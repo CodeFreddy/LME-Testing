@@ -1,0 +1,6 @@
+4. The hours on each Business Day during which the Matching System is open and able to receive information regarding Agreed Trades (being the "Opening Hours" for the purpose of the LME Rulebook) are 01:00 to 20:00 London time in respect of trades for the LME Base Service. Requests for extensions to the TOM matching deadline or the London inter-office trade input deadline will only be granted in exceptional circumstances. Requests must be made to LME Post-Trade Operations no later than 15 minutes prior to the relevant deadline (email: posttradeoperations@lme.com; tel. no. +44 (0)20 7113 8201). The relevant deadlines are as follows: LME Base Service TOM Trading Deadline: 12:30 London time TOM Matching Deadline: 13:30 London time Trade Input Deadline: 20:00 London time
+5. The trading hours for the agreement of trades are as follows (all times are London time): LME Base Service LME Select
+## See the “Trading
+## Time and Dates” section of the www.lme.com 01:00 – 19:00
+## Inter-office 24 hours
+## Ring
