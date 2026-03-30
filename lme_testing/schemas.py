@@ -2,6 +2,7 @@
 
 import json
 import re
+from pathlib import Path
 
 
 class SchemaError(ValueError):
@@ -19,6 +20,80 @@ CASE_TYPES = {
 }
 COVERAGE_STATUSES = {"covered", "partial", "uncovered", "not_applicable"}
 COVERAGE_RELEVANCE = {"direct", "indirect", "not_relevant"}
+BLOCKING_CATEGORIES = {
+    "none",
+    "rule_mismatch",
+    "missing_required_case_type",
+    "invalid_case_type_mapping",
+    "no_evidence_or_wrong_evidence",
+    "non_executable_scenario",
+    "duplicate_case_covering_same_slot",
+    "schema_or_traceability_break",
+    "unspecified_block",
+}
+BLOCK_RECOMMENDATION_REVIEWS = {"not_applicable", "pending_review", "confirmed", "dismissed"}
+HUMAN_REVIEW_DECISIONS = {"pending", "approve", "rewrite", "reject"}
+ISSUE_TYPE_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "human_review_options.json"
+
+
+# 统一从配置文件读取 issue type，保证页面选项、回流校验和统计口径一致。
+def load_issue_type_options() -> list[dict]:
+    payload = json.loads(ISSUE_TYPE_CONFIG_PATH.read_text(encoding="utf-8-sig"))
+    items = payload.get("issue_types", [])
+    if not isinstance(items, list):
+        raise SchemaError("human_review_options.json must contain an 'issue_types' list.")
+    normalized: list[dict] = []
+    for item in items:
+        if not isinstance(item, dict):
+            raise SchemaError("Each issue type option must be an object.")
+        code = item.get("code")
+        label = item.get("label")
+        description = item.get("description")
+        if not all(isinstance(value, str) and value.strip() for value in (code, label, description)):
+            raise SchemaError("Each issue type option must include non-empty code/label/description.")
+        normalized.append({
+            "code": code.strip(),
+            "label": label.strip(),
+            "description": description.strip(),
+        })
+    return normalized
+
+
+def allowed_issue_type_codes() -> set[str]:
+    return {item["code"] for item in load_issue_type_options()}
+
+
+# 兼容旧版 human review JSON，便于历史测试数据继续导入。
+def normalize_human_review_item(item: dict) -> dict:
+    normalized = dict(item)
+
+    review_decision = normalized.get("review_decision")
+    legacy_review_map = {
+        "approved": "approve",
+        "needs_rewrite": "rewrite",
+        "rejected": "reject",
+    }
+    if review_decision in legacy_review_map:
+        normalized["review_decision"] = legacy_review_map[review_decision]
+
+    if "block_recommendation_review" not in normalized:
+        legacy_block = normalized.get("human_block_decision")
+        legacy_block_map = {
+            "not_requested": "not_applicable",
+            "pending": "pending_review",
+            "confirmed": "confirmed",
+            "downgraded": "dismissed",
+            "overridden": "dismissed",
+        }
+        if legacy_block in legacy_block_map:
+            normalized["block_recommendation_review"] = legacy_block_map[legacy_block]
+        elif normalized.get("checker_blocking") is True:
+            normalized["block_recommendation_review"] = "pending_review"
+        else:
+            normalized["block_recommendation_review"] = "not_applicable"
+
+    normalized.pop("human_block_decision", None)
+    return normalized
 
 
 def _strip_markdown_fence(text: str) -> str:
@@ -150,6 +225,9 @@ def validate_checker_payload(payload: dict, expected_case_map: dict[str, str] | 
             "overall_status",
             "blocking_findings_count",
             "is_blocking",
+            "blocking_category",
+            "blocking_reason",
+            "checker_confidence",
             "scores",
             "coverage_assessment",
         )
@@ -166,6 +244,22 @@ def validate_checker_payload(payload: dict, expected_case_map: dict[str, str] | 
             raise SchemaError("blocking_findings_count must be int.")
         if not isinstance(item["is_blocking"], bool):
             raise SchemaError("is_blocking must be boolean.")
+        if item["blocking_category"] not in BLOCKING_CATEGORIES:
+            raise SchemaError("Invalid blocking_category value.")
+        if not isinstance(item["blocking_reason"], str):
+            raise SchemaError("blocking_reason must be string.")
+        if not isinstance(item["checker_confidence"], (int, float)):
+            raise SchemaError("checker_confidence must be numeric.")
+        if item["checker_confidence"] < 0 or item["checker_confidence"] > 1:
+            raise SchemaError("checker_confidence must be between 0 and 1.")
+        if item["is_blocking"]:
+            if item["blocking_category"] == "none":
+                raise SchemaError("Blocking checker result must include a non-none blocking_category.")
+            if not item["blocking_reason"].strip():
+                raise SchemaError("Blocking checker result must include blocking_reason.")
+        else:
+            if item["blocking_category"] != "none":
+                raise SchemaError("Non-blocking checker result must use blocking_category='none'.")
         if not isinstance(item["scores"], dict):
             raise SchemaError("Checker scores must be an object.")
         if not isinstance(item.get("findings", []), list):
@@ -190,4 +284,49 @@ def validate_checker_payload(payload: dict, expected_case_map: dict[str, str] | 
             expected_rule_id = expected_case_map[item["case_id"]]
             if item["semantic_rule_id"] != expected_rule_id:
                 raise SchemaError("Checker returned a semantic_rule_id that does not match the input case.")
+    return payload
+
+
+# 校验人工审核页面导出的 JSON，保证回流给 maker 的输入是结构化、可追溯的。
+def validate_human_review_payload(payload: dict, expected_case_map: dict[str, str] | None = None) -> dict:
+    reviews = payload.get("reviews")
+    if not isinstance(reviews, list):
+        raise SchemaError("Human review payload must contain a 'reviews' list.")
+
+    actual_case_ids: list[str] = []
+    allowed_issue_codes = allowed_issue_type_codes()
+    normalized_reviews: list[dict] = []
+    for raw_item in reviews:
+        if not isinstance(raw_item, dict):
+            raise SchemaError("Each human review item must be an object.")
+        item = normalize_human_review_item(raw_item)
+        case_id = item.get("case_id")
+        semantic_rule_id = item.get("semantic_rule_id")
+        if not isinstance(case_id, str) or not case_id:
+            raise SchemaError("Each human review item must include case_id.")
+        if not isinstance(semantic_rule_id, str) or not semantic_rule_id:
+            raise SchemaError("Each human review item must include semantic_rule_id.")
+        if item.get("review_decision") not in HUMAN_REVIEW_DECISIONS:
+            raise SchemaError("Invalid human review_decision value.")
+        if item.get("block_recommendation_review") not in BLOCK_RECOMMENDATION_REVIEWS:
+            raise SchemaError("Invalid block_recommendation_review value.")
+        if not isinstance(item.get("human_comment", ""), str):
+            raise SchemaError("human_comment must be string.")
+        issue_types = item.get("issue_types", [])
+        if not isinstance(issue_types, list) or any(not isinstance(value, str) for value in issue_types):
+            raise SchemaError("issue_types must be a list of strings.")
+        if any(value not in allowed_issue_codes for value in issue_types):
+            raise SchemaError("issue_types contains values outside configured options.")
+        normalized_reviews.append(item)
+        actual_case_ids.append(case_id)
+
+    payload["reviews"] = normalized_reviews
+    if expected_case_map is not None:
+        expected_case_ids = list(expected_case_map.keys())
+        if set(actual_case_ids) - set(expected_case_ids):
+            raise SchemaError("Human review payload contains extra case_id values.")
+        for item in normalized_reviews:
+            expected_rule_id = expected_case_map.get(item["case_id"])
+            if expected_rule_id and item["semantic_rule_id"] != expected_rule_id:
+                raise SchemaError("Human review semantic_rule_id does not match the input case mapping.")
     return payload

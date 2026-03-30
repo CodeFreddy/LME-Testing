@@ -1,6 +1,10 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
+import http.client
 import json
+import logging
+import socket
+import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
@@ -9,22 +13,23 @@ from .config import ProviderConfig
 
 
 class ProviderError(RuntimeError):
-    """模型供应商调用失败时抛出。"""
+    """?????????????"""
 
 
 @dataclass(slots=True)
 class ModelResponse:
-    # content：模型正文；raw_response：完整原始响应，便于回溯排错。
+    # content??????raw_response???????????????
     content: str
     raw_response: dict
 
 
-# 当前先实现 OpenAI-compatible 风格接口，后续如需接 MiniMax/GLM 原生协议，可继续扩展。
+# ????? OpenAI-compatible ?????????? MiniMax/GLM ???????????
 class OpenAICompatibleProvider:
     def __init__(self, config: ProviderConfig):
         self.config = config
+        self.logger = logging.getLogger(f"{__name__}.{config.name}")
 
-    # 向兼容 OpenAI Chat Completions 的接口发起调用。
+    # ??? OpenAI Chat Completions ????????
     def generate(self, system_prompt: str, user_prompt: str) -> ModelResponse:
         payload = {
             "model": self.config.model,
@@ -45,18 +50,56 @@ class OpenAICompatibleProvider:
         url = f"{self.config.base_url}/chat/completions"
         request = urllib.request.Request(url=url, data=body, headers=headers, method="POST")
 
-        try:
-            with urllib.request.urlopen(request, timeout=self.config.timeout_seconds) as response:
-                raw = json.loads(response.read().decode("utf-8"))
-        except urllib.error.HTTPError as exc:
-            detail = exc.read().decode("utf-8", errors="ignore")
-            raise ProviderError(
-                f"Provider '{self.config.name}' HTTP {exc.code}: {detail}"
-            ) from exc
-        except urllib.error.URLError as exc:
-            raise ProviderError(
-                f"Provider '{self.config.name}' network error: {exc.reason}"
-            ) from exc
+        max_attempts = max(1, self.config.max_retries + 1)
+        raw: dict | None = None
+        last_error: Exception | None = None
+
+        for attempt in range(1, max_attempts + 1):
+            try:
+                self.logger.info(
+                    "Calling provider=%s model=%s attempt=%s/%s",
+                    self.config.name,
+                    self.config.model,
+                    attempt,
+                    max_attempts,
+                )
+                with urllib.request.urlopen(request, timeout=self.config.timeout_seconds) as response:
+                    raw = json.loads(response.read().decode("utf-8"))
+                break
+            except urllib.error.HTTPError as exc:
+                detail = exc.read().decode("utf-8", errors="ignore")
+                last_error = exc
+                retryable = exc.code in {408, 409, 425, 429, 500, 502, 503, 504}
+                self.logger.warning(
+                    "Provider %s HTTP error attempt=%s/%s status=%s retryable=%s detail=%s",
+                    self.config.name,
+                    attempt,
+                    max_attempts,
+                    exc.code,
+                    retryable,
+                    detail,
+                )
+                if not retryable or attempt >= max_attempts:
+                    raise ProviderError(f"Provider '{self.config.name}' HTTP {exc.code}: {detail}") from exc
+            except (urllib.error.URLError, http.client.RemoteDisconnected, ConnectionResetError, TimeoutError, socket.timeout) as exc:
+                last_error = exc
+                reason = getattr(exc, 'reason', str(exc))
+                self.logger.warning(
+                    "Provider %s network error attempt=%s/%s reason=%s",
+                    self.config.name,
+                    attempt,
+                    max_attempts,
+                    reason,
+                )
+                if attempt >= max_attempts:
+                    raise ProviderError(f"Provider '{self.config.name}' network error: {reason}") from exc
+
+            sleep_seconds = self.config.retry_backoff_seconds * attempt
+            self.logger.info("Retrying provider %s after %.1f seconds", self.config.name, sleep_seconds)
+            time.sleep(sleep_seconds)
+
+        if raw is None:  # pragma: no cover
+            raise ProviderError(f"Provider '{self.config.name}' failed after retries: {last_error}")
 
         try:
             content = raw["choices"][0]["message"]["content"]
@@ -65,7 +108,7 @@ class OpenAICompatibleProvider:
                 f"Provider '{self.config.name}' returned an unexpected payload."
             ) from exc
 
-        # 少数兼容接口会返回 content 数组，这里做一次兼容拼接。
+        # ????????? content ?????????????
         if isinstance(content, list):
             content = "".join(
                 item.get("text", "") if isinstance(item, dict) else str(item)
@@ -75,10 +118,11 @@ class OpenAICompatibleProvider:
             raise ProviderError(
                 f"Provider '{self.config.name}' returned non-text content."
             )
+        self.logger.info("Provider %s call succeeded", self.config.name)
         return ModelResponse(content=content, raw_response=raw)
 
 
-# 根据 provider 配置构建具体适配器。
+# ?? provider ??????????
 def build_provider(config: ProviderConfig) -> OpenAICompatibleProvider:
     if config.provider_type != "openai_compatible":
         raise ProviderError(

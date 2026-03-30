@@ -3,9 +3,11 @@
 import os
 import shutil
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
-from lme_testing.config import ConfigError, load_project_config
+from lme_testing.config import ConfigError, ProviderConfig, load_project_config
+from lme_testing.providers import OpenAICompatibleProvider
 
 
 WORK_TMP = Path('.tmp_test')
@@ -80,6 +82,44 @@ class ConfigTests(unittest.TestCase):
         )
         with self.assertRaises(ConfigError):
             load_project_config(config_path)
+
+    def test_provider_retries_remote_disconnect(self) -> None:
+        provider = OpenAICompatibleProvider(
+            ProviderConfig(
+                name="demo",
+                provider_type="openai_compatible",
+                model="demo-model",
+                base_url="https://example.com/v1",
+                api_key="secret",
+                max_retries=2,
+                retry_backoff_seconds=0.0,
+            )
+        )
+
+        class _Response:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def read(self) -> bytes:
+                return b'{"choices":[{"message":{"content":"ok"}}]}'
+
+        calls = {"count": 0}
+
+        def fake_urlopen(request, timeout=None):
+            calls["count"] += 1
+            if calls["count"] == 1:
+                import http.client
+                raise http.client.RemoteDisconnected("Remote end closed connection without response")
+            return _Response()
+
+        with patch('urllib.request.urlopen', side_effect=fake_urlopen):
+            response = provider.generate('system', 'user')
+
+        self.assertEqual(calls["count"], 2)
+        self.assertIn('ok', response.content)
 
 
 if __name__ == "__main__":

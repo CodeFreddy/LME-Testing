@@ -14,7 +14,20 @@ def _status_options(values: list[str]) -> str:
     return ''.join(options)
 
 
-def _render_page(title: str, body: str, extra_script: str = "") -> str:
+def _nav_links_html(active: str) -> str:
+    links = [
+        ("report", "report.html", "Summary Report"),
+        ("maker", "maker_readable.html", "Maker Readable"),
+        ("checker", "checker_readable.html", "Checker Readable"),
+    ]
+    items = []
+    for key, href, label in links:
+        css_class = "nav-link active" if key == active else "nav-link"
+        items.append(f'<a class="{css_class}" href="{html.escape(href)}">{html.escape(label)}</a>')
+    return '<div class="nav">' + ''.join(items) + '</div>'
+
+
+def _render_page(title: str, body: str, extra_script: str = "", active_nav: str = "report") -> str:
     return f"""
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -32,6 +45,9 @@ def _render_page(title: str, body: str, extra_script: str = "") -> str:
     .metric {{ background: #eff6ff; border-radius: 10px; padding: 12px; border: 1px solid #bfdbfe; }}
     .toolbar {{ display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }}
     .toolbar label {{ font-size: 13px; color: #334155; }}
+    .nav {{ display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }}
+    .nav-link {{ text-decoration: none; color: #0f172a; background: white; border: 1px solid #cbd5e1; border-radius: 999px; padding: 8px 12px; font-size: 13px; }}
+    .nav-link.active {{ background: #0f172a; color: white; border-color: #0f172a; }}
     .toolbar select, .toolbar input {{ min-width: 180px; padding: 8px 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: white; }}
     .muted {{ color: #64748b; font-size: 12px; }}
     .detail {{ margin-top: 8px; }}
@@ -46,6 +62,7 @@ def _render_page(title: str, body: str, extra_script: str = "") -> str:
   </style>
 </head>
 <body>
+{_nav_links_html(active_nav)}
 {body}
 <script>
 {extra_script}
@@ -220,7 +237,9 @@ applyFilters();
       <div class="metric"><strong>Fully Covered</strong><br/>{coverage_report.get('fully_covered', 0)}</div>
       <div class="metric"><strong>Partially Covered</strong><br/>{coverage_report.get('partially_covered', 0)}</div>
       <div class="metric"><strong>Uncovered</strong><br/>{coverage_report.get('uncovered', 0)}</div>
-      <div class="metric"><strong>Not Applicable</strong><br/>{coverage_report.get('not_applicable', 0)}</div>
+      <div class="metric"><strong>Checker Blocking</strong><br/>{coverage_report.get('checker_block_count', 0)}</div>
+      <div class="metric"><strong>Human Confirmed Block</strong><br/>{coverage_report.get('human_confirmed_block_count', 0)}</div>
+      <div class="metric"><strong>Block Override Rate</strong><br/>{coverage_report.get('block_override_rate', 0)}%</div>
       <div class="metric"><strong>覆盖率</strong><br/>{coverage_report.get('coverage_percent', 0)}%</div>
     </div>
   </div>
@@ -324,9 +343,9 @@ applyFilters();
     maker_html_path = output_html_path.with_name('maker_readable.html')
     checker_html_path = output_html_path.with_name('checker_readable.html')
 
-    _write_text(output_html_path, _render_page('Maker Checker Report', combined_body, filter_script))
-    _write_text(maker_html_path, _render_page('Maker Readable Report', maker_body))
-    _write_text(checker_html_path, _render_page('Checker Readable Report', checker_body))
+    _write_text(output_html_path, _render_page('Maker Checker Report', combined_body, filter_script, active_nav='report'))
+    _write_text(maker_html_path, _render_page('Maker Readable Report', maker_body, active_nav='maker'))
+    _write_text(checker_html_path, _render_page('Checker Readable Report', checker_body, active_nav='checker'))
 
     return {
         'output_html': str(output_html_path),
@@ -359,8 +378,13 @@ def _render_checker_detail(review: dict) -> str:
         f'<div class="kv"><span class="label">Case Type</span>: {html.escape(str(review.get("case_type", "")))}</div>'
         f'<div class="kv"><span class="label">Case Type Accepted</span>: {html.escape(str(review.get("case_type_accepted", "")))}</div>'
         f'<div class="kv"><span class="label">Coverage Relevance</span>: {html.escape(str(review.get("coverage_relevance", "")))}</div>'
+        f'<div class="kv"><span class="label">Checker Blocking</span>: {html.escape(str(review.get("checker_blocking", review.get("is_blocking", False))))}</div>'
         f'<div class="kv"><span class="label">Blocking Findings Count</span>: {html.escape(str(review.get("blocking_findings_count", "")))}</div>'
-        f'<div class="kv"><span class="label">Is Blocking</span>: {html.escape(str(review.get("is_blocking", "")))}</div>'
+        f'<div class="kv"><span class="label">Blocking Category</span>: {html.escape(str(review.get("checker_blocking_category", review.get("blocking_category", ""))))}</div>'
+        f'<div class="kv"><span class="label">Blocking Reason</span>: {html.escape(str(review.get("checker_blocking_reason", review.get("blocking_reason", ""))))}</div>'
+        f'<div class="kv"><span class="label">Checker Confidence</span>: {html.escape(str(review.get("checker_confidence", "")))}</div>'
+        f'<div class="kv"><span class="label">Block Recommendation Review</span>: {html.escape(str(review.get("block_recommendation_review", "")))}</div>'
+        f'<div class="kv"><span class="label">Human Comment</span>: {html.escape(str(review.get("human_comment", "")))}</div>'
         f'<div class="kv"><span class="label">Scores</span><pre>{html.escape(json.dumps(review.get("scores", {}), ensure_ascii=False, indent=2))}</pre></div>'
         f'<div class="kv"><span class="label">Coverage Reason</span>: {html.escape(str(review.get("coverage_assessment", {}).get("reason", "")))}</div>'
         f'<div class="kv"><span class="label">Missing Aspects</span>{_list_html(review.get("coverage_assessment", {}).get("missing_aspects", []))}</div>'

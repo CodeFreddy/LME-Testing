@@ -1,0 +1,54 @@
+﻿{
+  "issue_types": [
+    {
+      "code": "rule_misread",
+      "label": "规则理解错误",
+      "description": "测试案例误解了 semantic rule 的核心含义或适用条件。"
+    },
+    {
+      "code": "bad_assertion",
+      "label": "断言不合理",
+      "description": "Then 断言不准确、不充分，或无法证明规则是否满足。"
+    },
+    {
+      "code": "weak_evidence",
+      "label": "证据不足",
+      "description": "引用的 evidence 过弱、过长或没有逐条对应到当前场景。"
+    },
+    {
+      "code": "wrong_case_type",
+      "label": "案例类型错误",
+      "description": "case_type 与规则要求不匹配，例如把边界案例写成正例。"
+    },
+    {
+      "code": "unclear_steps",
+      "label": "步骤不清晰",
+      "description": "Given/When/Then 表达模糊，阅读者难以理解或执行。"
+    },
+    {
+      "code": "missing_negative_case",
+      "label": "缺少负例",
+      "description": "当前规则需要 negative case，但 maker 没有提供有效负例。"
+    },
+    {
+      "code": "missing_boundary_case",
+      "label": "缺少边界案例",
+      "description": "当前规则需要 boundary case，但 maker 没有提供有效边界测试。"
+    },
+    {
+      "code": "non_executable_scenario",
+      "label": "场景不可执行",
+      "description": "场景无法在测试平台中落地执行或无法验证结果。"
+    },
+    {
+      "code": "coverage_dispute",
+      "label": "覆盖判断争议",
+      "description": "checker 对 covered/partial/uncovered 的判断与人工理解不一致。"
+    },
+    {
+      "code": "duplicate_coverage",
+      "label": "重复覆盖",
+      "description": "多个案例重复覆盖同一 slot，但遗漏了其他必选 case type。"
+    }
+  ]
+}

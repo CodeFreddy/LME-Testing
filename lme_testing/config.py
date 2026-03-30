@@ -31,6 +31,8 @@ class ProviderConfig:
     api_format: str = "openai_chat_completions"
     headers: dict[str, str] = field(default_factory=dict)
     timeout_seconds: int = 90
+    max_retries: int = 3
+    retry_backoff_seconds: float = 2.0
     temperature: float = 0.1
     max_output_tokens: int = 4000
 
@@ -109,6 +111,8 @@ def _build_provider(name: str, data: dict[str, Any]) -> ProviderConfig:
         api_format=data.get("api_format", "openai_chat_completions"),
         headers=dict(data.get("headers", {})),
         timeout_seconds=int(data.get("timeout_seconds", 90)),
+        max_retries=int(data.get("max_retries", 3)),
+        retry_backoff_seconds=float(data.get("retry_backoff_seconds", 2.0)),
         temperature=float(data.get("temperature", 0.1)),
         max_output_tokens=int(data.get("max_output_tokens", 4000)),
     )

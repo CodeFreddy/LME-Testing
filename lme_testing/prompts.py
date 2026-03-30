@@ -3,54 +3,8 @@
 import json
 
 
-MAKER_SYSTEM_PROMPT = """You are the maker model for an LME test design workflow.
-You transform semantic rules into evidence-backed BDD test cases.
-Hard requirements:
-- For every input semantic rule, return exactly one result object.
-- Do not omit any input semantic_rule_id.
-- Do not return extra semantic_rule_id values that were not in the batch.
-- Keep every semantic_rule_id exactly unchanged.
-- requirement_ids must map to the source atomic_rule_ids for that rule.
-- Every scenario must include evidence entries that map directly to requirement_ids.
-- Every scenario must include a case_type from this controlled set only: positive, negative, boundary, exception, state_transition, data_validation.
-- For each semantic rule, generate a complete scenario set that covers every required_case_type exactly once.
-- Do not omit any required_case_type.
-- Do not duplicate required_case_type scenarios for the same semantic rule.
-- Unless a rule is explicitly reference_only with an empty required_case_types list, do not return extra optional case types.
-- Evidence quotes must be short, literal, and individually mapped. Do not merge multiple quotes into one long quote.
-- Use only supplied semantic rules and evidence.
-- Do not invent exchange behavior that is not grounded in the evidence.
-- If something is uncertain, keep the scenario conservative and put the uncertainty into assumptions.
-- Return JSON only.
-"""
-
-
-CHECKER_SYSTEM_PROMPT = """You are the checker model for an LME test design workflow.
-You review maker-generated test cases against source semantic rules.
-Hard requirements:
-- Cover every input case_id in the batch exactly once.
-- Do not omit any input case_id.
-- Do not invent or return extra case_id values that were not provided.
-- Keep every returned case_id exactly unchanged.
-- Keep semantic_rule_id exactly aligned with the provided case_id mapping.
-- Evaluate whether the maker-declared case_type is appropriate for the rule and the scenario.
-- Judge evidence consistency, requirement coverage, test design quality, and hallucination risk.
-- If maker evidence is weak, say so explicitly in findings.
-- Return structured JSON only.
-"""
-
-
-def build_maker_user_prompt(batch: list[dict]) -> str:
-    expected_ids = [item["semantic_rule_id"] for item in batch]
-    expected_requirement_map = {
-        item["semantic_rule_id"]: item.get("source", {}).get("atomic_rule_ids", [])
-        for item in batch
-    }
-    expected_case_type_map = {
-        item["semantic_rule_id"]: item.get("required_case_types", [])
-        for item in batch
-    }
-    schema = {
+def _maker_result_schema_example() -> dict:
+    return {
         "results": [
             {
                 "semantic_rule_id": "SR-MR-000-00",
@@ -99,6 +53,71 @@ def build_maker_user_prompt(batch: list[dict]) -> str:
             }
         ]
     }
+
+
+MAKER_SYSTEM_PROMPT = """You are the maker model for an LME test design workflow.
+You transform semantic rules into evidence-backed BDD test cases.
+Hard requirements:
+- For every input semantic rule, return exactly one result object.
+- Do not omit any input semantic_rule_id.
+- Do not return extra semantic_rule_id values that were not in the batch.
+- Keep every semantic_rule_id exactly unchanged.
+- requirement_ids must map to the source atomic_rule_ids for that rule.
+- Every scenario must include evidence entries that map directly to requirement_ids.
+- Every scenario must include a case_type from this controlled set only: positive, negative, boundary, exception, state_transition, data_validation.
+- For each semantic rule, generate a complete scenario set that covers every required_case_type exactly once.
+- Do not omit any required_case_type.
+- Do not duplicate required_case_type scenarios for the same semantic rule.
+- Unless a rule is explicitly reference_only with an empty required_case_types list, do not return extra optional case types.
+- Evidence quotes must be short, literal, and individually mapped. Do not merge multiple quotes into one long quote.
+- Use only supplied semantic rules and evidence.
+- Do not invent exchange behavior that is not grounded in the evidence.
+- If something is uncertain, keep the scenario conservative and put the uncertainty into assumptions.
+- Return JSON only.
+"""
+
+
+REWRITE_SYSTEM_PROMPT = """You are the maker revision model for an LME test design workflow.
+You revise maker-generated test cases using checker feedback and human review feedback.
+Hard requirements:
+- For every input semantic rule, return exactly one revised result object.
+- Regenerate the full scenario set for that semantic rule, not just a partial patch.
+- The revised scenario set must cover every required_case_type exactly once.
+- Fix the issues raised by checker findings and human review comments when they are grounded in the supplied rule and evidence.
+- Preserve fidelity to the semantic rule and evidence; do not invent business behavior.
+- Return JSON only.
+"""
+
+
+CHECKER_SYSTEM_PROMPT = """You are the checker model for an LME test design workflow.
+You review maker-generated test cases against source semantic rules.
+Hard requirements:
+- Cover every input case_id in the batch exactly once.
+- Do not omit any input case_id.
+- Do not invent or return extra case_id values that were not provided.
+- Keep every returned case_id exactly unchanged.
+- Keep semantic_rule_id exactly aligned with the provided case_id mapping.
+- Evaluate whether the maker-declared case_type is appropriate for the rule and the scenario.
+- Judge evidence consistency, requirement coverage, test design quality, and hallucination risk.
+- Use blocking only for objective, high-severity issues such as rule mismatch, missing required case type, invalid case type mapping, wrong or missing evidence, non-executable scenario, duplicate slot usage, or traceability/schema break.
+- Treat blocking as a recommendation, not as a final human decision.
+- If maker evidence is weak, say so explicitly in findings.
+- Return structured JSON only.
+"""
+
+
+# 构建首轮 maker 提示词，强制模型按 required_case_types 生成完整场景组。
+def build_maker_user_prompt(batch: list[dict]) -> str:
+    expected_ids = [item["semantic_rule_id"] for item in batch]
+    expected_requirement_map = {
+        item["semantic_rule_id"]: item.get("source", {}).get("atomic_rule_ids", [])
+        for item in batch
+    }
+    expected_case_type_map = {
+        item["semantic_rule_id"]: item.get("required_case_types", [])
+        for item in batch
+    }
+    schema = _maker_result_schema_example()
     return (
         "Generate BDD test cases for the following semantic rules.\n"
         "You must return exactly one result per semantic_rule_id.\n"
@@ -116,6 +135,34 @@ def build_maker_user_prompt(batch: list[dict]) -> str:
     )
 
 
+# 构建 rewrite 提示词，让 maker 基于 checker 和人工反馈重写整条 rule 的完整场景组。
+def build_rewrite_user_prompt(batch: list[dict]) -> str:
+    expected_ids = [item["semantic_rule"]["semantic_rule_id"] for item in batch]
+    expected_requirement_map = {
+        item["semantic_rule"]["semantic_rule_id"]: item["semantic_rule"].get("source", {}).get("atomic_rule_ids", [])
+        for item in batch
+    }
+    expected_case_type_map = {
+        item["semantic_rule"]["semantic_rule_id"]: item["semantic_rule"].get("required_case_types", [])
+        for item in batch
+    }
+    schema = _maker_result_schema_example()
+    return (
+        "Revise the maker outputs for the following semantic rules.\n"
+        "You must return exactly one revised result per semantic_rule_id.\n"
+        f"Expected semantic_rule_id list: {json.dumps(expected_ids, ensure_ascii=False)}\n"
+        f"Expected requirement_ids map: {json.dumps(expected_requirement_map, ensure_ascii=False)}\n"
+        f"Expected required_case_types map: {json.dumps(expected_case_type_map, ensure_ascii=False)}\n"
+        "For each semantic rule, regenerate the complete scenario set so that every required_case_type is present exactly once.\n"
+        "Use checker findings and human feedback to fix the previous draft, but do not invent unsupported rule behavior.\n"
+        "Return JSON matching this schema shape:\n"
+        f"{json.dumps(schema, ensure_ascii=False, indent=2)}\n"
+        "Input rewrite batch:\n"
+        f"{json.dumps(batch, ensure_ascii=False, indent=2)}"
+    )
+
+
+# 构建 checker 提示词，要求逐 case 输出结构化审核结果和 blocking 建议。
 def build_checker_user_prompt(batch: list[dict]) -> str:
     expected_case_ids = [item["scenario"]["scenario_id"] for item in batch]
     expected_case_rule_map = {
@@ -132,6 +179,9 @@ def build_checker_user_prompt(batch: list[dict]) -> str:
                 "overall_status": "pass",
                 "blocking_findings_count": 0,
                 "is_blocking": False,
+                "blocking_category": "none",
+                "blocking_reason": "",
+                "checker_confidence": 0.88,
                 "scores": {
                     "evidence_consistency": 5,
                     "requirement_coverage": 4,
@@ -162,6 +212,9 @@ def build_checker_user_prompt(batch: list[dict]) -> str:
         f"Expected case_id -> semantic_rule_id map: {json.dumps(expected_case_rule_map, ensure_ascii=False)}\n"
         "For each result, preserve the incoming case_type and judge whether it is accepted.\n"
         "Use coverage_assessment.status only from this set: covered, partial, uncovered, not_applicable.\n"
+        "Use blocking_category only from this set: none, rule_mismatch, missing_required_case_type, invalid_case_type_mapping, no_evidence_or_wrong_evidence, non_executable_scenario, duplicate_case_covering_same_slot, schema_or_traceability_break, unspecified_block.\n"
+        "If is_blocking is false, set blocking_category to none and blocking_reason to an empty string.\n"
+        "If is_blocking is true, you must provide a short blocking_reason and a checker_confidence between 0 and 1.\n"
         "If you think a case is poor, still return a result for that exact case_id instead of dropping it.\n"
         "Return JSON matching this schema shape:\n"
         f"{json.dumps(schema, ensure_ascii=False, indent=2)}\n"

@@ -1,5 +1,6 @@
 ﻿from __future__ import annotations
 
+import logging
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -8,12 +9,16 @@ from .config import ProjectConfig
 from .prompts import (
     CHECKER_SYSTEM_PROMPT,
     MAKER_SYSTEM_PROMPT,
+    REWRITE_SYSTEM_PROMPT,
     build_checker_user_prompt,
     build_maker_user_prompt,
+    build_rewrite_user_prompt,
 )
 from .providers import build_provider
-from .schemas import CASE_TYPES, parse_json_object, validate_checker_payload, validate_maker_payload
+from .schemas import parse_json_object, validate_checker_payload, validate_human_review_payload, validate_maker_payload
 from .storage import append_jsonl, ensure_dir, load_json, load_jsonl, timestamp_slug, write_json
+
+logger = logging.getLogger(__name__)
 
 
 RULE_TYPE_CASE_REQUIREMENTS = {
@@ -27,6 +32,15 @@ RULE_TYPE_CASE_REQUIREMENTS = {
     "workflow": {"required": ["positive", "negative", "exception"], "optional": ["state_transition"]},
     "calculation": {"required": ["positive", "boundary", "data_validation"], "optional": ["negative"]},
     "reference_only": {"required": [], "optional": []},
+}
+BLOCKING_CATEGORY_ALIASES = {
+    "rule_mismatch": "rule_mismatch",
+    "missing_required_case_type": "missing_required_case_type",
+    "invalid_case_type_mapping": "invalid_case_type_mapping",
+    "no_evidence_or_wrong_evidence": "no_evidence_or_wrong_evidence",
+    "non_executable_scenario": "non_executable_scenario",
+    "duplicate_case_covering_same_slot": "duplicate_case_covering_same_slot",
+    "schema_or_traceability_break": "schema_or_traceability_break",
 }
 
 
@@ -65,6 +79,58 @@ def _augment_rule_with_case_requirements(rule: dict) -> dict:
     return augmented_rule
 
 
+def _normalize_blocking_category(value: str | None) -> str:
+    if not value:
+        return "none"
+    normalized = value.strip().lower().replace("-", "_").replace(" ", "_")
+    return BLOCKING_CATEGORY_ALIASES.get(normalized, "unspecified_block")
+
+
+def _default_blocking_reason(result: dict) -> str:
+    findings = result.get("findings", [])
+    if findings:
+        first = findings[0]
+        summary = str(first.get("summary", "")).strip()
+        if summary:
+            return summary
+    return str(result.get("coverage_assessment", {}).get("reason", "")).strip()
+
+
+def _governance_defaults(result: dict) -> None:
+    # checker_blocking ???????????????? Decision ???
+    result["checker_blocking"] = bool(result.get("is_blocking", False))
+    result["checker_blocking_category"] = result.get("blocking_category", "none")
+    result["checker_blocking_reason"] = result.get("blocking_reason", "")
+    result["checker_confidence"] = float(result.get("checker_confidence", 0.5))
+    result.setdefault(
+        "block_recommendation_review",
+        "pending_review" if result["checker_blocking"] else "not_applicable",
+    )
+    result.setdefault("human_comment", "")
+
+
+def _review_governance_summary(reviews: list[dict]) -> dict:
+    checker_block_count = sum(1 for item in reviews if item.get("checker_blocking") is True)
+    human_confirmed_block_count = sum(1 for item in reviews if item.get("block_recommendation_review") == "confirmed")
+    checker_false_block_count = sum(1 for item in reviews if item.get("block_recommendation_review") == "dismissed")
+    override_rate = round((checker_false_block_count / checker_block_count) * 100, 2) if checker_block_count else 0.0
+    return {
+        "checker_block_count": checker_block_count,
+        "human_confirmed_block_count": human_confirmed_block_count,
+        "checker_false_block_count": checker_false_block_count,
+        "block_override_rate": override_rate,
+    }
+
+
+def _load_semantic_rules(semantic_rules_path: Path, limit: int | None = None) -> list[dict]:
+    semantic_rules = load_json(semantic_rules_path)
+    if not isinstance(semantic_rules, list):
+        raise ValueError("semantic_rules.json must contain a list.")
+    if limit is not None:
+        semantic_rules = semantic_rules[:limit]
+    return semantic_rules
+
+
 def run_maker_pipeline(
     config: ProjectConfig,
     semantic_rules_path: Path,
@@ -73,11 +139,8 @@ def run_maker_pipeline(
     batch_size: int,
     resume_from: Path | None,
 ) -> dict:
-    semantic_rules = load_json(semantic_rules_path)
-    if not isinstance(semantic_rules, list):
-        raise ValueError("semantic_rules.json must contain a list.")
-    if limit is not None:
-        semantic_rules = semantic_rules[:limit]
+    logger.info("Starting maker pipeline. input=%s output_dir=%s limit=%s batch_size=%s resume_from=%s", semantic_rules_path, output_dir, limit, batch_size, resume_from)
+    semantic_rules = _load_semantic_rules(semantic_rules_path, limit=limit)
 
     completed_ids: set[str] = set()
     if resume_from and resume_from.exists():
@@ -102,6 +165,7 @@ def run_maker_pipeline(
     total_cases = 0
 
     for batch in _chunked(semantic_rules, batch_size):
+        logger.info("Maker batch start. run_id=%s batch_rule_ids=%s", run_id, [item["semantic_rule_id"] for item in batch])
         augmented_batch = [_augment_rule_with_case_requirements(item) for item in batch]
         response = provider.generate(
             system_prompt=MAKER_SYSTEM_PROMPT,
@@ -126,6 +190,7 @@ def run_maker_pipeline(
         append_jsonl(results_path, records)
         total_batches += 1
         total_cases += sum(len(item["scenarios"]) for item in payload["results"])
+        logger.info("Maker batch done. run_id=%s batch_count=%s total_cases=%s", run_id, total_batches, total_cases)
 
     summary = {
         "run_id": run_id,
@@ -139,6 +204,7 @@ def run_maker_pipeline(
         "raw_path": str(raw_path),
     }
     write_json(summary_path, summary)
+    logger.info("Maker pipeline completed. summary=%s", summary)
     return summary
 
 
@@ -165,11 +231,11 @@ def _calculate_coverage(semantic_rules: list[dict], reviews: list[dict]) -> dict
             accepted_case_types: list[str] = []
             missing_case_types: list[str] = []
         else:
-            present_case_types = sorted({r.get("case_type") for r in relevant_reviews if r.get("case_type") in CASE_TYPES})
+            present_case_types = sorted({r.get("case_type") for r in relevant_reviews if r.get("case_type")})
             accepted_case_types = sorted({
                 r.get("case_type")
                 for r in relevant_reviews
-                if r.get("case_type") in CASE_TYPES
+                if r.get("case_type")
                 and r.get("case_type_accepted") is True
                 and r.get("coverage_relevance") == "direct"
                 and r.get("is_blocking") is False
@@ -206,6 +272,7 @@ def _calculate_coverage(semantic_rules: list[dict], reviews: list[dict]) -> dict
         counts[coverage_status] += 1
 
     total = len(status_by_rule)
+    governance = _review_governance_summary(reviews)
     return {
         "total_requirements": total,
         "fully_covered": counts.get("fully_covered", 0),
@@ -213,6 +280,7 @@ def _calculate_coverage(semantic_rules: list[dict], reviews: list[dict]) -> dict
         "uncovered": counts.get("uncovered", 0),
         "not_applicable": counts.get("not_applicable", 0),
         "coverage_percent": round((counts.get("fully_covered", 0) / total) * 100, 2) if total else 0.0,
+        **governance,
         "status_by_rule": status_by_rule,
     }
 
@@ -262,9 +330,8 @@ def run_checker_pipeline(
     batch_size: int,
     resume_from: Path | None,
 ) -> dict:
-    semantic_rules = load_json(semantic_rules_path)
-    if not isinstance(semantic_rules, list):
-        raise ValueError("semantic_rules.json must contain a list.")
+    logger.info("Starting checker pipeline. rules=%s cases=%s output_dir=%s limit=%s batch_size=%s resume_from=%s", semantic_rules_path, maker_cases_path, output_dir, limit, batch_size, resume_from)
+    semantic_rules = _load_semantic_rules(semantic_rules_path)
     rules_by_id = {item["semantic_rule_id"]: item for item in semantic_rules if "semantic_rule_id" in item}
 
     maker_records = load_jsonl(maker_cases_path)
@@ -298,6 +365,7 @@ def run_checker_pipeline(
     reviews: list[dict] = []
 
     for batch in _chunked(review_items, batch_size):
+        logger.info("Checker batch start. run_id=%s scenario_ids=%s", run_id, [item.get("scenario", {}).get("scenario_id") for item in batch])
         response = provider.generate(
             system_prompt=CHECKER_SYSTEM_PROMPT,
             user_prompt=build_checker_user_prompt(batch),
@@ -329,15 +397,30 @@ def run_checker_pipeline(
                     result.setdefault("coverage_relevance", "direct")
                     result.setdefault("blocking_findings_count", 0)
                     result.setdefault("is_blocking", False)
+                    result.setdefault("blocking_category", "none")
+                    result.setdefault("blocking_reason", "")
+                    result.setdefault("checker_confidence", 0.5)
+                    result["blocking_category"] = _normalize_blocking_category(result.get("blocking_category"))
+                    if result.get("is_blocking") is False:
+                        result["blocking_category"] = "none"
+                        result["blocking_reason"] = ""
+                    else:
+                        result["blocking_reason"] = result.get("blocking_reason") or _default_blocking_reason(result)
+                        if not result.get("checker_confidence"):
+                            result["checker_confidence"] = 0.75
+                    _governance_defaults(result)
 
         payload = validate_checker_payload(normalized_payload, expected_case_map=expected_case_map)
         for result in payload["results"]:
             result["run_id"] = run_id
+            _governance_defaults(result)
             reviews.append(result)
             append_jsonl(reviews_path, [result])
+        logger.info("Checker batch done. run_id=%s accumulated_reviews=%s", run_id, len(reviews))
 
     coverage = _calculate_coverage(semantic_rules, reviews)
     write_json(coverage_path, coverage)
+    governance = _review_governance_summary(reviews)
 
     summary = {
         "run_id": run_id,
@@ -350,6 +433,152 @@ def run_checker_pipeline(
         "results_path": str(reviews_path),
         "coverage_report_path": str(coverage_path),
         "raw_path": str(raw_path),
+        **governance,
     }
     write_json(summary_path, summary)
+    logger.info("Checker pipeline completed. summary=%s", summary)
+    return summary
+
+
+def _case_map_from_maker_records(maker_records: list[dict]) -> dict[str, str]:
+    mapping: dict[str, str] = {}
+    for record in maker_records:
+        semantic_rule_id = record.get("semantic_rule_id")
+        for scenario in record.get("scenarios", []):
+            scenario_id = scenario.get("scenario_id")
+            if scenario_id and semantic_rule_id:
+                mapping[scenario_id] = semantic_rule_id
+    return mapping
+
+
+def _rewrite_target_rule_ids(human_payload: dict) -> list[str]:
+    target_rule_ids: list[str] = []
+    seen: set[str] = set()
+    for item in human_payload.get("reviews", []):
+        should_rewrite = item.get("review_decision") == "rewrite"
+        semantic_rule_id = item.get("semantic_rule_id")
+        if should_rewrite and semantic_rule_id and semantic_rule_id not in seen:
+            seen.add(semantic_rule_id)
+            target_rule_ids.append(semantic_rule_id)
+    return target_rule_ids
+
+
+def _merge_rewritten_records(original_records: list[dict], rewritten_records: list[dict]) -> list[dict]:
+    rewritten_by_rule = {item["semantic_rule_id"]: item for item in rewritten_records}
+    merged: list[dict] = []
+    replaced: set[str] = set()
+    for record in original_records:
+        semantic_rule_id = record.get("semantic_rule_id")
+        if semantic_rule_id in rewritten_by_rule:
+            merged.append(rewritten_by_rule[semantic_rule_id])
+            replaced.add(semantic_rule_id)
+        else:
+            merged.append(record)
+    for semantic_rule_id, record in rewritten_by_rule.items():
+        if semantic_rule_id not in replaced:
+            merged.append(record)
+    return merged
+
+
+def run_rewrite_pipeline(
+    config: ProjectConfig,
+    semantic_rules_path: Path,
+    maker_cases_path: Path,
+    checker_reviews_path: Path,
+    human_reviews_path: Path,
+    output_dir: Path,
+    limit: int | None,
+    batch_size: int,
+) -> dict:
+    semantic_rules = _load_semantic_rules(semantic_rules_path)
+    rules_by_id = {item["semantic_rule_id"]: item for item in semantic_rules if "semantic_rule_id" in item}
+    maker_records = load_jsonl(maker_cases_path)
+    checker_reviews = load_jsonl(checker_reviews_path)
+    case_map = _case_map_from_maker_records(maker_records)
+    human_payload = validate_human_review_payload(load_json(human_reviews_path), expected_case_map=case_map)
+
+    target_rule_ids = _rewrite_target_rule_ids(human_payload)
+    logger.info("Rewrite target semantic_rule_ids=%s", target_rule_ids)
+    if limit is not None:
+        target_rule_ids = target_rule_ids[:limit]
+
+    provider = build_provider(config.provider_for_role("maker"))
+    run_id = timestamp_slug()
+    run_dir = ensure_dir(output_dir / run_id)
+    rewritten_path = run_dir / "rewritten_cases.jsonl"
+    merged_path = run_dir / "merged_cases.jsonl"
+    raw_path = run_dir / "rewrite_raw_responses.jsonl"
+    summary_path = run_dir / "summary.json"
+
+    checker_reviews_by_rule: dict[str, list[dict]] = defaultdict(list)
+    for review in checker_reviews:
+        checker_reviews_by_rule[review["semantic_rule_id"]].append(review)
+
+    human_reviews_by_rule: dict[str, list[dict]] = defaultdict(list)
+    for review in human_payload.get("reviews", []):
+        human_reviews_by_rule[review["semantic_rule_id"]].append(review)
+
+    rewrite_items: list[dict] = []
+    for semantic_rule_id in target_rule_ids:
+        rule = rules_by_id.get(semantic_rule_id)
+        current_cases = next((item for item in maker_records if item.get("semantic_rule_id") == semantic_rule_id), None)
+        if not rule or not current_cases:
+            continue
+        rewrite_items.append(
+            {
+                "semantic_rule": _augment_rule_with_case_requirements(rule),
+                "current_maker_record": current_cases,
+                "checker_reviews": checker_reviews_by_rule.get(semantic_rule_id, []),
+                "human_reviews": human_reviews_by_rule.get(semantic_rule_id, []),
+            }
+        )
+
+    rewritten_records: list[dict] = []
+    total_scenarios = 0
+    for batch in _chunked(rewrite_items, batch_size) if rewrite_items else []:
+        response = provider.generate(
+            system_prompt=REWRITE_SYSTEM_PROMPT,
+            user_prompt=build_rewrite_user_prompt(batch),
+        )
+        raw_record = {
+            "run_id": run_id,
+            "batch_semantic_rule_ids": [item["semantic_rule"]["semantic_rule_id"] for item in batch],
+            "response": response.raw_response,
+        }
+        append_jsonl(raw_path, [raw_record])
+        payload = validate_maker_payload(
+            parse_json_object(response.content),
+            expected_rule_ids=[item["semantic_rule"]["semantic_rule_id"] for item in batch],
+            expected_required_case_types={
+                item["semantic_rule"]["semantic_rule_id"]: item["semantic_rule"].get("required_case_types", [])
+                for item in batch
+            },
+        )
+        for result in payload["results"]:
+            record = _maker_record_from_result(result, run_id=run_id)
+            rewritten_records.append(record)
+            append_jsonl(rewritten_path, [record])
+            total_scenarios += len(result.get("scenarios", []))
+
+    merged_records = _merge_rewritten_records(maker_records, rewritten_records)
+    if merged_records:
+        append_jsonl(merged_path, merged_records)
+
+    summary = {
+        "run_id": run_id,
+        "role": "maker_rewrite",
+        "input_rules": str(semantic_rules_path),
+        "input_maker_cases": str(maker_cases_path),
+        "input_checker_reviews": str(checker_reviews_path),
+        "input_human_reviews": str(human_reviews_path),
+        "output_dir": str(run_dir),
+        "target_rule_count": len(rewrite_items),
+        "rewritten_rule_count": len(rewritten_records),
+        "rewritten_scenario_count": total_scenarios,
+        "rewritten_cases_path": str(rewritten_path),
+        "merged_cases_path": str(merged_path),
+        "raw_path": str(raw_path),
+    }
+    write_json(summary_path, summary)
+    logger.info("Rewrite pipeline completed. summary=%s", summary)
     return summary
