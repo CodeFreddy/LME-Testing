@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(PYTHONPATH=. python .github/workflows/smoke_test.py)"
+    ]
+  }
+}
