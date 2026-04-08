@@ -2,875 +2,1007 @@
 
 ## Purpose
 
-This document translates the high-level roadmap into a task-oriented execution plan.
+This document translates the phased roadmap into an execution-oriented implementation plan.
 
 It is intended to serve as:
 
-1. an implementation guide for developers,
-2. a task contract reference for AI coding agents,
-3. a review aid for acceptance and phase-gate validation.
+1. a developer-facing task breakdown,
+2. a controlled execution guide for AI coding agents,
+3. a practical bridge between roadmap goals and acceptance gates.
 
 This document does **not** replace:
-- `docs/roadmap.md`
-- `docs/architecture.md`
-- `docs/acceptance.md`
-- `docs/model_governance.md`
-- `docs/testing_governance.md`
-- `docs/prompt_lifecycle.md`
-- `docs/agent_guidelines.md`
+- `docs/roadmap.md` for strategic direction,
+- `docs/architecture.md` for system boundaries,
+- `docs/acceptance.md` for formal phase gates,
+- `docs/model_governance.md` for model/prompt control,
+- `docs/testing_governance.md` for test asset and review operations.
 
-Instead, it provides the **execution layer** that sits beneath them.
+Instead, this file explains **how to execute roadmap work in governed tasks**.
 
 ---
 
 ## How to Use This Document
 
-For any non-trivial change:
+Each implementation task should be treated as a governed work unit.
 
-1. identify the roadmap phase,
-2. identify the task ID,
-3. read the task input contract,
-4. implement only within declared scope,
-5. produce the required outputs,
-6. run the defined checks,
-7. attach acceptance evidence.
+For every task:
 
-If a task depends on missing upstream artifacts, do not invent them silently.  
-Stop and explicitly identify the missing prerequisite.
+- identify the task ID and active phase,
+- read the task goal,
+- confirm prerequisites,
+- check whether earlier phase gates or equivalent prerequisites are satisfied,
+- honor the input contract,
+- produce the expected output contract,
+- run the required validation,
+- record acceptance evidence,
+- end with a structured self-evaluation against the acceptance criteria,
+- do not expand scope beyond the task unless explicitly approved.
 
----
-
-## Global Execution Rules
-
-These rules apply to all tasks in this file.
-
-### 1. Every task must define contracts
-Each task must define:
-- input contract,
-- output contract,
-- implementation notes,
-- acceptance criteria,
-- evidence expectations.
-
-### 2. No task may silently expand scope
-A task may not absorb future-phase work just because it seems convenient.
-
-### 3. Structured artifacts remain governed
-Any artifact introduced by a task must be:
-- named,
-- documented,
-- versionable where needed,
-- and linked back to the appropriate schema or contract layer.
-
-### 4. Traceability must improve, not weaken
-Every material change should either preserve or strengthen traceability.
-
-### 5. Model-facing work must remain benchmark-governed
-Any task that changes model behavior, prompt behavior, or structured output assumptions must also satisfy model governance requirements.
+This document is especially important when different LLM APIs or AI coding agents are used, because it defines stable execution expectations that do not depend on chat context.
 
 ---
 
-## Phase Overview
+## Task Contract Template
 
-### Phase 1 — Stabilization
-Focus:
-- rule validation,
-- schema enforcement,
-- metadata,
-- CI,
-- traceability hardening,
-- model/prompt stability controls.
+Every implementation task in this file follows the same structure.
 
-### Phase 2 — Planning and BDD Platform
-Focus:
-- multi-document ingestion,
-- planning layer,
-- normalized BDD,
-- collaborative review exchange,
-- style learning,
-- step registry,
-- checker stability visibility,
-- richer reporting.
+### Required fields
+- **Task ID**
+- **Goal**
+- **Why it matters**
+- **Prerequisites**
+- **Input contract**
+- **Output contract**
+- **Implementation notes**
+- **Validation**
+- **Acceptance evidence**
+- **Self-evaluation**
+- **Out of scope**
 
-### Phase 3 — Enterprise Integration
-Focus:
-- domain packaging,
-- step-definition integration,
-- execution-ready contracts,
-- deterministic oracle growth,
-- quality gates,
-- regression analysis.
+### Governance rule
+If a prerequisite is missing, do not fabricate it.  
+Stop, mark the dependency, and resolve the missing input first.
+
+Durable task behavior must be represented in repo-readable files:
+- prompts should live in governed prompt files,
+- config should live in config files,
+- schemas should live in schema files,
+- acceptance requirements should live in docs or governed policy files.
+
+Do not rely on hidden chat context as a substitute for repository contracts.
+
+## Self-Evaluation Format
+
+At the end of every substantial task implementation, produce a short self-evaluation that lists each relevant acceptance criterion and marks it as:
+
+- PASS
+- PARTIAL
+- FAIL
+
+If any criterion is FAIL, the task should not be treated as complete.
 
 ---
 
-# Phase 1 Tasks
+# Phase 1 — Short-Term Stabilization
 
-## Task P1.1 — Artifact Schema Validation
+## Objective
+
+Stabilize the current document-to-rule-to-BDD design pipeline so that model changes, prompt changes, and repo evolution do not silently degrade output quality.
+
+---
+
+## Task 1.1 — Rule Schema Validation
 
 ### Goal
-Introduce formal schema validation for all core structured artifacts.
+Introduce governed schema validation for rule-layer artifacts.
 
-### Input Contract
-- existing core artifact definitions,
-- current generated samples if available,
-- repo governance docs.
+### Why it matters
+The upstream rule layer determines downstream quality. Invalid `atomic_rule` or `semantic_rule` inputs can silently poison maker, checker, review, and reporting.
 
-### Output Contract
-- versioned schema files for:
-  - atomic rule
-  - semantic rule
-  - maker output
-  - checker output
-  - review output
-- validation entry points,
+### Prerequisites
+- current artifact examples exist,
+- artifact fields are known,
+- baseline schema directory or equivalent location is available.
+
+### Input contract
+- representative `atomic_rule` examples,
+- representative `semantic_rule` examples,
+- known required fields,
+- known `rule_type` values.
+
+### Output contract
+- governed schema definitions for `atomic_rule` and `semantic_rule`,
+- validation utility or validation workflow,
+- a structured validation report format,
 - valid and invalid fixtures,
-- schema validation tests.
+- documentation of rule validation behavior.
 
-### Implementation Notes
-- prefer backward-tolerant evolution where possible,
-- do not weaken contracts silently,
-- ensure invalid fixtures fail clearly.
+### Implementation notes
+Focus on:
+- required fields,
+- field types,
+- traceability fields,
+- `rule_type` enum constraints,
+- version support.
 
-### Acceptance Criteria
-- all core artifact schemas exist,
-- valid samples pass validation,
-- invalid samples fail validation,
-- CI can run schema validation.
+Do not overfit schemas to a single temporary sample.
 
-### Evidence
-- schema files,
-- fixtures,
-- test logs,
-- CI output.
+### Validation
+- valid fixture passes,
+- invalid fixture fails,
+- invalid `rule_type` fails,
+- missing required field fails,
+- a structured validation report can be produced,
+- downstream maker execution is blocked when validation fails.
 
----
+### Acceptance evidence
+- schema files committed,
+- fixtures committed,
+- validation logs or tests committed,
+- sample structured validation report committed or demonstrated,
+- references added to docs.
 
-## Task P1.2 — Rule Validation Pipeline
+### Self-evaluation
+Confirm each validation requirement as PASS / PARTIAL / FAIL.
 
-### Goal
-Insert a governed validation layer between extraction outputs and downstream semantic use.
-
-### Input Contract
-- extraction outputs,
-- current rule normalization flow,
-- schema definitions from Task P1.1.
-
-### Output Contract
-A formal pipeline step that performs:
-- schema validation,
-- rule_type enum validation,
-- duplicate candidate detection,
-- trace reference validation.
-
-### Implementation Notes
-- validation failures must be visible,
-- do not auto-heal malformed artifacts silently,
-- duplicate detection may be heuristic but must be observable.
-
-### Acceptance Criteria
-- invalid rule artifacts hard-fail the validation step,
-- invalid enum values hard-fail the validation step,
-- duplicate candidates are surfaced in machine-readable output,
-- broken trace references are surfaced.
-
-### Evidence
-- validation output samples,
-- failing fixtures,
-- pipeline test logs.
+### Out of scope
+- advanced conflict reasoning,
+- full semantic contradiction analysis,
+- execution integration.
 
 ---
 
-## Task P1.3 — Model and Prompt Metadata
+## Task 1.2 — Prompt and Model Version Metadata
 
 ### Goal
-Ensure all model-driven outputs record sufficient metadata for auditability.
+Ensure generated artifacts record model and prompt provenance.
 
-### Input Contract
-- current maker/checker/rewrite paths,
-- provider abstraction behavior,
-- model governance requirements.
+### Why it matters
+Without provenance, behavior drift becomes difficult to diagnose.
 
-### Output Contract
-All governed generated artifacts contain:
-- provider,
+### Prerequisites
+- provider abstraction exists or is identifiable,
+- governed prompt version policy exists or can be introduced.
+
+### Input contract
+- model configuration source,
+- prompt ID/version source,
+- pipeline version source.
+
+### Output contract
+Maker/checker/rewrite artifacts include:
+- provider name,
 - model name,
 - model version if available,
 - prompt ID,
 - prompt version,
 - run timestamp,
 - source artifact hash,
-- pipeline version,
-- module name.
+- pipeline version.
 
-### Implementation Notes
-- metadata presence must be testable,
-- avoid provider-specific leakage into business logic.
+### Implementation notes
+Do not scatter metadata logic across business modules.  
+Keep metadata generation centralized where possible.
 
-### Acceptance Criteria
-- maker and checker outputs include metadata,
-- rewrite outputs include metadata when applicable,
-- metadata is validated in tests,
-- missing metadata fails governed validation.
+### Validation
+- generated artifacts contain required metadata,
+- metadata is stable across repeated runs when inputs are unchanged except timestamp,
+- tests confirm metadata presence,
+- unknown or unsupported configured model names fail clearly before a live LLM call.
 
-### Evidence
-- generated artifacts,
-- tests,
-- validation output.
+### Acceptance evidence
+- sample generated artifacts,
+- metadata tests,
+- docs updated.
+
+### Self-evaluation
+Confirm each acceptance condition as PASS / PARTIAL / FAIL.
+
+### Out of scope
+- full model benchmarking,
+- rollout automation.
 
 ---
 
-## Task P1.4 — Baseline CI and Smoke Flow
+## Task 1.3 — Baseline CI and Smoke Flow
 
 ### Goal
-Create a reproducible baseline CI path for the minimal supported workflow.
+Create a reliable baseline CI path for the current core workflow.
 
-### Input Contract
-- minimal baseline artifacts or fixture set,
-- current pipeline entrypoints,
-- testing and acceptance docs.
+### Why it matters
+Without CI, roadmap work has no durable safety net.
 
-### Output Contract
-CI jobs covering:
+### Prerequisites
+- minimal reproducible sample flow,
+- validation commands or equivalent scripts available.
+
+### Input contract
+- smallest baseline dataset or artifact set,
+- schema validation tasks,
+- reporting generation task.
+
+### Output contract
+CI workflow that runs at least:
 - schema validation,
 - minimal end-to-end smoke,
-- reporting smoke,
-- core unit tests.
+- report generation smoke,
+- core unit tests for pipeline bootstrapping,
+- and can execute the end-to-end smoke path without calling a real LLM API by using a deterministic stub provider or equivalent governed test double.
 
-### Implementation Notes
-- keep the baseline small and reproducible,
-- use fixtures where possible,
-- network-dependent model calls should be stubbed or controlled for CI reliability.
+### Implementation notes
+Prefer stable fixture-based smoke coverage over large expensive runs.
 
-### Acceptance Criteria
-- CI runs on every relevant change,
-- minimal smoke flow is reproducible,
-- failures are attributable to stage,
-- reporting path is covered.
+### Validation
+- CI fails on broken schema,
+- CI fails on broken smoke path,
+- CI fails on broken report generation,
+- smoke runs can be executed without making real LLM API calls.
 
-### Evidence
+### Acceptance evidence
 - workflow files,
-- CI logs,
-- smoke artifacts.
+- passing CI logs,
+- failing-case proof where useful.
+
+### Self-evaluation
+Confirm each CI requirement as PASS / PARTIAL / FAIL.
+
+### Out of scope
+- expensive full-dataset CI,
+- production deployment pipeline.
 
 ---
 
-## Task P1.5 — Structured Traceability Key
+## Task 1.4 — Checker Stability Visibility
 
 ### Goal
-Strengthen traceability with a stable, explicit source-level identifier strategy.
+Make checker instability visible instead of implicit.
 
-### Input Contract
-- source segmentation logic,
-- rule normalization pipeline,
-- reporting requirements.
+### Why it matters
+Checker results may appear authoritative even when they are unstable.
 
-### Output Contract
-A traceability strategy that propagates a stable source-level identifier through:
-- source parsing,
-- atomic rule,
-- semantic rule,
-- maker output,
-- checker output,
-- report output.
+### Prerequisites
+- baseline sample set exists,
+- checker can be invoked repeatedly with controlled inputs.
 
-### Implementation Notes
-- identifiers must remain unique within intended scope,
-- sortability and audit usability are preferred,
-- downstream artifacts must preserve the key rather than recompute ad hoc variants.
+### Input contract
+- stable baseline input set,
+- checker output comparison method.
 
-### Acceptance Criteria
-- traceability key appears in core downstream artifacts,
-- traceability is testable end-to-end,
-- duplicate or broken identifiers are detectable.
+### Output contract
+A repeatable workflow that:
+- runs checker multiple times on the same baseline,
+- compares results,
+- marks unstable outcomes,
+- exposes this signal in logs or reports.
 
-### Evidence
-- artifact samples,
-- validation tests,
-- report examples.
+### Implementation notes
+Start with a small controlled baseline before expanding to broader statistical measurement.
+
+### Validation
+- repeated runs produce comparison data,
+- differences are visible,
+- unstable cases can be identified.
+
+### Acceptance evidence
+- comparison output examples,
+- task documentation,
+- report or log samples.
+
+### Self-evaluation
+Confirm each stability requirement as PASS / PARTIAL / FAIL.
+
+### Out of scope
+- full confidence engine,
+- automated adjudication of instability.
 
 ---
 
-## Task P1.6 — Checker Stability Visibility
+## Task 1.5 — Structured Source Anchor Traceability
 
 ### Goal
-Make checker instability observable on a controlled baseline.
+Introduce a stable source-level traceability key, such as a paragraph-level identifier or equivalent governed source anchor, that can flow through downstream artifacts.
 
-### Input Contract
-- checker module,
-- baseline fixture set,
-- reporting or benchmark output path.
+### Why it matters
+Traceability becomes more actionable when a stable source anchor is available rather than only broad source references.
 
-### Output Contract
-A controlled comparison flow that:
-- runs checker more than once on the same baseline,
-- compares outputs,
-- surfaces unstable findings.
+### Prerequisites
+- source parsing supports section/paragraph segmentation,
+- trace fields exist or can be extended safely.
 
-### Implementation Notes
-- stability is a signal, not a replacement for correctness,
-- do not hide instability behind a single final score.
+### Input contract
+- source document segmentation output,
+- existing traceability model.
 
-### Acceptance Criteria
-- repeated checker runs can be compared,
-- unstable results are surfaced in machine-readable output,
-- the process is documented.
+### Output contract
+A traceability mechanism that carries a stable source anchor into:
+- rule artifacts,
+- maker outputs,
+- checker outputs,
+- reports,
+- future BDD or step-related outputs.
 
-### Evidence
-- comparison outputs,
-- benchmark script output,
-- docs update.
+### Implementation notes
+The exact field name may evolve, but the concept must remain stable and documented.
+
+### Validation
+- IDs are unique within governed scope,
+- downstream artifacts retain the ID,
+- reports or machine-readable exports can surface or sort by it.
+
+### Acceptance evidence
+- artifact examples,
+- uniqueness checks,
+- docs updated.
+
+### Self-evaluation
+Confirm each traceability requirement as PASS / PARTIAL / FAIL.
+
+### Out of scope
+- full graph-based provenance service.
 
 ---
 
-# Phase 2 Tasks
+# Phase 2 — Mid-Term Planning and BDD Platform
 
-## Task P2.1 — Multi-Document Ingestion
+## Objective
+
+Expand from stable design artifacts into reusable planning, normalized BDD generation, and team-pilot workflows.
+
+---
+
+## Task 2.1 — Multi-Document Ingestion
 
 ### Goal
-Support multiple document classes with explicit ingestion strategies.
+Support multiple document classes with explicit ingestion expectations.
 
-### Input Contract
-- current source ingestion behavior,
-- representative sample documents for at least 3 classes,
-- extraction constraints per class.
+### Why it matters
+Enterprise testing cannot depend on a single document shape.
 
-### Output Contract
-Document-class-aware ingestion definitions covering:
-- parsing strategy,
-- extraction constraints,
-- expected rule patterns,
+### Prerequisites
+- Phase 1 validation and traceability foundations,
+- document classes chosen for initial support.
+
+### Input contract
+For each chosen document class:
+- representative samples,
+- parsing assumptions,
+- rule extraction expectations,
 - known failure modes.
 
-### Implementation Notes
-- do not assume one extraction policy fits all document classes,
-- keep class behavior explicit and reviewable.
+### Output contract
+Document-class-aware ingestion support with:
+- documented parsing strategy,
+- documented extraction constraints,
+- sample outputs,
+- validation notes.
 
-### Acceptance Criteria
-- at least 3 document classes are supported,
-- each class has documented parsing and extraction behavior,
-- extraction outputs remain governed.
+### Implementation notes
+Start with a small number of classes.  
+Do not claim generality too early.
 
-### Evidence
-- configs or code,
-- class-specific docs,
-- sample outputs.
+### Validation
+- at least 3 classes process successfully,
+- each class has documented failure modes,
+- outputs remain traceable and schema-valid.
+
+### Acceptance evidence
+- sample documents,
+- sample outputs,
+- class-specific notes,
+- tests or fixtures.
+
+### Self-evaluation
+Confirm each ingestion requirement as PASS / PARTIAL / FAIL.
+
+### Out of scope
+- unlimited file-type support,
+- OCR-heavy universal ingestion.
 
 ---
 
-## Task P2.2 — Planning Layer
+## Task 2.2 — Planning Layer
 
 ### Goal
-Introduce a planner stage between semantic rules and BDD generation.
+Add a planner stage between semantic rules and scenario generation.
 
-### Input Contract
+### Why it matters
+Planning introduces explicit test intent rather than generating scenarios directly from rules without intermediate reasoning structure.
+
+### Prerequisites
+- semantic rules are stable,
+- planner output schema can be defined.
+
+### Input contract
 - semantic rules,
-- current maker assumptions,
-- roadmap phase guidance.
+- rule metadata,
+- risk/priority heuristics where available.
 
-### Output Contract
-A planner artifact that includes:
-- objective,
-- priority,
+### Output contract
+Versioned planner artifacts describing:
+- test objective,
 - risk level,
 - coverage intent,
 - scenario family,
 - dependency notes,
-- validation strategy hints.
+- recommended validation strategy.
 
-### Implementation Notes
-- planner output is a governed artifact,
-- do not collapse planner output into unstructured prompt text.
+### Implementation notes
+Planner outputs should remain structured and reviewable.  
+Do not let planner become a free-form narrative layer.
 
-### Acceptance Criteria
-- planner schema exists,
-- planner output is traceable,
-- planner output is consumed by downstream generation,
-- planner behavior is benchmarkable.
+### Validation
+- planner artifacts validate,
+- planner artifacts trace to semantic rules,
+- downstream generation can consume them.
 
-### Evidence
+### Acceptance evidence
 - planner schema,
-- planner fixtures,
-- integration tests.
+- planner samples,
+- integration tests to downstream generation.
+
+### Self-evaluation
+Confirm each planning requirement as PASS / PARTIAL / FAIL.
+
+### Out of scope
+- full autonomous test management,
+- execution orchestration.
 
 ---
 
-## Task P2.3 — Normalized BDD Contract
+## Task 2.3 — Normalized BDD Contract
 
 ### Goal
-Define a stable BDD contract independent of final renderer or execution integration.
+Introduce a stable BDD representation independent of final output syntax.
 
-### Input Contract
-- planner output,
-- current maker output,
-- existing feature-file style references if available.
+### Why it matters
+BDD must become a governed artifact, not only a presentation format.
 
-### Output Contract
-A normalized BDD artifact that preserves:
-- scenario intent,
-- step structure,
-- traceability,
-- metadata,
-- execution-agnostic representation.
+### Prerequisites
+- planning outputs or stable generation inputs,
+- BDD output patterns understood.
 
-### Implementation Notes
-- keep it renderer-independent,
-- do not bind directly to a single feature syntax assumption if future flexibility is needed.
+### Input contract
+- planner or semantic inputs,
+- current BDD output examples,
+- style expectations.
 
-### Acceptance Criteria
-- normalized BDD schema exists,
-- generated BDD validates,
-- at least one renderer can consume it,
-- traceability is preserved.
-
-### Evidence
+### Output contract
+A normalized BDD artifact contract with:
 - schema,
-- output samples,
-- renderer tests.
+- traceability,
+- scenario structure,
+- style metadata where needed.
+
+### Implementation notes
+The normalized BDD artifact should be reusable across future renderers and step-integration logic.
+
+### Validation
+- valid BDD artifacts pass schema,
+- invalid ones fail,
+- at least one renderer or exporter consumes the normalized representation.
+
+### Acceptance evidence
+- schema,
+- fixtures,
+- renderer/export proof,
+- docs updated.
+
+### Self-evaluation
+Confirm each BDD contract requirement as PASS / PARTIAL / FAIL.
+
+### Out of scope
+- full execution binding,
+- automatic step generation.
 
 ---
 
-## Task P2.4 — BDD Style Learning
+## Task 2.4 — BDD Style Learning
 
 ### Goal
-Learn reusable BDD style patterns from existing feature assets.
+Learn reusable style patterns from existing BDD assets without hardcoding everything manually.
 
-### Input Contract
-- existing `.feature` corpus if available,
-- current generated BDD artifacts,
-- normalized BDD contract.
+### Why it matters
+Teams often already have conventions that should be preserved.
 
-### Output Contract
-Style-learning outputs such as:
-- style profile data,
-- template profile summary,
-- style guide notes,
-- optional renderer preferences.
+### Prerequisites
+- existing `.feature` examples or equivalent BDD assets,
+- normalized BDD contract direction established.
 
-### Implementation Notes
-- learned style should guide rendering, not corrupt semantic intent,
-- style artifacts should remain reviewable and replaceable.
+### Input contract
+- representative feature files,
+- style attributes to observe,
+- extraction procedure for style features.
 
-### Acceptance Criteria
-- style profiles can be generated from sample features,
-- rendering can consume learned style preferences,
-- semantic content remains stable when style changes.
+### Output contract
+A governed style artifact, such as a style profile or style guide, that can inform generation without becoming an opaque hidden dependency.
 
-### Evidence
-- style artifacts,
-- before/after render comparisons,
-- review notes.
+### Implementation notes
+Style-learning outputs should be inspectable and versioned.  
+They should not be hidden inside prompts only.
+
+### Validation
+- extracted style patterns are reviewable,
+- generation can reference them,
+- results remain within normalized BDD contract.
+
+### Acceptance evidence
+- style profile artifacts,
+- review notes,
+- examples before/after style adoption.
+
+### Self-evaluation
+Confirm each style-learning requirement as PASS / PARTIAL / FAIL.
+
+### Out of scope
+- unrestricted stylistic self-optimization.
 
 ---
 
-## Task P2.5 — Step Registry
+## Task 2.5 — Review Package Exchange
 
 ### Goal
-Build a governed view of existing step-definition inventory for future reuse.
+Allow review outputs to be exported, imported, and merged outside a single local session.
 
-### Input Contract
-- existing step definition sources if available,
-- normalized BDD outputs,
-- naming and ownership expectations.
+### Why it matters
+Pilot usage requires more than one person and more than one browser session.
 
-### Output Contract
-A step registry artifact capturing:
-- step signatures,
-- parameter patterns,
-- ownership or source path,
-- reuse hints,
-- match candidates.
+### Prerequisites
+- structured review artifacts exist,
+- review identity model is defined.
 
-### Implementation Notes
-- registry is descriptive first, not yet full execution binding,
-- unmatched steps must remain visible.
+### Input contract
+- review records,
+- reviewed artifact references,
+- merge rules.
 
-### Acceptance Criteria
-- step inventory can be produced,
-- step matching categories can be reported,
-- unmatched step candidates are surfaced,
-- reuse analysis exists.
-
-### Evidence
-- registry output,
-- diff or match reports,
-- integration tests.
-
----
-
-## Task P2.6 — Review Exchange and Merge
-
-### Goal
-Support asynchronous review beyond a single local session.
-
-### Input Contract
-- current review artifact model,
-- review workflow assumptions,
-- conflict-handling needs.
-
-### Output Contract
-A review exchange mechanism supporting:
-- export,
-- import,
+### Output contract
+A governed package format for:
+- review export,
+- review import,
 - merge,
 - conflict surfacing.
 
-### Implementation Notes
-- keep review artifacts structured,
-- merge behavior must be explicit and testable.
+### Implementation notes
+Start with file- or bundle-based exchange before full hosted collaboration.
 
-### Acceptance Criteria
-- review packages can be exported and imported,
-- merge conflicts can be surfaced,
-- structured review integrity is preserved.
+### Validation
+- export/import roundtrip works,
+- merge works for non-conflicting changes,
+- conflicts are visible.
 
-### Evidence
-- package format,
+### Acceptance evidence
+- package examples,
 - merge tests,
-- conflict examples.
+- docs updated.
+
+### Self-evaluation
+Confirm each review-exchange requirement as PASS / PARTIAL / FAIL.
+
+### Out of scope
+- full enterprise review service.
 
 ---
 
-## Task P2.7 — Quality Dashboard and Drift Reporting
+## Task 2.6 — Quality Dashboards and Drift Views
 
 ### Goal
-Provide pilot-grade visibility into coverage, drift, and instability.
+Enhance reporting so teams can see stability, drift, and coverage patterns.
 
-### Input Contract
-- checker output,
+### Why it matters
+Governed workflows need visibility, not just final pass/fail summaries.
+
+### Prerequisites
+- stable reporting layer,
 - traceability data,
-- benchmark comparison data.
+- checker stability signal.
 
-### Output Contract
-Reports or machine-readable summaries covering:
-- rule-type coverage,
-- unstable checker findings,
-- baseline drift,
-- document-class breakdown,
+### Input contract
+- current reports,
+- benchmark history or repeated run history,
+- traceability fields.
+
+### Output contract
+Reporting extensions that can show, at minimum:
+- rule-type coverage view,
+- unstable checker decisions,
+- run-to-run drift,
 - traceability drill-down,
-- JSON/CSV export.
+- machine-readable export.
 
-### Implementation Notes
-- metrics should remain attributable to artifacts,
-- do not hide drift behind aggregated pass/fail alone.
+### Implementation notes
+Prefer traceability and governance value over decorative visualization.
 
-### Acceptance Criteria
-- reports surface instability and drift,
-- exports are usable downstream,
-- traceability remains visible.
+### Validation
+- reports render correctly,
+- exports are usable,
+- drift signals are visible.
 
-### Evidence
+### Acceptance evidence
 - report samples,
-- exported files,
-- report tests.
+- export samples,
+- screenshots if needed,
+- generation tests.
+
+### Self-evaluation
+Confirm each reporting requirement as PASS / PARTIAL / FAIL.
+
+### Out of scope
+- heavy BI platform integration.
 
 ---
 
-# Phase 3 Tasks
+# Phase 3 — Enterprise AI Testing Platform
 
-## Task P3.1 — Domain Packaging
+## Objective
 
-### Goal
-Support domain-aware configuration without coupling the whole platform to one domain.
-
-### Input Contract
-- current pipeline configuration,
-- representative domain differences,
-- governance expectations.
-
-### Output Contract
-A domain-aware configuration model that can express:
-- domain-specific ingestion hints,
-- rule interpretation differences,
-- BDD rendering preferences,
-- review/reporting defaults where appropriate.
-
-### Implementation Notes
-- domain customization must remain explicit,
-- shared core contracts should not be duplicated unnecessarily.
-
-### Acceptance Criteria
-- domain configuration can be introduced without breaking shared flow,
-- at least one domain override path is testable,
-- core artifacts remain compatible.
-
-### Evidence
-- config examples,
-- domain tests,
-- compatibility notes.
+Extend from design and planning artifacts into execution integration, governance at scale, and enterprise-ready test operations.
 
 ---
 
-## Task P3.2 — Step Binding and Integration Readiness
+## Task 3.1 — Step Definition Registry
 
 ### Goal
-Move from step inventory to actual step binding readiness.
+Build a governed registry of existing step definitions for reuse and integration.
 
-### Input Contract
-- normalized BDD outputs,
+### Why it matters
+Enterprise adoption depends on connecting generated BDD to real executable assets.
+
+### Prerequisites
+- access to existing step definition libraries,
+- normalized BDD contract exists.
+
+### Input contract
+- step definition source set,
+- parsing assumptions,
+- output registry schema.
+
+### Output contract
+A governed step registry that supports:
+- step signature inventory,
+- ownership or source mapping,
+- parameter awareness where possible,
+- reuse-oriented lookup.
+
+### Implementation notes
+The registry should help identify reuse opportunities before generating new steps.
+
+### Validation
+- registry is generated reproducibly,
+- representative steps are captured,
+- lookup works for sample BDD outputs.
+
+### Acceptance evidence
+- registry artifact,
+- parser tests,
+- integration examples.
+
+### Self-evaluation
+Confirm each registry requirement as PASS / PARTIAL / FAIL.
+
+### Out of scope
+- automatic execution of all step bindings.
+
+---
+
+## Task 3.2 — Step Mapping and Gap Analysis
+
+### Goal
+Map normalized BDD steps to existing step definitions and expose gaps.
+
+### Why it matters
+Teams need to know what is reusable and what still needs implementation.
+
+### Prerequisites
+- Task 3.1 complete,
+- normalized BDD artifacts available.
+
+### Input contract
+- normalized BDD scenarios,
 - step registry,
-- ownership expectations,
-- current runtime constraints if known.
+- matching rules.
 
-### Output Contract
-A governed binding result indicating:
+### Output contract
+Mapping results showing:
 - exact matches,
-- parameterized matches,
+- parameterized matches where supported,
 - unmatched steps,
-- implementation-needed markers,
-- reuse score,
-- integration-ready summaries.
+- candidate suggestions,
+- gap summary.
 
-### Implementation Notes
-- do not generate false certainty for unmatched steps,
-- binding results should remain auditable.
+### Implementation notes
+Unmatched steps should be explicit and reviewable.  
+Do not bury them in free-form logs.
 
-### Acceptance Criteria
-- step binding can be evaluated,
-- unmatched steps are clearly reported,
-- reuse metrics are available,
-- integration summaries are exportable.
+### Validation
+- mapping results are reproducible,
+- unmatched steps are visible,
+- reuse is measurable.
 
-### Evidence
-- binding reports,
-- examples,
-- tests.
+### Acceptance evidence
+- mapping samples,
+- diff or gap reports,
+- matching tests.
+
+### Self-evaluation
+Confirm each mapping requirement as PASS / PARTIAL / FAIL.
+
+### Out of scope
+- automatic step implementation.
 
 ---
 
-## Task P3.3 — Executable Scenario Contract
+## Task 3.3 — Executable Scenario Contract
 
 ### Goal
-Introduce an execution-ready handoff artifact without collapsing design and execution layers.
+Introduce an execution-ready artifact that extends normalized BDD into a runtime integration contract.
 
-### Input Contract
-- normalized BDD,
-- step binding outputs,
-- environment and assertion requirements,
-- long-term architecture guidance.
+### Why it matters
+Design artifacts and executable artifacts should not be conflated.
 
-### Output Contract
-An `ExecutableScenario` contract including:
+### Prerequisites
+- normalized BDD exists,
+- step mapping exists,
+- execution concerns have been modeled.
+
+### Input contract
+- normalized BDD artifacts,
+- step mappings,
+- environment/setup expectations,
+- assertion references.
+
+### Output contract
+An execution-ready scenario artifact that may include:
 - environment requirements,
+- input data requirements,
 - setup hooks,
-- data requirements,
-- linked step definitions,
+- cleanup hooks,
 - deterministic assertion references,
-- cleanup expectations.
+- step bindings.
 
-### Implementation Notes
-- keep execution contract explicit,
-- do not make it a raw prompt output without schema and review.
+### Implementation notes
+Keep this contract explicit and bounded.  
+Do not let it become a vague “future execution” bucket.
 
-### Acceptance Criteria
-- execution contract exists and is schema-validatable,
-- sample scenarios can be exported,
-- traceability is preserved from source to executable contract.
+### Validation
+- contract validates,
+- required execution metadata exists,
+- export is consistent.
 
-### Evidence
-- schema,
-- samples,
+### Acceptance evidence
+- schema or contract definition,
+- sample artifacts,
 - validation tests.
 
+### Self-evaluation
+Confirm each execution-contract requirement as PASS / PARTIAL / FAIL.
+
+### Out of scope
+- full distributed execution engine.
+
 ---
 
-## Task P3.4 — Deterministic Oracle Expansion
+## Task 3.4 — Deterministic Oracle Layer
 
 ### Goal
-Increase deterministic validation coverage for structured rule classes.
+Move core runtime truth into deterministic assertions wherever possible.
 
-### Input Contract
-- structured rule categories,
-- existing validation logic,
-- execution contract direction.
+### Why it matters
+Execution correctness should not depend purely on LLM judgment.
 
-### Output Contract
-Deterministic validation modules for core categories such as:
+### Prerequisites
+- execution-ready contract exists,
+- structured rule categories identified.
+
+### Input contract
+- rule categories,
+- expected observable behaviors,
+- assertion scope.
+
+### Output contract
+Deterministic validation modules for core structured categories, such as:
 - field validation,
 - state validation,
-- calculation validation,
 - deadline/window checks,
-- event sequence checks,
+- calculation checks,
+- sequence checks,
 - pass/fail accounting.
 
-### Implementation Notes
-- prioritize deterministic checks where clear structure exists,
-- do not delegate deterministic truth to LLMs if avoidable.
+### Implementation notes
+Start with the most structured categories first.
 
-### Acceptance Criteria
-- at least core structured categories are supported,
-- tests exist for deterministic modules,
-- execution-facing artifacts can reference deterministic checks.
+### Validation
+- assertions are test-covered,
+- deterministic outputs are reproducible,
+- integration with execution-ready artifacts is clear.
 
-### Evidence
-- modules,
+### Acceptance evidence
+- oracle modules,
 - tests,
-- sample usage.
+- sample scenario validations.
+
+### Self-evaluation
+Confirm each deterministic-oracle requirement as PASS / PARTIAL / FAIL.
+
+### Out of scope
+- full autonomous judgment of ambiguous cases.
 
 ---
 
-## Task P3.5 — Quality Gate
+## Task 3.5 — Hosted Review and Audit Service
 
 ### Goal
-Create a governed promotion gate for generated BDD and integration outputs.
+Upgrade review workflows from local utility to deployable collaborative service.
 
-### Input Contract
-- normalized BDD,
-- step binding data,
-- checker stability signals,
-- benchmark summaries.
+### Why it matters
+Enterprise usage requires auditability and multi-user control.
 
-### Output Contract
-A quality-gate decision framework that can mark outputs as:
-- acceptable,
-- review-required,
-- unstable,
-- implementation-incomplete,
-- blocked.
+### Prerequisites
+- structured review artifacts,
+- review package model,
+- identity/role expectations.
 
-### Implementation Notes
-- gate logic should remain transparent,
-- quality gates complement human review rather than silently replace it.
+### Input contract
+- review workflow requirements,
+- audit requirements,
+- conflict handling requirements.
 
-### Acceptance Criteria
-- gate decisions are reproducible,
-- decision reasons are visible,
-- outputs can be filtered by gate status.
+### Output contract
+A hosted review capability supporting:
+- reviewer identity,
+- roles,
+- decision storage,
+- audit trail,
+- comment threads,
+- assignment workflow.
 
-### Evidence
-- gate outputs,
-- test cases,
-- report examples.
+### Implementation notes
+Keep artifact compatibility with earlier review formats where practical.
+
+### Validation
+- multi-user scenarios function,
+- audit records are preserved,
+- conflict handling is explicit.
+
+### Acceptance evidence
+- workflow demos,
+- API/UI tests,
+- audit samples.
+
+### Self-evaluation
+Confirm each hosted-review requirement as PASS / PARTIAL / FAIL.
+
+### Out of scope
+- full enterprise IAM integration in first cut.
 
 ---
 
-## Task P3.6 — Cross-Run Regression Analysis
+## Task 3.6 — Quality Gate and Regression Governance
 
 ### Goal
-Track quality movement across runs rather than only within a single run.
+Formalize enterprise-ready release gating for model behavior, artifact quality, and integration stability.
 
-### Input Contract
+### Why it matters
+As the platform grows, changes must be promoted through governed quality signals rather than intuition.
+
+### Prerequisites
+- benchmark infrastructure exists,
+- traceability and reporting exist,
+- model governance is enforced.
+
+### Input contract
 - benchmark history,
-- report outputs,
-- checker stability results,
-- traceability keys.
+- artifact quality metrics,
+- checker stability metrics,
+- mapping/reuse metrics where applicable.
 
-### Output Contract
-Cross-run analysis artifacts covering:
-- drift,
-- stability changes,
-- reuse changes,
-- unmatched-step trend,
-- quality-gate trend.
+### Output contract
+A governed quality-gate process that can block promotion when:
+- schema validity drops,
+- checker instability rises,
+- benchmark thresholds fail,
+- regression patterns appear,
+- integration quality degrades.
 
-### Implementation Notes
-- preserve run metadata,
-- comparisons should remain attributable and reviewable.
+### Implementation notes
+Keep thresholds explicit and reviewable.
 
-### Acceptance Criteria
-- multiple runs can be compared,
-- regression summaries are available,
-- trend outputs are exportable.
+### Validation
+- failing thresholds block promotion,
+- successful runs produce reviewable evidence,
+- rollback path remains documented.
 
-### Evidence
-- history artifacts,
-- trend reports,
-- comparison tests.
+### Acceptance evidence
+- gate configuration,
+- blocked-run examples,
+- promotion examples,
+- docs updated.
 
----
+### Self-evaluation
+Confirm each quality-gate requirement as PASS / PARTIAL / FAIL.
 
-## Task P3.7 — Prompt Improvement Loop (Optional / Experimental)
-
-### Goal
-Create a controlled, non-default mechanism for proposing prompt improvements from observed failures.
-
-### Input Contract
-- failure analyses,
-- benchmark regressions,
-- prompt lifecycle policy,
-- model governance policy.
-
-### Output Contract
-A governed candidate-improvement flow that can produce:
-- candidate prompt change proposals,
-- linked failure evidence,
-- validation requirements,
-- non-default recommendation records.
-
-### Implementation Notes
-- this task is experimental,
-- it must not auto-promote prompt changes,
-- all proposals remain subject to prompt lifecycle and model governance rules.
-
-### Acceptance Criteria
-- prompt-improvement proposals are clearly marked as proposals,
-- no automatic production promotion occurs,
-- linked validation expectations are present.
-
-### Evidence
-- candidate proposal artifacts,
-- workflow docs,
-- governance references.
+### Out of scope
+- fully autonomous release approval.
 
 ---
 
-## Cross-Task Acceptance Rules
+## Optional Exploration Tasks (Do Not Treat as Core Path)
 
-These rules apply across all phases.
+These tasks may be useful later, but they are not core requirements for the main platform path.
 
-### 1. Every task needs evidence
-No task is done without:
-- tests,
-- artifacts,
-- docs updates where relevant,
-- and an acceptance mapping.
+### Optional A — Auto Step Definition Generation
+Possible future direction once step registry and gap analysis are mature.
 
-### 2. Missing prerequisites must be reported
-If a task cannot proceed because an upstream artifact or contract is missing, the gap must be made explicit.
+### Optional B — Prompt Optimization Assistant
+Possible future direction once enough benchmark history exists to justify governed optimization.
 
-### 3. Contract changes require coordinated updates
-If a task changes a schema, prompt contract, registry structure, or output contract, update:
-- tests,
-- docs,
-- acceptance references,
-- migration notes where needed.
+### Optional C — Domain Packages and Specialization Layers
+Possible future direction once the base platform is stable and multiple target domains require specialization.
 
-### 4. Provider-specific behavior must remain isolated
-Tasks must not introduce provider-specific coupling into business modules.
+These optional tasks should not displace core governance, traceability, and execution-readiness work.
 
-### 5. Deterministic logic should grow over time
-Where responsibilities can become deterministic, future tasks should move in that direction.
+# Phase Gate Awareness
 
----
+Implementation work should respect formal phase gates where they exist.
 
-## Suggested Tracking Format
+Before starting work in a later phase:
+- check whether the prior phase gate has been signed off,
+- if a required gate record is missing, flag it,
+- do not quietly treat later-phase work as normal completion when earlier phase criteria are still open.
 
-Each task implementation should produce a structured summary:
+This does not forbid exploratory work, but it does forbid presenting governed later-phase work as fully complete when prerequisite phase gates remain unsigned.
 
-- Task ID
-- Title
-- Scope
-- Files changed
-- Inputs used
-- Outputs produced
-- Tests run
-- Acceptance items satisfied
-- Known limitations
-- Follow-up tasks
-- Rollback notes
+# Implementation Review Checklist
 
-This can be used in PRs, issue templates, or internal project tracking.
+Before merging any implementation task, confirm:
+
+- task ID is identified,
+- prerequisites were satisfied,
+- earlier phase gates or equivalent prerequisites were checked,
+- input contract was honored,
+- output contract was produced,
+- validation was run,
+- acceptance evidence exists,
+- a structured self-evaluation was produced,
+- out-of-scope boundaries were respected,
+- docs were updated where required.
+
+If any of these are unclear, the task is not implementation-ready.
 
 ---
 
-## Summary
+# AI Agent Execution Rules
 
-This document converts the roadmap into an execution-oriented plan.
+Any AI coding agent following this plan must obey the following:
 
-The roadmap explains **where the system is going**.  
-This implementation plan explains **how to move phase by phase without losing contracts, governance, or reviewability**.
+## 1. Never fabricate missing prerequisites
+If an input contract depends on a file, schema, benchmark, artifact, or earlier phase gate that does not exist, stop and surface the missing dependency.
 
-It is especially important for AI-assisted development because it:
-- reduces ambiguity,
-- enforces phase discipline,
-- makes dependencies explicit,
-- and ties work to testable outcomes.
+## 2. Do not silently widen scope
+Stay within the current task and phase unless a human explicitly expands scope.
+
+## 3. Do not replace contracts with chat context
+All durable behavior must be captured in repo-readable files, not hidden in conversation state.
+
+## 4. Prefer deterministic validation when available
+If a contract can be validated deterministically, do not rely only on model judgment.
+
+## 5. Keep outputs reviewable
+Generated outputs, configs, schemas, and summaries must remain understandable by human reviewers.
+
+## 6. End with explicit completion status
+For substantial work, provide a short self-evaluation with PASS, PARTIAL, or FAIL per relevant acceptance item.
+
+---
+
+# Summary
+
+This implementation plan turns the strategic roadmap into governed execution tasks.
+
+It preserves the architecture-first and governance-first approach of the repo while adding task-level execution structure that is especially useful for:
+- developers,
+- reviewers,
+- and AI coding agents working across different LLM APIs.
+
+The key principle is simple:
+
+**strategic direction belongs in the roadmap, system boundaries belong in architecture, governance belongs in policy docs, and execution detail belongs here.**

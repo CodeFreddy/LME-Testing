@@ -2,592 +2,674 @@
 
 ## Purpose
 
-This document defines the testing-governance layer for this repository.
+This document defines the testing-governance layer for the repository.
 
-It complements the architecture, roadmap, model governance, and agent rules by focusing on the testing perspective:
+It complements the architecture, roadmap, acceptance, and model governance documents by introducing the perspective that test teams need in order to operate the system safely and consistently.
 
-- how test assets are governed,
-- how prompt-driven testing workflows are controlled,
-- how review and validation are organized,
-- how failures and confidence are assessed,
-- how changes are introduced safely,
-- and how quality is preserved across iterations.
+This document exists to ensure that:
+
+- prompt-driven workflows are treated as governed test assets,
+- review and validation are structured and repeatable,
+- changes are auditable,
+- failure analysis is preserved,
+- execution order and dependencies remain explicit,
+- and testing quality does not drift as the framework evolves.
 
 This document should be read together with:
 
 - `docs/roadmap.md`
+- `docs/implementation_plan.md`
 - `docs/acceptance.md`
 - `docs/model_governance.md`
 - `docs/agent_guidelines.md`
 - `docs/architecture.md`
+- `docs/prompt_lifecycle.md`
 
 ---
 
 ## Why This Document Exists
 
-The repository already has a strong developer-oriented structure:
-- architecture,
-- artifact contracts,
-- phase-based roadmap,
-- model governance,
-- agent behavior rules.
-
-However, enterprise AI testing also requires a testing-oriented governance layer.
-
-Developer-facing documents answer questions such as:
-- What is the system architecture?
-- What are the artifact contracts?
-- How should model changes be governed?
-- What is the roadmap?
-
-Testing governance answers different but equally important questions:
-- What counts as a governed test asset?
-- How are prompts, reviews, and validation steps maintained over time?
-- How do we detect silent degradation?
-- How do we assess confidence and failure modes?
-- How do we validate changes before and after rollout?
-- How do we manage test workflow consistency when multiple model APIs are used?
-
-This document exists to make those testing concerns first-class and explicit.
-
----
-
-## Role in the Documentation System
-
-This file is intentionally separate from other docs.
-
-### This document should own
-- testing asset governance,
-- prompt lifecycle expectations from a testing perspective,
-- review and feedback discipline,
-- pre-run and post-run validation expectations,
-- confidence and failure analysis,
-- test change management,
-- non-functional testing controls such as parallelism, recovery, and incremental updates.
-
-### This document should not replace
-- architecture definitions in `docs/architecture.md`,
-- model API governance in `docs/model_governance.md`,
-- roadmap priorities in `docs/roadmap.md`,
-- phase gates in `docs/acceptance.md`,
-- repo-wide AI agent rules in `docs/agent_guidelines.md`.
-
----
-
-## Governance Model
-
-The overall framework should be understood in two complementary layers:
-
-### 1. Architecture-led layer
-This is the developer-facing system layer.
-
-It governs:
+The repository already has a strong engineering view of the system:
 - pipeline stages,
-- module boundaries,
 - artifact contracts,
-- roadmap phases,
-- model strategy,
-- provider abstractions,
-- execution evolution.
+- phase roadmap,
+- model governance,
+- and architecture boundaries.
 
-### 2. Test-governed layer
-This is the testing-facing quality control layer.
+This document adds the **test-operations and test-asset governance view**.
 
-It governs:
-- prompt and test asset lifecycle,
-- review discipline,
-- validation discipline,
-- failure classification,
-- confidence reporting,
-- change safety,
-- repeatability of testing workflows.
+In practical terms:
 
-Both layers are required.  
-Architecture alone is not enough for enterprise AI testing.  
-Testing discipline alone is not enough for long-term system evolution.
+- architecture documents define how the system is built,
+- testing governance defines how the system is validated, reviewed, and controlled as a testing asset.
+
+Both are required for enterprise AI testing.
+
+---
+
+## Scope
+
+This document governs:
+
+- prompt inventory and lifecycle,
+- review and feedback processes,
+- confidence assessment,
+- failure analysis,
+- pre-run and post-run validation,
+- integration test procedures,
+- change impact tracking,
+- rollback expectations,
+- incremental update expectations,
+- parallel execution expectations,
+- error recovery expectations,
+- testing-related performance metrics,
+- minimum governance artifacts for reviewable runs.
+
+It does **not** replace:
+- architecture design,
+- provider integration rules,
+- roadmap sequencing,
+- or schema contract definitions.
 
 ---
 
 ## Core Testing Governance Principles
 
-### 1. Test assets are governed assets
+### 1. Prompt sets are governed test assets
 
-The following must be treated as governed testing assets, not disposable helpers:
+Prompts used in the system are not temporary instructions.  
+They are governed assets that can affect downstream quality and must therefore be managed with the same discipline as schemas, configs, and test fixtures.
 
-- prompt sets,
+### 2. Completeness matters
+
+A managed prompt set must not silently lose members, numbering, or dependency links.
+
+### 3. Every meaningful change must leave an audit trail
+
+Changes to prompts, review templates, test flow definitions, or output structures must include update records and impact notes.
+
+### 4. Validation must exist both before and after execution
+
+A testing workflow is not governed if it validates only the final output.  
+Pre-run checks and post-run checks are both required.
+
+### 5. Review quality must be explicit
+
+Testing workflows should not stop at “pass/fail”.  
+They should preserve:
+- review comments,
+- confidence judgments,
+- failure analysis,
+- and known limitations.
+
+### 6. Failure must be analyzable
+
+When outputs are poor, incomplete, or inconsistent, the system must capture why that happened and what should be improved.
+
+### 7. Operational qualities are part of testing governance
+
+Incremental updates, parallel execution, error recovery, and performance visibility are not optional implementation details.  
+They are part of the quality envelope of the testing system.
+
+### 8. Governed testing behavior must be repo-readable
+
+If a workflow is intended to be repeatable and auditable, the controlling rules must live in repo-readable artifacts such as:
+- prompts,
 - review templates,
 - validation checklists,
-- confidence labels,
-- failure-analysis templates,
-- benchmark datasets,
-- sample artifacts,
-- expected output patterns,
-- integration test procedures.
-
-### 2. Prompt-driven testing behavior must be versioned
-
-If prompts or prompt sequences affect system behavior, they are part of the governed testing surface and must be versioned, reviewed, and traceable.
-
-### 3. Validation must happen both before and after execution
-
-A testing workflow is incomplete unless it defines:
-- pre-run validation,
-- post-run validation,
-- and change impact review.
-
-### 4. Silent degradation is a primary risk
-
-This framework must explicitly watch for situations where:
-- the pipeline still runs,
-- output still looks plausible,
-- but quality or trustworthiness has degraded.
-
-### 5. Failure handling is part of quality, not an afterthought
-
-The repo should classify, surface, analyze, and learn from testing failures.
-
-### 6. Testing governance must remain compatible with multi-model operation
-
-Different LLM APIs may behave differently.  
-Testing workflows must remain stable through explicit governance rather than provider-specific habit.
+- integration procedures,
+- acceptance rules,
+- governance records.
 
 ---
 
-## Governed Testing Assets
+## Test Asset Governance Model
 
-## 1. Prompt sets
+## 1. Governed test assets
 
-Prompt sets include any prompts or ordered prompt sequences that meaningfully shape:
-- rule extraction support,
-- semantic interpretation,
-- test planning,
-- BDD generation,
-- review guidance,
-- rewrite behavior,
-- or future step-mapping suggestions.
+The following are considered governed test assets in this repo:
 
-Prompt sets must have:
-- stable identifiers,
-- version history,
-- ownership,
-- dependency awareness,
-- linked benchmark usage.
+- prompt collections,
+- prompt templates,
+- review templates,
+- feedback templates,
+- confidence assessment templates,
+- failure analysis templates,
+- validation checklists,
+- integration test procedures,
+- benchmark cases,
+- output file conventions,
+- execution logs used for testing evidence,
+- audit-style run records.
 
-## 2. Review templates
+## 2. Minimum governance expectations
 
-Review structures, scoring rubrics, review labels, and human decision templates are governed assets.
+Every governed test asset should have, where applicable:
 
-Examples:
-- approve / reject / rewrite labels,
-- quality review categories,
-- confidence levels,
-- issue classification templates.
-
-## 3. Validation checklists
-
-Pre-run and post-run validation checklists must be maintained as governed operational assets.
-
-## 4. Failure-analysis templates
-
-Failure analysis should follow repeatable structures rather than ad hoc notes.
-
-## 5. Benchmark and regression datasets
-
-Benchmark datasets are not only model-governance assets; they are also testing-governance assets because they define expected stability and quality behavior.
+- stable identifier,
+- version or revision trace,
+- owner,
+- scope,
+- dependencies,
+- update history,
+- validation expectations,
+- rollback notes if materially changed.
 
 ---
 
-## Prompt Lifecycle Governance
+## Prompt Set Governance
 
-This section focuses on prompts from a testing-governance perspective.  
-Technical model governance remains in `docs/model_governance.md`.
+This section adapts the strongest ideas from the tester-oriented workflow into repo-friendly governance rules.
 
-## Prompt lifecycle stages
+## 1. Prompt set completeness
 
-Each governed prompt or prompt set should move through these stages:
+If the project maintains a defined prompt collection for a workflow, the collection must remain complete unless a reviewed decision explicitly changes it.
 
-1. proposal
-2. draft
-3. review
-4. baseline validation
-5. active use
-6. monitored use
-7. revision
-8. deprecation or rollback
+### Required
+- no silent prompt deletion,
+- no silent renumbering,
+- no silent dependency breakage,
+- no silent replacement of one governed prompt by another.
 
-## Minimum prompt metadata
+### Implication
+An agent or developer must not reduce the governed prompt set just because a smaller set “seems enough”.
 
-Every governed prompt should have, at minimum:
-- prompt ID
-- version
-- owner
-- purpose
-- related module
-- expected input type
-- expected output type
-- dependency notes
-- linked validation or benchmark set
-- change log
+## 2. Prompt identifiers
 
-## Prompt change expectations
+Each governed prompt should have:
+- a stable prompt ID,
+- a human-readable name,
+- version information,
+- scope description,
+- upstream dependencies,
+- downstream consumers.
 
-A prompt change should not be treated as a trivial edit.
+## 3. Prompt dependency awareness
 
-A valid prompt change should include:
-- reason for change,
-- expected behavior impact,
-- benchmark or validation evidence,
-- risk assessment,
-- rollback note if behavior worsens.
+Where prompts form a sequence, the repo should document:
+- execution order,
+- required inputs,
+- generated outputs,
+- downstream dependencies,
+- and which prompts are foundational.
 
-## Prompt dependency awareness
+## 4. Prompt output expectations
 
-If multiple prompts are designed to be used together or in sequence, their dependency order must be documented.
+For major prompts, the repo should define:
+- expected output artifacts,
+- output location,
+- validation requirements,
+- review artifacts if required,
+- and whether README or index files must be updated.
 
-This matters because testing workflows often fail not because a single prompt is wrong, but because:
-- sequence assumptions change,
-- one prompt's output no longer matches another prompt's expected input,
-- dependency drift occurs silently.
+## 5. Prompt lifecycle records
 
----
+A prompt change record should capture:
+- date,
+- author,
+- description,
+- downstream impact,
+- validation performed.
 
-## Review Governance
-
-## Role of review
-
-Review is a testing control mechanism, not only a usability step.
-
-It exists to:
-- catch low-confidence outputs,
-- detect failure patterns,
-- expose ambiguity,
-- support selective rewrite,
-- preserve accountability.
-
-## Review dimensions
-
-Reviews should be able to cover at least these dimensions:
-
-- structural validity
-- source traceability
-- scenario relevance
-- coverage credibility
-- ambiguity level
-- rewrite necessity
-- reviewer confidence
-
-## Structured review expectations
-
-Where possible, review should use structured forms rather than pure free text.
-
-Structured review should support:
-- outcome labels,
-- issue categories,
-- confidence labels,
-- trace references,
-- rationale snippets,
-- recommended action.
-
-## Review disagreement handling
-
-If multiple reviewers are introduced later, the system should preserve disagreement rather than flattening it immediately.
-
-Disagreement is valuable signal and should be visible.
+This applies especially to prompts used in repeatable workflows, not only to exploratory experimentation.
 
 ---
 
-## Confidence Governance
+## Review and Feedback Governance
 
-Confidence should be treated as an explicit testing concept.
+## 1. Review is a governed control layer
 
-## Why confidence matters
+Review outputs are not casual notes.  
+They are controlled testing artifacts that help determine whether generated outputs are fit for use.
 
-A result can be:
-- structurally valid,
-- apparently complete,
-- and still not trustworthy enough for action.
+## 2. Minimum review categories
 
-Confidence reporting helps distinguish:
-- plausible output,
-- stable output,
-- trusted output.
+The governance system should support structured review categories such as:
 
-## Suggested confidence dimensions
+- skill-related review,
+- test-related review,
+- code-related review,
+- documentation review,
+- framework review,
+- governance review.
 
-Confidence may be expressed across different axes, for example:
-- structural confidence
-- semantic confidence
-- coverage confidence
-- review confidence
-- stability confidence
+The exact folder layout may evolve, but category-based review templates are encouraged because they improve consistency.
 
-## Architectural note
+## 3. Review deliverables
 
-Confidence should not replace pass/fail or coverage decisions.  
-It should complement them.
+For significant governed workflows, review output should ideally preserve:
 
-For example:
-- fully covered + unstable
-- partially covered + high confidence
-- structurally valid + low semantic confidence
+- review result,
+- structured feedback,
+- confidence assessment,
+- failure analysis,
+- reviewer identity or role,
+- reviewed artifact reference,
+- timestamp.
+
+## 4. Feedback templates
+
+Feedback should not be completely ad hoc for governed flows.  
+The repo should support reusable feedback structures for:
+- correctness issues,
+- coverage gaps,
+- formatting inconsistencies,
+- dependency problems,
+- confidence concerns,
+- failure root causes.
+
+---
+
+## Confidence Assessment Governance
+
+## 1. Confidence is separate from pass/fail
+
+A generated artifact may be acceptable yet still have low confidence.  
+Confidence should therefore be tracked as a separate signal where valuable.
+
+## 2. Confidence inputs
+
+Confidence may be informed by:
+- schema validity,
+- review quality,
+- traceability completeness,
+- stable source-anchor completeness where applicable,
+- consistency across multiple runs,
+- checker stability,
+- known ambiguity level,
+- quality of supporting evidence.
+
+## 3. Confidence output usage
+
+Confidence should be used to:
+- prioritize human review,
+- identify unstable workflows,
+- highlight risky outputs,
+- guide future benchmark expansion.
+
+Confidence should not be treated as a substitute for actual validation.
 
 ---
 
 ## Failure Analysis Governance
 
-Failure analysis should be systematic.
+## 1. Failure analysis is mandatory for important workflow failures
 
-## Why failure analysis matters
+When a governed workflow fails materially, the failure should produce a structured analysis.
 
-The framework is likely to face failures such as:
-- malformed extraction artifacts,
-- wrong rule typing,
-- duplicate or conflicting rules,
-- unstable checker judgments,
-- prompt regressions,
-- provider-specific behavior changes,
-- report inconsistencies,
-- review merge conflicts in future collaborative workflows.
+## 2. Failure analysis should capture
 
-Without systematic failure analysis, the same errors repeat without improving the system.
+At minimum:
+- what failed,
+- where it failed,
+- likely root cause,
+- affected downstream artifacts,
+- whether recovery was attempted,
+- whether rollback is needed,
+- recommended next action.
 
-## Failure categories
+## 3. Failure categories
 
-Testing failures should be classified at minimum by:
-- source / ingestion failure
-- extraction failure
-- normalization failure
-- generation failure
-- checker inconsistency
-- review failure
-- reporting failure
-- model/provider failure
-- regression failure
+Suggested categories:
+- source/input failure,
+- extraction failure,
+- schema/contract failure,
+- prompt or model behavior failure,
+- review workflow failure,
+- reporting failure,
+- integration failure.
 
-## Failure record expectations
+## 4. Retention
 
-A useful failure record should include:
-- failure category
-- affected stage
-- artifact identifiers
-- model/prompt metadata if relevant
-- observed behavior
-- expected behavior
-- severity
-- recovery action
-- follow-up action
+Failure analyses should be retained as learning artifacts, not discarded after the immediate issue is closed.
 
 ---
 
-## Pre-Run Validation
+## Pre-Run and Post-Run Validation
 
-Pre-run validation ensures the testing workflow is safe to execute.
+## 1. Pre-run validation
 
-## Required pre-run checks
+Before a governed workflow executes, validate:
 
-At minimum, pre-run validation should confirm:
-- required source inputs exist,
-- required schemas exist,
-- required prompt versions are available,
-- target model/provider configuration is valid,
-- benchmark or validation dataset is selected when needed,
-- output paths or artifact destinations are valid,
-- expected dependencies between stages are satisfied.
+- source availability,
+- source readability,
+- required directories and paths,
+- permission assumptions,
+- risk of accidental overwrite,
+- required dependencies,
+- stable source-anchor generation expectations where relevant,
+- space or environment prerequisites when relevant.
 
-## Optional pre-run checks
+## 2. Post-run validation
 
-Depending on phase and maturity:
-- duplicate candidate warnings,
-- prompt dependency checks,
-- configuration diff warnings,
-- previous failed run reminders.
+After execution, validate:
 
----
+- required artifacts exist,
+- naming conventions are respected,
+- schema constraints pass,
+- traceability references resolve,
+- stable source anchors are preserved where applicable,
+- index or summary outputs are updated if required,
+- review outputs are generated if required,
+- logs and metadata are present.
 
-## Post-Run Validation
+## 3. Architectural alignment
 
-Post-run validation ensures results are usable and trustworthy.
-
-## Required post-run checks
-
-At minimum, post-run validation should confirm:
-- all required artifacts were produced,
-- artifact schemas are valid,
-- required metadata is present,
-- traceability links are intact,
-- checker output can be interpreted,
-- report output was generated if expected,
-- instability or low-confidence flags are surfaced.
-
-## Recommended post-run checks
-
-- compare against previous baseline,
-- summarize drift,
-- classify failures,
-- identify changed risk areas,
-- record known limitations.
+Pre-run and post-run validation should be treated as part of the testing architecture, not as optional operational scripts.
 
 ---
 
-## Change Management for Testing Assets
+## Change Impact and Rollback Governance
 
-Testing changes should be governed explicitly.
+## 1. Change impact notes
 
-## Changes covered by this policy
+Before significant workflow changes, document:
 
-This includes changes to:
-- prompts,
-- review labels,
-- validation templates,
-- benchmark datasets,
-- confidence scales,
-- failure taxonomy,
-- test execution procedures,
-- integration checklists.
+- what is changing,
+- which assets are affected,
+- which downstream prompts or modules may be affected,
+- whether traceability changes,
+- whether review or reporting expectations change.
 
-## Required change questions
+## 2. Change execution records
 
-Before accepting a testing-asset change, answer:
-- What changed?
-- Why is it needed?
-- Which workflow stage is affected?
-- What could regress?
-- What validation was run?
-- Can the change be rolled back?
-- Should the change update docs or acceptance gates?
+After significant workflow changes, record:
 
----
+- files changed,
+- generated outputs,
+- validation status,
+- exceptions or deviations,
+- reviewer observations,
+- unresolved follow-up items.
 
-## Integration Testing Governance
+## 3. Rollback expectations
 
-Integration testing is especially important for multi-stage AI testing systems.
+For important prompt, template, review, or flow changes, define rollback expectations.
 
-## Why integration testing matters
-
-A single stage may look correct in isolation while the multi-stage workflow still fails because:
-- inputs/outputs no longer align,
-- metadata is missing,
-- prompt ordering assumptions break,
-- downstream validators reject upstream output,
-- reports misrepresent results.
-
-## Minimum integration test coverage
-
-Integration tests should cover at least:
-- extraction -> normalization
-- semantic rules -> maker
-- maker -> checker
-- checker -> review
-- rewrite -> checker -> report
-- benchmark baseline flow
-
-As the system evolves, integration tests should expand to include:
-- planning -> normalized BDD
-- normalized BDD -> step mapping
-- step mapping -> executable scenario contract
+Rollback notes should clarify:
+- what to revert,
+- what generated artifacts may need restoration,
+- whether documentation must also be reverted,
+- whether review artifacts remain valid after rollback.
 
 ---
 
-## Non-Functional Testing Governance
+## Integration Test Governance
 
-Testing governance should also cover operational qualities, not only correctness.
+## 1. Integration tests are required for governed workflow chains
 
-## 1. Incremental update handling
+If a workflow depends on sequence, dependency, or output handoff between stages, there should be integration tests or integration test procedures.
 
-The system should be able to validate what changed without forcing unnecessary revalidation of everything every time.
+## 2. Integration test procedures should define
 
-## 2. Parallel execution awareness
+- scenario name,
+- purpose,
+- prerequisites,
+- steps,
+- expected outputs,
+- expected review artifacts,
+- expected validation checks.
 
-If multiple runs or reviewer operations happen in parallel, the framework should guard against:
-- file collisions,
-- artifact overwrite,
-- inconsistent review state,
-- baseline confusion.
+## 3. Integration test focus areas
 
-## 3. Error recovery
+For this framework, integration governance should especially cover:
+- extraction to rule artifacts,
+- rule artifacts to maker output,
+- maker output to checker output,
+- checker output to review workflow,
+- review decisions to rewrite flow,
+- report generation from final artifacts.
 
-Recovery behavior should be explicit and visible.
+## 4. Sequential dependency awareness
 
-Recovery mechanisms should not silently hide structural failures.
-
-## 4. Performance awareness
-
-The framework should eventually observe metrics such as:
-- run duration by stage,
-- validation time,
-- report generation time,
-- retry frequency,
-- benchmark execution time.
-
-Performance does not replace correctness, but it matters for enterprise use.
+If one prompt or stage is foundational to others, integration tests should confirm sequence integrity.
 
 ---
 
-## Relationship to Existing Repo Docs
+## Incremental Update Governance
 
-## `docs/architecture.md`
-This file defines system structure.  
-Testing governance adds operational and quality discipline on top of that structure.
+## 1. Incremental update support is a quality requirement
 
-## `docs/model_governance.md`
-That file governs provider/model/prompt adoption from a platform perspective.  
-This file governs how testing workflows remain stable and reviewable when those model choices change.
+If a workflow claims to support partial updates, that claim must be testable and governed.
 
-## `docs/acceptance.md`
-That file defines phase gates.  
-This file defines the testing discipline needed to pass those gates in a repeatable way.
+## 2. Required controls
 
-## `docs/agent_guidelines.md`
-That file defines what AI agents may or may not do.  
-This file defines which testing assets and review practices those agents must respect.
+Incremental update support should include:
+- change detection,
+- changed-scope tracking,
+- update logging,
+- validation of updated subset,
+- traceability preservation.
 
-## `README.md`
-The README should remain concise and point readers here rather than duplicating detailed testing governance.
+## 3. Risk
+
+Incremental updates can silently create mixed-version artifacts.  
+Testing governance must therefore ensure that updated and untouched outputs remain coherent together.
 
 ---
 
-## Suggested Future Companion Documents
+## Parallel Execution Governance
 
-As the system grows, testing governance may be complemented by:
+## 1. Parallel execution must preserve correctness
 
+If tasks are processed in parallel, governance must ensure that:
+- identifiers remain unique,
+- outputs do not overwrite each other,
+- logging remains attributable,
+- traceability remains intact,
+- stable source anchors remain attributable,
+- failure isolation works as expected.
+
+## 2. Parallel execution checks
+
+Where relevant, validate:
+- task partitioning,
+- output isolation,
+- progress tracking,
+- race condition avoidance,
+- resource management behavior.
+
+---
+
+## Error Recovery Governance
+
+## 1. Recovery must be bounded and observable
+
+Automatic recovery is allowed only if:
+- recovery logic is documented,
+- recovery attempts are logged,
+- recovered outputs remain traceable,
+- unrecoverable cases fail visibly.
+
+## 2. Recovery records
+
+Recovery logs should capture:
+- error type,
+- stage,
+- recovery action,
+- success/failure,
+- time spent,
+- impact on final outputs.
+
+## 3. Governance rule
+
+Recovery should never hide that an error occurred.
+
+---
+
+## Performance and Operational Metrics
+
+Testing governance should include metrics beyond correctness.
+
+## Minimum recommended metrics
+
+### Execution metrics
+- start time
+- end time
+- total duration
+- per-stage duration
+
+### Resource metrics
+- memory use where measurable
+- CPU use where measurable
+- I/O heavy operation timing where relevant
+
+### Quality metrics
+- artifacts generated
+- schema pass rate
+- traceability completeness
+- stable source-anchor completeness where applicable
+- review completion rate
+- checker instability rate
+
+### Error metrics
+- error count
+- error category distribution
+- recovery attempt count
+- recovery success rate
+
+### Update metrics
+- changed scope count
+- update duration
+- change detection accuracy where measured
+
+### Parallel metrics
+- number of concurrent tasks
+- parallel execution duration
+- resource utilization observations
+
+These do not all need to be implemented immediately, but they should remain part of the long-term testing governance model.
+
+---
+
+## Minimum Governance Artifacts
+
+A governed testing workflow should be able to produce or preserve, where relevant:
+
+- run summaries,
+- review summaries,
+- confidence summaries,
+- failure analyses,
+- drift comparison outputs,
+- checker instability summaries,
+- change impact notes,
+- rollback notes,
+- integration test evidence,
+- audit-style execution records.
+
+The exact repo structure may evolve, but these artifacts should remain repo-readable and reviewable.
+
+---
+
+## Recommended Repository Additions
+
+To fully absorb the testing perspective into the repo, the following patterns are recommended.
+
+## 1. Testing governance document
+This document itself should exist as:
+- `docs/testing_governance.md`
+
+## 2. Optional prompt lifecycle document
+If the repo formalizes a stable prompt inventory, add:
 - `docs/prompt_lifecycle.md`
-- `docs/review_framework.md`
-- `docs/failure_taxonomy.md`
-- `docs/benchmark_policy.md`
 
-These should be created only if the current doc becomes too large or if those topics need deeper operational detail.
+That document may include:
+- prompt inventory,
+- prompt IDs,
+- dependencies,
+- output expectations,
+- lifecycle state,
+- deprecation rules.
+
+## 3. Review template organization
+Review templates may be organized by category and workflow type to improve consistency.
+
+## 4. Output naming conventions
+Prompt- or stage-specific output naming conventions should be documented if they are intended to be stable operating rules.
 
 ---
 
-## Review Questions for Testing Governance
+## What Should Be Merged into Existing Docs
 
-Use these questions when reviewing major workflow or prompt changes:
+This testing-governance perspective should strengthen, not replace, the existing repo docs.
 
-- Does this change alter a governed testing asset?
-- Is the prompt or review structure versioned?
-- Are pre-run and post-run validations still sufficient?
-- Could this introduce silent degradation?
-- Is confidence reporting affected?
-- Does failure analysis need new categories?
-- Are integration tests still valid?
-- Can the change be rolled back safely?
+### Into `docs/architecture.md`
+Add or preserve emphasis on:
+- pre-run and post-run validation,
+- stable source anchors,
+- incremental and parallel execution as governed quality concerns,
+- prompt/template assets as governed artifacts.
 
-If these questions cannot be answered clearly, the change is not yet governance-ready.
+### Into `docs/acceptance.md`
+Add or preserve:
+- confidence evidence,
+- failure analysis evidence,
+- integration test evidence,
+- rollback verification,
+- stable source-anchor evidence where applicable.
+
+### Into `docs/model_governance.md`
+Add or preserve:
+- prompt dependency awareness,
+- prompt collection completeness expectations,
+- prompt change impact analysis.
+
+### Into `docs/agent_guidelines.md`
+Add or preserve:
+- no silent prompt deletion,
+- no silent prompt renumbering,
+- no silent dependency breakage,
+- mandatory update record behavior for governed prompt assets.
+
+---
+
+## AI Agent Rules for Testing Governance
+
+Any AI coding agent working with test-governed assets must follow these rules.
+
+### 1. Do not silently delete governed prompts or templates
+If a governed prompt or review template is removed, the change must be explicit, justified, and documented.
+
+### 2. Do not silently renumber prompt sets
+Prompt identity must remain stable unless a reviewed migration is performed.
+
+### 3. Do not break dependency chains without documentation
+If a prompt or workflow stage changes upstream or downstream dependencies, that must be recorded.
+
+### 4. Do not skip update records for governed test assets
+Changes to governed prompt sets, review templates, or validation templates require traceable update notes.
+
+### 5. Do not treat review, confidence, or failure analysis outputs as optional when a governed workflow requires them
+If a workflow contract expects them, they are part of completion.
+
+---
+
+## Review Questions
+
+Use these questions when reviewing testing-governance changes:
+
+- Does this change preserve governed prompt set integrity?
+- Are update records and impacts documented?
+- Are pre-run and post-run validations still clear?
+- Does the change weaken review rigor?
+- Does it reduce confidence visibility?
+- Does it remove failure-analysis capability?
+- Does it weaken rollback clarity?
+- Does it affect integration-test sequencing?
+- Does it preserve incremental and parallel execution expectations where relevant?
+- Does it preserve stable source-anchor handling where applicable?
 
 ---
 
 ## Summary
 
-Testing governance is the quality-control layer that complements the repo's architecture and roadmap.
+Testing governance adds the operational quality layer that architecture alone cannot provide.
 
-The developer-facing documents define how the system is built and evolves.  
-This document defines how testing assets, review, validation, confidence, and failure handling are governed so that the system remains trustworthy as it grows.
+In this repository:
+- architecture defines the system skeleton,
+- model governance controls probabilistic dependencies,
+- acceptance defines gates,
+- agent guidelines define implementation discipline,
+- and testing governance ensures that prompts, review, validation, confidence, failure analysis, and operational test quality remain controlled.
 
-The intended end state is not just an AI-enabled testing pipeline, but a governed enterprise AI testing framework where:
-- architecture is explicit,
-- artifacts are traceable,
-- prompts are controlled,
-- reviews are structured,
-- validation is repeatable,
-- failures are learned from,
-- and model changes do not silently erode testing quality.
+This is the layer that helps turn a promising AI testing framework into a system that test teams can actually trust and operate.

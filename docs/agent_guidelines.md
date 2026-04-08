@@ -1,22 +1,29 @@
-# AI Agent Contribution Guidelines
+# AI Agent Guidelines
 
 ## Purpose
 
 This document defines how AI coding agents are allowed to operate in this repository.
 
-The goal is not to restrict useful automation.
-The goal is to make AI-assisted development safe, reviewable, and aligned with the roadmap, acceptance gates, and model governance rules.
+It exists to ensure that AI-assisted development remains:
+
+- safe,
+- traceable,
+- phase-aligned,
+- schema-respecting,
+- benchmark-governed,
+- and reviewable by humans.
 
 This document applies to any AI agent that:
-- writes or edits code,
-- modifies prompts,
+- writes code,
+- edits prompts,
 - changes schemas,
-- updates docs,
-- adds tests,
+- updates tests,
+- modifies docs,
 - changes model configuration,
-- or generates artifacts intended for use in the repo.
+- or proposes workflow changes.
 
 This document should be read together with:
+
 - `docs/roadmap.md`
 - `docs/acceptance.md`
 - `docs/model_governance.md`
@@ -24,411 +31,464 @@ This document should be read together with:
 
 ---
 
-## Core Principles
+## Guiding Principle
 
-### 1. The agent works within contracts
+AI agents may accelerate implementation, but they must not become an uncontrolled source of architecture drift.
 
-The agent must treat schemas, module boundaries, benchmark gates, and acceptance criteria as source-of-truth constraints.
+Agents are allowed to help implement the roadmap.  
+Agents are not allowed to redefine the roadmap implicitly through code changes.
 
-The agent may not assume that a plausible change is acceptable unless it also satisfies the documented contract.
+## Task Session Protocol
 
-### 2. The agent may assist implementation, not redefine scope
+For any non-trivial implementation request, an agent should work in this order:
 
-The roadmap defines scope.
-The agent may accelerate scoped work, but it may not silently pull later-phase work into the current phase.
+1. identify the roadmap phase and task ID,
+2. read the task input contract,
+3. read the task acceptance criteria,
+4. check whether prerequisite tasks or earlier phase gates have been satisfied,
+5. implement only the scoped task work,
+6. produce the required output artifacts,
+7. end with a structured self-evaluation.
 
-### 3. Structured systems must stay structured
+If any listed prerequisite, contract input, or required gate is missing, the agent should stop and surface the dependency rather than fabricate inputs.
 
-If the pipeline currently depends on structured artifacts, the agent must preserve structured contracts.
+### Required session closeout
 
-Free-form output must not replace schema-governed output without an explicit architectural decision.
+A substantial implementation session should end with a self-evaluation against the task acceptance criteria using a status such as:
+- PASS
+- PARTIAL
+- FAIL
 
-### 4. Deterministic checks take priority where possible
-
-If a validation or rule can be implemented deterministically, the agent must prefer that over adding another model-dependent judgment layer.
-
-### 5. No silent changes
-
-Any change that affects behavior, contract, prompts, model defaults, or acceptance criteria must be clearly documented.
-
----
-
-## What the Agent Is Allowed to Do
-
-The agent may:
-
-- implement roadmap items that are already approved,
-- add tests, fixtures, and CI checks,
-- improve schema validation,
-- improve traceability,
-- add benchmark coverage,
-- improve logging and observability,
-- refactor code without changing behavior,
-- improve docs when the docs remain aligned with actual implementation,
-- add deterministic validation modules,
-- add provider adapters behind existing abstractions,
-- improve reporting without breaking artifact contracts.
-
-The agent may also generate implementation suggestions or code drafts for:
-- planner modules,
-- BDD normalization,
-- step binding suggestions,
-- review export/import logic,
-- governance automation,
-
-but only when those changes remain inside the currently approved roadmap phase or are explicitly approved.
+If any criterion is FAIL, the work should not be described as complete.
 
 ---
 
-## What the Agent Must Not Do
+## Core Working Rules
 
-The agent must not:
+### 1. Work against explicit contracts
 
-- change artifact schemas silently,
-- bypass validation gates,
-- replace structured JSON with free-form text,
-- switch default models or prompts without governance updates,
-- hardcode provider-specific behavior into business logic,
-- merge future-phase scope into current-phase work without approval,
-- declare work complete without evidence,
-- add hidden fallback logic that masks invalid outputs,
-- silently weaken acceptance criteria,
-- invent undocumented pipeline stages as if they already existed.
+An agent must prefer existing contracts over inferred intent.
 
-The agent must also not treat "the model usually does this correctly" as an acceptable substitute for explicit validation.
-
----
-
-## Required Workflow for Any Meaningful Change
-
-Any meaningful change must follow this workflow.
-
-### Step 1: Identify scope
-
-Before making a change, the agent must determine:
-- which roadmap phase the change belongs to,
-- which modules are affected,
-- whether the change impacts schemas, prompts, models, reports, or acceptance criteria.
-
-### Step 2: Check contracts
-
-The agent must review relevant contracts before editing:
-- schema definitions,
-- acceptance criteria,
-- model governance rules,
+Contracts include:
+- schemas,
 - module boundaries,
-- existing tests and fixtures.
+- documented pipeline stages,
+- phase scope,
+- acceptance criteria,
+- model governance rules.
 
-### Step 3: Implement with minimal scope
+If a documented contract conflicts with an inferred improvement idea, the documented contract wins unless a human explicitly changes it.
 
-The agent should prefer the smallest change that satisfies the intended requirement.
+### 2. Do not treat current behavior as automatically correct
 
-The agent should not combine unrelated refactors with behavior changes unless explicitly requested.
+Existing code may contain prototype assumptions.  
+Agents should preserve behavior only when that behavior is consistent with:
+- repo docs,
+- schemas,
+- acceptance gates,
+- roadmap phase boundaries.
 
-### Step 4: Add or update evidence
+### 2A. Durable behavior must live in repo-readable files
 
-If the behavior changes, the agent must also update:
+AI agents must not rely on hidden chat context as a substitute for repository contracts.
+
+If a workflow depends on:
+- prompts,
+- config,
+- schemas,
+- task contracts,
+- benchmark rules,
+- or acceptance requirements,
+
+those dependencies should live in version-controlled repo-readable files rather than being left implicit in a conversation.
+
+### 3. Prefer minimal, auditable changes
+
+Agents should prefer:
+- small scoped changes,
+- isolated refactors,
+- explicit tests,
+- documented migration notes.
+
+Avoid broad, implicit rewrites unless the change is explicitly requested and acceptance criteria are updated.
+
+### 4. Keep structured outputs structured
+
+If a module currently emits structured JSON or schema-governed artifacts, an agent must not replace that with free-form text output unless the contract is intentionally revised.
+
+### 5. Deterministic validation takes priority
+
+If something can be validated deterministically, the agent should prefer deterministic validation over additional LLM judgment.
+
+---
+
+## What Agents May Do
+
+Agents may:
+
+- add or update tests,
+- implement roadmap items inside the active phase,
+- add schema validation,
+- improve traceability,
+- add benchmark tooling,
+- improve CI,
+- improve error handling,
+- improve docs,
+- add structured metadata,
+- improve provider abstractions,
+- improve report generation,
+- add migration notes when contracts change.
+
+Agents may also propose, but not silently force:
+- schema extensions,
+- prompt updates,
+- new benchmark cases,
+- stricter acceptance gates,
+- internal refactors.
+
+---
+
+## What Agents Must Not Do
+
+Agents must not:
+
+- silently change artifact contracts,
+- silently switch default models,
+- bypass schemas,
+- hardcode provider-specific behavior into business modules,
+- introduce undocumented prompt changes,
+- merge later-phase scope into earlier-phase work,
+- remove tests or benchmarks without replacement,
+- replace deterministic checks with LLM-only logic,
+- hide failures by swallowing validation errors,
+- silently coerce malformed structured output into valid artifacts.
+
+Agents must not expand the architectural scope of a task just because it seems beneficial.
+
+---
+
+## Phase Discipline
+
+Agents must respect the roadmap phase boundaries.
+
+### Short-term phase work
+Allowed focus:
+- schema validation,
+- rule validation,
+- CI,
+- prompt metadata,
+- artifact metadata,
+- checker stability visibility,
+- governance docs.
+
+Not allowed unless explicitly requested:
+- hosted review platform,
+- execution engine,
+- step definition integration,
+- full planning platform.
+
+### Mid-term phase work
+Allowed focus:
+- multi-document ingestion,
+- planner stage,
+- normalized BDD contract,
+- traceability,
+- review package exchange,
+- richer dashboards.
+
+Not allowed unless explicitly requested:
+- full enterprise hosted platform,
+- unrestricted execution automation,
+- cross-team production platform assumptions.
+
+### Long-term phase work
+Allowed focus:
+- step binding,
+- execution-ready contracts,
+- deterministic oracle framework,
+- hosted review service,
+- enterprise observability.
+
+Not allowed:
+- free-form autonomous behavior without approval gates,
+- undocumented execution logic.
+
+If a requested change crosses phase boundaries, the agent must label that clearly in its change summary.
+
+---
+
+## Required Change Behavior
+
+### 1. Explain the intended scope of the change
+For every non-trivial change, the agent should be able to state:
+- what is being changed,
+- which roadmap task or equivalent work unit it maps to,
+- why it belongs to the current phase,
+- which acceptance items it addresses,
+- whether earlier phase gates or prerequisites are already satisfied.
+
+### 2. Update related artifacts when needed
+If a change affects a contract, the agent must update:
+- schema,
 - tests,
-- fixtures,
 - docs,
-- benchmark references,
-- acceptance references where applicable.
+- acceptance references,
+- migration notes if needed.
 
-### Step 5: Summarize the change
+### 3. Preserve backward clarity
+If backward compatibility is broken, the agent must make that explicit.
 
-The final output of the change should make clear:
-- what changed,
-- why it changed,
-- which files were affected,
-- what evidence supports it,
-- what remains out of scope.
+### 4. Keep failure visible
+If validation fails, the pipeline should fail visibly.  
+Agents must not hide structural problems just to keep flows passing.
 
 ---
 
-## Required Workflow for Schema Changes
+## Required Output for AI-Generated Changes
 
-Artifact schemas are high-risk changes.
+For any substantial change, the agent should provide a structured change summary containing:
 
-If the agent changes any schema or artifact contract, it must also update:
-- schema files,
-- artifact fixtures,
-- validation tests,
-- migration notes,
-- docs that describe the artifact,
-- acceptance references if phase gates depend on that artifact.
+- **Change summary**
+- **Why this change is needed**
+- **Roadmap phase**
+- **Acceptance items addressed**
+- **Files added or changed**
+- **Tests added or run**
+- **Schema or prompt impact**
+- **Known limitations**
+- **Rollback considerations**
 
-### Schema change checklist
-
-Before considering a schema change complete, confirm:
-- Is the new schema versioned?
-- Are valid fixtures updated?
-- Are invalid fixtures updated?
-- Does CI validate the new contract?
-- Are downstream consumers reviewed?
-- Is migration impact documented?
-
-If the answer to any of these is no, the schema change is incomplete.
+This can be included in:
+- PR descriptions,
+- patch summaries,
+- implementation notes,
+- or structured change logs.
 
 ---
 
-## Required Workflow for Prompt Changes
+## Schema Rules for Agents
 
-Prompts are governed assets.
+### 1. No schema change without coordinated updates
+If an artifact schema changes, the agent must update:
+- schema definitions,
+- fixtures,
+- validations,
+- docs,
+- acceptance references.
 
-If the agent changes a prompt, it must also update:
-- prompt version,
-- prompt change summary,
-- linked benchmark evidence,
-- prompt ownership metadata if required,
-- docs if the operational behavior changed.
+### 2. Do not widen enums casually
+Adding a new enum value changes downstream interpretation and must be treated as a governed change.
 
-### Prompt change checklist
+### 3. Do not remove required fields without migration support
+Any weakening of a schema must be explicitly justified and documented.
 
-Before considering a prompt change complete, confirm:
-- Is the prompt version updated?
-- Is benchmark evidence available?
-- Are output diffs reviewed?
-- Is rollback straightforward?
-- Is any new failure mode introduced?
+### 4. Prefer additive evolution
+When possible, extend contracts in backward-tolerant ways.
 
 ---
 
-## Required Workflow for Model Changes
+## Prompt Rules for Agents
 
-Model changes include:
-- switching providers,
-- switching model names,
-- switching default models,
-- changing decoding settings that materially affect behavior.
+### 1. Prompts must be versioned
+No agent may change a production prompt without:
+- updating prompt version,
+- recording the change,
+- linking benchmark evidence.
 
-If the agent makes or proposes a model change, it must also include:
+### 2. Prompt edits are governed changes
+A prompt change is not “just text”; it is a behavioral change.
+
+### 3. Do not optimize prompts only for a narrow happy path
+Prompt changes must be evaluated against benchmark coverage, not only an example that happens to improve.
+
+---
+
+## Model Rules for Agents
+
+### 1. Do not switch default model behavior silently
+Any default model change must update:
+- config,
+- docs,
 - benchmark evidence,
-- compatibility notes,
-- rollback notes,
-- affected module list,
-- governance updates if defaults change.
+- rollback notes.
 
-### Model change checklist
+### 2. Keep provider quirks isolated
+Provider-specific logic belongs in adapter or strategy layers.
 
-Before considering a model change complete, confirm:
-- Does it pass benchmark gates?
-- Does it preserve structured output requirements?
-- Does checker stability remain within allowed range?
-- Is provider-specific behavior isolated?
-- Is rollback documented?
-
----
-
-## Required Workflow for Acceptance-Critical Changes
-
-If a change affects a roadmap acceptance item, the agent must explicitly link the change to:
-- the roadmap phase,
-- the acceptance item,
-- the evidence produced,
-- any remaining limitations.
-
-A code change is not complete merely because it compiles or looks reasonable.
-It must satisfy the acceptance gate it claims to advance.
+### 3. Prefer compatibility over cleverness
+Do not rely on undocumented provider quirks as if they were stable platform features.
 
 ---
 
 ## Testing Rules for Agents
 
-### 1. Every meaningful change requires tests or explicit rationale
+### 1. Every feature requires a testable acceptance outcome
+If a change cannot be tied to a test or acceptance check, it is incomplete.
 
-If a change affects behavior, the agent must add or update tests.
+### 2. Do not remove failing tests to make CI green
+Fix root causes or explicitly document why a test is being replaced.
 
-If tests are not added, the agent must explain why not.
+### 3. Add benchmark cases when fixing important regressions
+If a defect reveals a missing benchmark scenario, add it.
 
-### 2. Prefer narrow tests plus one flow check
-
-The agent should usually add:
-- focused tests for changed logic,
-- plus at least one flow-level check if the change affects pipeline behavior.
-
-### 3. Preserve benchmark relevance
-
-If a change affects model-facing logic, benchmark or baseline coverage should be reviewed and updated when necessary.
-
-### 4. Do not rely on manual inspection alone
-
-Manual reading of generated outputs is useful, but it is not sufficient evidence for completion.
+### 4. Protect critical paths first
+Priority test coverage should protect:
+- schema validation,
+- rule validation,
+- maker output validity,
+- checker output validity,
+- report generation,
+- benchmark reproducibility.
 
 ---
 
 ## Documentation Rules for Agents
 
-The agent must update docs when:
-- workflow changes,
-- schema changes,
-- governance rules change,
-- acceptance gates change,
-- model defaults change,
-- new required developer steps are introduced.
+### 1. Update docs when behavior changes
+If a workflow, schema, benchmark rule, or model policy changes, docs must be updated in the same change.
 
-Docs must describe real behavior, not desired future behavior, unless clearly labeled as roadmap content.
+### 2. Prefer explicit documentation over tribal knowledge
+If an agent depends on an operational rule, that rule should live in the repo.
 
----
-
-## Phase Discipline Rules
-
-The roadmap is phase-based. The agent must respect that.
-
-### Short-term phase
-
-The agent may focus on:
-- schema validation,
-- extraction validation,
-- CI,
-- metadata capture,
-- checker stability visibility,
-- governance docs.
-
-The agent must not quietly expand short-term work into:
-- full planner systems,
-- full hosted collaboration platforms,
-- full execution engines,
-- full step integration.
-
-### Mid-term phase
-
-The agent may focus on:
-- multi-document ingestion,
-- planning layer,
-- BDD normalization,
-- traceability,
-- review exchange and merge,
-- quality dashboards.
-
-The agent must not quietly expand mid-term work into:
-- unrestricted enterprise execution orchestration,
-- production multi-tenant governance layers beyond approved scope.
-
-### Long-term phase
-
-The agent may focus on:
-- step definition mapping,
-- executable scenario contracts,
-- deterministic oracle layers,
-- hosted review service,
-- enterprise observability.
-
-The agent must still preserve schema and governance discipline.
+### 3. Keep docs aligned with the active roadmap phase
+Do not document aspirational behavior as if it already exists.
 
 ---
 
-## Preferred Engineering Behaviors
+## Safe Refactoring Rules
 
-The agent should prefer:
-- small, reviewable commits,
-- explicit interfaces,
-- stable contracts,
-- deterministic validation,
-- machine-readable outputs,
-- simple rollback paths,
-- visible failure over hidden coercion,
-- narrow provider adapters,
-- traceable artifacts.
+Agents may refactor, but safe refactoring means:
 
-The agent should avoid:
-- broad speculative refactors,
-- hidden heuristics,
-- undocumented fallback behavior,
-- mixing roadmap phases,
-- changing multiple contracts at once without need,
-- overfitting to one provider.
+- no silent behavior change,
+- no contract change without docs/tests,
+- no phase scope expansion,
+- no hidden provider coupling,
+- no removal of observability.
+
+If a refactor changes behavior intentionally, it must be labeled as behavior-changing work, not hidden inside cleanup.
 
 ---
 
-## Output Requirements for Agent-Generated Changes
+## Failure Handling Rules
 
-When the agent proposes or completes a change, the summary should include:
-- **Scope**
-- **Roadmap phase**
-- **Files changed**
-- **Behavior change**
-- **Schema impact**
-- **Prompt/model impact**
-- **Tests added or updated**
-- **Acceptance items addressed**
-- **Known limitations**
-- **Rollback notes** if applicable
+### 1. Surface validation failures clearly
+Schema and contract failures must remain visible.
 
-This keeps changes reviewable by humans and comparable across model providers.
+### 2. Do not silently auto-heal structural corruption
+Bounded recovery is allowed only if:
+- documented,
+- test-covered,
+- logged,
+- and metadata captures that recovery happened.
 
----
-
-## Red Flags That Require Human Review
-
-The agent should not proceed without explicit human review when:
-- an artifact schema must change,
-- a default model must change,
-- a prompt causes materially different outputs,
-- acceptance criteria would need to be weakened,
-- a fallback is proposed for invalid structured outputs,
-- execution behavior becomes less deterministic,
-- review decisions could become less auditable,
-- traceability fields are removed or weakened.
+### 3. Prefer explicit fallback strategies
+If a model fails or a provider behaves differently, fallback logic must be documented and observable.
 
 ---
 
-## Escalation Guidelines
+## Review Expectations for Agent Changes
 
-If the agent detects uncertainty, it should prefer escalation over silent assumption.
+A human reviewer should be able to answer the following after reading an agent-generated change:
 
-Examples:
-- unclear schema ownership,
-- ambiguous acceptance gate interpretation,
-- unclear roadmap phase fit,
-- conflicting provider behaviors,
-- missing migration strategy.
+- What changed?
+- Why was it changed?
+- Which roadmap phase does it belong to?
+- Which acceptance criteria does it satisfy?
+- Did it alter a schema, prompt, or model behavior?
+- Were tests and docs updated?
+- Can it be rolled back safely?
 
-The correct behavior is to surface the uncertainty clearly, not to hide it behind broad code changes.
-
----
-
-## Minimal Definition of Done for Agent Work
-
-A change should not be considered done unless:
-- the scope is clear,
-- the contract is preserved or intentionally versioned,
-- tests or evidence exist,
-- docs are updated if needed,
-- acceptance impact is stated,
-- rollback is considered for risky changes.
+If these answers are not clear, the change is not review-ready.
 
 ---
 
-## Suggested Labels or Change Categories
+## Escalation Conditions
 
-If the repo later uses labels, the following categories are recommended:
-- `phase-short-term`
-- `phase-mid-term`
-- `phase-long-term`
-- `schema-change`
-- `prompt-change`
-- `model-change`
-- `benchmark-impact`
-- `acceptance-impact`
-- `docs-only`
-- `deterministic-validation`
-- `review-required`
+An agent should flag a change for explicit human review if it involves:
 
-These labels are optional, but they help keep agent-generated work visible and governable.
+- schema contract changes,
+- new enum values,
+- prompt behavior changes,
+- default model changes,
+- benchmark threshold changes,
+- rollback policy changes,
+- cross-phase architecture expansion,
+- missing prerequisite tasks or missing earlier phase gate sign-off,
+- new execution semantics,
+- review workflow changes with merge implications.
+
+---
+
+## Suggested Working Flow for Agents
+
+Recommended sequence for non-trivial changes:
+
+1. identify the roadmap phase,
+2. identify the acceptance criteria,
+3. locate affected contracts,
+4. implement minimal scoped change,
+5. update tests,
+6. update docs,
+7. run or define benchmark evidence,
+8. produce structured change summary,
+9. end with PASS / PARTIAL / FAIL self-evaluation.
+
+This sequence helps prevent uncontrolled drift.
+
+---
+
+## Anti-Patterns
+
+Agents should explicitly avoid these anti-patterns:
+
+- “The current model seemed better in my quick test, so I switched the default.”
+- “The schema was restrictive, so I relaxed it without updating downstream logic.”
+- “The JSON parser was failing, so I accepted malformed output automatically.”
+- “The roadmap did not mention this, but I implemented a bigger platform feature while I was here.”
+- “The test was flaky, so I removed it.”
+- “The prompt changed, but no version bump was needed.”
+- “The docs were outdated, so I ignored them instead of updating them.”
+
+---
+
+## Required Self-Evaluation
+
+For any substantial implementation task, an agent should finish with a structured self-evaluation against the relevant acceptance criteria.
+
+The self-evaluation should:
+- list each relevant acceptance item,
+- mark it as PASS, PARTIAL, or FAIL,
+- provide short reasoning,
+- identify missing prerequisites or blockers if any remain.
+
+This requirement is especially important when different LLM APIs are used, because it makes completion reviewable without relying on hidden conversation state.
+
+---
+
+## Minimum Definition of Done for Agent Work
+
+Agent-generated work is only done when all of the following are true:
+
+- scope is clear,
+- roadmap phase is identified,
+- acceptance criteria are addressed,
+- tests are present or updated,
+- docs are updated,
+- schema/prompt/model impacts are explicit,
+- rollback impact is understood,
+- a self-evaluation has been produced.
 
 ---
 
 ## Summary
 
-AI coding agents can accelerate this repository significantly, but only if they operate inside explicit contracts.
+AI agents are allowed to accelerate this repository, but only inside governed boundaries.
 
-Agents should:
-- preserve schemas,
-- respect roadmap phases,
-- attach evidence,
-- keep model changes governed,
-- prefer deterministic validation where possible,
-- and avoid silent behavior changes.
+The repository should evolve through:
+- explicit contracts,
+- phase discipline,
+- deterministic validation,
+- benchmark-governed model use,
+- and auditable change summaries.
 
-The purpose of this document is not to slow development down.
-It is to make multi-model, AI-assisted development reliable enough for an enterprise AI testing roadmap.
+Agent speed is valuable only when it preserves architectural clarity and trust.

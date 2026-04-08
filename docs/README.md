@@ -1,244 +1,229 @@
 # LME-Testing
 
-A document-driven AI testing framework for extracting rules from source documents, generating structured BDD-style test scenarios, reviewing coverage, and evolving toward enterprise-grade AI-assisted testing.
-
-## Status
-
-This repository is currently a **document-driven test design system**, not yet a full execution platform.
-
-Current pipeline:
-
-`source documents -> extraction -> atomic rules -> semantic rules -> maker -> checker -> review-session -> rewrite -> checker -> report`
-
-Today, the project is focused on:
-
-- extracting structured rules from source documents,
-- normalizing rules into governed artifacts,
-- generating BDD-style test scenarios,
-- checking scenario quality and coverage,
-- supporting human review and rewrite,
-- producing readable reports.
-
-Planned future layers include:
-
-- multi-document ingestion,
-- test planning,
-- normalized BDD contracts,
-- step definition integration,
-- execution-ready scenario contracts,
-- deterministic runtime assertions,
-- hosted collaborative review.
-
-See [`docs/roadmap.md`](./roadmap.md) for the phased plan.
-
----
+Document-driven AI test design prototype for rule extraction, scenario generation, review, and reporting.
 
 ## What This Project Is
 
-LME-Testing is intended to help teams move from document-based requirements to structured, reviewable test design artifacts.
+LME-Testing is a document-driven AI testing prototype that transforms source documents into structured testing artifacts.
 
-The architecture is built around governed transformations:
+Current workflow:
 
-- source documents
-- extracted rule artifacts
-- semantic rule artifacts
-- generated scenario artifacts
-- review artifacts
-- reports
+`source docs -> extraction -> atomic rules -> semantic rules -> maker -> checker -> human review -> rewrite -> report`
 
-This project is especially suited for workflows where:
+The system is currently optimized for:
 
-- rules originate in specifications, rulebooks, compliance docs, API docs, or business workflow documents,
-- teams want traceable AI-assisted test design,
-- BDD-style outputs are useful,
-- model-driven generation must still be governed by schemas, validation, and review.
-
----
+- extracting structured rules from documents,
+- normalizing those rules into governed artifacts,
+- generating BDD-style test scenarios,
+- assessing scenario quality and coverage,
+- supporting human review and rewrite,
+- producing structured reports.
 
 ## What This Project Is Not Yet
 
 This repository is **not yet**:
 
-- a general-purpose runtime execution framework,
-- a fully hosted multi-user review system,
-- a complete step-definition-aware BDD execution engine,
-- an autonomous enterprise testing platform.
+- a full test execution framework,
+- a runtime orchestration platform,
+- a hosted multi-user review product,
+- a complete step-definition-aware BDD execution engine.
 
-Those are part of the longer-term roadmap, not current functionality.
+Those are part of the longer-term roadmap, not current baseline capabilities.
 
 ---
 
-## Current Core Workflow
+## Current Architecture at a Glance
 
-The current system is organized around this design loop:
+The current design loop is:
 
-1. extract source rules from documents,
-2. normalize into `atomic_rule`,
-3. normalize into `semantic_rule`,
-4. generate scenarios through `maker`,
-5. evaluate scenario quality and coverage through `checker`,
-6. review outputs through human review session,
-7. rewrite targeted results,
-8. generate reports.
+1. ingest source documents,
+2. extract `atomic_rule` artifacts,
+3. normalize into `semantic_rule` artifacts,
+4. generate candidate scenarios with `maker`,
+5. evaluate scenario quality and coverage with `checker`,
+6. collect human review decisions,
+7. regenerate targeted outputs through `rewrite`,
+8. produce final reports.
 
-This separation is intentional.  
-The project treats artifacts as governed contracts rather than ad hoc prompt outputs.
+This repo is centered on governed artifacts and phased validation rather than free-form prompt chaining.
+
+---
+
+## Current Priorities
+
+The current near-term priority is to stabilize the existing design pipeline so it can safely evolve across different LLM APIs.
+
+That means focusing on:
+
+- schema governance,
+- rule validation,
+- stable source-anchor traceability,
+- prompt and model governance,
+- CI and benchmark gates,
+- checker stability visibility,
+- reviewable artifact contracts.
+
+See the roadmap for phased details.
 
 ---
 
 ## Repository Documentation
 
-The repository is governed through the documents in `docs/`:
+Project documentation is organized under `docs/`.
 
-- [`docs/roadmap.md`](./roadmap.md) — phased short-term, mid-term, and long-term upgrade plan
-- [`docs/acceptance.md`](./acceptance.md) — acceptance criteria, release gates, and evidence requirements
-- [`docs/model_governance.md`](./model_governance.md) — model API governance, prompt versioning, benchmark and rollout rules
-- [`docs/agent_guidelines.md`](./agent_guidelines.md) — rules for AI coding agents working in the repo
-- [`docs/architecture.md`](./architecture.md) — system architecture, module boundaries, artifact contracts, deterministic vs LLM-assisted responsibilities
+### Core documents
 
-These docs are intended to help both:
-- human developers,
-- AI coding agents working under controlled constraints.
+- `docs/roadmap.md`  
+  Phased short-term, mid-term, and long-term upgrade plan.
 
----
+- `docs/implementation_plan.md`  
+  Task-oriented execution plan with input/output contracts, validation expectations, and task boundaries.
 
-## Architecture Overview
+- `docs/acceptance.md`  
+  Acceptance criteria and release gates for each roadmap phase.
 
-At a high level, the repository is a **document-to-test-design transformation system**.
+- `docs/model_governance.md`  
+  Rules for model APIs, prompt versioning, regression baselines, rollout, and rollback.
 
-Current artifact flow:
+- `docs/agent_guidelines.md`  
+  Operating rules for AI coding agents contributing to this repo.
 
-`source documents -> extraction -> atomic rules -> semantic rules -> maker output -> checker output -> human review -> report`
+- `docs/architecture.md`  
+  System-level architecture, artifact contracts, module boundaries, traceability, and deterministic vs LLM-assisted responsibilities.
 
-Architectural principles:
+- `docs/testing_governance.md`  
+  Review, confidence, failure analysis, validation, operational metrics, and test-governance rules.
 
-- artifacts are first-class contracts,
-- upstream rule quality matters more than downstream cleverness,
-- structured outputs remain structured,
-- deterministic validation must constrain LLM-assisted steps,
-- traceability must be preserved through the pipeline.
+- `docs/prompt_lifecycle.md`  
+  Prompt inventory, dependency, versioning, deprecation, and rollback rules.
 
-See [`docs/architecture.md`](./architecture.md) for the full architecture description.
-
----
-
-## Model Governance
-
-This repository is designed to work with evolving LLM APIs, but model usage must remain governed.
-
-Core governance expectations:
-
-- prompts are versioned artifacts,
-- model outputs are treated as probabilistic,
-- generated artifacts must record metadata,
-- benchmark evidence is required for model or prompt changes,
-- rollback must remain possible,
-- provider-specific behavior must stay isolated behind adapters or strategy layers.
-
-See [`docs/model_governance.md`](./model_governance.md) for details.
+- `docs/step_integration_plan.md`  
+  BDD style learning, step registry, step mapping, gap analysis, and execution-ready handoff planning.
 
 ---
 
-## Acceptance and Phase Gates
+## Roadmap Summary
 
-The roadmap is phase-based and every phase has explicit acceptance criteria.
-
-No major feature is considered complete unless it includes:
-
-- clear acceptance evidence,
-- tests or benchmark support,
-- contract alignment,
-- documentation updates where needed.
-
-See [`docs/acceptance.md`](./acceptance.md) for the full release and acceptance rules.
-
----
-
-## AI Agent Contribution Policy
-
-AI coding agents are welcome in this repository, but must work under repo contracts.
-
-Key expectations:
-
-- do not silently change schemas,
-- do not silently switch default models,
-- do not bypass acceptance criteria,
-- do not replace deterministic checks with LLM-only behavior,
-- do not expand roadmap scope implicitly,
-- do not hide failures to keep flows passing.
-
-See [`docs/agent_guidelines.md`](./agent_guidelines.md).
-
----
-
-## Suggested Near-Term Priorities
-
-The near-term focus of the repo is to stabilize the current design pipeline before expanding architectural scope.
-
-Priority areas include:
-
-- schema-governed rule validation,
-- rule type enforcement,
-- benchmarkable maker/checker behavior,
-- CI protection for the pipeline,
-- model and prompt metadata,
+### Short-term
+Stabilize the current document-to-rule-to-BDD pipeline with:
+- schema validation,
+- rule validation,
+- stable source-anchor traceability,
+- baseline CI,
+- prompt and artifact metadata,
 - checker stability visibility,
-- controlled governance docs and contracts.
+- governance docs.
 
-These priorities are described in the short-term phase of [`docs/roadmap.md`](./roadmap.md).
+### Mid-term
+Expand into a reusable AI-assisted planning and BDD generation platform with:
+- multi-document ingestion,
+- planning layer,
+- normalized BDD contract,
+- BDD style learning,
+- stronger traceability,
+- collaborative review exchange,
+- richer reporting.
 
----
+### Long-term
+Evolve into an enterprise AI testing platform with:
+- step-definition registry and mapping,
+- execution-ready scenario contracts,
+- deterministic assertion layers,
+- hosted review workflows,
+- enterprise observability.
 
-## Working Philosophy
-
-This project assumes that AI-assisted testing is only valuable when it is:
-
-- traceable,
-- reviewable,
-- contract-governed,
-- benchmarked,
-- and incrementally extensible.
-
-The goal is not just to generate test artifacts with LLMs.  
-The goal is to build a trustworthy system that can evolve from document-driven test design into enterprise AI testing over time.
-
----
-
-## Contributing
-
-Before making major changes, review:
-
-1. [`docs/roadmap.md`](./roadmap.md)
-2. [`docs/acceptance.md`](./acceptance.md)
-3. [`docs/model_governance.md`](./model_governance.md)
-4. [`docs/agent_guidelines.md`](./agent_guidelines.md)
-5. [`docs/architecture.md`](./architecture.md)
-
-When contributing:
-
-- keep changes scoped,
-- preserve artifact contracts,
-- update docs if behavior changes,
-- add or update tests,
-- keep provider logic isolated,
-- prefer deterministic validation whenever possible.
+See `docs/roadmap.md` for the full plan.
 
 ---
 
-## Recommended Next Docs to Add
+## Governance Principles
 
-As the repository evolves, the following docs are recommended:
+This repository follows a few core rules:
 
-- `docs/step_integration_plan.md`
-- `docs/benchmark_policy.md`
-- `docs/schema_evolution.md`
-- `docs/review_collaboration.md`
+- model outputs are probabilistic and must be governed,
+- schemas and contracts are first-class,
+- deterministic validation takes priority where possible,
+- prompts must be versioned,
+- model changes require benchmark evidence,
+- architecture changes must respect roadmap phases,
+- durable behavior must be reconstructable from repo-readable assets.
+
+See:
+- `docs/model_governance.md`
+- `docs/agent_guidelines.md`
+- `docs/acceptance.md`
+
+---
+
+## Quick Start
+
+> Note: This section should be updated with exact repo-specific commands if the CLI or setup steps change.
+
+Typical high-level flow:
+
+1. prepare source documents,
+2. run extraction to produce rule artifacts,
+3. validate generated artifacts,
+4. run maker to generate scenarios,
+5. run checker to assess quality and coverage,
+6. review results through the review workflow,
+7. run rewrite if required,
+8. generate final reports.
+
+If you are new to the repo, start with the smallest reproducible baseline flow before attempting larger datasets.
+
+---
+
+## Working Model
+
+### Artifact-first development
+All meaningful outputs in the pipeline should be represented as governed artifacts.
+
+### Benchmark-governed evolution
+Any meaningful model or prompt change should be benchmarked before adoption.
+
+### Human review remains a control layer
+Human review is part of the current system design, not an optional extra.
+
+### Step integration is a future bridge, not a current shortcut
+BDD generation and executable step integration are connected by a governed bridge layer.  
+See `docs/step_integration_plan.md`.
+
+---
+
+## Recommended Next Steps for Contributors
+
+If you are contributing to this repo, start by reading:
+
+1. `docs/roadmap.md`
+2. `docs/implementation_plan.md`
+3. `docs/architecture.md`
+4. `docs/model_governance.md`
+5. `docs/acceptance.md`
+6. `docs/agent_guidelines.md`
+
+Then identify:
+- the current roadmap phase,
+- the relevant implementation task,
+- the acceptance criteria,
+- the artifact contracts affected by your change.
+
+---
+
+## Suggested README Follow-Ups
+
+As implementation progresses, this README should be extended with:
+
+- exact installation steps,
+- concrete CLI examples,
+- example artifact paths,
+- sample reports,
+- benchmark usage instructions,
+- contribution workflow notes.
 
 ---
 
 ## Summary
 
-LME-Testing is a governed AI-assisted test design framework that starts from documents and moves toward structured BDD generation, review, and eventually enterprise test integration.
-
-It is currently strongest as a document-to-test-design system.  
-Its evolution toward enterprise AI testing depends on strong contracts, phase discipline, benchmark-governed model changes, and clear architectural boundaries.
+LME-Testing is currently a document-driven AI test design prototype.  
+Its immediate focus is not to become a bigger prompt workflow, but to become a more stable, governed, traceable system for document-derived testing artifacts. Over time, it is intended to evolve toward enterprise AI testing through planning, normalized BDD generation, step-definition integration, execution-ready contracts, and governed step-aware automation.

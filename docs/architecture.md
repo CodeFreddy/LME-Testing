@@ -2,705 +2,860 @@
 
 ## Purpose
 
-This document defines the current and target architecture of the repository.
+This document defines the architecture of the repository at the system level.
 
-Its goals are to:
+It serves four goals:
 
-- describe the end-to-end pipeline clearly,
-- define artifact contracts and responsibilities,
-- separate deterministic modules from LLM-assisted modules,
-- establish stable module boundaries,
-- and reduce architecture drift as the system evolves.
+1. describe the current pipeline clearly,
+2. define artifact contracts and module boundaries,
+3. separate deterministic responsibilities from LLM-assisted responsibilities,
+4. guide future evolution without allowing implicit architecture drift.
 
 This document should be read together with:
 
 - `docs/roadmap.md`
+- `docs/implementation_plan.md`
 - `docs/acceptance.md`
 - `docs/model_governance.md`
 - `docs/agent_guidelines.md`
+- `docs/testing_governance.md`
 
 ---
 
-## 1. System Overview
+## Architectural Summary
 
-This repository is a document-driven AI testing framework evolving in stages.
+The repository is currently a **document-driven test design system**.
 
-At its current core, the system transforms source documents into structured rule artifacts, then into test design outputs, and finally into human-reviewed reports.
+Its current architecture is centered on a structured transformation pipeline:
 
-### Current pipeline
+`source documents -> extraction -> atomic rules -> semantic rules -> maker -> checker -> human review -> rewrite -> report`
 
-`source docs -> extraction scripts -> atomic_rules.json -> semantic_rules.json -> maker -> checker -> review-session -> rewrite -> checker -> report`
+This architecture is optimized for:
+- rule extraction,
+- test scenario generation,
+- coverage analysis,
+- human review,
+- structured reporting.
 
-### Long-term target pipeline
+It is **not yet** a full execution platform.
 
-`source docs -> ingestion -> extraction -> validation -> semantic normalization -> planning -> normalized BDD -> review -> step mapping -> executable scenario -> execution integration -> report / analytics`
-
-The architecture must support the transition from the current pipeline to the target pipeline without breaking artifact traceability or governance.
-
----
-
-## 2. Architectural Principles
-
-### 2.1 Contracts over conventions
-
-Artifacts must be governed by explicit schemas and interfaces.  
-No module should depend on loosely assumed structures.
-
-### 2.2 Traceability is a first-class requirement
-
-Every downstream artifact should be traceable back to its upstream source inputs.
-
-### 2.3 Deterministic where possible, LLM-assisted where useful
-
-LLMs should be used where interpretation, drafting, or semantic compression is valuable.
-
-Deterministic logic should be used where correctness, validation, and repeatability are required.
-
-### 2.4 Phase-safe evolution
-
-Architecture changes must respect roadmap phase boundaries.  
-Do not design mid-term and long-term components in ways that destabilize short-term deliverables.
-
-### 2.5 Provider isolation
-
-Model-provider-specific behavior must remain behind provider or strategy interfaces.
+Execution integration, step definition mapping, deterministic runtime assertions, and hosted multi-user review are future architectural layers, not current core layers.
 
 ---
 
-## 3. Major Pipeline Stages
+## Current System Boundary
 
-This section defines the intended role of each stage.
+### What the system currently is
 
-### 3.1 Source Document Ingestion
+The current system is a pipeline that transforms source documents into structured test design artifacts and reviewable outputs.
 
-**Responsibility**  
-Accept source materials and prepare them for extraction.
+### What the system currently is not
 
-**Input examples**
-- rulebooks
-- product specifications
-- API documentation
-- business workflow documents
-- compliance and policy documents
-- release notes
+The current system is not yet:
 
-**Output**  
-A normalized document representation suitable for extraction.
+- a general-purpose test execution framework,
+- a runtime orchestration system,
+- a multi-user enterprise review platform,
+- a step-definition-aware BDD execution engine.
 
-**Notes**  
-In the short term, ingestion may remain lightweight and script-driven.  
-In the mid-term, document-class-aware ingestion should be introduced.
-
-### 3.2 Rule Extraction
-
-**Responsibility**  
-Extract raw candidate rules from source materials.
-
-**Input**  
-Normalized source document or document text.
-
-**Output**  
-`atomic_rules.json`
-
-**Characteristics**  
-This stage is one of the most failure-sensitive parts of the system.  
-Errors here propagate into all downstream stages.
-
-**Required controls**
-- schema validation
-- required field checks
-- duplicate candidate detection
-- rule type validation
-- trace reference validation
-
-### 3.3 Semantic Normalization
-
-**Responsibility**  
-Transform atomic rules into semantically richer rule objects that can support test design.
-
-**Input**  
-`atomic_rules.json`
-
-**Output**  
-`semantic_rules.json`
-
-**Characteristics**  
-This stage bridges source-oriented rules and test-oriented reasoning.
-
-**Output expectations**  
-Semantic rules should encode:
-- normalized meaning,
-- category / rule type,
-- relevant constraints,
-- traceability references,
-- downstream design guidance,
-- execution-oriented hints where appropriate.
-
-### 3.4 Planning
-
-**Responsibility**  
-Convert semantic rules into prioritized and grouped test planning units.
-
-**Input**  
-`semantic_rules.json`
-
-**Output**  
-Planning artifacts such as:
-- test objectives
-- scenario families
-- risk labels
-- dependency notes
-- recommended validation strategies
-
-**Notes**  
-This stage is mid-term roadmap scope.  
-It should sit between semantic normalization and BDD generation.
-
-### 3.5 BDD Generation
-
-**Responsibility**  
-Generate structured BDD scenarios from rule and planning artifacts.
-
-**Current implementation pattern**  
-This responsibility is currently approximated by the maker stage.
-
-**Long-term expectation**  
-BDD generation should target a normalized BDD contract rather than raw output formatting only.
-
-**Output**  
-Normalized BDD artifact, plus renderable BDD variants as needed.
-
-### 3.6 Checker Review
-
-**Responsibility**  
-Assess generated scenarios for structural validity, coverage intent, and review findings.
-
-**Input**  
-Maker or BDD generation output plus semantic rule context.
-
-**Output**  
-Structured checker artifact with:
-- accept / block style judgments,
-- coverage-related findings,
-- evidence or rationale,
-- traceability references,
-- stability metadata if supported.
-
-**Important limitation**  
-Checker logic may be LLM-assisted, but checker outputs must remain structured and governed.
-
-### 3.7 Human Review
-
-**Responsibility**  
-Provide explicit human approval, rejection, or rewrite decisions.
-
-**Current implementation pattern**  
-Local review-session service.
-
-**Long-term expectation**  
-Hosted multi-user review and audit workflow.
-
-**Output**  
-Structured human review decision artifact.
-
-### 3.8 Rewrite
-
-**Responsibility**  
-Regenerate selected outputs after human or checker-driven feedback.
-
-**Input**  
-Review decisions plus prior artifacts.
-
-**Output**  
-Revised design artifacts suitable for re-checking.
-
-### 3.9 Reporting
-
-**Responsibility**  
-Expose pipeline results in forms suitable for evaluation and governance.
-
-**Output examples**
-- HTML reports
-- heatmaps
-- JSON exports
-- CSV exports
-- drift summaries
-- traceability views
-
-### 3.10 Step Definition Mapping
-
-**Responsibility**  
-Map normalized BDD steps onto existing step definitions.
-
-**Notes**  
-This is long-term roadmap scope.
-
-**Output**  
-Binding artifact including:
-- matched steps
-- parameter bindings
-- candidate suggestions
-- unmatched step list
-- reuse signals
-
-### 3.11 Execution Integration
-
-**Responsibility**  
-Prepare and hand off execution-ready scenarios to downstream automation layers.
-
-**Notes**  
-This architecture does not assume immediate in-repo full execution ownership.
-
-**Output**  
-`ExecutableScenario` or equivalent execution-ready artifact.
+This distinction matters because architecture decisions should be aligned with the actual system stage, not an assumed end-state.
 
 ---
 
-## 4. Artifact Contracts
+## Architectural Principles
 
-This section defines the conceptual artifact model.
+### 1. Artifacts are first-class contracts
 
-### 4.1 Source Document Artifact
+The system is built around governed artifacts, not around ad hoc prompt outputs.
 
-Represents an ingested source document or normalized source content.
+Artifacts must be:
+- structured,
+- versionable,
+- traceable,
+- schema-validatable,
+- reviewable.
 
-Expected properties:
-- source identifier
-- document type
-- version or timestamp if known
-- section references
-- normalized text representation
+### 2. Upstream correctness matters more than downstream cleverness
 
-### 4.2 Atomic Rule Artifact
+If upstream rule extraction is invalid, downstream maker/checker quality becomes unreliable.
 
-Represents the smallest source-grounded rule unit extracted from documents.
+### 3. LLMs assist judgment and generation, but contracts remain deterministic
 
-Expected properties:
-- stable rule identifier
-- source trace reference
-- raw or lightly normalized statement
-- rule type candidate
-- section or clause reference
-- extraction metadata
+LLM-assisted stages may propose or interpret, but the overall architecture must remain controlled by:
+- schemas,
+- deterministic validation,
+- explicit pipeline stages,
+- benchmark gates,
+- and acceptance rules.
 
-**Architectural role**  
-Source-grounded unit for validation and traceability.
+### 4. Module boundaries must remain explicit
 
-### 4.3 Semantic Rule Artifact
+Business logic, provider logic, schema logic, review logic, and reporting logic should not be mixed casually.
 
-Represents a semantically normalized rule suitable for test design reasoning.
+### 5. Traceability is part of the architecture
 
-Expected properties:
-- stable semantic rule identifier
-- trace back to atomic rule(s)
-- normalized statement
-- canonical rule type
-- constraints
-- semantic qualifiers
-- planning hints
-- execution-oriented hints where needed
+The architecture must preserve the ability to trace downstream artifacts back to upstream sources.
 
-**Architectural role**  
-Bridge between document semantics and test design logic.
+### 6. Durable execution context must be repo-readable
 
-### 4.4 Planning Artifact
+If behavior is expected to be repeatable across humans, models, providers, or sessions, its governing inputs must live in repo-readable assets such as:
+- schemas,
+- prompts,
+- configs,
+- benchmark data,
+- acceptance rules,
+- implementation tasks.
 
-Represents the planning interpretation of semantic rules.
-
-Expected properties:
-- planning identifier
-- linked semantic rule(s)
-- priority
-- risk
-- coverage intent
-- scenario family
-- dependency notes
-- recommended validation mode
-
-**Architectural role**  
-Transforms rule semantics into test planning decisions.
-
-### 4.5 BDD Artifact
-
-Represents normalized BDD scenario structures.
-
-Expected properties:
-- scenario identifier
-- linked planning item
-- linked semantic rule(s)
-- scenario title
-- preconditions
-- actions
-- expected outcomes
-- traceability references
-- rendering metadata if needed
-
-**Architectural role**  
-Stable design handoff before step mapping or execution integration.
-
-### 4.6 Checker Artifact
-
-Represents checker findings for generated scenarios.
-
-Expected properties:
-- checker run metadata
-- linked scenario identifier
-- linked semantic rule identifier
-- decision or judgment
-- coverage finding
-- finding evidence
-- stability or comparison metadata when available
-
-**Architectural role**  
-Governed evaluation output, not free-form narrative.
-
-### 4.7 Human Review Artifact
-
-Represents human decisions on review units.
-
-Expected properties:
-- reviewer or review source
-- target object identifier
-- decision
-- comments
-- rewrite request details
-- timestamp
-- merge provenance if collaboration is supported
-
-### 4.8 Step Binding Artifact
-
-Represents the mapping between normalized BDD steps and existing step definitions.
-
-Expected properties:
-- scenario identifier
-- step identifier
-- matched step definition
-- binding confidence or mode
-- parameter mapping
-- unmatched status if applicable
-
-### 4.9 Executable Scenario Artifact
-
-Represents a scenario that is ready to be executed or handed off to an execution layer.
-
-Expected properties:
-- executable scenario identifier
-- linked normalized BDD scenario
-- environment requirements
-- input data requirements
-- setup hooks
-- linked step definitions
-- deterministic assertion references
-- cleanup hooks
+Durable system behavior must not depend only on transient conversation context.
 
 ---
 
-## 5. Module Boundaries
+## High-Level Pipeline
 
-This section defines stable architectural boundaries.
+## Current pipeline
 
-### 5.1 Ingestion Module
+The current architecture can be represented as:
 
-**Owns**
-- document loading
-- document-type classification if implemented
-- normalized document representation
+1. **Source documents**
+2. **Extraction**
+3. **Atomic rule normalization**
+4. **Semantic rule normalization**
+5. **Scenario generation (maker)**
+6. **Scenario assessment (checker)**
+7. **Human review**
+8. **Rewrite**
+9. **Reporting**
 
-**Must not own**
-- semantic interpretation
-- BDD generation
-- execution logic
+### Stage overview
 
-### 5.2 Extraction Module
+#### 1. Source documents
+Input source materials such as:
+- specifications,
+- rulebooks,
+- product behavior docs,
+- API docs,
+- policy / compliance docs,
+- or other structured business documents.
 
-**Owns**
-- source rule extraction
-- extraction metadata
-- raw rule structuring
+#### 2. Extraction
+Transforms source material into intermediate structured rule candidates.
 
-**Must not own**
-- downstream coverage logic
-- final BDD output formatting
-- execution mapping decisions beyond extraction hints
+#### 3. Atomic rule normalization
+Represents document-level rule statements in a granular, source-grounded form.
 
-### 5.3 Validation Module
+#### 4. Semantic rule normalization
+Transforms atomic rules into semantically richer structures used by downstream generation and coverage logic.
 
-**Owns**
-- schema validation
-- enum validation
-- duplicate candidate detection
-- trace reference validation
-- contract checks
+#### 5. Scenario generation (maker)
+Generates structured BDD-style or scenario-style test design artifacts from semantic rules.
 
-**Must not own**
-- semantic rewriting
-- planner creativity
-- provider-specific inference behavior
+#### 6. Scenario assessment (checker)
+Evaluates generated scenarios for quality and coverage against semantic rules.
 
-### 5.4 Semantic Normalization Module
+#### 7. Human review
+Allows human reviewers to approve, reject, or request rewrite for generated results.
 
-**Owns**
-- rule meaning normalization
-- semantic categorization
-- downstream design hints
-- trace-preserving transformation
+#### 8. Rewrite
+Regenerates targeted outputs after human review decisions.
 
-**Must not own**
-- final report rendering
-- execution orchestration
-- provider plumbing
-
-### 5.5 Planning Module
-
-**Owns**
-- risk and priority framing
-- scenario family definition
-- coverage intent shaping
-- dependency annotation
-
-**Must not own**
-- final step binding
-- provider adapters
-- execution result validation
-
-### 5.6 BDD Generation Module
-
-**Owns**
-- normalized scenario generation
-- BDD contract population
-- test-design-level structure
-
-**Must not own**
-- execution platform specifics
-- step implementation code
-- final pass/fail truth
-
-### 5.7 Checker Module
-
-**Owns**
-- structured review findings
-- coverage-related structured judgments
-- scenario validity signals
-- output suitable for reports and human review
-
-**Must not own**
-- schema definition
-- source extraction
-- execution truth for deterministic checks
-
-### 5.8 Human Review Module
-
-**Owns**
-- review workflow
-- human decisions
-- review package exchange or merge
-- audit trail in long-term scope
-
-**Must not own**
-- model selection
-- artifact generation rules
-- silent artifact mutation
-
-### 5.9 Reporting Module
-
-**Owns**
-- presentation and export
-- trend and drift views
-- traceability visualization
-- decision summaries
-
-**Must not own**
-- rule extraction
-- semantic inference
-- step definition matching logic
-
-### 5.10 Provider / Model Strategy Module
-
-**Owns**
-- provider abstraction
-- model configuration
-- prompt resolution
-- retry strategy
-- output mode configuration
-
-**Must not own**
-- business decision logic
-- schema interpretation rules
-- roadmap scope decisions
-
-### 5.11 Step Mapping Module
-
-**Owns**
-- matching BDD steps to existing step definitions
-- candidate suggestion
-- unmatched reporting
-- reuse scoring
-
-**Must not own**
-- document extraction
-- semantic rule normalization
-- full execution runtime ownership unless explicitly extended
+#### 9. Reporting
+Produces human-readable and machine-usable outputs summarizing the pipeline results.
 
 ---
 
-## 6. Deterministic vs LLM-Assisted Responsibility Split
+## Target Future Pipeline
 
-This split is critical to the architecture.
+The longer-term target architecture extends the current pipeline rather than replacing it.
 
-### 6.1 Deterministic responsibilities
+Target future pipeline:
 
-These should be implemented without relying on model judgment wherever practical:
+`source documents -> extraction -> atomic rules -> semantic rules -> planning -> normalized BDD -> step mapping -> executable scenario contract -> execution integration -> deterministic oracle -> report and analytics`
 
-- schema validation
-- required field validation
-- enum validation
-- traceability linkage checks
-- duplicate candidate thresholding
-- artifact metadata enforcement
-- benchmark result accounting
-- report export correctness
-- step match exactness when exact mapping is available
-- execution-time assertions for structured checks
+This target architecture adds:
+- planning layer,
+- normalized BDD contract,
+- BDD style-learning support,
+- step definition registry and mapping,
+- execution-ready handoff,
+- deterministic runtime validation,
+- enterprise observability.
 
-### 6.2 LLM-assisted responsibilities
-
-These may use LLMs because semantic compression or drafting value is high:
-
-- rule normalization
-- ambiguity handling
-- scenario drafting
-- planning suggestions
-- checker reasoning draft generation
-- candidate step suggestions where exact mapping is not available
-
-### 6.3 Mixed responsibilities
-
-Some modules may combine deterministic guardrails with LLM assistance:
-
-- semantic normalization with schema-constrained outputs
-- maker with required case type constraints
-- checker with structured output validation
-- step suggestion with deterministic exact match first and LLM-assisted fallback second
+These are future extensions, not current assumptions.
 
 ---
 
-## 7. Traceability Requirements
+## Artifact Model
 
-Traceability must be preserved across the pipeline.
+Artifacts are the backbone of this architecture.
 
-At minimum, downstream artifacts should support tracing back through:
+## Artifact categories
 
-- source document
-- source section or clause
-- atomic rule
-- semantic rule
-- planning artifact if present
-- BDD artifact
-- checker artifact
-- human review artifact
-- step binding artifact where applicable
-- executable scenario where applicable
+### 1. Source-level artifacts
+Represent original or parsed content from documents.
 
-Traceability should be machine-readable and reportable.
+Examples:
+- raw source file metadata,
+- parsed sections,
+- clauses,
+- extraction traces,
+- stable source anchors such as paragraph-level identity where applicable.
 
----
+### 2. Rule-level artifacts
+Represent normalized rule structures.
 
-## 8. Error Handling and Failure Visibility
+Examples:
+- `atomic_rule`
+- `semantic_rule`
 
-The architecture must prefer visible failure over silent corruption.
+### 3. Generation artifacts
+Represent outputs produced from rules.
 
-### Required behaviors
-- invalid structured artifacts fail validation,
-- malformed outputs are not silently accepted,
-- recovery logic is bounded and observable,
-- retries are tracked,
-- provider-specific failures are isolated and visible,
-- report generation failures are surfaced.
+Examples:
+- maker outputs,
+- checker outputs,
+- rewrite outputs,
+- planner outputs in future phases,
+- normalized BDD outputs in future phases.
 
-### Non-goals
-- hiding invalid outputs just to keep the pipeline green,
-- converting major contract failures into warnings without policy support.
+### 4. Review artifacts
+Represent human review state and decisions.
 
----
+Examples:
+- review draft,
+- review decision records,
+- conflict markers in future collaboration flows.
 
-## 9. Evolution Strategy
+### 5. Reporting artifacts
+Represent summarized results for humans or external systems.
 
-Architecture should evolve incrementally.
-
-### Short-term emphasis
-- stabilize extraction and validation,
-- govern maker and checker outputs,
-- strengthen CI and metadata.
-
-### Mid-term emphasis
-- add planning,
-- add multi-document support,
-- normalize BDD,
-- add collaborative review and richer dashboards.
-
-### Long-term emphasis
-- integrate step definitions,
-- introduce executable scenario contracts,
-- add deterministic execution assertions,
-- support hosted review and enterprise observability.
+Examples:
+- HTML reports,
+- JSON exports,
+- CSV exports,
+- quality summaries,
+- benchmark summaries,
+- audit-style run summaries.
 
 ---
 
-## 10. Suggested Repository Structure
+## Core Artifact Contracts
 
-A recommended repo-aligned structure may look like:
+## 1. Atomic Rule
 
-- `docs/`
-- `schemas/`
-- `prompts/`
-- `benchmarks/`
-- `configs/models/`
-- `artifacts/`
-- `src/ingestion/`
-- `src/extraction/`
-- `src/validation/`
-- `src/semantic/`
-- `src/planning/`
-- `src/bdd/`
-- `src/checker/`
-- `src/review/`
-- `src/reporting/`
-- `src/providers/`
-- `src/step_mapping/`
-- `src/execution/`
+### Role
+The atomic rule is the source-grounded normalized unit extracted from document content.
 
-The exact implementation layout may differ, but module ownership should remain clear.
+### Architectural responsibility
+It preserves:
+- source intent at low semantic abstraction,
+- traceability back to source sections or clauses,
+- stable source anchors where available,
+- input granularity for downstream semantic normalization.
 
----
+### Must remain
+- source-linked,
+- schema-governed,
+- minimally opinionated,
+- reviewable.
 
-## 11. Architectural Review Questions
-
-Before approving a design change, reviewers should ask:
-
-- Which pipeline stage is being changed?
-- Which artifact contracts are affected?
-- Does the change preserve traceability?
-- Is the logic deterministic where it should be?
-- Is LLM use properly governed?
-- Does the change cross roadmap phase boundaries?
-- Are provider-specific behaviors isolated?
-- Are acceptance criteria and docs updated?
-
-If these questions cannot be answered clearly, the architectural change is not ready.
+### Must not become
+- overloaded with downstream generation assumptions,
+- a substitute for semantic planning,
+- free-form text blobs without structure.
 
 ---
 
-## 12. Summary
+## 2. Semantic Rule
 
-This architecture is designed to support a controlled evolution from a document-driven test design prototype to an enterprise AI testing platform.
+### Role
+The semantic rule is the normalized rule object used for downstream coverage logic and scenario generation.
 
-The central architectural commitments are:
+### Architectural responsibility
+It bridges:
+- source-grounded rule meaning,
+- downstream scenario generation,
+- rule-type-aware coverage expectations.
 
-- explicit artifact contracts,
+### Must remain
+- schema-governed,
+- traceable to atomic rules,
+- traceable to stable source anchors where applicable,
+- semantically clear,
+- fit for maker/checker consumption.
+
+### May contain
+- rule type,
+- execution-oriented hints,
+- observables,
+- constraints,
+- scenario-relevant metadata.
+
+### Must not be treated as
+- a directly executable test script,
+- a substitute for a future execution contract.
+
+---
+
+## 3. Maker Output
+
+### Role
+Represents generated test scenarios or BDD-style design outputs from semantic rules.
+
+### Architectural responsibility
+It is a design artifact, not runtime truth.
+
+### Must remain
+- structured,
+- schema-validatable,
+- traceable to semantic rules,
+- traceable to stable source anchors when available,
+- reviewable by checker and humans.
+
+### Must not be treated as
+- execution proof,
+- final oracle,
+- provider-specific raw output.
+
+---
+
+## 4. Checker Output
+
+### Role
+Represents assessment of maker outputs for quality and coverage.
+
+### Architectural responsibility
+It acts as a governed evaluation artifact for design-stage quality.
+
+### Must remain
+- structured,
+- schema-validatable,
+- explainable at artifact level,
+- traceable to governed source anchors when applicable,
+- distinguishable from deterministic runtime assertions.
+
+### Must not be treated as
+- infallible truth,
+- a substitute for future deterministic execution oracle,
+- purely free-form narrative.
+
+---
+
+## 5. Human Review Artifact
+
+### Role
+Represents human decisions over generated results.
+
+### Architectural responsibility
+It is the controlled human override and governance layer for the design loop.
+
+### Must remain
+- structured where possible,
+- decision-oriented,
+- traceable to reviewed artifacts,
+- auditable.
+
+---
+
+## 6. Normalized BDD Artifact (future)
+
+### Role
+Represents a stable BDD contract independent of final rendering or execution bindings.
+
+### Architectural responsibility
+It becomes the handoff artifact between test design and execution integration.
+
+### Must remain
+- execution-agnostic,
+- traceable,
+- schema-validatable,
+- reusable across output formats.
+
+---
+
+## 7. Executable Scenario Artifact (future)
+
+### Role
+Represents execution-ready scenarios enriched with environment, setup, data, assertions, and step bindings.
+
+### Architectural responsibility
+It bridges design artifacts to runtime integration.
+
+### Must remain
+- explicit,
+- deterministic where possible,
+- test-environment aware,
+- independent from undocumented model behavior.
+
+---
+
+## Module Boundary Model
+
+The repo should maintain explicit boundaries between modules.
+
+## 1. Ingestion / extraction modules
+Own:
+- document reading,
+- parsing,
+- extraction support,
+- source segmentation,
+- stable source-anchor generation where applicable,
+- extraction trace metadata.
+
+Do not own:
+- downstream scenario generation policy,
+- provider-specific model logic,
+- report rendering.
+
+## 2. Rule normalization modules
+Own:
+- atomic rule shaping,
+- semantic rule shaping,
+- trace linkage,
+- schema alignment,
+- rule-type interpretation.
+
+Do not own:
+- review UI,
+- reporting,
+- provider transport details.
+
+## 3. Generation modules
+Own:
+- maker,
+- rewrite,
+- future planner,
+- future normalized BDD generation,
+- future BDD style-learning outputs.
+
+Do not own:
+- provider adapter internals,
+- schema registry policy,
+- long-term analytics logic.
+
+## 4. Evaluation modules
+Own:
+- checker,
+- future benchmark evaluation,
+- future stability comparison.
+
+Do not own:
+- human decision workflow,
+- runtime execution pass/fail truth,
+- provider transport.
+
+## 5. Review modules
+Own:
+- review state,
+- decision storage,
+- decision export/import in future phases,
+- human workflow control.
+
+Do not own:
+- rule extraction,
+- provider logic,
+- deterministic execution assertions.
+
+## 6. Reporting modules
+Own:
+- human-readable output,
+- machine-readable summaries,
+- metrics aggregation,
+- traceability views,
+- audit-style run summaries.
+
+Do not own:
+- business rules for generation,
+- provider selection,
+- schema migration policy.
+
+## 7. Provider / model strategy modules
+Own:
+- provider-specific API interaction,
+- retry handling,
+- structured output mode,
+- metadata capture,
+- model selection abstraction.
+
+Do not own:
+- scenario generation business logic,
+- report rendering,
+- review workflows.
+
+## 8. Schema and contract modules
+Own:
+- artifact structure definitions,
+- schema validation,
+- contract evolution policy support.
+
+Do not own:
+- provider invocation,
+- document parsing,
+- UI workflows.
+
+---
+
+## Deterministic vs LLM-Assisted Responsibilities
+
+This is one of the most important architectural boundaries in the repo.
+
+## LLM-assisted responsibilities
+
+LLMs may assist with:
+- extraction support where explicitly permitted,
+- semantic normalization support,
+- ambiguity detection,
+- maker generation,
+- checker evaluation,
+- rewrite suggestions,
+- future planning suggestions,
+- future BDD style-pattern suggestion,
+- future step candidate suggestions.
+
+These stages are useful because they involve interpretation, synthesis, or language-rich generation.
+
+## Deterministic responsibilities
+
+Deterministic modules must own:
+- schema validation,
+- enum validation,
+- stable source-anchor integrity checks,
+- traceability checks,
+- duplicate candidate logic thresholds,
+- contract enforcement,
+- artifact metadata enforcement,
+- benchmark pass/fail accounting,
+- CI gates,
+- report assembly rules,
+- audit/run-record generation rules,
+- future execution assertions wherever feasible.
+
+## Architectural rule
+
+If a responsibility can be made deterministic without losing essential value, it should not remain purely LLM-governed.
+
+---
+
+## Traceability Model
+
+Traceability should exist across the pipeline.
+
+## Stable source-anchor strategy
+
+Where source segmentation permits it, the architecture should introduce a stable source anchor such as `paragraph_id` or equivalent.
+
+This anchor should:
+- be unique within governed source scope,
+- survive downstream transformations,
+- appear in rule artifacts where applicable,
+- remain available to maker/checker/reporting layers,
+- and extend into future BDD and step-integration layers.
+
+The exact field name may evolve, but the architectural requirement should remain stable.
+
+## Minimum traceability path
+
+`source document -> source section / clause -> stable source anchor (if applicable) -> atomic rule -> semantic rule -> maker output -> checker output -> human review -> report`
+
+## Future traceability path
+
+`... -> planning decision -> normalized BDD -> style profile reference -> step mapping -> executable scenario -> execution result`
+
+Traceability must support:
+- auditability,
+- debugging,
+- coverage reasoning,
+- regression analysis,
+- human review confidence.
+
+---
+
+## Validation Architecture
+
+Validation should not be a single step; it should exist across layers.
+
+## Validation layers
+
+### 1. Source ingestion validation
+Checks:
+- source readability,
+- format compatibility,
+- section extraction sanity,
+- stable source-anchor uniqueness where applicable.
+
+### 2. Rule artifact validation
+Checks:
+- schema validity,
+- enum validity,
+- required field presence,
+- trace references,
+- duplicate candidate detection.
+
+### 3. Generation artifact validation
+Checks:
+- structured output validity,
+- semantic rule references,
+- stable source-anchor propagation where applicable,
+- expected field completeness,
+- metadata presence.
+
+### 4. Review validation
+Checks:
+- decision format,
+- reviewed target identity,
+- allowed action values,
+- merge integrity in future collaboration flows.
+
+### 5. Reporting validation
+Checks:
+- artifact completeness,
+- traceability availability,
+- metrics consistency,
+- export validity,
+- governance/audit summary completeness where applicable.
+
+Validation failures should remain visible.  
+The architecture should not silently absorb broken contracts.
+
+---
+
+## Benchmark Architecture
+
+Benchmarks are part of architecture, not an optional add-on.
+
+## Benchmark roles
+
+Benchmarks should validate:
+- extraction sanity,
+- semantic normalization quality,
+- maker structural validity,
+- checker consistency,
+- report generation,
+- end-to-end smoke behavior.
+
+Future benchmark roles should include:
+- planning quality,
+- normalized BDD quality,
+- BDD style-learning consistency,
+- step binding quality,
+- execution contract readiness.
+
+## Benchmark ownership
+
+Benchmarks belong to governed system quality, not to individual providers.
+
+This means benchmarks should be reusable even when the underlying model changes.
+
+---
+
+## Configuration Architecture
+
+Configuration should remain layered and explicit.
+
+## Configuration layers
+
+### 1. Pipeline configuration
+Defines:
+- stage enablement,
+- artifact paths,
+- validation behavior,
+- environment mode.
+
+### 2. Model strategy configuration
+Defines:
+- provider,
+- model,
+- prompt version,
+- retries,
+- structured output settings.
+
+### 3. Benchmark configuration
+Defines:
+- datasets,
+- thresholds,
+- comparison policy.
+
+### 4. Reporting configuration
+Defines:
+- output formats,
+- summaries,
+- export behavior,
+- governance/audit summary behavior where relevant.
+
+Configuration should not be scattered across undocumented inline constants.
+
+---
+
+## Minimum Governance Artifacts
+
+In addition to business artifacts, the architecture should support a minimal set of governance artifacts.
+
+Examples include:
+- benchmark outputs,
+- drift comparison outputs,
+- checker instability summaries,
+- run summaries,
+- change-impact notes,
+- audit-style execution records.
+
+The exact directory structure may evolve, but the architecture assumes these artifacts are repo-readable and reviewable.
+
+---
+
+## Failure Model
+
+The architecture should assume failure will occur.
+
+## Failure classes
+
+### 1. Source failure
+Examples:
+- unreadable document,
+- malformed source,
+- unsupported format.
+
+### 2. Contract failure
+Examples:
+- invalid schema,
+- invalid enum,
+- broken trace reference,
+- broken source-anchor propagation.
+
+### 3. Model failure
+Examples:
+- timeout,
+- malformed structured output,
+- unstable output,
+- incomplete result.
+
+### 4. Review failure
+Examples:
+- incomplete review state,
+- conflicting review packages in future collaboration flows.
+
+### 5. Reporting failure
+Examples:
+- missing required artifacts,
+- broken summary generation,
+- export failure.
+
+## Architectural rule for failures
+
+Failures should be:
+- visible,
+- classifiable,
+- attributable to a stage,
+- recoverable where appropriate,
+- never hidden as if they were successful outputs.
+
+---
+
+## Evolution Rules
+
+The architecture may evolve, but evolution must be governed.
+
+## Allowed architectural evolution
+
+The repo may evolve by:
+- adding new artifact versions,
+- adding new validation layers,
+- introducing planning artifacts,
+- introducing normalized BDD,
+- introducing BDD style-learning assets,
+- introducing step registry and mapping,
+- introducing execution contracts,
+- improving collaboration and observability.
+
+## Disallowed architectural drift
+
+The repo should not drift into:
+- undocumented provider coupling,
+- free-form artifact formats,
+- unclear module ownership,
+- silent contract weakening,
+- later-phase features hidden inside early-phase work.
+
+---
+
+## Recommended Directory Responsibilities
+
+This section is intentionally abstract so it remains valid even if the exact repo layout evolves.
+
+### `docs/`
+Owns:
+- architecture,
+- roadmap,
+- governance,
+- acceptance rules,
+- agent rules.
+
+### `schemas/` or equivalent
+Owns:
+- artifact schemas,
+- schema fixtures,
+- schema evolution helpers.
+
+### `prompts/` or equivalent
+Owns:
+- governed prompts,
+- prompt metadata,
+- versioned prompt assets.
+
+### `benchmarks/` or equivalent
+Owns:
+- benchmark datasets,
+- comparison logic,
+- benchmark configs,
+- evaluation summaries.
+
+### `artifacts/` or equivalent
+Owns:
+- generated sample outputs,
+- benchmark outputs,
+- reproducible reference flows,
+- governance/audit outputs.
+
+### `src/` or equivalent code directories
+Own:
+- pipeline logic,
+- providers,
+- validators,
+- reporting,
+- review flows,
+- generation logic.
+
+---
+
+## Architectural Review Questions
+
+Use these questions before approving major changes:
+
+- Does this change preserve artifact contracts?
+- Does it improve or weaken traceability?
+- Does it preserve stable source-anchor propagation where applicable?
+- Does it keep provider logic isolated?
+- Does it blur module boundaries?
+- Does it move deterministic responsibilities into LLM-only logic?
+- Does it silently introduce later-phase capabilities?
+- Does it preserve rollback clarity?
+- Does it align with the current roadmap phase?
+
+If these questions cannot be answered clearly, the architecture impact is not yet review-ready.
+
+---
+
+## Summary
+
+The architecture of this repository is centered on governed transformation of documents into structured test design artifacts.
+
+The system should continue evolving through:
+- explicit artifacts,
+- clear module boundaries,
+- deterministic validation,
+- stable source-anchor traceability,
+- repo-readable durable context,
+- LLM-assisted generation where appropriate,
 - strong traceability,
-- deterministic validation where correctness matters,
-- LLM assistance where semantic value is high,
-- provider isolation,
-- and phase-safe evolution.
+- and phased expansion toward planning, BDD normalization, step integration, and execution readiness.
 
-These boundaries exist to make the system scalable, governable, and resilient as multiple model APIs and more advanced testing capabilities are introduced.
+Architecture clarity is essential because this repo may use multiple LLM APIs over time.  
+Without stable boundaries and contracts, model flexibility would become system instability.
