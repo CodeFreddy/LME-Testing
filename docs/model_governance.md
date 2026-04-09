@@ -17,7 +17,7 @@ This document applies to all model-driven modules, including:
 - maker,
 - checker,
 - rewrite,
-- planning,
+- planning when introduced under a governed contract,
 - future step-mapping suggestions,
 - and any AI-assisted code generation workflow used in the repo.
 
@@ -66,6 +66,8 @@ All model outputs are treated as probabilistic and must be governed through:
 - benchmark comparison,
 - and failure handling.
 
+No model-driven stage should be treated as governed baseline behavior unless its output contract, validation path, and traceability expectations are defined in repo-readable form.
+
 ### 3. Prompts are versioned artifacts
 
 Prompts are not inline implementation details.  
@@ -108,6 +110,9 @@ This governance policy applies to:
 - rollback policy.
 
 It does not define business roadmap priorities; those are covered in `docs/roadmap.md`.
+
+It also does not require every future model-driven stage to exist immediately.
+Governance must scale with the active roadmap phase and actual system maturity.
 
 ---
 
@@ -161,6 +166,7 @@ This metadata should be recorded for:
 - checker outputs,
 - rewrite outputs,
 - planner outputs when introduced,
+- any future normalized BDD generation outputs when model-driven,
 - any future step-binding suggestion outputs.
 
 ### Rationale
@@ -214,6 +220,8 @@ Any prompt change that may affect output behavior must include:
 - change note,
 - linked benchmark run,
 - acceptance impact review if output contracts are affected.
+
+If the prompt belongs to a newly introduced or future stage, that stage must already have a governed contract before the prompt can be promoted into baseline use.
 
 ### Prompt review questions
 
@@ -304,6 +312,8 @@ At minimum, benchmark coverage should include:
 5. report generation
 6. end-to-end smoke
 
+The active baseline should begin with a small practical benchmark set, such as the existing `poc_two_rules` style flow, before broader benchmark coverage is required.
+
 As the system evolves, benchmark categories should expand to include:
 - planning quality,
 - BDD normalization,
@@ -330,6 +340,8 @@ Each benchmark run should capture:
 - checker instability signals,
 - run metadata,
 - summary score or threshold results.
+
+Checker instability checks should default to a small governed baseline set rather than implicitly requiring double-runs of the full corpus.
 
 ---
 
@@ -409,6 +421,9 @@ Track at least:
 - report generation failure rate,
 - model-specific failure patterns.
 
+The exact metric set should remain selective and phase-appropriate.
+Governance should not assume a heavy enterprise observability program before the repo actually needs one.
+
 ### Trigger conditions
 
 A governance review should be triggered when:
@@ -442,6 +457,7 @@ A rollout must define:
 - monitoring expectations.
 
 Do not promote a model or prompt directly from experiment to full default without evidence.
+Do not promote a model or prompt into a stage whose contract and acceptance path are still undefined.
 
 ---
 
@@ -518,6 +534,7 @@ The exact numeric thresholds may evolve, but the repo should define thresholds f
 These thresholds should be maintained in a dedicated config or benchmark policy file where possible.
 
 Do not rely on informal human judgment alone for promotion decisions.
+Do not require threshold programs that are heavier than the current roadmap phase justifies.
 
 ---
 

@@ -1,176 +1,227 @@
-# LME 文本拆分、`atomic_rule` 与 `semantic_rule` 设计说明
+# Rule Model and Parsing Design
 
-## 1. 目的
+## Purpose
 
-本文档面向接手本项目的开发人员，说明以下内容：
+This document explains the current upstream rule-model design in the repository:
 
-- 为什么需要先做文本拆分，再做规则解析
-- `atomic_rule` 和 `semantic_rule` 的职责边界
-- 文本拆分脚本的设计原则
-- `semantic_rule` 的正式字段清单与字段含义
-- 每一种 `rule_type` 的独有字段说明
-- 每一种 `rule_type` 的示例
+- why the repo separates `atomic_rule` from `semantic_rule`
+- what each layer is responsible for
+- what fields belong to each artifact
+- how deterministic extraction and first-pass semantic normalization should interact
+- and how this model fits into the current governed roadmap
 
-这份文档是当前仓库中关于规则建模的主说明文档。
+This is the primary implementation-side design document for extraction and rule modeling.
 
-## 2. 总体处理链路
+Read it together with:
 
-针对 LME 官方文档，建议固定采用如下流水线：
+- `docs/roadmap.md`
+- `docs/implementation_plan.md`
+- `docs/architecture.md`
+- `docs/acceptance.md`
+- `docs/rule_extraction_script_guide.md`
 
-`PDF -> pages -> clauses -> atomic_rule -> semantic_rule -> Gherkin/DSL -> review -> coverage`
+---
 
-为什么不能让大模型直接从 PDF 生成测试案例：
+## Current Processing Path
 
-- 覆盖率分母不稳定
-- 追溯关系会丢
-- 文档与测试案例之间没有中间事实层
-- 双模型审核时难以判断到底是拆分错了还是语义理解错了
+For the current repo phase, the intended upstream path is:
 
-## 3. 两层规则模型
+`source document -> pages -> clauses -> atomic_rule -> semantic_rule`
 
-### 3.1 `atomic_rule`
+These artifacts then support:
 
-`atomic_rule` 是文档事实层的最小规则单元。
+- validation
+- review
+- maker/checker inputs
+- reporting
+- and later planning / normalized BDD work
 
-主要职责：
+This document intentionally stops before normalized BDD, step integration, and execution-ready contracts.
+Those belong to later phases and are governed elsewhere.
 
-- 作为覆盖率分母候选
-- 作为文档追溯锚点
-- 作为人工抽检对象
-- 作为后续 `semantic_rule` 的输入
+---
 
-设计原则：
+## Why the Repo Uses Two Rule Layers
 
-- 尽量由脚本稳定生成
-- 尽量少解释业务语义
-- 允许保守、允许偏粗，但必须可回溯
+The repo does not jump directly from source documents to test cases because that would make it harder to:
 
-### 3.2 `semantic_rule`
+- keep the coverage denominator stable
+- preserve traceability
+- separate extraction errors from semantic interpretation errors
+- review upstream quality before downstream generation
+- and support multiple later consumers from the same governed source artifacts
 
-`semantic_rule` 是语义层和半执行层。
+The two-layer rule model exists to create a stable intermediate truth boundary:
 
-主要职责：
+- `atomic_rule` captures document-grounded rule units
+- `semantic_rule` captures first-pass normalized interpretation of those units
 
-- 生成 Gherkin/BDD 场景
-- 生成结构化测试 DSL/YAML/JSON
-- 作为模型审核输入
-- 承载证据、推断、歧义、测试提示
+---
 
-设计原则：
+## Layer 1: `atomic_rule`
 
-- 每条 `semantic_rule` 必须来源于一个或多个 `atomic_rule`
-- 允许规范化，但必须标明 `source_type`
-- 每条规则必须带 `evidence`
-- 对未来可执行测试保持足够接近，但不直接等于测试脚本
+`atomic_rule` is the smallest governed document-level rule unit used by this repo.
 
-## 4. 文本拆分设计
+### Responsibilities
 
-### 4.1 拆分层级
+- provide a stable coverage denominator candidate
+- preserve document-grounded traceability
+- support human inspection of extraction quality
+- serve as the direct source for `semantic_rule` generation
 
-固定为 4 层：
+### Design principles
+
+- prefer deterministic extraction over model interpretation
+- stay conservative when splitting
+- preserve recoverability to the source text
+- allow coarse first-pass categorization, but avoid overclaiming semantic certainty
+
+### What `atomic_rule` is not
+
+`atomic_rule` is not:
+
+- a full semantic interpretation
+- a test case
+- a normalized BDD artifact
+- an execution-ready contract
+
+---
+
+## Layer 2: `semantic_rule`
+
+`semantic_rule` is the first-pass normalized semantic artifact built from one or more `atomic_rule` records.
+
+### Responsibilities
+
+- normalize rule meaning into a governed structured form
+- preserve source traceability and evidence
+- support downstream maker/checker flows
+- support later planning and normalized BDD stages
+- carry review-relevant uncertainty signals such as ambiguity and inferred fields
+
+### Design principles
+
+- every `semantic_rule` must trace back to source `atomic_rule` records
+- normalization is allowed, but inferred content must remain visible
+- evidence is mandatory
+- the artifact should be useful to later stages without pretending to be those later stages
+
+### What `semantic_rule` is not
+
+`semantic_rule` is not:
+
+- the final business truth
+- a direct substitute for planner outputs
+- the canonical normalized BDD artifact
+- a syntax-specific `.feature` rendering
+- an execution-ready scenario contract
+
+---
+
+## Parsing Design
+
+## Parsing layers
+
+The upstream parsing stack currently uses four levels:
 
 1. `document`
 2. `section`
 3. `clause`
 4. `atomic_rule`
 
-说明：
+### Meaning of each layer
 
-- `document` 是整本文档元数据
-- `section` 是章节标题，例如 `Give-Ups`
-- `clause` 是显式条款，例如 `46.`
-- `atomic_rule` 是覆盖率与测试映射的最小规则单元
+- `document` holds source-level metadata
+- `section` captures the major heading context
+- `clause` captures explicit numbered rule sections such as `46.`
+- `atomic_rule` captures the smallest reviewable rule unit needed for governed downstream use
 
-### 4.2 `clause` 的切分规则
+## Clause splitting
 
-主条款按显式编号切分，例如：
+Clause boundaries should be determined by deterministic parsing logic, not by LLM judgment.
 
-- `1.`
-- `14.`
-- `46.`
+Why:
 
-拆分过程应由脚本完成，而不是交给大模型。
+- clause boundaries must be reproducible
+- the same source should yield the same clause structure across runs
+- later coverage and traceability depend on stable upstream boundaries
 
-原因：
+## Atomic-rule splitting
 
-- 切分结果必须稳定
-- 同一文档每次执行应得到相同的条款边界
-- 后续换模型时覆盖率口径不能漂移
+One `atomic_rule` should express one reviewable normative proposition.
 
-### 4.3 `atomic_rule` 的切分规则
+Typical cases that should split:
 
-一条 `atomic_rule` 应只表达一个可判断的规范命题。
+- multiple independent modal requirements in one clause such as `must`, `must not`, `may`, `shall`, `will`
+- mixed obligation and prohibition content
+- multiple independent timing requirements
+- semantically independent subclauses such as `(a)(b)(c)`
+- semantically independent roman-numeral lists such as `(i)(ii)(iii)`
+- multiple distinct enum definitions in the same clause
 
-必须拆分的典型情况：
+Typical cases that should not split further:
 
-- 同一条款中出现多个独立 `must / must not / may / shall / will`
-- 同时出现义务和禁止
-- 同时出现多个时间要求
-- 子条款 `(a)(b)(c)` 语义独立
-- 罗马编号 `(i)(ii)(iii)` 语义独立
-- 同一条款里定义多个枚举值
+- pure background context
+- explanatory fragments that do not stand alone as rules
+- examples that do not define a separate normative proposition
 
-不建议拆分的情况：
+---
 
-- 只是背景或解释
-- 只是补充短语，不能独立判定
-- 只是示例
+## `atomic_rule` Fields
 
-## 5. `atomic_rule` 字段说明
-
-当前脚本产出的 `atomic_rule` 采用以下关键字段：
+The current extraction stage uses the following key `atomic_rule` fields.
 
 ### `rule_id`
 
-稳定规则 ID。
+Stable rule identifier.
 
-示例：
+Examples:
 
 - `MR-046-01`
 - `MR-052-A-1`
 
 ### `clause_id`
 
-所属主条款 ID。
+Stable parent clause identifier.
 
-示例：
+Example:
 
 - `MR-046`
 
 ### `clause_number`
 
-文档原始条款编号。
+Original clause number from the source document.
 
 ### `section`
 
-所属章节。
+Parent section heading when available.
 
-示例：
+Example:
 
 - `Give-Ups`
 
 ### `start_page` / `end_page`
 
-原文起止页码。
+Source page range for the extracted rule.
 
 ### `rule_type`
 
-脚本层的初始分类猜测。
+First-pass deterministic or heuristic category guess from the extraction layer.
 
-注意：
+Important:
 
-- 只是初判
-- 不是最终语义结论
+- this is an initial classification hint
+- it is not the final semantic judgment
 
 ### `testability`
 
-脚本层的初始可测性判断。
+First-pass extraction-layer judgment about whether the rule appears testable.
 
 ### `split_basis`
 
-说明该规则是如何拆出来的。
+Explains how the rule was split from the clause.
 
-示例：
+Examples:
 
 - `sentence`
 - `subclause:A`
@@ -178,36 +229,41 @@
 
 ### `raw_text`
 
-该规则对应的原始文本片段。
+The source text fragment for this rule.
 
-这是后续 `semantic_rule.evidence` 的重要基础。
+This field is a critical basis for:
 
-## 6. `semantic_rule` 顶层通用字段
+- evidence generation
+- review
+- semantic normalization
+- and traceability
 
-顶层通用字段只解释一次，各 `rule_type` 示例默认都复用这些定义。
+---
+
+## `semantic_rule` Core Fields
+
+The fields below are the core repo-readable structure for first-pass semantic normalization.
 
 ### `semantic_rule_id`
 
-语义规则层主键。
+Primary key for the semantic artifact.
 
-推荐格式：
+Recommended style:
 
 - `SR-MR-046-03`
 - `SR-MR-052-AB`
 
 ### `version`
 
-`semantic_rule` schema 版本。
+Schema version for the semantic artifact.
 
-当前建议固定为：
+Current first-pass examples commonly use:
 
 - `1.0`
 
 ### `source`
 
-来源追溯信息。
-
-字段：
+Traceability payload that should at minimum preserve:
 
 - `doc_id`
 - `doc_title`
@@ -217,17 +273,18 @@
 - `atomic_rule_ids`
 - `pages`
 
-作用：
+This field exists to support:
 
-- 文档追溯
-- 覆盖率统计
-- 人工抽检
+- source traceability
+- review
+- coverage reasoning
+- and downstream artifact linkage
 
 ### `classification`
 
-规则分类与覆盖率元数据。
+Rule metadata and downstream coverage context.
 
-字段：
+Typical fields:
 
 - `rule_type`
 - `rule_tags`
@@ -237,9 +294,9 @@
 
 ### `statement`
 
-语义主体。
+Normalized semantic statement of the rule.
 
-字段：
+Typical fields:
 
 - `actor`
 - `action`
@@ -249,17 +306,17 @@
 - `outcome`
 - `exceptions`
 
-建议理解方式：
+Interpretation guideline:
 
-- `conditions` 是“规则在什么前提下生效”
-- `constraints` 是“字段或值必须满足什么限制”
-- `outcome` 是“期望结果是什么”
+- `conditions` describe when the rule applies
+- `constraints` describe field/value restrictions
+- `outcome` describes the expected effect or state
 
 ### `execution_mapping`
 
-连接到未来可执行测试层的桥接字段。
+Bridging hints for later downstream design, not an execution contract.
 
-字段：
+Typical fields:
 
 - `business_inputs`
 - `observable_outputs`
@@ -268,16 +325,17 @@
 - `postconditions_for_execution`
 - `dsl_assertions`
 
-这部分服务两个目标：
+Important:
 
-- 生成 Gherkin
-- 生成结构化测试 DSL
+- this field may help later planning or normalized BDD work
+- it must not be treated as proof that execution integration is already governed
+- it should remain subordinate to later canonical intermediate artifacts
 
 ### `evidence`
 
-证据列表。
+Source-backed evidence list.
 
-每条证据至少包含：
+Each evidence item should at minimum preserve:
 
 - `target`
 - `quote`
@@ -286,9 +344,7 @@
 
 ### `review`
 
-审核元数据。
-
-字段：
+Review-oriented metadata such as:
 
 - `confidence`
 - `inference_flags`
@@ -296,9 +352,9 @@
 
 ### `test_design_hints`
 
-测试设计辅助信息。
+Optional first-pass hints that may help later test design.
 
-字段：
+Typical fields:
 
 - `gherkin_intent`
 - `positive_scenarios`
@@ -307,11 +363,15 @@
 - `data_requirements`
 - `oracle_notes`
 
-## 7. 关键枚举值
+These are hints, not final planning outputs.
+
+---
+
+## Key Enums
 
 ### `rule_type`
 
-正式枚举：
+Current governed values:
 
 - `obligation`
 - `prohibition`
@@ -344,111 +404,58 @@
 - `normalized`
 - `inferred`
 
-## 8. 各 `rule_type` 的独有字段与示例
+`source_type` is especially important because it distinguishes:
 
-### 8.1 `obligation`
+- direct source facts
+- normalized restatements
+- inferred content that must not be mistaken for explicit source truth
 
-含义：
+---
 
-- 文档要求主体必须执行某个动作
+## Type-Specific Payloads
 
-独有字段：
+The current semantic model supports type-specific payloads under `type_payload`.
+
+### `obligation`
+
+Meaning:
+
+- the document requires an actor to perform an action
+
+Fields:
 
 - `type_payload.obligation.mode`
 - `type_payload.obligation.fulfillment`
 
-示例：
+### `prohibition`
 
-```json
-{
-  "classification": {
-    "rule_type": "obligation"
-  },
-  "statement": {
-    "actor": {"value": "member", "source_type": "normalized"},
-    "action": {"value": "retain_audit_trail", "source_type": "normalized"},
-    "object": {"value": "orders_trades_post_trade_operations", "source_type": "normalized"}
-  },
-  "type_payload": {
-    "obligation": {
-      "mode": "must",
-      "fulfillment": "required"
-    }
-  }
-}
-```
+Meaning:
 
-### 8.2 `prohibition`
+- the document forbids a behavior
 
-含义：
-
-- 文档明确禁止某种行为
-
-独有字段：
+Fields:
 
 - `type_payload.prohibition.mode`
 - `type_payload.prohibition.scope`
 
-示例：
+### `permission`
 
-```json
-{
-  "classification": {
-    "rule_type": "prohibition"
-  },
-  "statement": {
-    "actor": {"value": "member", "source_type": "normalized"},
-    "action": {"value": "submit_give_up_trade", "source_type": "normalized"},
-    "object": {"value": "give_up_trade", "source_type": "normalized"}
-  },
-  "type_payload": {
-    "prohibition": {
-      "mode": "must_not",
-      "scope": "submission"
-    }
-  }
-}
-```
+Meaning:
 
-### 8.3 `permission`
+- the document allows a behavior, but does not require it
 
-含义：
-
-- 文档允许某种行为，但不是义务
-
-独有字段：
+Fields:
 
 - `type_payload.permission.mode`
 - `type_payload.permission.optional`
 
-示例：
+### `deadline`
 
-```json
-{
-  "classification": {
-    "rule_type": "permission"
-  },
-  "statement": {
-    "actor": {"value": "executing_member", "source_type": "normalized"},
-    "action": {"value": "register_executor_half_directly", "source_type": "normalized"},
-    "object": {"value": "give_up_clearer", "source_type": "normalized"}
-  },
-  "type_payload": {
-    "permission": {
-      "mode": "may",
-      "optional": true
-    }
-  }
-}
-```
+Meaning:
 
-### 8.4 `deadline`
+- the document defines a timing constraint or deadline
 
-含义：
-
-- 文档规定了时间截止条件
-
-独有字段：
+Fields:
 
 - `type_payload.deadline.deadline_kind`
 - `type_payload.deadline.reference_event`
@@ -458,75 +465,26 @@
 - `type_payload.deadline.business_day_offset`
 - `type_payload.deadline.breach_outcome`
 
-示例：
+### `state_transition`
 
-```json
-{
-  "classification": {
-    "rule_type": "deadline"
-  },
-  "statement": {
-    "actor": {"value": "executing_member", "source_type": "normalized"},
-    "action": {"value": "enter_trade_half", "source_type": "normalized"},
-    "object": {"value": "give_up_executor_trade_half", "source_type": "normalized"}
-  },
-  "type_payload": {
-    "deadline": {
-      "deadline_kind": "relative",
-      "reference_event": "client_order_execution",
-      "offset_iso8601": "PT10M",
-      "absolute_time_local": null,
-      "timezone": "Europe/London",
-      "business_day_offset": 0,
-      "breach_outcome": "late_submission"
-    }
-  }
-}
-```
+Meaning:
 
-### 8.5 `state_transition`
+- the document describes a required or expected state change
 
-含义：
-
-- 文档要求或描述系统状态变化
-
-独有字段：
+Fields:
 
 - `type_payload.state_transition.trigger_event`
 - `type_payload.state_transition.from_state`
 - `type_payload.state_transition.to_state`
 - `type_payload.state_transition.automatic`
 
-示例：
+### `data_constraint`
 
-```json
-{
-  "classification": {
-    "rule_type": "state_transition"
-  },
-  "statement": {
-    "actor": {"value": "matching_system", "source_type": "normalized"},
-    "action": {"value": "generate_trade_half", "source_type": "normalized"},
-    "object": {"value": "give_up_clearer_trade_half", "source_type": "normalized"}
-  },
-  "type_payload": {
-    "state_transition": {
-      "trigger_event": "give_up_executor_trade_half_submitted",
-      "from_state": "submitted",
-      "to_state": "clearer_half_generated",
-      "automatic": true
-    }
-  }
-}
-```
+Meaning:
 
-### 8.6 `data_constraint`
+- the document constrains field values, formats, or allowed ranges
 
-含义：
-
-- 针对字段值、格式、允许范围的约束
-
-独有字段：
+Fields:
 
 - `type_payload.data_constraint.field`
 - `type_payload.data_constraint.constraint_kind`
@@ -534,88 +492,26 @@
 - `type_payload.data_constraint.allowed_values`
 - `type_payload.data_constraint.applies_when`
 
-示例：
+### `enum_definition`
 
-```json
-{
-  "classification": {
-    "rule_type": "data_constraint"
-  },
-  "statement": {
-    "conditions": [
-      {
-        "id": "C1",
-        "kind": "field",
-        "field": "venue_code",
-        "operator": "equals",
-        "value": "Inter-office",
-        "source_type": "explicit"
-      }
-    ],
-    "constraints": [
-      {
-        "id": "K1",
-        "field": "trade_time",
-        "operator": "matches_format",
-        "value": "HH:MM:SS",
-        "source_type": "explicit"
-      }
-    ]
-  },
-  "type_payload": {
-    "data_constraint": {
-      "field": "trade_time",
-      "constraint_kind": "format",
-      "format": "HH:MM:SS",
-      "allowed_values": [],
-      "applies_when": ["venue_code=Inter-office"]
-    }
-  }
-}
-```
+Meaning:
 
-### 8.7 `enum_definition`
+- the document defines a governed code value or enumerated meaning
 
-含义：
-
-- 定义规则词典中的代码值、账户值、价格类型等
-
-独有字段：
+Fields:
 
 - `type_payload.enum_definition.field`
 - `type_payload.enum_definition.value`
 - `type_payload.enum_definition.meaning`
 - `type_payload.enum_definition.applies_to`
 
-示例：
+### `workflow`
 
-```json
-{
-  "classification": {
-    "rule_type": "enum_definition"
-  },
-  "statement": {
-    "action": {"value": "define_enum_value", "source_type": "normalized"},
-    "object": {"value": "venue_code", "source_type": "normalized"}
-  },
-  "type_payload": {
-    "enum_definition": {
-      "field": "venue_code",
-      "value": "Inter-office",
-      "meaning": "all other business agreed non-electronically",
-      "applies_to": ["agreed_trade"]
-    }
-  }
-}
-```
+Meaning:
 
-### 8.8 `workflow`
+- the document defines a multi-branch or multi-step process
 
-含义：
-
-- 文档定义了多分支、多步骤流程
-
-独有字段：
+Fields:
 
 - `type_payload.workflow.trigger`
 - `type_payload.workflow.branches`
@@ -623,128 +519,79 @@
 - `branch_condition`
 - `steps`
 
-示例：
+### `calculation`
 
-```json
-{
-  "classification": {
-    "rule_type": "workflow"
-  },
-  "type_payload": {
-    "workflow": {
-      "trigger": "clearer becomes known after UNA flow",
-      "branches": [
-        {
-          "branch_id": "A",
-          "branch_condition": "cancel_cleared_trade_path",
-          "steps": [
-            "cancel_system_generated_cleared_trade",
-            "submit_executor_half_with_known_clearer"
-          ]
-        },
-        {
-          "branch_id": "B",
-          "branch_condition": "reverse_original_executor_half_path",
-          "steps": [
-            "reverse_original_executor_half",
-            "submit_executor_half_with_known_clearer"
-          ]
-        }
-      ]
-    }
-  }
-}
-```
+Meaning:
 
-### 8.9 `calculation`
+- the document defines a formula, substitution, derivation, or arithmetic rule
 
-含义：
-
-- 文档中存在公式、均值、替换、衍生值计算
-
-独有字段：
+Fields:
 
 - `type_payload.calculation.calculation_kind`
 - `type_payload.calculation.inputs`
 - `type_payload.calculation.formula_description`
 - `type_payload.calculation.rounding_rule`
 
-示例：
+### `reference_only`
 
-```json
-{
-  "classification": {
-    "rule_type": "calculation"
-  },
-  "type_payload": {
-    "calculation": {
-      "calculation_kind": "substitution",
-      "inputs": ["short_price_code", "published_absolute_value"],
-      "formula_description": "substitute correct price and calculate absolute values for differential legs",
-      "rounding_rule": null
-    }
-  }
-}
-```
+Meaning:
 
-### 8.10 `reference_only`
+- contextual or explanatory content retained for traceability, but not counted as coverage-eligible test scope
 
-含义：
-
-- 仅作为说明、背景或上下文保留，不直接生成测试
-
-独有字段：
+Fields:
 
 - `type_payload.reference_only.reason`
 
-示例：
+This type should normally imply:
 
-```json
-{
-  "classification": {
-    "rule_type": "reference_only",
-    "testability": "non_testable",
-    "coverage_eligible": false
-  },
-  "type_payload": {
-    "reference_only": {
-      "reason": "contextual_explanation_only"
-    }
-  }
-}
-```
+- `testability = non_testable`
+- `coverage_eligible = false`
 
-## 9. `semantic_rule` 与测试生成的关系
+---
 
-生成 Gherkin 时建议主要依赖：
+## Relationship to Later Test Design
+
+`semantic_rule` should help later test design, but it must not collapse into later-phase artifacts.
+
+### What later stages may use
+
+Later stages may draw from:
 
 - `statement`
 - `execution_mapping`
 - `test_design_hints`
 - `evidence`
 
-建议的映射方式：
+### What this document does not authorize
 
-- `Given` <- `conditions` 和 `preconditions_for_execution`
-- `When` <- `actor + action + object`
-- `Then` <- `outcome + observable_outputs + dsl_assertions`
+This document does not authorize:
 
-生成结构化 DSL 时建议主要依赖：
+- direct syntax-first Gherkin generation as the canonical contract
+- skipping planner or normalized BDD artifacts when those phases are introduced
+- treating `execution_mapping` as an execution-ready handoff
 
-- `business_inputs`
-- `observable_outputs`
-- `system_events`
-- `dsl_assertions`
+The correct downstream order remains:
 
-## 10. 开发建议
+- governed semantic artifacts first
+- later planner and normalized BDD contracts next
+- syntax-specific export after that
+- execution bridge only in later phases
 
-- 不要让大模型决定文本怎么切
-- 不要省略 `evidence`
-- 不要把 `source_type=inferred` 当成高置信事实
-- 不要把 `reference_only` 纳入可测覆盖率分母
-- 建议先稳定 `atomic_rule`，再做 `semantic_rule`
+---
 
-## 11. 相关文件
+## Design Guidance
 
-- 规则抽取脚本：[extract_matching_rules.py](/F:/Develop/python/LME-Testing/scripts/extract_matching_rules.py)
-- 脚本说明文档：[rule_extraction_script_guide.md](/F:/Develop/python/LME-Testing/docs/rule_extraction_script_guide.md)
+- Do not let the LLM decide document boundaries that should be deterministic.
+- Do not remove or weaken `evidence`.
+- Do not treat `source_type = inferred` as high-confidence source truth.
+- Do not include `reference_only` in coverage-eligible rule denominators.
+- Stabilize `atomic_rule` quality before expanding `semantic_rule` sophistication.
+- Prefer upstream traceability and reviewability over aggressive semantic compression.
+
+---
+
+## Related Files
+
+- [extract_matching_rules.py](../scripts/extract_matching_rules.py)
+- [generate_semantic_rules.py](../scripts/generate_semantic_rules.py)
+- [rule_extraction_script_guide.md](./rule_extraction_script_guide.md)

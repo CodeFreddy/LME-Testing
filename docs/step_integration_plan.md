@@ -2,15 +2,15 @@
 
 ## Purpose
 
-This document defines the bridge from governed BDD artifacts to executable step-definition-aware workflows.
+This document defines the future bridge from governed BDD artifacts to executable, step-definition-aware workflows.
 
 It exists because the repository is expected to evolve from:
 
 - document-driven rule extraction,
 - planning and BDD generation,
-- into step-aware, execution-ready enterprise AI testing.
+- into step-aware, execution-ready testing assets when the roadmap reaches that phase.
 
-This document does **not** assume that the repository is already a full execution platform.  
+This document does **not** assume that the repository is already a full execution platform.
 Instead, it defines the staged integration path between:
 
 - normalized BDD artifacts,
@@ -18,6 +18,9 @@ Instead, it defines the staged integration path between:
 - gap analysis,
 - execution-ready scenario contracts,
 - and future execution integration.
+
+This document is a future bridge, not a shortcut around the current roadmap baseline.
+It becomes actionable only after normalized BDD artifacts, traceability, and review contracts are stable enough to support it.
 
 This document should be read together with:
 
@@ -55,6 +58,8 @@ This deserves a dedicated plan because it introduces:
 - gap analysis,
 - and long-term execution integration.
 
+It should remain a later-phase design concern until the upstream governed artifacts are mature enough to make execution-facing work reliable.
+
 ---
 
 ## Scope
@@ -74,7 +79,8 @@ It does **not** define:
 - a full execution engine,
 - runtime environment orchestration,
 - distributed test execution infrastructure,
-- full CI/CD execution deployment details.
+- full CI/CD execution deployment details,
+- the current repo baseline for Phase 1 or early Phase 2 work.
 
 ---
 
@@ -86,26 +92,31 @@ If an existing step definition can satisfy a generated BDD step, the framework s
 
 ### 2. Step awareness starts after normalized BDD
 
-Generated raw text is not enough.  
+Generated raw text is not enough.
 Step-aware integration should begin from a governed normalized BDD contract.
 
-### 3. Team style is a governed input
+### 3. No step bridge without governed intermediate artifacts
+
+Step integration should not begin from direct syntax rendering alone.
+The bridge depends on governed normalized BDD outputs, stable traceability, and explicit mapping artifacts.
+
+### 4. Team style is a governed input
 
 Existing BDD conventions are part of execution compatibility, not just stylistic preference.
 
-### 4. Gap visibility is mandatory
+### 5. Gap visibility is mandatory
 
 The framework must make it obvious which generated steps:
 - map cleanly to existing implementations,
 - might map with parameterization,
 - or require new implementation.
 
-### 5. Execution readiness is a separate contract
+### 6. Execution readiness is a separate contract
 
-BDD is not the same as executable integration.  
+BDD is not the same as executable integration.
 Execution readiness must be represented explicitly.
 
-### 6. Stable traceability must survive the bridge
+### 7. Stable traceability must survive the bridge
 
 Source traceability, including stable source anchors such as paragraph-level identity where applicable, must remain available through BDD and step-integration outputs.
 
@@ -119,16 +130,18 @@ The intended bridge is:
 
 This bridge introduces four major layers:
 
-1. style learning,
-2. step inventory / registry,
-3. mapping and gap analysis,
-4. execution-ready handoff.
+1. style learning
+2. step inventory / registry
+3. mapping and gap analysis
+4. execution-ready handoff
+
+Each layer depends on the previous one being governed well enough to support reviewable downstream decisions.
 
 ---
 
 ## Step Integration Stages
 
-## Stage 1 — BDD Style Learning
+## Stage 1 - BDD Style Learning
 
 ### Goal
 Learn reusable BDD conventions from existing assets so generated BDD aligns with team practice.
@@ -159,7 +172,7 @@ This stage does not create execution bindings.
 
 ---
 
-## Stage 2 — Step Definition Registry
+## Stage 2 - Step Definition Registry
 
 ### Goal
 Create a governed registry of existing step definitions so reuse can be measured and planned.
@@ -189,7 +202,7 @@ This stage does not automatically create new steps.
 
 ---
 
-## Stage 3 — Mapping and Gap Analysis
+## Stage 3 - Mapping and Gap Analysis
 
 ### Goal
 Map normalized BDD steps to existing step definitions and expose what is missing.
@@ -229,7 +242,7 @@ This stage does not yet guarantee runtime executability.
 
 ---
 
-## Stage 4 — Review of Unmatched or Weakly Matched Steps
+## Stage 4 - Review of Unmatched or Weakly Matched Steps
 
 ### Goal
 Add human control over step gaps and ambiguous mappings.
@@ -252,14 +265,14 @@ Structured review decisions such as:
 ### Governance expectations
 - decisions must be structured,
 - decisions must be traceable to BDD artifacts,
-- decisions should be exportable and mergeable if review workflows are collaborative.
+- decisions should be exportable if review workflows require handoff or auditability.
 
 ### Non-goal
 This stage does not execute the scenario.
 
 ---
 
-## Stage 5 — Step Stub Generation Strategy (Optional but Planned)
+## Stage 5 - Step Stub Generation Strategy (Optional)
 
 ### Goal
 Provide a governed path for creating implementation-ready stubs for steps that do not exist.
@@ -283,11 +296,11 @@ Potential future outputs:
 - generated stubs should preserve traceability and gap context.
 
 ### Non-goal
-This stage is not required for the initial enterprise adoption path and should remain optional until registry and mapping are mature.
+This stage is not required for the current roadmap baseline and should remain optional until registry and mapping are mature.
 
 ---
 
-## Stage 6 — Execution-Ready Handoff
+## Stage 6 - Execution-Ready Handoff
 
 ### Goal
 Represent the execution-facing contract after BDD and step integration are sufficiently mature.
@@ -341,7 +354,8 @@ Style learning should not:
 - override schema contracts,
 - invent hidden execution assumptions,
 - silently rewrite core business intent,
-- become an opaque unreviewable heuristic.
+- become an opaque unreviewable heuristic,
+- bypass normalized BDD contracts with style-only `.feature` generation.
 
 ## Output recommendations
 
@@ -381,6 +395,8 @@ The registry is not:
 - a substitute for runtime validation,
 - a substitute for code ownership processes.
 
+It is also not required for the current baseline before the roadmap reaches execution-readiness work.
+
 ---
 
 ## Mapping Strategy
@@ -400,6 +416,8 @@ The system should:
 - preserve candidate ambiguity explicitly,
 - require review when confidence is weak,
 - avoid silently collapsing candidate matches into executable truth.
+
+Matching logic should be introduced only after the upstream normalized BDD artifact is stable enough to make mappings reviewable and repeatable.
 
 ## Mapping outputs
 
@@ -475,7 +493,8 @@ A minimum recommended artifact set for governed step integration includes:
 - review decisions for ambiguous or unmatched steps,
 - execution-ready handoff artifact when available.
 
-These should be discoverable and exportable.
+These should be discoverable and exportable when this bridge is active.
+They do not need to exist before the roadmap reaches the relevant phase.
 
 ---
 
@@ -502,34 +521,40 @@ These should be discoverable and exportable.
 - deterministic assertion references are present where required,
 - traceability survives the bridge.
 
+Validation depth should remain proportional to the active phase.
+The repo should not build a heavy execution-governance program before the bridge itself becomes part of active scope.
+
 ---
 
 ## Acceptance-Oriented Milestones
 
-## Milestone A — Style-aware normalized BDD
+## Milestone A - Style-aware normalized BDD
 Complete when:
 - normalized BDD exists,
 - style-learning artifacts exist,
 - generated BDD can reference style guidance.
 
-## Milestone B — Step registry and mapping visibility
+## Milestone B - Step registry and mapping visibility
 Complete when:
 - a step registry exists,
 - normalized BDD can be mapped,
 - unmatched steps are visible,
 - reuse metrics can be reported.
 
-## Milestone C — Reviewable gap governance
+## Milestone C - Reviewable gap governance
 Complete when:
 - ambiguous and unmatched steps can be reviewed,
 - step gap decisions are structured,
 - gap reports are exportable.
 
-## Milestone D — Execution-ready handoff
+## Milestone D - Execution-ready handoff
 Complete when:
 - step-aware execution artifacts can be produced,
 - unresolved implementation gaps remain visible,
 - deterministic assertion references are attached where required.
+
+These milestones should be treated as later-phase objectives.
+They are not evidence that Phase 1 or early Phase 2 baseline work is complete.
 
 ---
 
@@ -555,6 +580,9 @@ Do not imply that a scenario is executable unless step mapping and required exec
 ### 6. Treat stub generation as governed output
 If stubs are generated, they must be labeled and kept separate from trusted manually maintained libraries unless explicitly approved.
 
+### 7. Do not pull step integration forward across phases
+If normalized BDD contracts, traceability, or review gates are not yet stable, do not present step integration as current baseline work.
+
 ---
 
 ## Recommended Future Repo Structure (Conceptual)
@@ -568,7 +596,7 @@ The exact structure may evolve, but conceptually the repo should have discoverab
 - step-review records
 - execution-ready handoff artifacts
 
-Directory names may vary.  
+Directory names may vary.
 The governance requirement is discoverability and traceability, not one hardcoded folder tree.
 
 ---
@@ -585,6 +613,7 @@ Use these questions before approving step-integration changes:
 - Are gaps exportable and reviewable?
 - Does traceability survive the bridge?
 - Is execution readiness explicit rather than implied?
+- Is this being introduced at the roadmap phase where it actually belongs?
 
 ---
 
@@ -594,11 +623,13 @@ Step integration is the bridge between AI-generated test design and executable t
 
 In this repository, that bridge should evolve in stages:
 
-1. learn team BDD style,
-2. build a governed step registry,
-3. map normalized BDD to existing steps,
-4. expose gaps clearly,
-5. optionally generate governed stubs,
-6. produce explicit execution-ready handoff artifacts.
+1. learn team BDD style
+2. build a governed step registry
+3. map normalized BDD to existing steps
+4. expose gaps clearly
+5. optionally generate governed stubs
+6. produce explicit execution-ready handoff artifacts
 
-This staged approach preserves reuse, traceability, reviewability, and enterprise readiness without pretending that BDD generation alone equals executable automation.
+This staged approach preserves reuse, traceability, and reviewability without pretending that BDD generation alone equals executable automation.
+
+In the current repo phase, the practical implication is narrower: keep step integration clearly positioned as a later bridge, and avoid designing execution-facing machinery before the normalized BDD and governance foundations are ready.

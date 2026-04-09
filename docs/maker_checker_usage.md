@@ -2,6 +2,9 @@
 
 本文档说明当前项目中 `maker`、`checker`、`report` 的调用方式、关键参数、输出目录、严格覆盖判定规则和接手注意事项。
 
+本文档是运行说明，不是架构总览。
+运行前请先确认当前输入 artifacts、schema 约束、model/prompt 配置和 phase 边界已经与治理文档一致。
+
 ## 1. 相关脚本与目录
 
 - 入口脚本：`main.py`
@@ -24,6 +27,22 @@
 ```text
 config/llm_profiles.example.json
 ```
+
+## 2.1 运行前提与治理约束
+
+在运行 `maker` / `checker` 之前，应先确认以下前提成立：
+
+- 输入 `semantic_rules.json` 来自当前受控 extraction 流程，而不是临时手改或聊天产物
+- 上游 `atomic_rule` / `semantic_rule` artifacts 已通过基本校验并可追溯到源文档
+- 本次运行使用的 model / prompt / config 可在 repo 中被识别和回溯
+- 当前运行目标属于 active roadmap phase，不要把后续 phase 的 planner / normalized BDD / step integration 假设混入 maker/checker baseline
+
+推荐先阅读：
+
+- `docs/roadmap.md`
+- `docs/model_governance.md`
+- `docs/testing_governance.md`
+- `docs/acceptance.md`
 
 ## 3. maker 调用方式
 
@@ -52,6 +71,12 @@ python main.py --config config/llm_profiles.example.json maker `
 - `--limit`
 - `--batch-size`
 - `--resume-from`
+
+### 3.4 maker 运行说明
+
+- `maker` 的职责是基于受控 `semantic_rule` 生成 case 候选，不负责修复上游规则质量问题
+- 如果输入 rule 的 evidence、traceability 或 classification 明显有问题，应先回到 extraction / semantic artifact 层修正
+- baseline 调试默认从小样本开始，不建议直接拿全量规则做 prompt 调参
 
 ## 4. checker 调用方式
 
@@ -83,6 +108,12 @@ python main.py --config config/llm_profiles.example.json checker `
 - `--limit`
 - `--batch-size`
 - `--resume-from`
+
+### 4.4 checker 运行说明
+
+- `checker` 的职责是评审 `maker` 产物与规则覆盖关系，不应被当成上游 rule 质量缺陷的替代修复层
+- checker 的稳定性应优先在小型 governed baseline 上观察，而不是默认要求全量重复跑
+- 如果 checker 输出持续暴露同类上游问题，应优先回看 `semantic_rules.json` 而不是继续追加下游补丁
 
 ## 5. report 调用方式
 
@@ -123,6 +154,11 @@ python main.py report `
   - 只看 maker 结果，方便检查 rule 是否遗漏、scenario 数是否合理、`given / when / then / evidence` 是否完整
 - `checker_readable.html`
   - 只看 checker 审核结果，方便检查 review 是否遗漏、`scores / findings / coverage reason` 是否合理
+
+### 5.4 report 的使用边界
+
+- `report` 用于提高结果可读性，不替代 schema 校验、artifact 审查或 acceptance gate
+- 报表里看到的 coverage / pass 结果依赖上游 artifacts 的质量，因此不能把 HTML 视为独立真相来源
 
 ## 6. 当前 prompt / schema 约束
 
@@ -232,10 +268,11 @@ python main.py report `
 ## 8. 推荐执行顺序
 
 1. 先跑 `artifacts/poc_two_rules/semantic_rules.json`
-2. 看 maker / checker 原始输出是否稳定
-3. 生成 HTML 做人工快速审核
-4. 再跑全量规则
-5. 如果中途中断，用 `--resume-from` 续跑，不要从头重跑
+2. 确认本次 run 的 config、model、prompt 口径明确且可追溯
+3. 看 maker / checker 原始输出是否稳定
+4. 生成 HTML 做人工快速审核
+5. 再跑全量规则
+6. 如果中途中断，用 `--resume-from` 续跑，不要从头重跑
 
 ## 9. 当前已生成的真实产物
 
@@ -261,6 +298,7 @@ python main.py report `
 - 如果修改了 maker/checker 的 schema，也必须同步更新 `prompts.py` 中的 schema 示例和本文档。
 - 如果修改了 `rule_type -> required_case_types` 映射，也必须同步更新本文档第 7 节。
 - 以后任何真实联调，默认先走 `artifacts/poc_two_rules` 小样本，不要直接全量跑。
+- 如果修改了 run metadata、model/profile 记录方式或报表口径，也必须同步检查 `docs/model_governance.md`、`docs/testing_governance.md` 与本文档是否仍一致。
 
 
 

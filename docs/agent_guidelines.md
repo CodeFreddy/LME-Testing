@@ -112,6 +112,15 @@ Agents should prefer:
 
 Avoid broad, implicit rewrites unless the change is explicitly requested and acceptance criteria are updated.
 
+### 3A. Do not introduce a new LLM-driven stage without a contract
+
+Agents must not add a new planner-like, BDD-normalization-like, or similar model-driven stage as baseline repo behavior unless the stage has:
+- a defined artifact contract,
+- validation rules,
+- traceability expectations,
+- reviewable outputs,
+- documented failure behavior.
+
 ### 4. Keep structured outputs structured
 
 If a module currently emits structured JSON or schema-governed artifacts, an agent must not replace that with free-form text output unless the contract is intentionally revised.
@@ -161,7 +170,8 @@ Agents must not:
 - remove tests or benchmarks without replacement,
 - replace deterministic checks with LLM-only logic,
 - hide failures by swallowing validation errors,
-- silently coerce malformed structured output into valid artifacts.
+- silently coerce malformed structured output into valid artifacts,
+- treat rendered syntax output as canonical where a normalized governed artifact should own the contract.
 
 Agents must not expand the architectural scope of a task just because it seems beneficial.
 
@@ -176,6 +186,7 @@ Allowed focus:
 - schema validation,
 - rule validation,
 - CI,
+- source-anchor groundwork,
 - prompt metadata,
 - artifact metadata,
 - checker stability visibility,
@@ -193,21 +204,23 @@ Allowed focus:
 - planner stage,
 - normalized BDD contract,
 - traceability,
-- review package exchange,
+- BDD style learning,
+- step visibility,
 - richer dashboards.
 
 Not allowed unless explicitly requested:
 - full enterprise hosted platform,
 - unrestricted execution automation,
-- cross-team production platform assumptions.
+- cross-team production platform assumptions,
+- heavy review collaboration features presented as baseline capability.
 
 ### Long-term phase work
 Allowed focus:
 - step binding,
 - execution-ready contracts,
 - deterministic oracle framework,
-- hosted review service,
-- enterprise observability.
+- selective governance signals,
+- release governance.
 
 Not allowed:
 - free-form autonomous behavior without approval gates,
@@ -296,7 +309,7 @@ No agent may change a production prompt without:
 - linking benchmark evidence.
 
 ### 2. Prompt edits are governed changes
-A prompt change is not “just text”; it is a behavioral change.
+A prompt change is not "just text"; it is a behavioral change.
 
 ### 3. Do not optimize prompts only for a narrow happy path
 Prompt changes must be evaluated against benchmark coverage, not only an example that happens to improve.
@@ -441,13 +454,13 @@ This sequence helps prevent uncontrolled drift.
 
 Agents should explicitly avoid these anti-patterns:
 
-- “The current model seemed better in my quick test, so I switched the default.”
-- “The schema was restrictive, so I relaxed it without updating downstream logic.”
-- “The JSON parser was failing, so I accepted malformed output automatically.”
-- “The roadmap did not mention this, but I implemented a bigger platform feature while I was here.”
-- “The test was flaky, so I removed it.”
-- “The prompt changed, but no version bump was needed.”
-- “The docs were outdated, so I ignored them instead of updating them.”
+- "The current model seemed better in my quick test, so I switched the default."
+- "The schema was restrictive, so I relaxed it without updating downstream logic."
+- "The JSON parser was failing, so I accepted malformed output automatically."
+- "The roadmap did not mention this, but I implemented a bigger platform feature while I was here."
+- "The test was flaky, so I removed it."
+- "The prompt changed, but no version bump was needed."
+- "The docs were outdated, so I ignored them instead of updating them."
 
 ---
 

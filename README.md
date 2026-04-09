@@ -172,11 +172,21 @@ HTML 报表
 第一次接手，不要直接跑全量规则。建议按下面顺序：
 
 1. 先看 `artifacts/poc_two_rules/`
-2. 再看 `docs/maker_checker_usage.md`
-3. 用 POC 小样本跑一遍 maker
-4. 再跑 checker
-5. 最后生成 HTML 报表
-6. 确认逻辑正确后，再考虑跑全量 `artifacts/lme_rules_v2_2/`
+2. 先跑基础治理检查
+3. 再看 `docs/maker_checker_usage.md`
+4. 用 POC 小样本跑一遍 maker
+5. 再跑 checker
+6. 最后生成 HTML 报表
+7. 确认逻辑正确后，再考虑跑全量 `artifacts/lme_rules_v2_2/`
+
+基础治理检查命令：
+
+```powershell
+python scripts/check_docs_governance.py
+python scripts/check_artifact_governance.py
+```
+
+如果本机 `python` 不在 `PATH`，请改用你环境里的 Python 可执行路径运行同样命令。
 
 ## 当前项目里最值得关注的几个事实
 
@@ -184,6 +194,7 @@ HTML 报表
 - checker 现在已经按更严格的 `required_case_types` 判断 rule 是否真正被覆盖
 - POC 小样本是默认回归入口，避免每次都跑全量文档
 - 运行结果允许持久化，因此 `runs/` 和 `reports/` 会保留历史结果，方便比较不同 prompt / schema 版本
+- docs 和 baseline artifacts 现在都有独立治理检查，修改文档或基线产物前后都应先跑一遍
 
 ## 你下一步应该看什么
 

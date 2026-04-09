@@ -15,6 +15,9 @@ They are long-lived behavioral assets that can materially affect:
 - planning behavior in future phases,
 - and any other model-driven workflow.
 
+Prompt lifecycle governance in this repo is phase-aware. It should make prompt behavior
+reviewable and rollback-safe without forcing a heavier process than the current roadmap phase justifies.
+
 This document should be read together with:
 
 - `docs/testing_governance.md`
@@ -61,6 +64,8 @@ This document governs:
 
 This document does not replace provider governance or schema governance.
 
+It also does not require a fully centralized prompt platform before the repo has enough governed prompt assets to justify one.
+
 ---
 
 ## Prompt Governance Principles
@@ -84,6 +89,8 @@ A prompt revision is a behavioral change and must be supported by:
 - benchmark evidence,
 - and impact awareness.
 
+The evidence required should be proportional to the prompt's role and the active roadmap phase.
+
 ### 5. Prompt dependencies must remain visible
 
 If one prompt depends on upstream output or feeds downstream stages, those dependencies must be documented.
@@ -91,6 +98,11 @@ If one prompt depends on upstream output or feeds downstream stages, those depen
 ### 6. Prompt rollback must be possible
 
 A prompt revision is not safely released unless prior behavior can be restored.
+
+### 7. No prompt should define an ungoverned stage
+
+A prompt may refine an existing governed stage, but it must not silently introduce a new model-driven workflow
+whose outputs, contracts, traceability, and review path are undefined.
 
 ---
 
@@ -120,6 +132,7 @@ This inventory may live in:
 - or a documented prompt directory convention.
 
 The exact implementation may evolve, but the inventory must be explicit and version-controlled.
+For the current repo phase, lightweight inventory conventions are acceptable if they remain reviewable.
 
 ---
 
@@ -182,7 +195,7 @@ Used by checker or similar evaluation modules.
 Used to regenerate targeted outputs.
 
 ### 6. Planning prompts
-Used in future planning stages.
+Used in planning stages after a governed planner contract exists.
 
 ### 7. Review support prompts
 Used to summarize, classify, or support human review workflows.
@@ -207,6 +220,9 @@ Each prompt should be stored with:
 - change notes if separated.
 
 Prompt storage should be easy to audit and review in source control.
+
+The storage model should stay proportionate to current repo maturity. A simple explicit directory
+structure is preferable to an elaborate prompt management layer introduced too early.
 
 ---
 
@@ -238,6 +254,9 @@ Every governed prompt should have metadata, either embedded or adjacent.
 - rollback notes
 - deprecation notes
 
+Metadata should stay focused on fields that materially improve review, traceability, and rollback.
+Do not require metadata so detailed that prompt upkeep becomes heavier than the prompt change itself.
+
 ---
 
 ## Prompt Dependency Governance
@@ -266,6 +285,9 @@ A prompt may feed:
 ## 3. Dependency rule
 
 If a prompt change alters an input assumption or output structure that affects other stages, that dependency impact must be recorded.
+
+If the prompt belongs to a future or newly introduced stage, the stage contract must already be defined in the repo
+before that prompt is treated as a governed default.
 
 ## 4. Sequence-sensitive workflows
 
@@ -298,6 +320,8 @@ A prompt version must be bumped when:
 - assumptions or constraints change,
 - benchmark expectations change,
 - dependency behavior changes.
+
+Purely editorial changes may use the lightest available bump, but they still must not be silent.
 
 ## 3. No silent prompt edits
 
@@ -336,6 +360,8 @@ Check:
 ### Step 4: Run benchmark or validation checks
 Use the linked benchmark set for that prompt category or module.
 
+For the current repo phase, this should usually begin with a small governed baseline set rather than a full-corpus rerun.
+
 ### Step 5: Review output differences
 Review:
 - schema validity,
@@ -343,6 +369,9 @@ Review:
 - output completeness,
 - checker stability if relevant,
 - confidence and review implications if relevant.
+
+If the prompt affects a future governed stage such as planning or normalized BDD generation, review should also confirm
+that the stage contract still holds and that downstream traceability remains intact.
 
 ### Step 6: Approve, reject, or keep experimental
 If evidence is insufficient, do not promote to active default.
@@ -385,6 +414,7 @@ Before approving a prompt revision, reviewers should ask:
 - Did output structure change?
 - Does rollback remain possible?
 - Does the prompt still belong to the same lifecycle status?
+- Is this prompt still operating inside an already governed stage?
 
 If these cannot be answered clearly, the prompt change is not review-ready.
 
@@ -416,6 +446,9 @@ If only part of a prompt set is updated, the repo must still preserve awareness 
 - version mix,
 - dependency coherence.
 
+This does not require a heavyweight prompt-set platform in the current repo phase; it requires only that the set
+remain explicit and reviewable.
+
 ---
 
 ## Prompt Output Governance
@@ -432,6 +465,9 @@ For major prompts, the repo should document:
 
 This helps ensure prompt evolution is connected to observable artifact behavior.
 
+For prompts attached to structured intermediate artifacts, output governance should point to the governing schema or contract,
+not just describe the intended prose format.
+
 ---
 
 ## Prompt Validation Policy
@@ -446,6 +482,9 @@ Prompt updates should be validated using a mix of:
 - integration path review where sequence matters.
 
 A prompt should not be accepted purely because one example output looked better.
+
+Validation depth should remain phase-appropriate. The repo should not require a testing program heavier than the
+current roadmap phase justifies just to approve a small prompt improvement.
 
 ---
 
@@ -462,6 +501,8 @@ Some prompts may exist only for exploration.
 ### Experimental prompts must not:
 - overwrite default governed prompt behavior without review,
 - be confused with active production prompts.
+
+Experimental prompts also must not be used to backdoor a new model-driven stage into the baseline workflow.
 
 ---
 
@@ -512,6 +553,9 @@ Every important prompt revision should be rollback-aware.
 
 A prompt change is not safely promoted without rollback clarity.
 
+For baseline prompts, rollback expectations should be concrete enough that an agent or reviewer can restore the prior state
+without reconstructing hidden chat context.
+
 ---
 
 ## Prompt Lifecycle States
@@ -552,6 +596,9 @@ Model governance governs:
 - benchmark thresholds,
 - rollout and rollback across model APIs.
 
+Prompt lifecycle should not duplicate model governance. It should describe prompt identity and change control,
+while deferring cross-model policy and release thresholds to `docs/model_governance.md`.
+
 ## With `docs/testing_governance.md`
 Prompt lifecycle governs prompt assets directly.
 
@@ -591,6 +638,12 @@ Benchmark and review gates still apply.
 ### 6. Keep prompt metadata aligned with prompt content
 Metadata drift is a governance defect.
 
+### 7. Do not use prompt edits to expand phase scope silently
+Prompt work must stay inside the currently governed roadmap phase unless the new stage contract is explicitly introduced.
+
+### 8. Do not treat a syntax-specific rendering prompt as the canonical contract
+If the architecture defines a governed intermediate artifact, prompt changes must preserve that boundary.
+
 ---
 
 ## Suggested Repository Additions
@@ -604,6 +657,7 @@ To support prompt lifecycle governance, the repo should consider maintaining:
 - benchmark cases linked to major prompt categories
 
 The exact file format may vary, but lifecycle information must remain explicit and reviewable.
+These additions are optional until the active prompt inventory is large enough to justify them.
 
 ---
 
@@ -641,3 +695,6 @@ In this repository, prompt governance should preserve:
 - and controlled deprecation and rollback.
 
 This is essential for any AI testing framework that expects to evolve safely across multiple models, workflows, and contributors.
+
+In the current repo phase, the practical goal is narrower: keep prompt changes explicit, benchmarked on a small governed baseline,
+aligned with stage contracts, and safe for both humans and AI coding agents to review.

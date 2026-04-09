@@ -39,7 +39,7 @@ This architecture is optimized for:
 
 It is **not yet** a full execution platform.
 
-Execution integration, step definition mapping, deterministic runtime assertions, and hosted multi-user review are future architectural layers, not current core layers.
+Execution integration, step definition mapping, deterministic runtime assertions, and heavy hosted collaboration are future architectural layers, not current core layers.
 
 ---
 
@@ -88,6 +88,8 @@ LLM-assisted stages may propose or interpret, but the overall architecture must 
 - benchmark gates,
 - and acceptance rules.
 
+No new LLM-driven stage should become part of the governed baseline unless its outputs are contract-defined, reviewable, and traceable.
+
 ### 4. Module boundaries must remain explicit
 
 Business logic, provider logic, schema logic, review logic, and reporting logic should not be mixed casually.
@@ -107,6 +109,19 @@ If behavior is expected to be repeatable across humans, models, providers, or se
 - implementation tasks.
 
 Durable system behavior must not depend only on transient conversation context.
+
+### 7. New LLM-driven stages require contract-first introduction
+
+Future planner, normalized BDD, or similar stages must not be introduced as free-form pipeline expansions.
+
+Before a new LLM-assisted stage becomes part of the governed baseline, the architecture should define:
+- the artifact contract,
+- validation rules,
+- traceability expectations,
+- reviewability requirements,
+- failure behavior.
+
+This is especially important for planner outputs and normalized BDD artifacts.
 
 ---
 
@@ -178,9 +193,15 @@ This target architecture adds:
 - step definition registry and mapping,
 - execution-ready handoff,
 - deterministic runtime validation,
-- enterprise observability.
+- selective governance signals.
 
 These are future extensions, not current assumptions.
+
+The ordering is intentional:
+- planning should follow governed semantic rules,
+- normalized BDD should exist before syntax-specific outputs become the canonical handoff,
+- execution integration should follow normalized BDD and step mapping,
+- deterministic oracle layers should be introduced where business value justifies them.
 
 ---
 
@@ -215,7 +236,8 @@ Examples:
 - checker outputs,
 - rewrite outputs,
 - planner outputs in future phases,
-- normalized BDD outputs in future phases.
+- normalized BDD outputs in future phases,
+- syntax-specific BDD renderings such as `.feature` exports in future phases.
 
 ### 4. Review artifacts
 Represent human review state and decisions.
@@ -370,6 +392,16 @@ It becomes the handoff artifact between test design and execution integration.
 - schema-validatable,
 - reusable across output formats.
 
+### Must be introduced only when
+- its contract is defined explicitly,
+- at least one validator exists,
+- at least one renderer or downstream consumer exists,
+- raw syntax output is no longer the only governed representation.
+
+### Must not become
+- a vague synonym for rendered Gherkin text,
+- an unvalidated middle layer between planner and execution work.
+
 ---
 
 ## 7. Executable Scenario Artifact (future)
@@ -385,6 +417,11 @@ It bridges design artifacts to runtime integration.
 - deterministic where possible,
 - test-environment aware,
 - independent from undocumented model behavior.
+
+### Must not become
+- a bucket for unresolved design ambiguity,
+- a substitute for step mapping evidence,
+- a substitute for deterministic oracle ownership.
 
 ---
 
@@ -425,12 +462,14 @@ Own:
 - rewrite,
 - future planner,
 - future normalized BDD generation,
-- future BDD style-learning outputs.
+- future BDD style-learning outputs,
+- future syntax-specific exporters built on normalized BDD.
 
 Do not own:
 - provider adapter internals,
 - schema registry policy,
-- long-term analytics logic.
+- long-term analytics logic,
+- canonical execution truth.
 
 ## 4. Evaluation modules
 Own:
@@ -447,7 +486,6 @@ Do not own:
 Own:
 - review state,
 - decision storage,
-- decision export/import in future phases,
 - human workflow control.
 
 Do not own:
@@ -598,6 +636,12 @@ Checks:
 - expected field completeness,
 - metadata presence.
 
+For future planner and normalized BDD stages, generation validation should also check:
+- stage-specific contract conformance,
+- traceability continuity,
+- reviewability of outputs,
+- renderer or downstream-consumer compatibility where relevant.
+
 ### 4. Review validation
 Checks:
 - decision format,
@@ -697,6 +741,8 @@ Examples include:
 - change-impact notes,
 - audit-style execution records.
 
+The architecture does not require a full enterprise observability stack before those artifacts are justified by actual platform usage.
+
 The exact directory structure may evolve, but the architecture assumes these artifacts are repo-readable and reviewable.
 
 ---
@@ -730,7 +776,7 @@ Examples:
 ### 4. Review failure
 Examples:
 - incomplete review state,
-- conflicting review packages in future collaboration flows.
+- conflicting review state in any future collaboration flow.
 
 ### 5. Reporting failure
 Examples:
@@ -763,7 +809,8 @@ The repo may evolve by:
 - introducing BDD style-learning assets,
 - introducing step registry and mapping,
 - introducing execution contracts,
-- improving collaboration and observability.
+- improving collaboration where justified,
+- improving selective governance signals and observability where justified.
 
 ## Disallowed architectural drift
 
@@ -772,7 +819,9 @@ The repo should not drift into:
 - free-form artifact formats,
 - unclear module ownership,
 - silent contract weakening,
-- later-phase features hidden inside early-phase work.
+- later-phase features hidden inside early-phase work,
+- syntax-first BDD pipelines that skip normalized governed artifacts once the normalized layer is introduced,
+- heavy hosted collaboration assumptions becoming implicit architecture before the repo actually needs them.
 
 ---
 
@@ -835,6 +884,8 @@ Use these questions before approving major changes:
 - Does it keep provider logic isolated?
 - Does it blur module boundaries?
 - Does it move deterministic responsibilities into LLM-only logic?
+- Does it introduce a new LLM-driven stage without a defined contract?
+- Does it treat syntax output as canonical where a normalized artifact should own the contract?
 - Does it silently introduce later-phase capabilities?
 - Does it preserve rollback clarity?
 - Does it align with the current roadmap phase?

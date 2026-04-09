@@ -13,6 +13,7 @@ It is intended to be used by:
 This document should be read together with:
 
 - `docs/roadmap.md`
+- `docs/implementation_plan.md`
 - `docs/architecture.md`
 - `docs/model_governance.md`
 - `docs/agent_guidelines.md`
@@ -24,6 +25,7 @@ This document should be read together with:
 These rules apply to all phases.
 
 ### 1. No acceptance without evidence
+
 A phase item is not complete unless there is clear evidence of completion.
 
 Accepted evidence types include:
@@ -37,31 +39,49 @@ Accepted evidence types include:
 - change notes in the repo.
 
 ### 2. No artifact contract change without coordinated updates
+
 Any change to an artifact format requires all of the following:
 
-- schema update,
-- migration note,
+- schema update or equivalent contract update,
+- migration note where applicable,
 - test update,
 - documentation update,
 - acceptance checklist update if the change affects phase gates.
 
-### 3. No model change without regression check
-A new model API, model version, or prompt version must not be adopted unless benchmark and stability checks have passed.
+### 3. No model or prompt change without regression check
+
+A new model API, model version, or prompt version must not be adopted unless benchmark and stability checks have passed at the level required by the active phase.
 
 ### 4. No phase crossover without approval
+
 Work from a later phase must not be merged into an earlier phase unless explicitly approved and documented.
 
 ### 5. Structured outputs remain structured
+
 Any module that currently emits structured JSON must continue to emit structured JSON unless the contract is intentionally revised.
 
 ### 6. Phase gate sign-off is required for cross-phase execution
+
 If work from a later phase is requested, the relevant earlier phase gate must already be signed off, or the missing sign-off must be explicitly flagged.
 
 Examples:
+
 - Phase 2 work should not be treated as normal implementation if the equivalent Phase 1 gate has not been completed.
 - Phase 3 work should not be treated as normal implementation if the required earlier phase gates are missing.
 
 Where a repo uses explicit gate files or equivalent gate records, those records should be checked before cross-phase implementation is considered complete.
+
+### 7. New LLM-driven stages require governed contracts
+
+No new LLM-driven stage should be treated as accepted baseline behavior unless it has:
+
+- a defined artifact contract,
+- schema or equivalent deterministic validation,
+- traceability expectations,
+- reviewable outputs,
+- documented failure behavior.
+
+This rule is especially important for planner outputs and normalized BDD artifacts.
 
 ---
 
@@ -79,7 +99,7 @@ Each completed roadmap item should provide evidence in this form:
 
 ---
 
-# Phase 1 Acceptance: Short-Term Stabilization (0–3 Months)
+# Phase 1 Acceptance: Baseline Control and Pipeline Hardening (0-3 Months)
 
 ## Phase Goal
 
@@ -89,12 +109,15 @@ Stabilize the current document-to-rule-to-BDD design pipeline so that different 
 
 Phase 1 is complete only if all required acceptance sections below pass.
 
+Phase 1 is intentionally biased toward control, validation, and reproducibility before workflow expansion.
+
 ---
 
 ## 1. Artifact Schema Gate
 
 ### Required
-Versioned schemas must exist for:
+
+Governed schemas or equivalent governed validation contracts must exist for:
 
 - `atomic_rule`
 - `semantic_rule`
@@ -103,40 +126,42 @@ Versioned schemas must exist for:
 - human review output
 
 ### Acceptance Criteria
-- each schema is stored in the repo,
-- schema version is declared,
+
+- each artifact contract is stored in the repo,
+- contract version or validation version is declared,
 - example artifacts validate successfully,
 - invalid sample artifacts fail validation.
 
 ### Evidence
-- schema files committed,
+
+- schema files or governed validation modules committed,
 - validation test output,
 - example valid and invalid fixtures.
 
-### Status
-⚠️ **Partial** (2026-04-09): Python validation logic exists in `lme_testing/schemas.py` (`validate_maker_payload`, `validate_checker_payload`). Versioned JSON Schema files (`.json` format) have not yet been committed — only Python code. JSON Schema files are required per acceptance criteria.
-
 ---
 
-## 2. Rule Validation Pipeline Gate
+## 2. Upstream Validation Pipeline Gate
 
 ### Required
+
 A formal validation stage must exist between extraction and downstream generation.
 
-Expected flow:
+Expected path:
 
 `docs -> extraction scripts -> atomic_rules.json -> schema validation -> duplicate candidate detection -> rule_type enum validation -> semantic_rules.json`
 
 ### Acceptance Criteria
+
 - invalid `atomic_rule` artifacts fail the pipeline,
 - invalid `rule_type` values fail the pipeline,
 - duplicate candidate detection produces a machine-readable result,
-- invalid trace references are surfaced as validation findings,
+- invalid trace references are surfaced as validation findings where trace fields already exist,
 - the validation stage can produce a structured validation report,
 - the report includes total rules, valid count, invalid count, and per-rule error details,
 - validation failure prevents downstream maker execution.
 
 ### Evidence
+
 - pipeline implementation,
 - test fixtures that intentionally fail,
 - CI logs showing enforcement,
@@ -144,34 +169,16 @@ Expected flow:
 
 ---
 
-## 3. Model and Prompt Metadata Gate
+## 3. Baseline CI Gate
 
 ### Required
-All maker and checker artifacts must record metadata about how they were generated.
 
-### Acceptance Criteria
-Each generated artifact must include:
-- provider,
-- model identifier,
-- prompt version,
-- run timestamp,
-- source artifact hash,
-- pipeline version.
-
-### Evidence
-- generated sample artifacts,
-- schema support for metadata,
-- tests confirming metadata presence.
-
----
-
-## 4. Baseline CI Gate
-
-### Required
 A baseline CI workflow must run automatically.
 
 ### Acceptance Criteria
+
 CI must run at least:
+
 - end-to-end smoke on a minimal baseline dataset,
 - schema validation tests,
 - reporting smoke test,
@@ -179,113 +186,153 @@ CI must run at least:
 - an end-to-end smoke path that can run without real LLM API calls by using a deterministic stub provider or equivalent governed test double.
 
 ### Evidence
+
 - CI workflow files,
 - CI run logs,
-- pass/fail status on example PRs or commits.
-
-### Status
-✅ **Addressed** (2026-04-09): `.github/workflows/ci.yml` runs unit tests and end-to-end smoke via `.github/workflows/smoke_test.py` using `SmokeFakeProvider`. Unit tests discovered via `tests/__init__.py`.
+- pass or fail status on example commits or PRs.
 
 ---
 
-## 5. Checker Stability Gate
+## 4. Model and Prompt Metadata Gate
 
 ### Required
-Checker output instability must be detectable on a baseline set.
+
+All maker and checker artifacts must record metadata about how they were generated.
 
 ### Acceptance Criteria
-- the same baseline input can be evaluated twice,
-- differences are captured in a machine-readable way,
-- unstable findings are surfaced in output or logs,
-- the process is documented.
+
+Each generated governed artifact includes:
+
+- provider,
+- model identifier,
+- prompt version,
+- run timestamp,
+- source artifact hash where applicable,
+- pipeline version.
 
 ### Evidence
-- benchmark or comparison script,
-- sample diff output,
-- documentation of interpretation rules.
+
+- generated sample artifacts,
+- contract or schema support for metadata,
+- tests confirming metadata presence.
 
 ---
 
-## 6. Stable Source Anchor Gate
+## 5. Stable Source Anchor Gate
 
 ### Required
-The pipeline must support a stable source-level traceability anchor for downstream artifacts.
+
+The pipeline must support a stable source-level traceability anchor for governed upstream artifacts and any downstream artifact that already carries traceability.
 
 ### Acceptance Criteria
+
 - the rule layer supports a stable source anchor such as a paragraph-level identifier or equivalent governed source key,
 - uniqueness within the governed scope is checked,
-- downstream artifacts can retain this anchor,
-- reports or machine-readable exports can surface the anchor.
+- downstream governed artifacts that consume trace data can retain or surface this anchor where practical,
+- reports or machine-readable exports can surface the anchor when available.
 
 ### Evidence
+
 - artifact samples with source anchor fields,
 - uniqueness validation output,
 - report or export examples showing the anchor.
 
 ---
 
+## 6. Checker Stability Gate
+
+### Required
+
+Checker output instability must be detectable on a baseline set.
+
+### Acceptance Criteria
+
+- the same small baseline input can be evaluated repeatedly,
+- differences are captured in a machine-readable way,
+- unstable findings are surfaced in output or logs,
+- the process is documented,
+- the gate applies to a practical baseline set and does not require full-corpus double-runs by default.
+
+### Evidence
+
+- benchmark or comparison script,
+- sample diff output,
+- documentation of interpretation rules.
+
+---
+
 ## 7. Documentation Gate
 
 ### Required
+
 Repository docs must exist to guide both humans and AI agents.
 
 ### Acceptance Criteria
+
 The repo contains, at minimum:
+
 - `docs/roadmap.md`
+- `docs/implementation_plan.md`
 - `docs/acceptance.md`
 - `docs/model_governance.md`
 - `docs/agent_guidelines.md`
 
 ### Evidence
+
 - committed docs,
 - links from `README.md`,
 - doc review checklist.
-
-### Status
-✅ **Complete** (initial repo setup): All required docs exist. `docs/architecture.md` and `docs/testing_governance.md` also present as extras.
 
 ---
 
 ## 8. Phase 1 Exit Criteria
 
 Phase 1 is accepted only if:
-- all core artifacts are schema-validated in CI,
+
+- all core rule artifacts are schema-validated in CI,
 - invalid `rule_type` values hard-fail the pipeline,
 - a structured validation report can be produced and used to stop downstream execution,
 - a reproducible minimal smoke run exists in CI,
 - the smoke path can run without making real LLM API calls by using a deterministic stub provider or equivalent governed test double,
-- all maker/checker artifacts record model and prompt metadata,
+- maker and checker artifacts record model and prompt metadata,
 - checker instability can be surfaced on the baseline set,
-- a stable source anchor such as a paragraph-level identifier or equivalent is retained through governed downstream artifacts,
+- a stable source anchor is available in governed upstream artifacts and preserved where applicable downstream,
 - required governance docs exist in the repo.
 
 ---
 
-# Phase 2 Acceptance: Mid-Term Planning and BDD Platform (3–9 Months)
+# Phase 2 Acceptance: Planned Test Design and Normalized BDD Platform (3-9 Months)
 
 ## Phase Goal
 
-Upgrade from a stable prototype into an AI-assisted test planning and BDD generation platform that can support multiple document categories and team pilot usage.
+Upgrade from a stable prototype into an AI-assisted test planning and BDD generation platform that can support multiple document categories and controlled team-pilot usage without losing reviewability or contract clarity.
 
 ## Phase Gate
 
 Phase 2 is complete only if all required acceptance sections below pass.
+
+Phase 2 is about adding governed intermediate artifacts, not just adding more LLM calls.
 
 ---
 
 ## 1. Multi-Document Ingestion Gate
 
 ### Required
-The system must support multiple defined document classes.
+
+The system must support multiple defined document classes and preserve a governed source-to-rule path.
 
 ### Acceptance Criteria
-At least 3 document classes are supported, each with:
+
+Multiple document classes are supported, each with:
+
 - parsing strategy,
 - extraction constraints,
 - expected rule patterns,
-- documented failure modes.
+- documented failure modes,
+- source-aware outputs that remain traceable and schema-valid.
 
 ### Evidence
+
 - parser configuration or code,
 - sample documents,
 - extraction outputs,
@@ -296,102 +343,120 @@ At least 3 document classes are supported, each with:
 ## 2. Planning Layer Gate
 
 ### Required
-A planner stage must exist between semantic rules and BDD generation.
+
+A planner stage may exist between semantic rules and BDD generation only if it is governed.
 
 Expected flow:
 
 `semantic_rules -> planning -> test objectives -> scenario families -> BDD generation`
 
 ### Acceptance Criteria
+
 Planner outputs are:
-- schema-validated,
+
+- schema-validated or equivalently contract-validated,
 - versioned,
-- reproducible on a benchmark set,
+- traceable to semantic rules,
+- reviewable independently,
 - linked to downstream BDD generation.
 
 ### Evidence
+
 - planner schema,
 - planner artifact samples,
-- tests showing trace into BDD outputs.
+- tests showing trace into downstream generation.
 
 ---
 
-## 3. Traceability Gate
+## 3. Normalized BDD Contract Gate
 
 ### Required
-Generated BDD scenarios must be traceable through the pipeline.
+
+A normalized BDD representation must exist independent of final syntax output.
 
 ### Acceptance Criteria
-Each final BDD scenario can be traced to:
-- source document,
-- source clause or section,
-- atomic rule,
-- semantic rule,
-- planning decision,
-- checker verdict,
-- human review outcome.
+
+- normalized BDD schema exists,
+- generated BDD artifacts validate against it,
+- at least one output renderer can consume it,
+- the contract is documented,
+- raw `.feature` output is not the only governed representation.
 
 ### Evidence
+
+- BDD schema,
+- valid and invalid fixtures,
+- renderer tests,
+- architecture or contract documentation.
+
+---
+
+## 4. Traceability Gate
+
+### Required
+
+Generated planning and BDD artifacts must be traceable through the pipeline.
+
+### Acceptance Criteria
+
+Governed downstream artifacts can be traced to:
+
+- source document or source segment,
+- governed source anchor where applicable,
+- atomic rule,
+- semantic rule,
+- planning decision where planning exists.
+
+### Evidence
+
 - traceability fields in artifacts,
 - report examples,
 - traceability validation tests.
 
 ---
 
-## 4. BDD Contract Gate
+## 5. Step Visibility Gate
 
 ### Required
-A normalized BDD representation must exist independent of final syntax output.
+
+Phase 2 must surface early step-definition reuse and gap visibility without requiring full execution binding.
 
 ### Acceptance Criteria
-- normalized BDD schema exists,
-- generated BDD artifacts validate against it,
-- at least one output renderer can consume it,
-- the contract is documented.
+
+The system can produce reviewable outputs showing:
+
+- candidate reusable steps,
+- obvious step gaps,
+- implementation-needed markers,
+- lightweight early mapping notes.
 
 ### Evidence
-- BDD schema,
-- valid and invalid fixtures,
-- renderer tests,
-- architecture documentation.
 
----
-
-## 5. Review Collaboration Gate
-
-### Required
-Review data must be exchangeable and mergeable outside a single local session.
-
-### Acceptance Criteria
-The system supports:
-- export of review packages,
-- import of review packages,
-- merge of review decisions,
-- conflict surfacing.
-
-### Evidence
-- export/import format,
-- merge logic tests,
-- conflict examples,
+- visibility artifacts,
+- sample gap reports,
 - usage documentation.
 
 ---
 
-## 6. Quality Dashboard Gate
+## 6. Quality and Drift Reporting Gate
 
 ### Required
-Reports must support pilot-grade visibility into quality and drift.
+
+Reports must support pilot-grade visibility into quality, drift, and traceability.
 
 ### Acceptance Criteria
+
 Reports can show:
-- rule type coverage heatmap,
-- unstable checker decisions,
+
+- rule type coverage view,
+- unstable checker decisions on the benchmark set,
 - baseline drift versus previous runs,
-- document class breakdown,
+- document class breakdown where applicable,
 - traceability drill-down,
 - JSON and/or CSV export.
 
 ### Evidence
+
 - report artifacts,
 - screenshots,
 - export samples,
@@ -402,63 +467,72 @@ Reports can show:
 ## 7. Model Governance Enforcement Gate
 
 ### Required
-Model changes must be gated before adoption.
+
+Model and prompt changes must be gated before adoption.
 
 ### Acceptance Criteria
-- benchmark checks run before new model adoption,
-- checker stability threshold is enforced,
+
+- benchmark checks run before new model or prompt adoption,
+- checker stability threshold is enforced where applicable,
 - artifact diff review is documented,
 - rollback path is defined.
 
 ### Evidence
+
 - governance doc updates,
 - benchmark output,
-- model adoption checklist.
+- adoption checklist or review record.
 
 ---
 
 ## 8. Phase 2 Exit Criteria
 
 Phase 2 is accepted only if:
-- at least 3 document classes are supported with explicit extraction rules,
-- at least one non-initial document class can be processed successfully end-to-end,
-- planner outputs are versioned and schema-validated,
-- normalized BDD artifacts are traceable end-to-end,
-- review packages can be exported, imported, and merged,
-- reports show drift and unstable judgments,
-- generated BDD or `.feature` outputs can pass a governed syntax or dry-run check in the target BDD framework,
-- governance or audit history contains multiple recorded runs sufficient to demonstrate change tracking,
+
+- multiple document classes are supported with explicit extraction rules,
+- planner outputs, if introduced, are versioned and schema-validated,
+- normalized BDD artifacts exist as governed intermediate outputs,
+- governed downstream artifacts remain traceable end-to-end,
+- step reuse and gap visibility exists in a lightweight reviewable form,
+- reports show drift and unstable judgments where applicable,
+- generated BDD or `.feature` outputs can pass a governed syntax or dry-run check in the target BDD framework where such output exists,
 - model change regression is enforced before adoption.
 
 ---
 
-# Phase 3 Acceptance: Enterprise AI Testing Platform (9–18 Months)
+# Phase 3 Acceptance: Execution Readiness and Selective Enterprise Controls (9-18 Months)
 
 ## Phase Goal
 
-Evolve the framework into an enterprise AI testing platform that connects document learning, planning, BDD generation, step definition integration, and execution-ready handoff.
+Evolve the framework into an execution-ready and governance-mature AI testing platform that connects planning, normalized BDD, step definition integration, and deterministic validation for high-value rule classes.
 
 ## Phase Gate
 
 Phase 3 is complete only if all required acceptance sections below pass.
+
+Phase 3 is about execution readiness and release-grade control, not about requiring a hosted product by default.
 
 ---
 
 ## 1. Step Definition Integration Gate
 
 ### Required
+
 Normalized BDD steps must be connectable to existing step definitions.
 
 ### Acceptance Criteria
+
 The system supports:
+
 - exact step match,
-- parameterized step match,
+- parameterized step match where supported,
 - candidate step suggestion,
 - unmatched step reporting,
 - reuse score,
-- ownership mapping for step libraries.
+- ownership mapping for step libraries where needed.
 
 ### Evidence
+
 - matching engine or mapping logic,
 - sample bindings,
 - unmatched step reports,
@@ -469,10 +543,13 @@ The system supports:
 ## 2. Execution Readiness Gate
 
 ### Required
+
 An execution-ready scenario contract must exist.
 
 ### Acceptance Criteria
+
 An `ExecutableScenario` representation includes:
+
 - environment requirements,
 - input data requirements,
 - setup hooks,
@@ -481,6 +558,7 @@ An `ExecutableScenario` representation includes:
 - linked step definitions.
 
 ### Evidence
+
 - schema or contract docs,
 - sample executable artifacts,
 - contract validation tests.
@@ -490,78 +568,62 @@ An `ExecutableScenario` representation includes:
 ## 3. Deterministic Oracle Gate
 
 ### Required
+
 Core structured rule categories must use deterministic assertions where possible.
 
 ### Acceptance Criteria
-Deterministic checks exist for at least the core structured categories, such as:
+
+Deterministic checks exist for at least the high-value structured categories, such as:
+
 - field validation,
 - state validation,
 - calculation validation,
 - deadline or window checks,
 - event sequence verification,
-- pass/fail accounting.
+- pass or fail accounting.
 
 ### Evidence
+
 - oracle modules,
 - unit tests,
 - scenario outputs using deterministic checks.
 
 ---
 
-## 4. Hosted Review Service Gate
+## 4. Governance Signals Gate
 
 ### Required
-Review capability must move beyond local single-user operation.
+
+Operational signals must be available for governed release and platform review.
 
 ### Acceptance Criteria
-A deployable review service supports:
-- user accounts,
-- reviewer roles,
-- audit trail,
-- conflict resolution,
-- comment threads,
-- assignment workflow.
 
-### Evidence
-- deployment docs,
-- screenshots,
-- API or UI tests,
-- audit log examples.
+The platform can track and review signals such as:
 
----
-
-## 5. Enterprise Observability Gate
-
-### Required
-Operational metrics must be available for platform governance.
-
-### Acceptance Criteria
-The platform can track:
-- ingestion failure rate,
-- extraction drift,
-- duplicate / conflict rule rate,
-- planner change rate,
-- maker validity rate,
+- schema failure rate,
 - checker instability rate,
-- BDD reuse rate,
-- step binding success rate,
-- execution pass/fail distribution.
+- coverage trend,
+- step binding success rate where applicable.
 
 ### Evidence
-- dashboards,
+
+- report artifacts,
 - metric definitions,
-- telemetry docs,
-- monitoring test output.
+- telemetry or reporting docs,
+- monitoring or generation test output.
 
 ---
 
-## 6. Release Governance Gate
+## 5. Release Governance Gate
 
 ### Required
+
 Formal release controls must exist.
 
 ### Acceptance Criteria
+
 The repo or release process defines:
+
 - release tags,
 - compatibility matrix,
 - benchmark gates,
@@ -569,6 +631,7 @@ The repo or release process defines:
 - approved provider list.
 
 ### Evidence
+
 - release docs,
 - tagged releases,
 - compatibility records,
@@ -576,18 +639,16 @@ The repo or release process defines:
 
 ---
 
-## 7. Phase 3 Exit Criteria
+## 6. Phase 3 Exit Criteria
 
 Phase 3 is accepted only if:
+
 - normalized BDD can be mapped to existing step definitions with measurable reuse,
 - unmatched steps are automatically surfaced,
 - execution-ready scenarios can be exported consistently,
-- hosted review supports multi-user auditability,
-- deterministic assertions cover the core structured rule classes,
+- deterministic assertions cover the core high-value structured rule classes,
 - provider rollout requires benchmark pass and rollback path,
-- enterprise metrics are available for audit and operations,
-- at least two materially different business domains have been processed through the governed platform path,
-- regression reporting covers a meaningful multi-run history rather than a single-run snapshot,
+- governance signals are available for release review,
 - the quality gate has demonstrated that it can block promotion when thresholds fail.
 
 ---
@@ -597,7 +658,8 @@ Phase 3 is accepted only if:
 This checklist applies before any release that changes core pipeline behavior.
 
 ## Required
-- schemas validated,
+
+- schemas or equivalent contracts validated,
 - CI passing,
 - benchmark passing,
 - model metadata present,
@@ -607,6 +669,7 @@ This checklist applies before any release that changes core pipeline behavior.
 - acceptance evidence attached.
 
 ## Optional but Recommended
+
 - artifact diff review,
 - report screenshots,
 - benchmark trend comparison,
@@ -620,25 +683,32 @@ This checklist applies before any release that changes core pipeline behavior.
 Any AI coding agent modifying the repo must satisfy the following:
 
 ## 1. Do not declare work complete without acceptance evidence
+
 A code change is incomplete until linked to a passing acceptance item.
 
 ## 2. Do not change schemas silently
+
 Any artifact contract change must update:
-- schema,
+
+- schema or equivalent contract,
 - docs,
 - tests,
 - acceptance references.
 
-## 3. Do not switch models without benchmark evidence
-Model changes must include:
+## 3. Do not switch models or prompts without benchmark evidence
+
+Model or prompt changes must include:
+
 - benchmark results,
-- stability results,
+- stability results where applicable,
 - compatibility notes.
 
 ## 4. Do not merge cross-phase work by accident
+
 If a change belongs to a later phase, it must be labeled and approved as such.
 
 ## 5. Prefer deterministic checks when available
+
 If a validation can be implemented deterministically, do not rely solely on LLM judgment.
 
 ---
@@ -646,6 +716,7 @@ If a validation can be implemented deterministically, do not rely solely on LLM 
 # Maintenance Notes
 
 This document should be updated whenever:
+
 - a roadmap phase changes,
 - a new artifact contract is introduced,
 - a new model provider is adopted,

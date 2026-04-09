@@ -7,6 +7,32 @@ on:
     branches: [main]
 
 jobs:
+  docs-governance:
+    name: Docs Governance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run docs governance checks
+        run: python scripts/check_docs_governance.py
+
+  artifact-governance:
+    name: Artifact Governance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run artifact governance checks
+        run: python scripts/check_artifact_governance.py
+
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
