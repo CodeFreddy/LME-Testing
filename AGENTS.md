@@ -41,6 +41,21 @@ These checks are the minimum governance baseline:
 - `check_docs_governance.py` enforces relative local links in `*.md`
 - `check_artifact_governance.py` enforces minimum baseline artifact structure and controlled `rule_type` values
 
+## Commit Handoff Rule
+
+Every commit should refresh `docs/session_handoff.md`.
+
+Preferred path:
+
+- enable repo hooks once with `powershell -ExecutionPolicy Bypass -File scripts/setup_git_hooks.ps1`
+- let the post-commit hook regenerate the handoff automatically
+
+If hooks are unavailable, update the handoff manually before committing:
+
+```text
+powershell -ExecutionPolicy Bypass -File scripts/update_session_handoff.ps1
+```
+
 ## Current Phase Bias
 
 The current roadmap is biased toward:

@@ -188,6 +188,12 @@ python scripts/check_artifact_governance.py
 
 如果本机 `python` 不在 `PATH`，请改用你环境里的 Python 可执行路径运行同样命令。
 
+启用本地 git hooks 后，每次提交会自动刷新 `docs/session_handoff.md`：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/setup_git_hooks.ps1
+```
+
 ## 当前项目里最值得关注的几个事实
 
 - maker 和 checker 不是自由文本聊天，而是受 schema 约束的结构化调用

@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+
+if [ "$SESSION_HANDOFF_HOOK_RUNNING" = "1" ]; then
+  exit 0
+fi
+
+repo_root=$(git rev-parse --show-toplevel)
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$repo_root/scripts/update_session_handoff.ps1"
+
+git -C "$repo_root" add docs/session_handoff.md
+
+if git -C "$repo_root" diff --cached --quiet -- docs/session_handoff.md; then
+  exit 0
+fi
+
+SESSION_HANDOFF_HOOK_RUNNING=1 git -C "$repo_root" commit --amend --no-edit --no-verify >/dev/null
