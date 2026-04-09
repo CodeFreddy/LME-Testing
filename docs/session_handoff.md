@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-09 09:18:29 UTC`
+- `2026-04-09 11:22:08 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `Update CLAUDE.md to reflect docs governance changes`
 - `Automate session handoff refresh on commit`
 - `Add roadmap comparison reference note`
 - `Align docs governance and add baseline checks`
 - `add .claude`
-- `update *.md`
 
 ---
 

@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Agent Entry Rules
+
+**Read `AGENTS.md` first** before making non-trivial changes in this repo. This repository is governed by contracts, phase boundaries, and acceptance gates. Agents may implement the roadmap, but must not silently redefine it through code or document changes.
+
 ## Project Overview
 
 LME-Testing is a document-driven AI test design prototype. It transforms source documents into structured testing artifacts through a governed pipeline:
@@ -40,7 +44,32 @@ python main.py report --maker-cases <path> --checker-reviews <path> --maker-summ
 python main.py maker --input <path> --output-dir <path> --batch-size 4 --resume-from runs/maker/<run_id>/maker_cases.jsonl
 ```
 
+## Governance Checks
+
+Before or after substantial repo changes, run baseline governance checks:
+
+```bash
+python scripts/check_docs_governance.py   # Enforces relative local links in *.md
+python scripts/check_artifact_governance.py # Enforces minimum artifact structure and controlled rule_type values
+```
+
+## Git Hooks (Session Handoff)
+
+Enable the post-commit hook to auto-refresh `docs/session_handoff.md`:
+
+```bash
+powershell -ExecutionPolicy Bypass -File scripts/setup_git_hooks.ps1
+```
+
+If hooks are unavailable, update manually before committing:
+
+```bash
+powershell -ExecutionPolicy Bypass -File scripts/update_session_handoff.ps1
+```
+
 ## Architecture
+
+See `docs/architecture.md` for the full system architecture, artifact contracts, and module boundaries.
 
 ### Pipeline Flow
 1. **Extraction** (scripts): Parse source documents into `atomic_rules.json`
@@ -60,6 +89,17 @@ python main.py maker --input <path> --output-dir <path> --batch-size 4 --resume-
 | `lme_testing/prompts.py` | MAKER_SYSTEM_PROMPT, CHECKER_SYSTEM_PROMPT, and prompt builders |
 | `lme_testing/reporting.py` | HTML report generation |
 | `lme_testing/storage.py` | JSON/JSONL read/write utilities; `timestamp_slug()` for run IDs |
+
+### Key Governance Documents
+
+| Document | Purpose |
+|----------|---------|
+| `docs/roadmap.md` | Phase-based execution contract (Phase 1/2/3), scope boundaries, priorities |
+| `docs/architecture.md` | Pipeline stages, artifact contracts, module boundaries |
+| `docs/implementation_plan.md` | Task breakdowns with input/output contracts |
+| `docs/acceptance.md` | Formal phase acceptance criteria and release gates |
+| `docs/model_governance.md` | Provider abstraction, model onboarding, prompt versioning |
+| `docs/agent_guidelines.md` | How AI agents may modify the repo |
 
 ### Key Data Structures
 - **semantic_rules.json**: List of rule objects with `semantic_rule_id`, `classification.rule_type`, `evidence`, `source.atomic_rule_ids`
