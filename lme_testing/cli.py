@@ -5,7 +5,8 @@ import json
 from pathlib import Path
 
 from .config import load_project_config
-from .pipelines import run_checker_pipeline, run_maker_pipeline
+from .pipelines import run_bdd_pipeline, run_checker_pipeline, run_maker_pipeline
+from .bdd_export import run_bdd_export
 from .reporting import generate_html_report
 
 
@@ -41,6 +42,23 @@ def build_parser() -> argparse.ArgumentParser:
     checker.add_argument("--limit", type=int, default=None)
     checker.add_argument("--batch-size", type=int, default=1)
     checker.add_argument("--resume-from", default=None)
+
+    bdd = subparsers.add_parser(
+        "bdd",
+        help="Generate refined BDD/Gherkin from maker test cases.",
+    )
+    bdd.add_argument("--cases", required=True, help="Path to maker_cases.jsonl")
+    bdd.add_argument("--output-dir", default="runs/bdd")
+    bdd.add_argument("--limit", type=int, default=None)
+    bdd.add_argument("--batch-size", type=int, default=4)
+    bdd.add_argument("--resume-from", default=None)
+
+    bdd_export = subparsers.add_parser(
+        "bdd-export",
+        help="Export BDD feature files and step definitions from maker cases (template-based, no LLM).",
+    )
+    bdd_export.add_argument("--cases", required=True, help="Path to maker_cases.jsonl")
+    bdd_export.add_argument("--output-dir", default="runs/bdd-export")
 
     report = subparsers.add_parser(
         "report",
@@ -82,7 +100,7 @@ def main() -> int:
             batch_size=args.batch_size,
             resume_from=Path(args.resume_from) if args.resume_from else None,
         )
-    else:
+    elif args.command == "checker":
         result = run_checker_pipeline(
             config=config,
             semantic_rules_path=Path(args.rules),
@@ -91,6 +109,20 @@ def main() -> int:
             limit=args.limit,
             batch_size=args.batch_size,
             resume_from=Path(args.resume_from) if args.resume_from else None,
+        )
+    elif args.command == "bdd":
+        result = run_bdd_pipeline(
+            config=config,
+            maker_cases_path=Path(args.cases),
+            output_dir=Path(args.output_dir),
+            limit=args.limit,
+            batch_size=args.batch_size,
+            resume_from=Path(args.resume_from) if args.resume_from else None,
+        )
+    elif args.command == "bdd-export":
+        result = run_bdd_export(
+            maker_cases_path=Path(args.cases),
+            output_dir=Path(args.output_dir),
         )
 
     print(json.dumps(result, ensure_ascii=False, indent=2))

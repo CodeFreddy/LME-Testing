@@ -6,11 +6,14 @@ from pathlib import Path
 
 from .config import ProjectConfig
 from .prompts import (
+    BDD_SYSTEM_PROMPT,
     CHECKER_SYSTEM_PROMPT,
     MAKER_SYSTEM_PROMPT,
+    build_bdd_user_prompt,
     build_checker_user_prompt,
     build_maker_user_prompt,
 )
+from .bdd_export import write_feature_files, write_feature_files_from_llm, write_step_definitions, write_step_definitions_from_llm
 from .providers import build_provider
 from .schemas import CASE_TYPES, parse_json_object, validate_checker_payload, validate_maker_payload
 from .storage import append_jsonl, ensure_dir, load_json, load_jsonl, timestamp_slug, write_json
@@ -352,4 +355,97 @@ def run_checker_pipeline(
         "raw_path": str(raw_path),
     }
     write_json(summary_path, summary)
+    return summary
+
+
+def run_bdd_pipeline(
+    config: ProjectConfig,
+    maker_cases_path: Path,
+    output_dir: Path,
+    limit: int | None,
+    batch_size: int,
+    resume_from: Path | None,
+) -> dict:
+    """Generate refined BDD/Gherkin from maker test cases."""
+    maker_records = load_jsonl(maker_cases_path)
+    if limit is not None:
+        maker_records = maker_records[:limit]
+
+    completed_ids: set[str] = set()
+    if resume_from and resume_from.exists():
+        for record in load_jsonl(resume_from):
+            # BDD records have scenario_id inside scenarios array
+            for s in record.get("scenarios", []):
+                scenario_id = s.get("scenario_id")
+                if scenario_id:
+                    completed_ids.add(scenario_id)
+        maker_records = [
+            record
+            for record in maker_records
+            if not any(
+                s.get("scenario_id") in completed_ids
+                for s in record.get("scenarios", [])
+            )
+        ]
+
+    provider = build_provider(config.provider_for_role("maker"))
+    run_id = timestamp_slug()
+    run_dir = ensure_dir(output_dir / run_id)
+    results_path = run_dir / "bdd_cases.jsonl"
+    raw_path = run_dir / "bdd_raw_responses.jsonl"
+    summary_path = run_dir / "summary.json"
+
+    # Flatten scenarios for batch processing
+    all_scenarios: list[dict] = []
+    for record in maker_records:
+        for scenario in record.get("scenarios", []):
+            all_scenarios.append({
+                "semantic_rule_id": record["semantic_rule_id"],
+                "feature": record.get("feature", ""),
+                "scenario": scenario,
+            })
+
+    total_cases = 0
+
+    for batch in _chunked(all_scenarios, batch_size):
+        response = provider.generate(
+            system_prompt=BDD_SYSTEM_PROMPT,
+            user_prompt=build_bdd_user_prompt(batch),
+        )
+        raw_record = {
+            "run_id": run_id,
+            "batch_scenario_ids": [item.get("scenario", {}).get("scenario_id") for item in batch],
+            "response": response.raw_response,
+        }
+        append_jsonl(raw_path, [raw_record])
+
+        payload = parse_json_object(response.content)
+        results = payload.get("results", [])
+        for result in results:
+            result["run_id"] = run_id
+            append_jsonl(results_path, [result])
+        total_cases += len(results)
+
+    summary = {
+        "run_id": run_id,
+        "role": "bdd",
+        "input_cases": str(maker_cases_path),
+        "output_dir": str(run_dir),
+        "processed_scenario_count": total_cases,
+        "results_path": str(results_path),
+        "raw_path": str(raw_path),
+    }
+    write_json(summary_path, summary)
+
+    # Export feature files and step definitions from LLM output
+    if results_path.exists():
+        bdd_results = load_jsonl(results_path)
+        if bdd_results:
+            feature_files = write_feature_files_from_llm(bdd_results, run_dir)
+            step_file = write_step_definitions_from_llm(bdd_results, run_dir)
+            summary["feature_files_count"] = len(feature_files)
+            summary["feature_files"] = [str(f) for f in feature_files]
+            summary["step_definitions_file"] = str(step_file)
+            write_json(summary_path, summary)
+
     return summary

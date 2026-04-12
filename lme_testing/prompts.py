@@ -40,6 +40,80 @@ Hard requirements:
 """
 
 
+BDD_SYSTEM_PROMPT = """You are the BDD rendering model for an LME test design workflow.
+You transform structured test cases into polished Gherkin .feature format AND Ruby Cucumber step definitions.
+Hard requirements:
+- Output valid Gherkin syntax for each scenario.
+- Generate corresponding Ruby step definitions that integrate with ruby+cucumber+selenium/rest.
+- Preserve all traceability links (semantic_rule_id, atomic_rule_ids, evidence).
+- Keep Given/When/Then steps concise and declarative.
+- Use proper Gherkin tags derived from case_type and priority.
+- Do not invent additional steps beyond what is in the input.
+- Step definitions should use LME::Client, LME::API, LME::PostTrade patterns.
+- Return structured JSON only.
+"""
+
+
+def build_bdd_user_prompt(batch: list[dict]) -> str:
+    """Build user prompt for BDD refinement from maker test cases."""
+    schema = {
+        "results": [
+            {
+                "semantic_rule_id": "SR-MR-000-00",
+                "feature_name": "matching_rules_price_validation",
+                "feature_file": "Feature: Contact Exchange on Price Validation Failure\n  SR-MR-000-00\n  Validates that Members contact the Exchange when orders/trades fail price validation.",
+                "scenarios": [
+                    {
+                        "scenario_id": "TC-SR-MR-000-00-positive-01",
+                        "case_type": "positive",
+                        "priority": "high",
+                        "given": ["a member with valid LME session", "an order that has failed price validation check"],
+                        "when": ["the member contacts the Exchange"],
+                        "then": ["the Exchange records the contact", "the Exchange receives the rationale"],
+                    }
+                ],
+                "step_definitions": {
+                    "given": [
+                        {
+                            "pattern": "a member with valid LME session",
+                            "code": "Given(/^a member with valid LME session$/) do\n  @session = LME::Client.login\nend"
+                        },
+                        {
+                            "pattern": "an order that has failed price validation check",
+                            "code": "Given(/^an order that has failed price validation check$/) do\n  @order_params = { price: '999999', metal: 'ALU' }\nend"
+                        }
+                    ],
+                    "when": [
+                        {
+                            "pattern": "the member contacts the Exchange",
+                            "code": "When(/^the member contacts the Exchange$/) do\n  LME::PostTrade.contact_exchange(reason: @response.rejection_reason)\nend"
+                        }
+                    ],
+                    "then": [
+                        {
+                            "pattern": "the Exchange records the contact",
+                            "code": "Then(/^the Exchange records the contact$/) do\n  contact = LME::PostTrade.get_contact(reason: @response.rejection_reason)\n  expect(contact).not_to be_nil\nend"
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+    return (
+        "Transform the following test cases into:\n"
+        "1. Polished Gherkin .feature format (feature_file field)\n"
+        "2. Ruby Cucumber step definitions (step_definitions field)\n"
+        "For each scenario:\n"
+        "- Generate complete Gherkin with Feature/Scenario keywords and tags\n"
+        "- Generate Ruby step definitions using LME::Client, LME::API, LME::PostTrade patterns\n"
+        "- Match Given/When/Then steps to step patterns\n"
+        "Return JSON matching this schema shape:\n"
+        f"{json.dumps(schema, ensure_ascii=False, indent=2)}\n"
+        "Input test cases:\n"
+        f"{json.dumps(batch, ensure_ascii=False, indent=2)}"
+    )
+
+
 def build_maker_user_prompt(batch: list[dict]) -> str:
     expected_ids = [item["semantic_rule_id"] for item in batch]
     expected_requirement_map = {
@@ -122,49 +196,24 @@ def build_checker_user_prompt(batch: list[dict]) -> str:
         item["scenario"]["scenario_id"]: item["semantic_rule_id"] for item in batch
     }
     schema = {
-        "results": [
-            {
-                "case_id": "TC-SR-MR-000-00-01",
-                "semantic_rule_id": "SR-MR-000-00",
-                "case_type": "positive",
-                "case_type_accepted": True,
-                "coverage_relevance": "direct",
-                "overall_status": "pass",
-                "blocking_findings_count": 0,
-                "is_blocking": False,
-                "scores": {
-                    "evidence_consistency": 5,
-                    "requirement_coverage": 4,
-                    "test_design_quality": 4,
-                    "non_hallucination": 5
-                },
-                "findings": [
-                    {
-                        "severity": "medium",
-                        "category": "missing_constraint",
-                        "summary": "Missing deadline detail",
-                        "details": "Explain the issue",
-                        "suggested_fix": "How maker should revise it"
-                    }
-                ],
-                "coverage_assessment": {
-                    "status": "covered",
-                    "reason": "Scenario set covers the rule",
-                    "missing_aspects": []
-                }
-            }
-        ]
+        "results": [{
+            "case_id": "TC-SR-MR-000-00-01",
+            "case_type_accepted": True,
+            "coverage_relevance": "direct",
+            "is_blocking": False,
+            "scores": {"evidence_consistency": 5, "requirement_coverage": 4, "test_design_quality": 4},
+            "findings": [],
+            "coverage_assessment": {"status": "covered"}
+        }]
     }
     return (
-        "Review the maker outputs against the supplied semantic rules.\n"
-        "You must return exactly one review result per input case_id, with no omissions and no extras.\n"
-        f"Expected case_id list: {json.dumps(expected_case_ids, ensure_ascii=False)}\n"
-        f"Expected case_id -> semantic_rule_id map: {json.dumps(expected_case_rule_map, ensure_ascii=False)}\n"
-        "For each result, preserve the incoming case_type and judge whether it is accepted.\n"
-        "Use coverage_assessment.status only from this set: covered, partial, uncovered, not_applicable.\n"
-        "If you think a case is poor, still return a result for that exact case_id instead of dropping it.\n"
-        "Return JSON matching this schema shape:\n"
+        "Review maker outputs against semantic rules.\n"
+        "Return one result per case_id.\n"
+        f"case_id -> rule: {json.dumps(expected_case_rule_map, ensure_ascii=False)}\n"
+        "coverage_relevance: direct | indirect | not_relevant\n"
+        "coverage_assessment.status: covered | partial | uncovered | not_applicable\n"
+        "Schema:\n"
         f"{json.dumps(schema, ensure_ascii=False, indent=2)}\n"
-        "Input review batch:\n"
+        "Batch:\n"
         f"{json.dumps(batch, ensure_ascii=False, indent=2)}"
     )

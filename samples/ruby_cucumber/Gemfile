@@ -1,0 +1,45 @@
+# frozen_string_literal: true
+
+source 'https://rubygems.org'
+
+# Core Cucumber
+gem 'cucumber', '~> 9.2'
+gem 'cucumber-core', '~> 11.0'
+gem 'cucumber-expressions', '~> 16.0'
+gem 'cucumber-cli', '~> 9.2'
+
+# Web Automation
+gem 'watir', '~> 7.3'
+gem 'selenium-webdriver', '~> 4.20'
+
+# API Testing
+gem 'rest-client', '~> 2.1'
+gem 'faraday', '~> 2.9'
+
+# Test Utilities
+gem 'rspec', '~> 3.13'
+gem 'rspec-expectations', '~> 3.13'
+gem 'factory_bot', '~> 6.4'
+gem 'faker', '~> 3.3'
+
+# Debugging
+gem 'pry', '~> 0.15'
+gem 'pry-byebug', '~> 3.11'
+
+# Reporting
+gem 'cucumber-html-formatter', '~> 19'
+gem 'cucumber-junitformatter', '~> 0.6'
+
+# Browser binaries (uncomment for local development)
+# gem 'chromedriver-helper', '~> 2.1'
+# gem 'geckodriver-helper', '~> 0.24'
+
+group :development do
+  gem 'rake', '~> 13.2'
+  gem 'rubocop', '~> 1.65'
+end
+
+group :test do
+  gem 'simplecov', '~> 0.22', require: false
+  gem 'cucumber_statistics', '~> 1.0'
+end

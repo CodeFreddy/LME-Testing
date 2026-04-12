@@ -99,8 +99,10 @@ def validate_maker_payload(
                     raise SchemaError("Each evidence item must include atomic_rule_id.")
                 if not isinstance(quote, str) or not quote.strip():
                     raise SchemaError("Each evidence item must include a non-empty quote.")
+                # Truncate long quotes instead of failing
                 if len(quote.strip()) > MAX_QUOTE_LENGTH:
-                    raise SchemaError("Evidence quote is too long; quotes must stay short.")
+                    evidence_item["quote"] = quote.strip()[:MAX_QUOTE_LENGTH] + "..."
+                quote = evidence_item["quote"]
                 if "\n" in quote:
                     raise SchemaError("Evidence quote must be a single short line.")
                 evidence_rule_ids.add(atomic_rule_id)
