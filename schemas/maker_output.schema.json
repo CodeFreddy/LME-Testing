@@ -1,0 +1,116 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "maker_output.schema.json",
+  "title": "Maker Output",
+  "description": "BDD-style test cases generated from semantic rules.",
+  "type": "object",
+  "required": ["run_id", "semantic_rule_id", "requirement_ids", "feature", "scenarios"],
+  "additionalProperties": true,
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "description": "Unique identifier for the pipeline run that produced this output."
+    },
+    "semantic_rule_id": {
+      "type": "string",
+      "description": "ID of the semantic rule these scenarios were generated from."
+    },
+    "requirement_ids": {
+      "type": "array",
+      "description": "Source atomic rule IDs this result is grounded in.",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "feature": {
+      "type": "string",
+      "description": "Short feature title for the generated scenarios."
+    },
+    "scenarios": {
+      "type": "array",
+      "description": "List of generated BDD test scenarios.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["scenario_id", "case_type", "given", "when", "then", "evidence"],
+        "additionalProperties": true,
+        "properties": {
+          "scenario_id": {
+            "type": "string",
+            "description": "Unique identifier for this scenario.",
+            "pattern": "^TC-",
+            "examples": ["TC-SR-MR-003-01-positive-01"]
+          },
+          "title": {
+            "type": "string",
+            "description": "Short human-readable title for the scenario."
+          },
+          "intent": {
+            "type": "string",
+            "description": "Why this scenario exists and what it validates."
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["high", "medium", "low"],
+            "description": "Priority level for this scenario."
+          },
+          "scenario_type": {
+            "type": "string",
+            "description": "DEPRECATED: Use case_type instead.",
+            "deprecated": true
+          },
+          "case_type": {
+            "type": "string",
+            "description": "Type of test case determining coverage requirements.",
+            "enum": ["positive", "negative", "boundary", "exception", "state_transition", "data_validation"]
+          },
+          "given": {
+            "type": "array",
+            "description": "Given preconditions for this scenario.",
+            "items": {"type": "string"}
+          },
+          "when": {
+            "type": "array",
+            "description": "When triggers or actions for this scenario.",
+            "items": {"type": "string"}
+          },
+          "then": {
+            "type": "array",
+            "description": "Then expected outcomes for this scenario.",
+            "items": {"type": "string"}
+          },
+          "assumptions": {
+            "type": "array",
+            "description": "Assumptions or known limitations for this scenario.",
+            "items": {"type": "string"}
+          },
+          "evidence": {
+            "type": "array",
+            "description": "Source quotes grounding this scenario.",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["atomic_rule_id", "page", "quote"],
+              "additionalProperties": true,
+              "properties": {
+                "atomic_rule_id": {
+                  "type": "string",
+                  "description": "Source atomic rule ID."
+                },
+                "page": {
+                  "type": "integer",
+                  "description": "Source page number.",
+                  "minimum": 1
+                },
+                "quote": {
+                  "type": "string",
+                  "description": "Literal quote from source.",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

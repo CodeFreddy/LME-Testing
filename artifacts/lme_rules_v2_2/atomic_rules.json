@@ -9,7 +9,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Capitalised terms not otherwise defined herein shall have the meaning ascribed to them in the Rules and Regulations of the LME(the “LME Rulebook”)."
+    "raw_text": "Capitalised terms not otherwise defined herein shall have the meaning ascribed to them in the Rules and Regulations of the LME(the “LME Rulebook”).",
+    "paragraph_id": "MR-001-01"
   },
   {
     "rule_id": "MR-001-02",
@@ -21,7 +22,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "These matching rules form part of the Administrative Procedures that may be adopted by the Exchange(also referred to as the “LME”) from time to time in accordance with the LME Rulebook."
+    "raw_text": "These matching rules form part of the Administrative Procedures that may be adopted by the Exchange(also referred to as the “LME”) from time to time in accordance with the LME Rulebook.",
+    "paragraph_id": "MR-001-02"
   },
   {
     "rule_id": "MR-002-01",
@@ -33,7 +35,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence:fallback",
-    "raw_text": "2. All business transacted on the Exchange is subject to price validation, whether that be on an order-by-order basis for business agreed and Executed on LMEselect, or trade-by-trade for business agreed non-electronically(i.e. on the Ring and inter-office market). For the avoidance of doubt, and as set out in Trading Regulation 2, agreement of a trade results in an Agreed Trade that is \"Executed\", provided that the Acceptance Criteria are satisfied. The point at which Execution occurs on each of the LME’s Execution Venues is set out more fully in Trading Regulation 2."
+    "raw_text": "2. All business transacted on the Exchange is subject to price validation, whether that be on an order-by-order basis for business agreed and Executed on LMEselect, or trade-by-trade for business agreed non-electronically(i.e. on the Ring and inter-office market). For the avoidance of doubt, and as set out in Trading Regulation 2, agreement of a trade results in an Agreed Trade that is \"Executed\", provided that the Acceptance Criteria are satisfied. The point at which Execution occurs on each of the LME’s Execution Venues is set out more fully in Trading Regulation 2.",
+    "paragraph_id": "MR-002-01"
   },
   {
     "rule_id": "MR-003-01",
@@ -45,7 +48,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Where an order or trade fails the price validation check, Members are required to contact the Exchange to explain the rationale as to the price of the rejected order or trade."
+    "raw_text": "Where an order or trade fails the price validation check, Members are required to contact the Exchange to explain the rationale as to the price of the rejected order or trade.",
+    "paragraph_id": "MR-003-01"
   },
   {
     "rule_id": "MR-003-02",
@@ -57,7 +61,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "In relation to the correction of any Failed Checks, the Member may be required to provide such additional information as the Exchange deems necessary and appropriate in determining whether the relevant order or trade should be permitted to be re-submitted in its original form."
+    "raw_text": "In relation to the correction of any Failed Checks, the Member may be required to provide such additional information as the Exchange deems necessary and appropriate in determining whether the relevant order or trade should be permitted to be re-submitted in its original form.",
+    "paragraph_id": "MR-003-02"
   },
   {
     "rule_id": "MR-003-03",
@@ -69,7 +74,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Members should note that where re-submission has been permitted, there may be a requirement to post additional collateral to the Clearing House, and Members must comply with such requirements."
+    "raw_text": "Members should note that where re-submission has been permitted, there may be a requirement to post additional collateral to the Clearing House, and Members must comply with such requirements.",
+    "paragraph_id": "MR-003-03"
   },
   {
     "rule_id": "MR-004-01",
@@ -81,7 +87,8 @@
     "rule_type": "deadline",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Requests for extensions to the TOM matching deadline or the London inter-office trade input deadline will only be granted in exceptional circumstances."
+    "raw_text": "Requests for extensions to the TOM matching deadline or the London inter-office trade input deadline will only be granted in exceptional circumstances.",
+    "paragraph_id": "MR-004-01"
   },
   {
     "rule_id": "MR-004-02",
@@ -93,7 +100,8 @@
     "rule_type": "deadline",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Requests must be made to LME Post-Trade Operations no later than 15 minutes prior to the relevant deadline(email: posttradeoperations@lme.com"
+    "raw_text": "Requests must be made to LME Post-Trade Operations no later than 15 minutes prior to the relevant deadline(email: posttradeoperations@lme.com",
+    "paragraph_id": "MR-004-02"
   },
   {
     "rule_id": "MR-004-03",
@@ -105,7 +113,8 @@
     "rule_type": "deadline",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "The relevant deadlines are as follows: LME Base Service TOM Trading Deadline: 12:30 London time TOM Matching Deadline: 13:30 London time Trade Input Deadline: 20:00 London time"
+    "raw_text": "The relevant deadlines are as follows: LME Base Service TOM Trading Deadline: 12:30 London time TOM Matching Deadline: 13:30 London time Trade Input Deadline: 20:00 London time",
+    "paragraph_id": "MR-004-03"
   },
   {
     "rule_id": "MR-005-01",
@@ -117,7 +126,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence:fallback",
-    "raw_text": "5. The trading hours for the agreement of trades are as follows(all times are London time): LME Base Service LME Select"
+    "raw_text": "5. The trading hours for the agreement of trades are as follows(all times are London time): LME Base Service LME Select",
+    "paragraph_id": "MR-005-01"
   },
   {
     "rule_id": "MR-006-01",
@@ -129,7 +139,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence",
-    "raw_text": "For the LME to fulfil its regulatory reporting obligations, the Matching System will connect to LMEselect at 01:00."
+    "raw_text": "For the LME to fulfil its regulatory reporting obligations, the Matching System will connect to LMEselect at 01:00.",
+    "paragraph_id": "MR-006-01"
   },
   {
     "rule_id": "MR-006-02",
@@ -141,7 +152,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "In order to receive all trade messaging Members will be required to login to the system in advance of the 01:00 opening."
+    "raw_text": "In order to receive all trade messaging Members will be required to login to the system in advance of the 01:00 opening.",
+    "paragraph_id": "MR-006-02"
   },
   {
     "rule_id": "MR-006-03",
@@ -153,7 +165,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Should members choose to login after the open they will be required to perform a Trade Mass Status Request whereby only the current state of the transaction is captured."
+    "raw_text": "Should members choose to login after the open they will be required to perform a Trade Mass Status Request whereby only the current state of the transaction is captured.",
+    "paragraph_id": "MR-006-03"
   },
   {
     "rule_id": "MR-007-01",
@@ -165,7 +178,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Members are responsible for the input of an Agreed Trade and all relevant particulars of an Agreed Trade into the Matching System within the timescales set out in Regulation 3.5 of the Trading Regulations, subject that registration of Agreed Trade halves agreed during Asian business hours(including those arranged by a Registered Intermediating Broker) must be submitted to the Matching System by 08:30."
+    "raw_text": "Members are responsible for the input of an Agreed Trade and all relevant particulars of an Agreed Trade into the Matching System within the timescales set out in Regulation 3.5 of the Trading Regulations, subject that registration of Agreed Trade halves agreed during Asian business hours(including those arranged by a Registered Intermediating Broker) must be submitted to the Matching System by 08:30.",
+    "paragraph_id": "MR-007-01"
   },
   {
     "rule_id": "MR-007-02",
@@ -177,7 +191,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence",
-    "raw_text": "Members are not obligated to submit Agreed Trade halves from 01:00, when the Matching System opens."
+    "raw_text": "Members are not obligated to submit Agreed Trade halves from 01:00, when the Matching System opens.",
+    "paragraph_id": "MR-007-02"
   },
   {
     "rule_id": "MR-008-01",
@@ -189,7 +204,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Members must retain a full audit trail for all orders submitted to LME Select, all Agreed Trades agreed non-electronically, and all post-trade operations."
+    "raw_text": "Members must retain a full audit trail for all orders submitted to LME Select, all Agreed Trades agreed non-electronically, and all post-trade operations.",
+    "paragraph_id": "MR-008-01"
   },
   {
     "rule_id": "MR-008-02",
@@ -201,7 +217,8 @@
     "rule_type": "data_constraint",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Where Members have Executed transactions in currencies other than US Dollars, the audit trail for these transactions must include the relevant US Dollars price and the FX rate used to calculate the non-US Dollars price."
+    "raw_text": "Where Members have Executed transactions in currencies other than US Dollars, the audit trail for these transactions must include the relevant US Dollars price and the FX rate used to calculate the non-US Dollars price.",
+    "paragraph_id": "MR-008-02"
   },
   {
     "rule_id": "MR-008-03",
@@ -213,7 +230,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "In addition, Members must ensure that they have appropriate documentation in place with their Clients prior to arranging, agreeing or Executing orders received from them(e.g. give-up agreement etc.)."
+    "raw_text": "In addition, Members must ensure that they have appropriate documentation in place with their Clients prior to arranging, agreeing or Executing orders received from them(e.g. give-up agreement etc.).",
+    "paragraph_id": "MR-008-03"
   },
   {
     "rule_id": "MR-009-01",
@@ -225,7 +243,8 @@
     "rule_type": "data_constraint",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Cash-Settled Futures, LMEmini Contracts, Monthly Average Futures, and Premium Contracts may only be executed in US Dollars."
+    "raw_text": "Cash-Settled Futures, LMEmini Contracts, Monthly Average Futures, and Premium Contracts may only be executed in US Dollars.",
+    "paragraph_id": "MR-009-01"
   },
   {
     "rule_id": "MR-009-02",
@@ -237,7 +256,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "All other contracts may be executed in US Dollars, Euro, Japanese Yen or Pounds Sterling."
+    "raw_text": "All other contracts may be executed in US Dollars, Euro, Japanese Yen or Pounds Sterling.",
+    "paragraph_id": "MR-009-02"
   },
   {
     "rule_id": "MR-010-01",
@@ -249,7 +269,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Agreed trades that are agreed as Carries should be entered as such in to the Matching System and the audit trail for the transaction should clearly demonstrate whether a trade is an outright or a Carry."
+    "raw_text": "Agreed trades that are agreed as Carries should be entered as such in to the Matching System and the audit trail for the transaction should clearly demonstrate whether a trade is an outright or a Carry.",
+    "paragraph_id": "MR-010-01"
   },
   {
     "rule_id": "MR-010-02",
@@ -261,7 +282,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "When submitting Carry trades into the Matching System, Members must follow market convention and enter the near leg first followed by all other legs in chronological prompt date order."
+    "raw_text": "When submitting Carry trades into the Matching System, Members must follow market convention and enter the near leg first followed by all other legs in chronological prompt date order.",
+    "paragraph_id": "MR-010-02"
   },
   {
     "rule_id": "MR-011-01",
@@ -273,7 +295,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Members are advised that where there is a requirement to adjust(Reversal/Correction) a previously registered Member to Member Carry trade when the near leg has expired all subsequent legs should be entered to the Matching System as outright trades."
+    "raw_text": "Members are advised that where there is a requirement to adjust(Reversal/Correction) a previously registered Member to Member Carry trade when the near leg has expired all subsequent legs should be entered to the Matching System as outright trades.",
+    "paragraph_id": "MR-011-01"
   },
   {
     "rule_id": "MR-011-02",
@@ -285,7 +308,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence",
-    "raw_text": "Where a Member to Client Carry trade requires adjustment, only the individual leg that requires adjustment need be reversed and then corrected, where appropriate."
+    "raw_text": "Where a Member to Client Carry trade requires adjustment, only the individual leg that requires adjustment need be reversed and then corrected, where appropriate.",
+    "paragraph_id": "MR-011-02"
   },
   {
     "rule_id": "MR-012-01",
@@ -297,7 +321,8 @@
     "rule_type": "prohibition",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Members must not use the LME Base Service for any abusive practice which may include, but is not limited to, the avoidance or evasion of the Rules or any Administrative Procedure."
+    "raw_text": "Members must not use the LME Base Service for any abusive practice which may include, but is not limited to, the avoidance or evasion of the Rules or any Administrative Procedure.",
+    "paragraph_id": "MR-012-01"
   },
   {
     "rule_id": "MR-013-01",
@@ -309,7 +334,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Members are reminded that, when entering trades to the Matching System they must use their own order/trade data and not rely upon that entered by the other party to the trade."
+    "raw_text": "Members are reminded that, when entering trades to the Matching System they must use their own order/trade data and not rely upon that entered by the other party to the trade.",
+    "paragraph_id": "MR-013-01"
   },
   {
     "rule_id": "MR-014-B1-1",
@@ -321,7 +347,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "bullet:1",
-    "raw_text": "The following trade categories will apply for all business that is agreed non-electronically1 :"
+    "raw_text": "The following trade categories will apply for all business that is agreed non-electronically1 :",
+    "paragraph_id": "MR-014-B1-1"
   },
   {
     "rule_id": "MR-014-B2-1",
@@ -333,7 +360,8 @@
     "rule_type": "enum_definition",
     "testability": "partially_testable",
     "split_basis": "bullet:2",
-    "raw_text": "Normal – is used to enter new market trades Executed on the Ring, Basis Ring(as described in paragraph 16 below), or agreed in the inter-office market(including trades agreed via a Fixed Price Auction) or via the Matching System."
+    "raw_text": "Normal – is used to enter new market trades Executed on the Ring, Basis Ring(as described in paragraph 16 below), or agreed in the inter-office market(including trades agreed via a Fixed Price Auction) or via the Matching System.",
+    "paragraph_id": "MR-014-B2-1"
   },
   {
     "rule_id": "MR-014-B3-1",
@@ -345,7 +373,8 @@
     "rule_type": "enum_definition",
     "testability": "partially_testable",
     "split_basis": "bullet:3",
-    "raw_text": "Give-Up Executor/Give-Up Clearer – is used to effect the give-up of a transaction to another Clearing Member."
+    "raw_text": "Give-Up Executor/Give-Up Clearer – is used to effect the give-up of a transaction to another Clearing Member.",
+    "paragraph_id": "MR-014-B3-1"
   },
   {
     "rule_id": "MR-014-B4-1",
@@ -357,7 +386,8 @@
     "rule_type": "enum_definition",
     "testability": "partially_testable",
     "split_basis": "bullet:4",
-    "raw_text": "OTC Bring-On – is used to convert a previously executed over-the- counter contract to a Cleared Contract, where the intention is to bring the transaction on-Exchange."
+    "raw_text": "OTC Bring-On – is used to convert a previously executed over-the- counter contract to a Cleared Contract, where the intention is to bring the transaction on-Exchange.",
+    "paragraph_id": "MR-014-B4-1"
   },
   {
     "rule_id": "MR-014-B4-2",
@@ -369,7 +399,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "bullet:4",
-    "raw_text": "Business Executed via LME Select will always have a Trade Category of Normal."
+    "raw_text": "Business Executed via LME Select will always have a Trade Category of Normal.",
+    "paragraph_id": "MR-014-B4-2"
   },
   {
     "rule_id": "MR-014-B5-1",
@@ -381,7 +412,8 @@
     "rule_type": "enum_definition",
     "testability": "partially_testable",
     "split_basis": "bullet:5",
-    "raw_text": "OTC Take Off – is used to convert an on-Exchange Contract to an over-thecounter contract."
+    "raw_text": "OTC Take Off – is used to convert an on-Exchange Contract to an over-thecounter contract.",
+    "paragraph_id": "MR-014-B5-1"
   },
   {
     "rule_id": "MR-014-B6-1",
@@ -393,7 +425,8 @@
     "rule_type": "enum_definition",
     "testability": "partially_testable",
     "split_basis": "bullet:6",
-    "raw_text": "Financing – is used to enter a trade that relates to financing transactions."
+    "raw_text": "Financing – is used to enter a trade that relates to financing transactions.",
+    "paragraph_id": "MR-014-B6-1"
   },
   {
     "rule_id": "MR-014-B7-1",
@@ -405,7 +438,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "bullet:7",
-    "raw_text": "Members must contact the LME Post Trade Operations team(posttradeoperations@lme.com, phone no: +44(0)20 7113 8201) in advance of submitting an Exception transaction to the Matching System, providing details and the rationale for the transaction."
+    "raw_text": "Members must contact the LME Post Trade Operations team(posttradeoperations@lme.com, phone no: +44(0)20 7113 8201) in advance of submitting an Exception transaction to the Matching System, providing details and the rationale for the transaction.",
+    "paragraph_id": "MR-014-B7-1"
   },
   {
     "rule_id": "MR-014-B7-2",
@@ -417,7 +451,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "bullet:7",
-    "raw_text": "This category can only be used in order to submit a trade to the Matching System that has been identified by the Member as a reportable transaction under MiFID II."
+    "raw_text": "This category can only be used in order to submit a trade to the Matching System that has been identified by the Member as a reportable transaction under MiFID II.",
+    "paragraph_id": "MR-014-B7-2"
   },
   {
     "rule_id": "MR-014-B8-1",
@@ -429,7 +464,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "bullet:8",
-    "raw_text": "Members must contact the LME Post Trade Operations team(posttradeoperations@lme.com, phone no: +44(0)20 7113 8201) in advance of submitting an Exception transaction to the Matching System, providing details and the rationale for the transaction."
+    "raw_text": "Members must contact the LME Post Trade Operations team(posttradeoperations@lme.com, phone no: +44(0)20 7113 8201) in advance of submitting an Exception transaction to the Matching System, providing details and the rationale for the transaction.",
+    "paragraph_id": "MR-014-B8-1"
   },
   {
     "rule_id": "MR-014-B8-2",
@@ -441,7 +477,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "bullet:8",
-    "raw_text": "This category can only be used in order to submit a trade to the Matching System that has been identified by the Member as a non-reportable transaction under MiFID II."
+    "raw_text": "This category can only be used in order to submit a trade to the Matching System that has been identified by the Member as a non-reportable transaction under MiFID II.",
+    "paragraph_id": "MR-014-B8-2"
   },
   {
     "rule_id": "MR-014-B9-1",
@@ -453,7 +490,8 @@
     "rule_type": "enum_definition",
     "testability": "partially_testable",
     "split_basis": "bullet:9",
-    "raw_text": "Transfer – is used to effect the move of a registered single trade or group of trades(“a position”) between Members or alternatively within a Member’s own client account structure."
+    "raw_text": "Transfer – is used to effect the move of a registered single trade or group of trades(“a position”) between Members or alternatively within a Member’s own client account structure.",
+    "paragraph_id": "MR-014-B9-1"
   },
   {
     "rule_id": "MR-015-B1-1",
@@ -465,7 +503,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "bullet:1",
-    "raw_text": "The following price types will apply for all business that is agreed non-electronically2:"
+    "raw_text": "The following price types will apply for all business that is agreed non-electronically2:",
+    "paragraph_id": "MR-015-B1-1"
   },
   {
     "rule_id": "MR-015-B2-1",
@@ -477,7 +516,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "bullet:2",
-    "raw_text": "Current – must be used to record Agreed Trades arranged at current market prices and transactions executed at current market process that are subsequently averaged for entry to the Matching System on TD+0 or TD+1."
+    "raw_text": "Current – must be used to record Agreed Trades arranged at current market prices and transactions executed at current market process that are subsequently averaged for entry to the Matching System on TD+0 or TD+1.",
+    "paragraph_id": "MR-015-B2-1"
   },
   {
     "rule_id": "MR-015-B3-1",
@@ -489,7 +529,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "bullet:3",
-    "raw_text": "Historic – must be used to record all other transactions(e.g."
+    "raw_text": "Historic – must be used to record all other transactions(e.g.",
+    "paragraph_id": "MR-015-B3-1"
   },
   {
     "rule_id": "MR-015-B3-2",
@@ -501,7 +542,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "bullet:3",
-    "raw_text": "Business Executed via LME Select will always have a price type of Current."
+    "raw_text": "Business Executed via LME Select will always have a price type of Current.",
+    "paragraph_id": "MR-015-B3-2"
   },
   {
     "rule_id": "MR-015-B3-3",
@@ -513,7 +555,8 @@
     "rule_type": "prohibition",
     "testability": "testable",
     "split_basis": "bullet:3",
-    "raw_text": "Because of the requirement to match trades within 10 minutes of Agreement of an Agreed Trade(see Regulation 3.5 Part 3, of the LME Rules), the “Average Price” price type is no longer available, as trades must not be held back from submission to matching."
+    "raw_text": "Because of the requirement to match trades within 10 minutes of Agreement of an Agreed Trade(see Regulation 3.5 Part 3, of the LME Rules), the “Average Price” price type is no longer available, as trades must not be held back from submission to matching.",
+    "paragraph_id": "MR-015-B3-3"
   },
   {
     "rule_id": "MR-015-B3-4",
@@ -525,7 +568,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "bullet:3",
-    "raw_text": "However, Members may create a single average price transaction for a single Client within their own systems, provided a full audit trail is maintained of any such actions(see paragraph 33 below)."
+    "raw_text": "However, Members may create a single average price transaction for a single Client within their own systems, provided a full audit trail is maintained of any such actions(see paragraph 33 below).",
+    "paragraph_id": "MR-015-B3-4"
   },
   {
     "rule_id": "MR-016-B1-1",
@@ -537,7 +581,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "bullet:1",
-    "raw_text": "The following venue codes will apply:"
+    "raw_text": "The following venue codes will apply:",
+    "paragraph_id": "MR-016-B1-1"
   },
   {
     "rule_id": "MR-016-B2-1",
@@ -549,7 +594,8 @@
     "rule_type": "enum_definition",
     "testability": "partially_testable",
     "split_basis": "bullet:2:fallback",
-    "raw_text": "16. The following venue codes will apply: - Select – for all electronically Executed business. - Ring – for all business Executed in the Ring. - Basis Ring – for any trade agreed between a Category 1 Member and their Client pursuant to an order placed with that Category 1 Member, that is filled in the Ring during the relevant Ring or kerb session, basis a price(s) discovered in the Ring3 through trading or quoting. - Inter-office – for all other business agreed non-electronically, including trades arranged by RIBs or Fixed Price Auction, and which is Executed pursuant to confirmation by the Matching System."
+    "raw_text": "16. The following venue codes will apply: - Select – for all electronically Executed business. - Ring – for all business Executed in the Ring. - Basis Ring – for any trade agreed between a Category 1 Member and their Client pursuant to an order placed with that Category 1 Member, that is filled in the Ring during the relevant Ring or kerb session, basis a price(s) discovered in the Ring3 through trading or quoting. - Inter-office – for all other business agreed non-electronically, including trades arranged by RIBs or Fixed Price Auction, and which is Executed pursuant to confirmation by the Matching System.",
+    "paragraph_id": "MR-016-B2-1"
   },
   {
     "rule_id": "MR-016-B3-1",
@@ -561,7 +607,8 @@
     "rule_type": "enum_definition",
     "testability": "partially_testable",
     "split_basis": "bullet:3:fallback",
-    "raw_text": "16. The following venue codes will apply: - Select – for all electronically Executed business. - Ring – for all business Executed in the Ring. - Basis Ring – for any trade agreed between a Category 1 Member and their Client pursuant to an order placed with that Category 1 Member, that is filled in the Ring during the relevant Ring or kerb session, basis a price(s) discovered in the Ring3 through trading or quoting. - Inter-office – for all other business agreed non-electronically, including trades arranged by RIBs or Fixed Price Auction, and which is Executed pursuant to confirmation by the Matching System."
+    "raw_text": "16. The following venue codes will apply: - Select – for all electronically Executed business. - Ring – for all business Executed in the Ring. - Basis Ring – for any trade agreed between a Category 1 Member and their Client pursuant to an order placed with that Category 1 Member, that is filled in the Ring during the relevant Ring or kerb session, basis a price(s) discovered in the Ring3 through trading or quoting. - Inter-office – for all other business agreed non-electronically, including trades arranged by RIBs or Fixed Price Auction, and which is Executed pursuant to confirmation by the Matching System.",
+    "paragraph_id": "MR-016-B3-1"
   },
   {
     "rule_id": "MR-016-B4-1",
@@ -573,7 +620,8 @@
     "rule_type": "enum_definition",
     "testability": "partially_testable",
     "split_basis": "bullet:4:fallback",
-    "raw_text": "16. The following venue codes will apply: - Select – for all electronically Executed business. - Ring – for all business Executed in the Ring. - Basis Ring – for any trade agreed between a Category 1 Member and their Client pursuant to an order placed with that Category 1 Member, that is filled in the Ring during the relevant Ring or kerb session, basis a price(s) discovered in the Ring3 through trading or quoting. - Inter-office – for all other business agreed non-electronically, including trades arranged by RIBs or Fixed Price Auction, and which is Executed pursuant to confirmation by the Matching System."
+    "raw_text": "16. The following venue codes will apply: - Select – for all electronically Executed business. - Ring – for all business Executed in the Ring. - Basis Ring – for any trade agreed between a Category 1 Member and their Client pursuant to an order placed with that Category 1 Member, that is filled in the Ring during the relevant Ring or kerb session, basis a price(s) discovered in the Ring3 through trading or quoting. - Inter-office – for all other business agreed non-electronically, including trades arranged by RIBs or Fixed Price Auction, and which is Executed pursuant to confirmation by the Matching System.",
+    "paragraph_id": "MR-016-B4-1"
   },
   {
     "rule_id": "MR-016-B5-1",
@@ -585,7 +633,8 @@
     "rule_type": "enum_definition",
     "testability": "partially_testable",
     "split_basis": "bullet:5:fallback",
-    "raw_text": "16. The following venue codes will apply: - Select – for all electronically Executed business. - Ring – for all business Executed in the Ring. - Basis Ring – for any trade agreed between a Category 1 Member and their Client pursuant to an order placed with that Category 1 Member, that is filled in the Ring during the relevant Ring or kerb session, basis a price(s) discovered in the Ring3 through trading or quoting. - Inter-office – for all other business agreed non-electronically, including trades arranged by RIBs or Fixed Price Auction, and which is Executed pursuant to confirmation by the Matching System."
+    "raw_text": "16. The following venue codes will apply: - Select – for all electronically Executed business. - Ring – for all business Executed in the Ring. - Basis Ring – for any trade agreed between a Category 1 Member and their Client pursuant to an order placed with that Category 1 Member, that is filled in the Ring during the relevant Ring or kerb session, basis a price(s) discovered in the Ring3 through trading or quoting. - Inter-office – for all other business agreed non-electronically, including trades arranged by RIBs or Fixed Price Auction, and which is Executed pursuant to confirmation by the Matching System.",
+    "paragraph_id": "MR-016-B5-1"
   },
   {
     "rule_id": "MR-017-B1-1",
@@ -597,7 +646,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "bullet:1",
-    "raw_text": "The following price codes will apply:"
+    "raw_text": "The following price codes will apply:",
+    "paragraph_id": "MR-017-B1-1"
   },
   {
     "rule_id": "MR-017-B2-1",
@@ -609,7 +659,8 @@
     "rule_type": "calculation",
     "testability": "testable",
     "split_basis": "bullet:2:fallback",
-    "raw_text": "17. The following price codes will apply: - Settlement Price(“S”) Code – where the price for an outright trade or the near leg of a Carry is based upon that day’s Settlement Price with other Carry leg(s) priced relative to the first leg plus or minus an agreed premium or discount. - Closing Price(“C”) Code – where the price is based upon that day’s Closing Price for the relevant Prompt Date for each outright trade or Carry leg and may include plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. This applies to prices in relation to which the primary pricing methodology is Ring-based, notwithstanding that prices in relation to which the primary pricing methodology is electronic may(e.g. in business continuity scenarios) utilise Ring activity as part of the pricing process. - Basis the Closing Price(“B”) Code – where the pricing basis for the near leg of a Carry is the Closing Price for the relevant Prompt Date and the other leg(s) is priced relative to the first leg plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. - Yesterday’s Settlement Price(“YS”) Code – where the price is the previous Business Day’s relevant Settlement Price. - Valuation Price(“V”) Code – where the price is the previous Business Day’s relevant Closing Price. This code should only be used in conjunction with the inter-office venue. - Mean Cash(“MC”) Code – where the price is the mean of the bid/offer spread for the relevant Cash prompt based on the Official Price. - Mean 3 Month(“M3”) Code – where the price is the mean of the bid/offer spread for the relevant 3 Month prompt based on the Official Price."
+    "raw_text": "17. The following price codes will apply: - Settlement Price(“S”) Code – where the price for an outright trade or the near leg of a Carry is based upon that day’s Settlement Price with other Carry leg(s) priced relative to the first leg plus or minus an agreed premium or discount. - Closing Price(“C”) Code – where the price is based upon that day’s Closing Price for the relevant Prompt Date for each outright trade or Carry leg and may include plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. This applies to prices in relation to which the primary pricing methodology is Ring-based, notwithstanding that prices in relation to which the primary pricing methodology is electronic may(e.g. in business continuity scenarios) utilise Ring activity as part of the pricing process. - Basis the Closing Price(“B”) Code – where the pricing basis for the near leg of a Carry is the Closing Price for the relevant Prompt Date and the other leg(s) is priced relative to the first leg plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. - Yesterday’s Settlement Price(“YS”) Code – where the price is the previous Business Day’s relevant Settlement Price. - Valuation Price(“V”) Code – where the price is the previous Business Day’s relevant Closing Price. This code should only be used in conjunction with the inter-office venue. - Mean Cash(“MC”) Code – where the price is the mean of the bid/offer spread for the relevant Cash prompt based on the Official Price. - Mean 3 Month(“M3”) Code – where the price is the mean of the bid/offer spread for the relevant 3 Month prompt based on the Official Price.",
+    "paragraph_id": "MR-017-B2-1"
   },
   {
     "rule_id": "MR-017-B3-1",
@@ -621,7 +672,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "bullet:3",
-    "raw_text": "Closing Price(“C”) Code – where the price is based upon that day’s Closing Price for the relevant Prompt Date for each outright trade or Carry leg and may include plus or minus an agreed premium or discount."
+    "raw_text": "Closing Price(“C”) Code – where the price is based upon that day’s Closing Price for the relevant Prompt Date for each outright trade or Carry leg and may include plus or minus an agreed premium or discount.",
+    "paragraph_id": "MR-017-B3-1"
   },
   {
     "rule_id": "MR-017-B3-2",
@@ -633,7 +685,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "bullet:3",
-    "raw_text": "This applies to prices in relation to which the primary pricing methodology is Ring-based, notwithstanding that prices in relation to which the primary pricing methodology is electronic may(e.g. in business continuity scenarios) utilise Ring activity as part of the pricing process."
+    "raw_text": "This applies to prices in relation to which the primary pricing methodology is Ring-based, notwithstanding that prices in relation to which the primary pricing methodology is electronic may(e.g. in business continuity scenarios) utilise Ring activity as part of the pricing process.",
+    "paragraph_id": "MR-017-B3-2"
   },
   {
     "rule_id": "MR-017-B4-1",
@@ -645,7 +698,8 @@
     "rule_type": "calculation",
     "testability": "testable",
     "split_basis": "bullet:4:fallback",
-    "raw_text": "17. The following price codes will apply: - Settlement Price(“S”) Code – where the price for an outright trade or the near leg of a Carry is based upon that day’s Settlement Price with other Carry leg(s) priced relative to the first leg plus or minus an agreed premium or discount. - Closing Price(“C”) Code – where the price is based upon that day’s Closing Price for the relevant Prompt Date for each outright trade or Carry leg and may include plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. This applies to prices in relation to which the primary pricing methodology is Ring-based, notwithstanding that prices in relation to which the primary pricing methodology is electronic may(e.g. in business continuity scenarios) utilise Ring activity as part of the pricing process. - Basis the Closing Price(“B”) Code – where the pricing basis for the near leg of a Carry is the Closing Price for the relevant Prompt Date and the other leg(s) is priced relative to the first leg plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. - Yesterday’s Settlement Price(“YS”) Code – where the price is the previous Business Day’s relevant Settlement Price. - Valuation Price(“V”) Code – where the price is the previous Business Day’s relevant Closing Price. This code should only be used in conjunction with the inter-office venue. - Mean Cash(“MC”) Code – where the price is the mean of the bid/offer spread for the relevant Cash prompt based on the Official Price. - Mean 3 Month(“M3”) Code – where the price is the mean of the bid/offer spread for the relevant 3 Month prompt based on the Official Price."
+    "raw_text": "17. The following price codes will apply: - Settlement Price(“S”) Code – where the price for an outright trade or the near leg of a Carry is based upon that day’s Settlement Price with other Carry leg(s) priced relative to the first leg plus or minus an agreed premium or discount. - Closing Price(“C”) Code – where the price is based upon that day’s Closing Price for the relevant Prompt Date for each outright trade or Carry leg and may include plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. This applies to prices in relation to which the primary pricing methodology is Ring-based, notwithstanding that prices in relation to which the primary pricing methodology is electronic may(e.g. in business continuity scenarios) utilise Ring activity as part of the pricing process. - Basis the Closing Price(“B”) Code – where the pricing basis for the near leg of a Carry is the Closing Price for the relevant Prompt Date and the other leg(s) is priced relative to the first leg plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. - Yesterday’s Settlement Price(“YS”) Code – where the price is the previous Business Day’s relevant Settlement Price. - Valuation Price(“V”) Code – where the price is the previous Business Day’s relevant Closing Price. This code should only be used in conjunction with the inter-office venue. - Mean Cash(“MC”) Code – where the price is the mean of the bid/offer spread for the relevant Cash prompt based on the Official Price. - Mean 3 Month(“M3”) Code – where the price is the mean of the bid/offer spread for the relevant 3 Month prompt based on the Official Price.",
+    "paragraph_id": "MR-017-B4-1"
   },
   {
     "rule_id": "MR-017-B5-1",
@@ -657,7 +711,8 @@
     "rule_type": "calculation",
     "testability": "testable",
     "split_basis": "bullet:5:fallback",
-    "raw_text": "17. The following price codes will apply: - Settlement Price(“S”) Code – where the price for an outright trade or the near leg of a Carry is based upon that day’s Settlement Price with other Carry leg(s) priced relative to the first leg plus or minus an agreed premium or discount. - Closing Price(“C”) Code – where the price is based upon that day’s Closing Price for the relevant Prompt Date for each outright trade or Carry leg and may include plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. This applies to prices in relation to which the primary pricing methodology is Ring-based, notwithstanding that prices in relation to which the primary pricing methodology is electronic may(e.g. in business continuity scenarios) utilise Ring activity as part of the pricing process. - Basis the Closing Price(“B”) Code – where the pricing basis for the near leg of a Carry is the Closing Price for the relevant Prompt Date and the other leg(s) is priced relative to the first leg plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. - Yesterday’s Settlement Price(“YS”) Code – where the price is the previous Business Day’s relevant Settlement Price. - Valuation Price(“V”) Code – where the price is the previous Business Day’s relevant Closing Price. This code should only be used in conjunction with the inter-office venue. - Mean Cash(“MC”) Code – where the price is the mean of the bid/offer spread for the relevant Cash prompt based on the Official Price. - Mean 3 Month(“M3”) Code – where the price is the mean of the bid/offer spread for the relevant 3 Month prompt based on the Official Price."
+    "raw_text": "17. The following price codes will apply: - Settlement Price(“S”) Code – where the price for an outright trade or the near leg of a Carry is based upon that day’s Settlement Price with other Carry leg(s) priced relative to the first leg plus or minus an agreed premium or discount. - Closing Price(“C”) Code – where the price is based upon that day’s Closing Price for the relevant Prompt Date for each outright trade or Carry leg and may include plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. This applies to prices in relation to which the primary pricing methodology is Ring-based, notwithstanding that prices in relation to which the primary pricing methodology is electronic may(e.g. in business continuity scenarios) utilise Ring activity as part of the pricing process. - Basis the Closing Price(“B”) Code – where the pricing basis for the near leg of a Carry is the Closing Price for the relevant Prompt Date and the other leg(s) is priced relative to the first leg plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. - Yesterday’s Settlement Price(“YS”) Code – where the price is the previous Business Day’s relevant Settlement Price. - Valuation Price(“V”) Code – where the price is the previous Business Day’s relevant Closing Price. This code should only be used in conjunction with the inter-office venue. - Mean Cash(“MC”) Code – where the price is the mean of the bid/offer spread for the relevant Cash prompt based on the Official Price. - Mean 3 Month(“M3”) Code – where the price is the mean of the bid/offer spread for the relevant 3 Month prompt based on the Official Price.",
+    "paragraph_id": "MR-017-B5-1"
   },
   {
     "rule_id": "MR-017-B6-1",
@@ -669,7 +724,8 @@
     "rule_type": "calculation",
     "testability": "testable",
     "split_basis": "bullet:6:fallback",
-    "raw_text": "17. The following price codes will apply: - Settlement Price(“S”) Code – where the price for an outright trade or the near leg of a Carry is based upon that day’s Settlement Price with other Carry leg(s) priced relative to the first leg plus or minus an agreed premium or discount. - Closing Price(“C”) Code – where the price is based upon that day’s Closing Price for the relevant Prompt Date for each outright trade or Carry leg and may include plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. This applies to prices in relation to which the primary pricing methodology is Ring-based, notwithstanding that prices in relation to which the primary pricing methodology is electronic may(e.g. in business continuity scenarios) utilise Ring activity as part of the pricing process. - Basis the Closing Price(“B”) Code – where the pricing basis for the near leg of a Carry is the Closing Price for the relevant Prompt Date and the other leg(s) is priced relative to the first leg plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. - Yesterday’s Settlement Price(“YS”) Code – where the price is the previous Business Day’s relevant Settlement Price. - Valuation Price(“V”) Code – where the price is the previous Business Day’s relevant Closing Price. This code should only be used in conjunction with the inter-office venue. - Mean Cash(“MC”) Code – where the price is the mean of the bid/offer spread for the relevant Cash prompt based on the Official Price. - Mean 3 Month(“M3”) Code – where the price is the mean of the bid/offer spread for the relevant 3 Month prompt based on the Official Price."
+    "raw_text": "17. The following price codes will apply: - Settlement Price(“S”) Code – where the price for an outright trade or the near leg of a Carry is based upon that day’s Settlement Price with other Carry leg(s) priced relative to the first leg plus or minus an agreed premium or discount. - Closing Price(“C”) Code – where the price is based upon that day’s Closing Price for the relevant Prompt Date for each outright trade or Carry leg and may include plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. This applies to prices in relation to which the primary pricing methodology is Ring-based, notwithstanding that prices in relation to which the primary pricing methodology is electronic may(e.g. in business continuity scenarios) utilise Ring activity as part of the pricing process. - Basis the Closing Price(“B”) Code – where the pricing basis for the near leg of a Carry is the Closing Price for the relevant Prompt Date and the other leg(s) is priced relative to the first leg plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. - Yesterday’s Settlement Price(“YS”) Code – where the price is the previous Business Day’s relevant Settlement Price. - Valuation Price(“V”) Code – where the price is the previous Business Day’s relevant Closing Price. This code should only be used in conjunction with the inter-office venue. - Mean Cash(“MC”) Code – where the price is the mean of the bid/offer spread for the relevant Cash prompt based on the Official Price. - Mean 3 Month(“M3”) Code – where the price is the mean of the bid/offer spread for the relevant 3 Month prompt based on the Official Price.",
+    "paragraph_id": "MR-017-B6-1"
   },
   {
     "rule_id": "MR-017-B7-1",
@@ -681,7 +737,8 @@
     "rule_type": "calculation",
     "testability": "testable",
     "split_basis": "bullet:7:fallback",
-    "raw_text": "17. The following price codes will apply: - Settlement Price(“S”) Code – where the price for an outright trade or the near leg of a Carry is based upon that day’s Settlement Price with other Carry leg(s) priced relative to the first leg plus or minus an agreed premium or discount. - Closing Price(“C”) Code – where the price is based upon that day’s Closing Price for the relevant Prompt Date for each outright trade or Carry leg and may include plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. This applies to prices in relation to which the primary pricing methodology is Ring-based, notwithstanding that prices in relation to which the primary pricing methodology is electronic may(e.g. in business continuity scenarios) utilise Ring activity as part of the pricing process. - Basis the Closing Price(“B”) Code – where the pricing basis for the near leg of a Carry is the Closing Price for the relevant Prompt Date and the other leg(s) is priced relative to the first leg plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. - Yesterday’s Settlement Price(“YS”) Code – where the price is the previous Business Day’s relevant Settlement Price. - Valuation Price(“V”) Code – where the price is the previous Business Day’s relevant Closing Price. This code should only be used in conjunction with the inter-office venue. - Mean Cash(“MC”) Code – where the price is the mean of the bid/offer spread for the relevant Cash prompt based on the Official Price. - Mean 3 Month(“M3”) Code – where the price is the mean of the bid/offer spread for the relevant 3 Month prompt based on the Official Price."
+    "raw_text": "17. The following price codes will apply: - Settlement Price(“S”) Code – where the price for an outright trade or the near leg of a Carry is based upon that day’s Settlement Price with other Carry leg(s) priced relative to the first leg plus or minus an agreed premium or discount. - Closing Price(“C”) Code – where the price is based upon that day’s Closing Price for the relevant Prompt Date for each outright trade or Carry leg and may include plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. This applies to prices in relation to which the primary pricing methodology is Ring-based, notwithstanding that prices in relation to which the primary pricing methodology is electronic may(e.g. in business continuity scenarios) utilise Ring activity as part of the pricing process. - Basis the Closing Price(“B”) Code – where the pricing basis for the near leg of a Carry is the Closing Price for the relevant Prompt Date and the other leg(s) is priced relative to the first leg plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. - Yesterday’s Settlement Price(“YS”) Code – where the price is the previous Business Day’s relevant Settlement Price. - Valuation Price(“V”) Code – where the price is the previous Business Day’s relevant Closing Price. This code should only be used in conjunction with the inter-office venue. - Mean Cash(“MC”) Code – where the price is the mean of the bid/offer spread for the relevant Cash prompt based on the Official Price. - Mean 3 Month(“M3”) Code – where the price is the mean of the bid/offer spread for the relevant 3 Month prompt based on the Official Price.",
+    "paragraph_id": "MR-017-B7-1"
   },
   {
     "rule_id": "MR-017-B8-1",
@@ -693,7 +750,8 @@
     "rule_type": "calculation",
     "testability": "testable",
     "split_basis": "bullet:8:fallback",
-    "raw_text": "17. The following price codes will apply: - Settlement Price(“S”) Code – where the price for an outright trade or the near leg of a Carry is based upon that day’s Settlement Price with other Carry leg(s) priced relative to the first leg plus or minus an agreed premium or discount. - Closing Price(“C”) Code – where the price is based upon that day’s Closing Price for the relevant Prompt Date for each outright trade or Carry leg and may include plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. This applies to prices in relation to which the primary pricing methodology is Ring-based, notwithstanding that prices in relation to which the primary pricing methodology is electronic may(e.g. in business continuity scenarios) utilise Ring activity as part of the pricing process. - Basis the Closing Price(“B”) Code – where the pricing basis for the near leg of a Carry is the Closing Price for the relevant Prompt Date and the other leg(s) is priced relative to the first leg plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. - Yesterday’s Settlement Price(“YS”) Code – where the price is the previous Business Day’s relevant Settlement Price. - Valuation Price(“V”) Code – where the price is the previous Business Day’s relevant Closing Price. This code should only be used in conjunction with the inter-office venue. - Mean Cash(“MC”) Code – where the price is the mean of the bid/offer spread for the relevant Cash prompt based on the Official Price. - Mean 3 Month(“M3”) Code – where the price is the mean of the bid/offer spread for the relevant 3 Month prompt based on the Official Price."
+    "raw_text": "17. The following price codes will apply: - Settlement Price(“S”) Code – where the price for an outright trade or the near leg of a Carry is based upon that day’s Settlement Price with other Carry leg(s) priced relative to the first leg plus or minus an agreed premium or discount. - Closing Price(“C”) Code – where the price is based upon that day’s Closing Price for the relevant Prompt Date for each outright trade or Carry leg and may include plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. This applies to prices in relation to which the primary pricing methodology is Ring-based, notwithstanding that prices in relation to which the primary pricing methodology is electronic may(e.g. in business continuity scenarios) utilise Ring activity as part of the pricing process. - Basis the Closing Price(“B”) Code – where the pricing basis for the near leg of a Carry is the Closing Price for the relevant Prompt Date and the other leg(s) is priced relative to the first leg plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue. - Yesterday’s Settlement Price(“YS”) Code – where the price is the previous Business Day’s relevant Settlement Price. - Valuation Price(“V”) Code – where the price is the previous Business Day’s relevant Closing Price. This code should only be used in conjunction with the inter-office venue. - Mean Cash(“MC”) Code – where the price is the mean of the bid/offer spread for the relevant Cash prompt based on the Official Price. - Mean 3 Month(“M3”) Code – where the price is the mean of the bid/offer spread for the relevant 3 Month prompt based on the Official Price.",
+    "paragraph_id": "MR-017-B8-1"
   },
   {
     "rule_id": "MR-018-01",
@@ -705,7 +763,8 @@
     "rule_type": "calculation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "In all cases where a short price code has been used, and once the relevant absolute value has been made available, the Matching System will substitute the correct price for each code, and calculate absolute values for all leg(s) containing a price differential."
+    "raw_text": "In all cases where a short price code has been used, and once the relevant absolute value has been made available, the Matching System will substitute the correct price for each code, and calculate absolute values for all leg(s) containing a price differential.",
+    "paragraph_id": "MR-018-01"
   },
   {
     "rule_id": "MR-018-02",
@@ -717,7 +776,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence",
-    "raw_text": "For short price codes YS and V, the substitution of the absolute price will occur automatically upon submission."
+    "raw_text": "For short price codes YS and V, the substitution of the absolute price will occur automatically upon submission.",
+    "paragraph_id": "MR-018-02"
   },
   {
     "rule_id": "MR-019-01",
@@ -729,7 +789,8 @@
     "rule_type": "deadline",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Regulation 3.5 of Part 3, of the Rules sets out the deadlines for matching Contracts."
+    "raw_text": "Regulation 3.5 of Part 3, of the Rules sets out the deadlines for matching Contracts.",
+    "paragraph_id": "MR-019-01"
   },
   {
     "rule_id": "MR-020-01",
@@ -741,7 +802,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Where Client Contracts have been agreed after 19:50 London time with respect to LME Base Contracts(i.e. 10 minutes prior to the close of the Matching System), then the registration of these transactions must be completed by 08:30 London time on the following Business Day including those transactions arranged by RIBs."
+    "raw_text": "Where Client Contracts have been agreed after 19:50 London time with respect to LME Base Contracts(i.e. 10 minutes prior to the close of the Matching System), then the registration of these transactions must be completed by 08:30 London time on the following Business Day including those transactions arranged by RIBs.",
+    "paragraph_id": "MR-020-01"
   },
   {
     "rule_id": "MR-021-01",
@@ -753,7 +815,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Regulation 3.5.1(d) of Part 3 of the Rules states that business Executed in the Ring must be submitted within 10 minutes of the close of the Ring trading period in which the Agreed Trade was Executed."
+    "raw_text": "Regulation 3.5.1(d) of Part 3 of the Rules states that business Executed in the Ring must be submitted within 10 minutes of the close of the Ring trading period in which the Agreed Trade was Executed.",
+    "paragraph_id": "MR-021-01"
   },
   {
     "rule_id": "MR-021-02",
@@ -765,7 +828,8 @@
     "rule_type": "deadline",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Where Agreed Trades have been agreed, either in the Ring or in the inter-office market, using either the Official, Mean or Closing Price as the basis for the trade price, then the relevant Ring time code should be entered, but the matching deadline will be 10 minutes after all relevant data has been made available by the Exchange(i.e. after any objection period, and once the Official Prices/Closing Prices have been declared final)."
+    "raw_text": "Where Agreed Trades have been agreed, either in the Ring or in the inter-office market, using either the Official, Mean or Closing Price as the basis for the trade price, then the relevant Ring time code should be entered, but the matching deadline will be 10 minutes after all relevant data has been made available by the Exchange(i.e. after any objection period, and once the Official Prices/Closing Prices have been declared final).",
+    "paragraph_id": "MR-021-02"
   },
   {
     "rule_id": "MR-022-01",
@@ -777,7 +841,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Where a RIB has registered an Agreed Trade in the Matching System, the Clearing Member must approve or reject the Agreed Trade within the Matching System within 10 minutes of such registration."
+    "raw_text": "Where a RIB has registered an Agreed Trade in the Matching System, the Clearing Member must approve or reject the Agreed Trade within the Matching System within 10 minutes of such registration.",
+    "paragraph_id": "MR-022-01"
   },
   {
     "rule_id": "MR-022-02",
@@ -789,7 +854,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "For the avoidance of doubt, where the Agreed Trade comprises a PTT Order, the time of \"arrangement\" shall be the time from which the RIB has Pre-Trade Communications in respect of two Clients that would, subject to acceptance by the Clearing Member(s), comprise an IOM PTT Initiating Pair."
+    "raw_text": "For the avoidance of doubt, where the Agreed Trade comprises a PTT Order, the time of \"arrangement\" shall be the time from which the RIB has Pre-Trade Communications in respect of two Clients that would, subject to acceptance by the Clearing Member(s), comprise an IOM PTT Initiating Pair.",
+    "paragraph_id": "MR-022-02"
   },
   {
     "rule_id": "MR-023-B1-1",
@@ -801,7 +867,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "bullet:1",
-    "raw_text": "Depending on the venue, the Trade Time field must be completed as follows:"
+    "raw_text": "Depending on the venue, the Trade Time field must be completed as follows:",
+    "paragraph_id": "MR-023-B1-1"
   },
   {
     "rule_id": "MR-023-B2-1",
@@ -813,7 +880,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "bullet:2",
-    "raw_text": "Select – this field is automatically populated upon the matching of relevant orders, no further action is required by Members."
+    "raw_text": "Select – this field is automatically populated upon the matching of relevant orders, no further action is required by Members.",
+    "paragraph_id": "MR-023-B2-1"
   },
   {
     "rule_id": "MR-023-B3-1",
@@ -825,7 +893,8 @@
     "rule_type": "data_constraint",
     "testability": "testable",
     "split_basis": "bullet:3:fallback",
-    "raw_text": "23. Depending on the venue, the Trade Time field must be completed as follows: - Select – this field is automatically populated upon the matching of relevant orders, no further action is required by Members. - Ring – either “R 1” if Executed during a Ring session or “K 1” if Executed during a kerb session. - Basis Ring – either “C 1” if agreed during a permissible Ring session or “D 1” if agreed during the relevant kerb session(see also paragraph 16 above). - Inter-office – the time at which the trade was agreed4, and must be entered as HH:MM:SS."
+    "raw_text": "23. Depending on the venue, the Trade Time field must be completed as follows: - Select – this field is automatically populated upon the matching of relevant orders, no further action is required by Members. - Ring – either “R 1” if Executed during a Ring session or “K 1” if Executed during a kerb session. - Basis Ring – either “C 1” if agreed during a permissible Ring session or “D 1” if agreed during the relevant kerb session(see also paragraph 16 above). - Inter-office – the time at which the trade was agreed4, and must be entered as HH:MM:SS.",
+    "paragraph_id": "MR-023-B3-1"
   },
   {
     "rule_id": "MR-023-B4-1",
@@ -837,7 +906,8 @@
     "rule_type": "data_constraint",
     "testability": "testable",
     "split_basis": "bullet:4:fallback",
-    "raw_text": "23. Depending on the venue, the Trade Time field must be completed as follows: - Select – this field is automatically populated upon the matching of relevant orders, no further action is required by Members. - Ring – either “R 1” if Executed during a Ring session or “K 1” if Executed during a kerb session. - Basis Ring – either “C 1” if agreed during a permissible Ring session or “D 1” if agreed during the relevant kerb session(see also paragraph 16 above). - Inter-office – the time at which the trade was agreed4, and must be entered as HH:MM:SS."
+    "raw_text": "23. Depending on the venue, the Trade Time field must be completed as follows: - Select – this field is automatically populated upon the matching of relevant orders, no further action is required by Members. - Ring – either “R 1” if Executed during a Ring session or “K 1” if Executed during a kerb session. - Basis Ring – either “C 1” if agreed during a permissible Ring session or “D 1” if agreed during the relevant kerb session(see also paragraph 16 above). - Inter-office – the time at which the trade was agreed4, and must be entered as HH:MM:SS.",
+    "paragraph_id": "MR-023-B4-1"
   },
   {
     "rule_id": "MR-023-B5-1",
@@ -849,7 +919,8 @@
     "rule_type": "data_constraint",
     "testability": "testable",
     "split_basis": "bullet:5",
-    "raw_text": "Inter-office – the time at which the trade was agreed4, and must be entered as HH:MM:SS."
+    "raw_text": "Inter-office – the time at which the trade was agreed4, and must be entered as HH:MM:SS.",
+    "paragraph_id": "MR-023-B5-1"
   },
   {
     "rule_id": "MR-024-D-1",
@@ -861,7 +932,8 @@
     "rule_type": "enum_definition",
     "testability": "partially_testable",
     "split_basis": "subclause:D:fallback",
-    "raw_text": "24. The Matching System supports the following accounts: - H – House, for all proprietary, non-Client business; Note that this will record the time of: (i) the Contingent Agreement to Trade; or(ii) the agreement of the Agreed Trade arranged by the RIB; pursuant to Regulation 2.5.1(d) or 2.5.2(e), as applicable, of Part 3 of the LME Rules, the Agreed Trade shall, provided that it satisfies the Acceptance Criteria, be Executed at the time, following the completion of any Fixed Price Auction, that the Matching System confirms that the Agreed Trade is matched and that all Pre-Execution Checks are satisfied. - U – Unallocated, sub-account of H, for all business that is to be given-up to another Clearing Member even where the details of the Clearing Member are known; - C – Client, for all business allocated to a net omnibus segregated Client account(OSA); - G – Client, for all business allocated to a gross omnibus segregated Client account(GOSA); - S – Client, for all business allocated to an individual segregated Client account(ISA); and"
+    "raw_text": "24. The Matching System supports the following accounts: - H – House, for all proprietary, non-Client business; Note that this will record the time of: (i) the Contingent Agreement to Trade; or(ii) the agreement of the Agreed Trade arranged by the RIB; pursuant to Regulation 2.5.1(d) or 2.5.2(e), as applicable, of Part 3 of the LME Rules, the Agreed Trade shall, provided that it satisfies the Acceptance Criteria, be Executed at the time, following the completion of any Fixed Price Auction, that the Matching System confirms that the Agreed Trade is matched and that all Pre-Execution Checks are satisfied. - U – Unallocated, sub-account of H, for all business that is to be given-up to another Clearing Member even where the details of the Clearing Member are known; - C – Client, for all business allocated to a net omnibus segregated Client account(OSA); - G – Client, for all business allocated to a gross omnibus segregated Client account(GOSA); - S – Client, for all business allocated to an individual segregated Client account(ISA); and",
+    "paragraph_id": "MR-024-D-1"
   },
   {
     "rule_id": "MR-024-E-1",
@@ -873,7 +945,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "subclause:E",
-    "raw_text": "(e), as applicable, of Part 3 of the LME Rules, the Agreed Trade shall, provided that it satisfies the Acceptance Criteria, be Executed at the time, following the completion of any Fixed Price Auction, that the Matching System confirms that the Agreed Trade is matched and that all Pre-Execution Checks are satisfied."
+    "raw_text": "(e), as applicable, of Part 3 of the LME Rules, the Agreed Trade shall, provided that it satisfies the Acceptance Criteria, be Executed at the time, following the completion of any Fixed Price Auction, that the Matching System confirms that the Agreed Trade is matched and that all Pre-Execution Checks are satisfied.",
+    "paragraph_id": "MR-024-E-1"
   },
   {
     "rule_id": "MR-025-01",
@@ -885,7 +958,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "This field must be populated with the code used to identify the beneficial owner of the Client Contract in the Member’s books and records."
+    "raw_text": "This field must be populated with the code used to identify the beneficial owner of the Client Contract in the Member’s books and records.",
+    "paragraph_id": "MR-025-01"
   },
   {
     "rule_id": "MR-025-02",
@@ -897,7 +971,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "This code must be consistent with that used when reporting positions to the Exchange."
+    "raw_text": "This code must be consistent with that used when reporting positions to the Exchange.",
+    "paragraph_id": "MR-025-02"
   },
   {
     "rule_id": "MR-026-01",
@@ -909,7 +984,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "When entering orders on LMEselect, Members must ensure that they identify the correct account where appropriate."
+    "raw_text": "When entering orders on LMEselect, Members must ensure that they identify the correct account where appropriate.",
+    "paragraph_id": "MR-026-01"
   },
   {
     "rule_id": "MR-026-02",
@@ -921,7 +997,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence",
-    "raw_text": "Trades incorrectly identified will be allocated to an X Account of the Clearing Member and it will be the responsibility of the Clearing Member to reverse the trade and allocate it to the right account in accordance with the procedures set out in paragraphs 36 below."
+    "raw_text": "Trades incorrectly identified will be allocated to an X Account of the Clearing Member and it will be the responsibility of the Clearing Member to reverse the trade and allocate it to the right account in accordance with the procedures set out in paragraphs 36 below.",
+    "paragraph_id": "MR-026-02"
   },
   {
     "rule_id": "MR-027-01",
@@ -933,7 +1010,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence:fallback",
-    "raw_text": "27. This section details the post-trade/administrative functions that are available for Members; Members are encouraged to contact the Exchange if they are unsure how to effect any particular post-trade activity(email: posttradeoperations@lme.com, phone +44(0)20 7113 8201)."
+    "raw_text": "27. This section details the post-trade/administrative functions that are available for Members; Members are encouraged to contact the Exchange if they are unsure how to effect any particular post-trade activity(email: posttradeoperations@lme.com, phone +44(0)20 7113 8201).",
+    "paragraph_id": "MR-027-01"
   },
   {
     "rule_id": "MR-028-01",
@@ -945,7 +1023,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence",
-    "raw_text": "This post-trade category should be used to move a single trade or a group of trades(“a position”) between Members, for a common Client or non-common Client between two Clearing Members or alternatively within a Member’s own account structure."
+    "raw_text": "This post-trade category should be used to move a single trade or a group of trades(“a position”) between Members, for a common Client or non-common Client between two Clearing Members or alternatively within a Member’s own account structure.",
+    "paragraph_id": "MR-028-01"
   },
   {
     "rule_id": "MR-029-01",
@@ -957,7 +1036,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence:fallback",
-    "raw_text": "29. This post-trade category should also be used where Members wish to undertake a metal position exchange(formerly referred to as a metal position swap) whereby users of physical metal swap(exchange) an existing on- Exchange hedge and a commitment to deliver physical metal. The entry recorded in the Matching System is therefore the movement of a position for a non-common Client."
+    "raw_text": "29. This post-trade category should also be used where Members wish to undertake a metal position exchange(formerly referred to as a metal position swap) whereby users of physical metal swap(exchange) an existing on- Exchange hedge and a commitment to deliver physical metal. The entry recorded in the Matching System is therefore the movement of a position for a non-common Client.",
+    "paragraph_id": "MR-029-01"
   },
   {
     "rule_id": "MR-030-01",
@@ -969,7 +1049,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "When undertaking a physical metal swap for a non-common Client Members are required to have a 4-way agreement in place prior to entering such a transaction."
+    "raw_text": "When undertaking a physical metal swap for a non-common Client Members are required to have a 4-way agreement in place prior to entering such a transaction.",
+    "paragraph_id": "MR-030-01"
   },
   {
     "rule_id": "MR-030-02",
@@ -981,7 +1062,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Members must maintain a full audit trail in order to demonstrate complete history of a transaction."
+    "raw_text": "Members must maintain a full audit trail in order to demonstrate complete history of a transaction.",
+    "paragraph_id": "MR-030-02"
   },
   {
     "rule_id": "MR-030-03",
@@ -993,7 +1075,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Each Member must confirm via the agreement that the Client is a direct customer, is a commercial user of the metal concerned and had given the Member written instructions regarding the metal swap transaction."
+    "raw_text": "Each Member must confirm via the agreement that the Client is a direct customer, is a commercial user of the metal concerned and had given the Member written instructions regarding the metal swap transaction.",
+    "paragraph_id": "MR-030-03"
   },
   {
     "rule_id": "MR-030-04",
@@ -1005,7 +1088,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "The Member must ensure that the transaction is not in breach of LME Rules or other appropriate legal requirements."
+    "raw_text": "The Member must ensure that the transaction is not in breach of LME Rules or other appropriate legal requirements.",
+    "paragraph_id": "MR-030-04"
   },
   {
     "rule_id": "MR-031-01",
@@ -1017,7 +1101,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence",
-    "raw_text": "Where the Members or their Clients wish to use an existing position as a hedge for an EFP transaction, then this constitutes a metal position exchange and the Transfer trade category should be used."
+    "raw_text": "Where the Members or their Clients wish to use an existing position as a hedge for an EFP transaction, then this constitutes a metal position exchange and the Transfer trade category should be used.",
+    "paragraph_id": "MR-031-01"
   },
   {
     "rule_id": "MR-032-01",
@@ -1029,7 +1114,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Where transferring a Client position between Clearing Members for the Base Service, the position must first be moved out of the relevant GOSA/OSA/ISA account to the Member’s House account using the Transfer post-trade category."
+    "raw_text": "Where transferring a Client position between Clearing Members for the Base Service, the position must first be moved out of the relevant GOSA/OSA/ISA account to the Member’s House account using the Transfer post-trade category.",
+    "paragraph_id": "MR-032-01"
   },
   {
     "rule_id": "MR-032-02",
@@ -1041,7 +1127,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Once this registration has been completed, the Transfer trade half may be entered into the Matching System for matching with the other Clearing Member to effect the Transfer."
+    "raw_text": "Once this registration has been completed, the Transfer trade half may be entered into the Matching System for matching with the other Clearing Member to effect the Transfer.",
+    "paragraph_id": "MR-032-02"
   },
   {
     "rule_id": "MR-033-01",
@@ -1053,7 +1140,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Client positions may be transferred at the original “Historic” contract price, or “Current” market price(usually the Closing Price for the relevant Prompt Date)."
+    "raw_text": "Client positions may be transferred at the original “Historic” contract price, or “Current” market price(usually the Closing Price for the relevant Prompt Date).",
+    "paragraph_id": "MR-033-01"
   },
   {
     "rule_id": "MR-033-02",
@@ -1065,7 +1153,8 @@
     "rule_type": "calculation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Members may transfer a single trade or a trade weighted average of the longs AND a trade weighted average of the shorts as long as they maintain a sufficient audit trail to demonstrate how the “average” price was calculated and which pricing basis was used."
+    "raw_text": "Members may transfer a single trade or a trade weighted average of the longs AND a trade weighted average of the shorts as long as they maintain a sufficient audit trail to demonstrate how the “average” price was calculated and which pricing basis was used.",
+    "paragraph_id": "MR-033-02"
   },
   {
     "rule_id": "MR-033-03",
@@ -1077,7 +1166,8 @@
     "rule_type": "prohibition",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Members may not offset long and short positions between two or more accounts to effect a position transfers, for the purpose of avoiding or evading the Matching Rules or otherwise."
+    "raw_text": "Members may not offset long and short positions between two or more accounts to effect a position transfers, for the purpose of avoiding or evading the Matching Rules or otherwise.",
+    "paragraph_id": "MR-033-03"
   },
   {
     "rule_id": "MR-033-04",
@@ -1089,7 +1179,8 @@
     "rule_type": "prohibition",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Members may not average/amalgamate trades using different pricing bases."
+    "raw_text": "Members may not average/amalgamate trades using different pricing bases.",
+    "paragraph_id": "MR-033-04"
   },
   {
     "rule_id": "MR-034-01",
@@ -1101,7 +1192,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "In these circumstances, a net position may be offset at each Clearing Member by submitted the relevant entries to the Matching System priced at the Official Settlement Price for the Prompt Date."
+    "raw_text": "In these circumstances, a net position may be offset at each Clearing Member by submitted the relevant entries to the Matching System priced at the Official Settlement Price for the Prompt Date.",
+    "paragraph_id": "MR-034-01"
   },
   {
     "rule_id": "MR-035-01",
@@ -1113,7 +1205,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "The Transfer post-trade category may also be used to offset an existing onExchange position at one Member with an OTC position at another Member for a common Client, or an existing OTC position at one Member with an onExchange position at another Member for a common Client using the Transfer trade category in conjunction with the OTC Bring-On trade category as applicable."
+    "raw_text": "The Transfer post-trade category may also be used to offset an existing onExchange position at one Member with an OTC position at another Member for a common Client, or an existing OTC position at one Member with an onExchange position at another Member for a common Client using the Transfer trade category in conjunction with the OTC Bring-On trade category as applicable.",
+    "paragraph_id": "MR-035-01"
   },
   {
     "rule_id": "MR-036-01",
@@ -1125,7 +1218,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "To execute a Reversal/Correction the cancellation trade flag should be used to correct errors that may have occurred in one or more of the fields entered into the Matching System at the point of trade submission."
+    "raw_text": "To execute a Reversal/Correction the cancellation trade flag should be used to correct errors that may have occurred in one or more of the fields entered into the Matching System at the point of trade submission.",
+    "paragraph_id": "MR-036-01"
   },
   {
     "rule_id": "MR-037-01",
@@ -1137,7 +1231,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Trades previously submitted with a Reversal/Correction trade category must be submitted with the same trade category as the previously registered trade."
+    "raw_text": "Trades previously submitted with a Reversal/Correction trade category must be submitted with the same trade category as the previously registered trade.",
+    "paragraph_id": "MR-037-01"
   },
   {
     "rule_id": "MR-037-02",
@@ -1149,7 +1244,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "The new trade must have the correct Cancellation Flag and the Cancel Link Id set to the Matching Reference Number of the original trade."
+    "raw_text": "The new trade must have the correct Cancellation Flag and the Cancel Link Id set to the Matching Reference Number of the original trade.",
+    "paragraph_id": "MR-037-02"
   },
   {
     "rule_id": "MR-038-01",
@@ -1161,7 +1257,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Trades submitted to the Matching System with the Reversal trade flag must reflect the exact economic trade details of the trade originally registered other than the ‘Buy/Sell’ indicator."
+    "raw_text": "Trades submitted to the Matching System with the Reversal trade flag must reflect the exact economic trade details of the trade originally registered other than the ‘Buy/Sell’ indicator.",
+    "paragraph_id": "MR-038-01"
   },
   {
     "rule_id": "MR-039-01",
@@ -1173,7 +1270,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Client Contracts may be cancelled and resubmitted to the Matching System on the day of trade(“T”) but errors identified thereafter(T+1 onwards) must be corrected using the Reversal/Correction above."
+    "raw_text": "Client Contracts may be cancelled and resubmitted to the Matching System on the day of trade(“T”) but errors identified thereafter(T+1 onwards) must be corrected using the Reversal/Correction above.",
+    "paragraph_id": "MR-039-01"
   },
   {
     "rule_id": "MR-040-01",
@@ -1185,7 +1283,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "In the event that a trade Executed in LME Select requires a price adjustment as a result of the Lending Rules, Members must use the Reversal/Correction process Normal trade category against venue inter-office to effect the necessary adjustment."
+    "raw_text": "In the event that a trade Executed in LME Select requires a price adjustment as a result of the Lending Rules, Members must use the Reversal/Correction process Normal trade category against venue inter-office to effect the necessary adjustment.",
+    "paragraph_id": "MR-040-01"
   },
   {
     "rule_id": "MR-041-01",
@@ -1197,7 +1296,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence:fallback",
-    "raw_text": "41. The Reversal/Correction process can also be used to effect a currency conversion in which an existing Client Contract is converted from one currency accepted by the Exchange to another currency accepted by the Exchange."
+    "raw_text": "41. The Reversal/Correction process can also be used to effect a currency conversion in which an existing Client Contract is converted from one currency accepted by the Exchange to another currency accepted by the Exchange.",
+    "paragraph_id": "MR-041-01"
   },
   {
     "rule_id": "MR-042-B1-1",
@@ -1209,7 +1309,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "bullet:1",
-    "raw_text": "In the event that an Agreed Trade is arranged by a RIB and is matched and submitted to the Matching System, and needs to go through the Reversal/Correction process:"
+    "raw_text": "In the event that an Agreed Trade is arranged by a RIB and is matched and submitted to the Matching System, and needs to go through the Reversal/Correction process:",
+    "paragraph_id": "MR-042-B1-1"
   },
   {
     "rule_id": "MR-042-B2-1",
@@ -1221,7 +1322,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "bullet:2",
-    "raw_text": "the RIB must liaise with each Clearing Member to agree the correct details of the Agreed Trade to be re-submitted;"
+    "raw_text": "the RIB must liaise with each Clearing Member to agree the correct details of the Agreed Trade to be re-submitted;",
+    "paragraph_id": "MR-042-B2-1"
   },
   {
     "rule_id": "MR-042-B3-1",
@@ -1233,7 +1335,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "bullet:3",
-    "raw_text": "once agreed, either of the following processes should be followed in order to execute a Reversal/Correction: o the RIB shall enter two new trades with the Cancellation flag set to Reversal/Correction, to: (i) counter the original registration of the Agreed Trade in the Matching System(Cancellation flag set to R(Reversal))"
+    "raw_text": "once agreed, either of the following processes should be followed in order to execute a Reversal/Correction: o the RIB shall enter two new trades with the Cancellation flag set to Reversal/Correction, to: (i) counter the original registration of the Agreed Trade in the Matching System(Cancellation flag set to R(Reversal))",
+    "paragraph_id": "MR-042-B3-1"
   },
   {
     "rule_id": "MR-042-B3-2",
@@ -1245,7 +1348,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "bullet:3",
-    "raw_text": "Both the Reversal and the Correction will have to be approved by both Clearing Members in order to match and lead to an Agreed Trade"
+    "raw_text": "Both the Reversal and the Correction will have to be approved by both Clearing Members in order to match and lead to an Agreed Trade",
+    "paragraph_id": "MR-042-B3-2"
   },
   {
     "rule_id": "MR-042-B3-3",
@@ -1257,7 +1361,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "bullet:3",
-    "raw_text": "or o alternatively, each Clearing Member shall enter two new trades with the Cancellation flag set to Reversal/Correction, to: (i) counter the original registration of the Agreed Trade in the Matching System"
+    "raw_text": "or o alternatively, each Clearing Member shall enter two new trades with the Cancellation flag set to Reversal/Correction, to: (i) counter the original registration of the Agreed Trade in the Matching System",
+    "paragraph_id": "MR-042-B3-3"
   },
   {
     "rule_id": "MR-043-01",
@@ -1269,7 +1374,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence:fallback",
-    "raw_text": "43. The process for use of the “UNA” mnemonic in Give-Ups is set out below, particularly at paragraphs 50 to"
+    "raw_text": "43. The process for use of the “UNA” mnemonic in Give-Ups is set out below, particularly at paragraphs 50 to",
+    "paragraph_id": "MR-043-01"
   },
   {
     "rule_id": "MR-060-A-1",
@@ -1281,7 +1387,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:A:fallback",
-    "raw_text": "60. The Exchange acknowledges that Members use the \"UNA\" mnemonic other than in connection with the registration of GiveUps. For example, UNAs are used in connection with the registration of Client Contracts, in circumstances other than those involving the facilitation of Give-Up trades. Such use of the \"UNA\" mnemonic is permitted, provided that: (a) Members comply with their obligations under Regulation 3.3 of the Trading Regulations and the provisions of the Clearing House Rules regarding the allocation of positions to the relevant position-keeping account at the Clearing House; (b) it is the sole responsibility of the Member to ensure that it allocates positions in respect of Contracts to an appropriate position-keeping account at the Clearing House to enable the Member and its Client(s) to comply with any applicable legal or regulatory requirements and/or any contractual obligations; and(c) such use is permissible under, and consistent with, the broader requirements set out in these Matching Rules and the LME Rulebook(in each case as amended from time to time)."
+    "raw_text": "60. The Exchange acknowledges that Members use the \"UNA\" mnemonic other than in connection with the registration of GiveUps. For example, UNAs are used in connection with the registration of Client Contracts, in circumstances other than those involving the facilitation of Give-Up trades. Such use of the \"UNA\" mnemonic is permitted, provided that: (a) Members comply with their obligations under Regulation 3.3 of the Trading Regulations and the provisions of the Clearing House Rules regarding the allocation of positions to the relevant position-keeping account at the Clearing House; (b) it is the sole responsibility of the Member to ensure that it allocates positions in respect of Contracts to an appropriate position-keeping account at the Clearing House to enable the Member and its Client(s) to comply with any applicable legal or regulatory requirements and/or any contractual obligations; and(c) such use is permissible under, and consistent with, the broader requirements set out in these Matching Rules and the LME Rulebook(in each case as amended from time to time).",
+    "paragraph_id": "MR-060-A-1"
   },
   {
     "rule_id": "MR-060-B-1",
@@ -1293,7 +1400,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:B:fallback",
-    "raw_text": "60. The Exchange acknowledges that Members use the \"UNA\" mnemonic other than in connection with the registration of GiveUps. For example, UNAs are used in connection with the registration of Client Contracts, in circumstances other than those involving the facilitation of Give-Up trades. Such use of the \"UNA\" mnemonic is permitted, provided that: (a) Members comply with their obligations under Regulation 3.3 of the Trading Regulations and the provisions of the Clearing House Rules regarding the allocation of positions to the relevant position-keeping account at the Clearing House; (b) it is the sole responsibility of the Member to ensure that it allocates positions in respect of Contracts to an appropriate position-keeping account at the Clearing House to enable the Member and its Client(s) to comply with any applicable legal or regulatory requirements and/or any contractual obligations; and(c) such use is permissible under, and consistent with, the broader requirements set out in these Matching Rules and the LME Rulebook(in each case as amended from time to time)."
+    "raw_text": "60. The Exchange acknowledges that Members use the \"UNA\" mnemonic other than in connection with the registration of GiveUps. For example, UNAs are used in connection with the registration of Client Contracts, in circumstances other than those involving the facilitation of Give-Up trades. Such use of the \"UNA\" mnemonic is permitted, provided that: (a) Members comply with their obligations under Regulation 3.3 of the Trading Regulations and the provisions of the Clearing House Rules regarding the allocation of positions to the relevant position-keeping account at the Clearing House; (b) it is the sole responsibility of the Member to ensure that it allocates positions in respect of Contracts to an appropriate position-keeping account at the Clearing House to enable the Member and its Client(s) to comply with any applicable legal or regulatory requirements and/or any contractual obligations; and(c) such use is permissible under, and consistent with, the broader requirements set out in these Matching Rules and the LME Rulebook(in each case as amended from time to time).",
+    "paragraph_id": "MR-060-B-1"
   },
   {
     "rule_id": "MR-060-C-1",
@@ -1305,7 +1413,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:C:fallback",
-    "raw_text": "60. The Exchange acknowledges that Members use the \"UNA\" mnemonic other than in connection with the registration of GiveUps. For example, UNAs are used in connection with the registration of Client Contracts, in circumstances other than those involving the facilitation of Give-Up trades. Such use of the \"UNA\" mnemonic is permitted, provided that: (a) Members comply with their obligations under Regulation 3.3 of the Trading Regulations and the provisions of the Clearing House Rules regarding the allocation of positions to the relevant position-keeping account at the Clearing House; (b) it is the sole responsibility of the Member to ensure that it allocates positions in respect of Contracts to an appropriate position-keeping account at the Clearing House to enable the Member and its Client(s) to comply with any applicable legal or regulatory requirements and/or any contractual obligations; and(c) such use is permissible under, and consistent with, the broader requirements set out in these Matching Rules and the LME Rulebook(in each case as amended from time to time)."
+    "raw_text": "60. The Exchange acknowledges that Members use the \"UNA\" mnemonic other than in connection with the registration of GiveUps. For example, UNAs are used in connection with the registration of Client Contracts, in circumstances other than those involving the facilitation of Give-Up trades. Such use of the \"UNA\" mnemonic is permitted, provided that: (a) Members comply with their obligations under Regulation 3.3 of the Trading Regulations and the provisions of the Clearing House Rules regarding the allocation of positions to the relevant position-keeping account at the Clearing House; (b) it is the sole responsibility of the Member to ensure that it allocates positions in respect of Contracts to an appropriate position-keeping account at the Clearing House to enable the Member and its Client(s) to comply with any applicable legal or regulatory requirements and/or any contractual obligations; and(c) such use is permissible under, and consistent with, the broader requirements set out in these Matching Rules and the LME Rulebook(in each case as amended from time to time).",
+    "paragraph_id": "MR-060-C-1"
   },
   {
     "rule_id": "MR-044-A-1",
@@ -1317,7 +1426,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "subclause:A",
-    "raw_text": "The transaction must be governed by an agreement to transfer commodities, or guaranteed rights relating to title to commodities subject to: (i) the seller can only transfer or pledge a particular commodity to one counterparty at a time;"
+    "raw_text": "The transaction must be governed by an agreement to transfer commodities, or guaranteed rights relating to title to commodities subject to: (i) the seller can only transfer or pledge a particular commodity to one counterparty at a time;",
+    "paragraph_id": "MR-044-A-1"
   },
   {
     "rule_id": "MR-044-A-2",
@@ -1329,7 +1439,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "subclause:A",
-    "raw_text": "(ii) the seller must agree to repurchase them, or substituted commodities of the same description"
+    "raw_text": "(ii) the seller must agree to repurchase them, or substituted commodities of the same description",
+    "paragraph_id": "MR-044-A-2"
   },
   {
     "rule_id": "MR-044-A-3",
@@ -1341,7 +1452,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "subclause:A",
-    "raw_text": "and(iii) the seller must agree to repurchase them at a specified price on a specific future date"
+    "raw_text": "and(iii) the seller must agree to repurchase them at a specified price on a specific future date",
+    "paragraph_id": "MR-044-A-3"
   },
   {
     "rule_id": "MR-044-B-1",
@@ -1353,7 +1465,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "subclause:B",
-    "raw_text": "securities or commodities lending and securities or commodities borrowing – where a counterparty transfers commodities subject to a commitment that the borrower will return equivalent commodities on a future date or when requested to by the transferor"
+    "raw_text": "securities or commodities lending and securities or commodities borrowing – where a counterparty transfers commodities subject to a commitment that the borrower will return equivalent commodities on a future date or when requested to by the transferor",
+    "paragraph_id": "MR-044-B-1"
   },
   {
     "rule_id": "MR-044-C-1",
@@ -1365,7 +1478,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:C:fallback",
-    "raw_text": "44. The Financing trade category is used for financing transactions where the prices are likely to be away from the prevailing current market price. Under MiFID II, securities financing transactions are not considered to be reportable transactions. Therefore, the use of the Financing trade category will not result in any transaction reporting obligations, provided the transaction itself meets the following criteria: (a) a repurchase transaction – involves selling a commodity and agreeing to repurchase it in the future. The transaction must be governed by an agreement to transfer commodities, or guaranteed rights relating to title to commodities subject to: (i) the seller can only transfer or pledge a particular commodity to one counterparty at a time; (ii) the seller must agree to repurchase them, or substituted commodities of the same description; and(iii) the seller must agree to repurchase them at a specified price on a specific future date; or(b) securities or commodities lending and securities or commodities borrowing – where a counterparty transfers commodities subject to a commitment that the borrower will return equivalent commodities on a future date or when requested to by the transferor; or(c) a buy-sell back transaction or sell-buy back transaction – where a counterparty buys commodities, or guaranteed rights relating to title to commodities, and agrees to sell them(or commodities/guaranteed rights of the same description) back to the other party at a specified price on a future date. A sell-buy back represents the other side of the transaction; or(d) a margin lending transaction – this only applies to securities, not commodities."
+    "raw_text": "44. The Financing trade category is used for financing transactions where the prices are likely to be away from the prevailing current market price. Under MiFID II, securities financing transactions are not considered to be reportable transactions. Therefore, the use of the Financing trade category will not result in any transaction reporting obligations, provided the transaction itself meets the following criteria: (a) a repurchase transaction – involves selling a commodity and agreeing to repurchase it in the future. The transaction must be governed by an agreement to transfer commodities, or guaranteed rights relating to title to commodities subject to: (i) the seller can only transfer or pledge a particular commodity to one counterparty at a time; (ii) the seller must agree to repurchase them, or substituted commodities of the same description; and(iii) the seller must agree to repurchase them at a specified price on a specific future date; or(b) securities or commodities lending and securities or commodities borrowing – where a counterparty transfers commodities subject to a commitment that the borrower will return equivalent commodities on a future date or when requested to by the transferor; or(c) a buy-sell back transaction or sell-buy back transaction – where a counterparty buys commodities, or guaranteed rights relating to title to commodities, and agrees to sell them(or commodities/guaranteed rights of the same description) back to the other party at a specified price on a future date. A sell-buy back represents the other side of the transaction; or(d) a margin lending transaction – this only applies to securities, not commodities.",
+    "paragraph_id": "MR-044-C-1"
   },
   {
     "rule_id": "MR-044-D-1",
@@ -1377,7 +1491,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:D:fallback",
-    "raw_text": "44. The Financing trade category is used for financing transactions where the prices are likely to be away from the prevailing current market price. Under MiFID II, securities financing transactions are not considered to be reportable transactions. Therefore, the use of the Financing trade category will not result in any transaction reporting obligations, provided the transaction itself meets the following criteria: (a) a repurchase transaction – involves selling a commodity and agreeing to repurchase it in the future. The transaction must be governed by an agreement to transfer commodities, or guaranteed rights relating to title to commodities subject to: (i) the seller can only transfer or pledge a particular commodity to one counterparty at a time; (ii) the seller must agree to repurchase them, or substituted commodities of the same description; and(iii) the seller must agree to repurchase them at a specified price on a specific future date; or(b) securities or commodities lending and securities or commodities borrowing – where a counterparty transfers commodities subject to a commitment that the borrower will return equivalent commodities on a future date or when requested to by the transferor; or(c) a buy-sell back transaction or sell-buy back transaction – where a counterparty buys commodities, or guaranteed rights relating to title to commodities, and agrees to sell them(or commodities/guaranteed rights of the same description) back to the other party at a specified price on a future date. A sell-buy back represents the other side of the transaction; or(d) a margin lending transaction – this only applies to securities, not commodities."
+    "raw_text": "44. The Financing trade category is used for financing transactions where the prices are likely to be away from the prevailing current market price. Under MiFID II, securities financing transactions are not considered to be reportable transactions. Therefore, the use of the Financing trade category will not result in any transaction reporting obligations, provided the transaction itself meets the following criteria: (a) a repurchase transaction – involves selling a commodity and agreeing to repurchase it in the future. The transaction must be governed by an agreement to transfer commodities, or guaranteed rights relating to title to commodities subject to: (i) the seller can only transfer or pledge a particular commodity to one counterparty at a time; (ii) the seller must agree to repurchase them, or substituted commodities of the same description; and(iii) the seller must agree to repurchase them at a specified price on a specific future date; or(b) securities or commodities lending and securities or commodities borrowing – where a counterparty transfers commodities subject to a commitment that the borrower will return equivalent commodities on a future date or when requested to by the transferor; or(c) a buy-sell back transaction or sell-buy back transaction – where a counterparty buys commodities, or guaranteed rights relating to title to commodities, and agrees to sell them(or commodities/guaranteed rights of the same description) back to the other party at a specified price on a future date. A sell-buy back represents the other side of the transaction; or(d) a margin lending transaction – this only applies to securities, not commodities.",
+    "paragraph_id": "MR-044-D-1"
   },
   {
     "rule_id": "MR-045-01",
@@ -1389,7 +1504,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence:fallback",
-    "raw_text": "45. Historic Price Carry submission would be effected via the Financing Trade Category. Historic Price Carry trades are used to roll or carry forward an existing Client Contract to a valid Prompt Date on the basis of the original contract price between the same Members. Notice 99/484 : A472 : R034(‘RULES ON HISTORIC/ORIGINAL PRICE CARRIES’) remains in force."
+    "raw_text": "45. Historic Price Carry submission would be effected via the Financing Trade Category. Historic Price Carry trades are used to roll or carry forward an existing Client Contract to a valid Prompt Date on the basis of the original contract price between the same Members. Notice 99/484 : A472 : R034(‘RULES ON HISTORIC/ORIGINAL PRICE CARRIES’) remains in force.",
+    "paragraph_id": "MR-045-01"
   },
   {
     "rule_id": "MR-046-01",
@@ -1401,7 +1517,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Give-Up trades must be registered in the Matching System in relation to a trade that is concluded on any Execution Venue."
+    "raw_text": "Give-Up trades must be registered in the Matching System in relation to a trade that is concluded on any Execution Venue.",
+    "paragraph_id": "MR-046-01"
   },
   {
     "rule_id": "MR-046-02",
@@ -1413,7 +1530,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Within 10 minutes from the time of Execution of the Client order, the executing Member must enter a Give- Up Executor trade half."
+    "raw_text": "Within 10 minutes from the time of Execution of the Client order, the executing Member must enter a Give- Up Executor trade half.",
+    "paragraph_id": "MR-046-02"
   },
   {
     "rule_id": "MR-046-03",
@@ -1425,7 +1543,8 @@
     "rule_type": "prohibition",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Irrespective of which Execution Venue the trade is concluded on, Give-Up trades may only be submitted to the Matching System with venue code “Inter-office”."
+    "raw_text": "Irrespective of which Execution Venue the trade is concluded on, Give-Up trades may only be submitted to the Matching System with venue code “Inter-office”.",
+    "paragraph_id": "MR-046-03"
   },
   {
     "rule_id": "MR-046-04",
@@ -1437,7 +1556,8 @@
     "rule_type": "prohibition",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Members are not permitted to submit Give-Up trades against any other venue code."
+    "raw_text": "Members are not permitted to submit Give-Up trades against any other venue code.",
+    "paragraph_id": "MR-046-04"
   },
   {
     "rule_id": "MR-047-01",
@@ -1449,7 +1569,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Where the executing Member knows the identity of the Give-Up Clearer at the time at which it enters the Give-Up Executor trade half, the executing Member may register the Give-Up Executor trade half directly to the Give-Up Clearer."
+    "raw_text": "Where the executing Member knows the identity of the Give-Up Clearer at the time at which it enters the Give-Up Executor trade half, the executing Member may register the Give-Up Executor trade half directly to the Give-Up Clearer.",
+    "paragraph_id": "MR-047-01"
   },
   {
     "rule_id": "MR-047-02",
@@ -1461,7 +1582,8 @@
     "rule_type": "data_constraint",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "In this scenario, the executing Member must include the Give-Up Clearer’s mnemonic in the counterparty field."
+    "raw_text": "In this scenario, the executing Member must include the Give-Up Clearer’s mnemonic in the counterparty field.",
+    "paragraph_id": "MR-047-02"
   },
   {
     "rule_id": "MR-048-01",
@@ -1473,7 +1595,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "However, in order to facilitate Members’ compliance with the 10 minute window mentioned above, Members may elect(but are not obligated) to use the process set out in paragraphs 50 to 60 below(the “UNA process”)."
+    "raw_text": "However, in order to facilitate Members’ compliance with the 10 minute window mentioned above, Members may elect(but are not obligated) to use the process set out in paragraphs 50 to 60 below(the “UNA process”).",
+    "paragraph_id": "MR-048-01"
   },
   {
     "rule_id": "MR-048-02",
@@ -1485,7 +1608,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Members may use this process whether or not the Clearing Member is known at the time of the Execution of the Client order, and for business that is executed on any of the LME Execution Venues."
+    "raw_text": "Members may use this process whether or not the Clearing Member is known at the time of the Execution of the Client order, and for business that is executed on any of the LME Execution Venues.",
+    "paragraph_id": "MR-048-02"
   },
   {
     "rule_id": "MR-049-01",
@@ -1497,7 +1621,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Where an executing Member uses the UNA process, the executing Member must enter the member mnemonic “UNA” in the counterparty field."
+    "raw_text": "Where an executing Member uses the UNA process, the executing Member must enter the member mnemonic “UNA” in the counterparty field.",
+    "paragraph_id": "MR-049-01"
   },
   {
     "rule_id": "MR-049-02",
@@ -1509,7 +1634,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "In both the trade to fulfil the Client order and the Give-Up Executor trade the account should be entered as “H”."
+    "raw_text": "In both the trade to fulfil the Client order and the Give-Up Executor trade the account should be entered as “H”.",
+    "paragraph_id": "MR-049-02"
   },
   {
     "rule_id": "MR-050-01",
@@ -1521,7 +1647,8 @@
     "rule_type": "state_transition",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "The submission of the Give-Up Executor trade half into the Matching System will automatically generate a Give-Up Clearer trade half, with an account field of “U”."
+    "raw_text": "The submission of the Give-Up Executor trade half into the Matching System will automatically generate a Give-Up Clearer trade half, with an account field of “U”.",
+    "paragraph_id": "MR-050-01"
   },
   {
     "rule_id": "MR-050-02",
@@ -1533,7 +1660,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence",
-    "raw_text": "This will create a matched trade that will be submitted for clearing, resulting in a cleared trade."
+    "raw_text": "This will create a matched trade that will be submitted for clearing, resulting in a cleared trade.",
+    "paragraph_id": "MR-050-02"
   },
   {
     "rule_id": "MR-050-03",
@@ -1545,7 +1673,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence",
-    "raw_text": "This will lead to equal and opposite positions on the executing Member’s H and U accounts."
+    "raw_text": "This will lead to equal and opposite positions on the executing Member’s H and U accounts.",
+    "paragraph_id": "MR-050-03"
   },
   {
     "rule_id": "MR-051-01",
@@ -1557,7 +1686,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Where the Clearing Member is known, the executing Member may then cancel or reverse the cleared trade by following either of the steps outlined in paragraph 52 below."
+    "raw_text": "Where the Clearing Member is known, the executing Member may then cancel or reverse the cleared trade by following either of the steps outlined in paragraph 52 below.",
+    "paragraph_id": "MR-051-01"
   },
   {
     "rule_id": "MR-051-02",
@@ -1569,7 +1699,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence",
-    "raw_text": "When the Clearing Member has been advised in due course by the Client that the executing Member has filled his order, the Clearing Member will then enter a Give-Up Clearer trade half to the Matching System."
+    "raw_text": "When the Clearing Member has been advised in due course by the Client that the executing Member has filled his order, the Clearing Member will then enter a Give-Up Clearer trade half to the Matching System.",
+    "paragraph_id": "MR-051-02"
   },
   {
     "rule_id": "MR-052-A-1",
@@ -1581,7 +1712,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:A",
-    "raw_text": "Cancel the cleared trade that was created through the system- generated Give-Up Clearer trade half with the UNA member mnemonic, and submit a Give-Up Executor trade half with the now known Clearing Member mnemonic in the Counterparty field, with an appropriate Client reference where known"
+    "raw_text": "Cancel the cleared trade that was created through the system- generated Give-Up Clearer trade half with the UNA member mnemonic, and submit a Give-Up Executor trade half with the now known Clearing Member mnemonic in the Counterparty field, with an appropriate Client reference where known",
+    "paragraph_id": "MR-052-A-1"
   },
   {
     "rule_id": "MR-052-B-1",
@@ -1593,7 +1725,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:B",
-    "raw_text": "(b) Reverse the original Give-Up Executor trade half with the UNA member mnemonic, and submit a Give-Up Executor trade half with the now known Clearing Member mnemonic in the Counterparty field and with an appropriate Client reference where known."
+    "raw_text": "(b) Reverse the original Give-Up Executor trade half with the UNA member mnemonic, and submit a Give-Up Executor trade half with the now known Clearing Member mnemonic in the Counterparty field and with an appropriate Client reference where known.",
+    "paragraph_id": "MR-052-B-1"
   },
   {
     "rule_id": "MR-053-01",
@@ -1605,7 +1738,8 @@
     "rule_type": "state_transition",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "When the Give-Up Executor enters their reversal half trade, then a new matched trade will be created, but with the original trade date/time retained."
+    "raw_text": "When the Give-Up Executor enters their reversal half trade, then a new matched trade will be created, but with the original trade date/time retained.",
+    "paragraph_id": "MR-053-01"
   },
   {
     "rule_id": "MR-054-01",
@@ -1617,7 +1751,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "If the executing Member chooses to follow(a) above, then they must ensure that the Give-Up Executor trade half that contains the Clearing Member mnemonic also includes such information that allows for it to be identified as being related to the original cleared trade."
+    "raw_text": "If the executing Member chooses to follow(a) above, then they must ensure that the Give-Up Executor trade half that contains the Clearing Member mnemonic also includes such information that allows for it to be identified as being related to the original cleared trade.",
+    "paragraph_id": "MR-054-01"
   },
   {
     "rule_id": "MR-055-A-1",
@@ -1629,7 +1764,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:A:fallback",
-    "raw_text": "55. For both(a) and(b) the Execution Time of the Give-Up Executor trade half must be the same as that entered on the original cleared Give-Up Executor/Give-Up Clearer trade."
+    "raw_text": "55. For both(a) and(b) the Execution Time of the Give-Up Executor trade half must be the same as that entered on the original cleared Give-Up Executor/Give-Up Clearer trade.",
+    "paragraph_id": "MR-055-A-1"
   },
   {
     "rule_id": "MR-055-B-1",
@@ -1641,7 +1777,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "subclause:B",
-    "raw_text": "(b) the Execution Time of the Give-Up Executor trade half must be the same as that entered on the original cleared Give-Up Executor/Give-Up Clearer trade."
+    "raw_text": "(b) the Execution Time of the Give-Up Executor trade half must be the same as that entered on the original cleared Give-Up Executor/Give-Up Clearer trade.",
+    "paragraph_id": "MR-055-B-1"
   },
   {
     "rule_id": "MR-056-A-1",
@@ -1653,7 +1790,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:A:fallback",
-    "raw_text": "56. Where the details of the original trade have changed – e.g. Prompt Date, price, volume – then the executing Member may again choose to follow either(a) or(b) as above. However, in these circumstances the Execution Time of either the Give-Up Executor trade half must be the time at which the amended details of the trade were agreed with the Client."
+    "raw_text": "56. Where the details of the original trade have changed – e.g. Prompt Date, price, volume – then the executing Member may again choose to follow either(a) or(b) as above. However, in these circumstances the Execution Time of either the Give-Up Executor trade half must be the time at which the amended details of the trade were agreed with the Client.",
+    "paragraph_id": "MR-056-A-1"
   },
   {
     "rule_id": "MR-056-B-1",
@@ -1665,7 +1803,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "subclause:B",
-    "raw_text": "However, in these circumstances the Execution Time of either the Give-Up Executor trade half must be the time at which the amended details of the trade were agreed with the Client."
+    "raw_text": "However, in these circumstances the Execution Time of either the Give-Up Executor trade half must be the time at which the amended details of the trade were agreed with the Client.",
+    "paragraph_id": "MR-056-B-1"
   },
   {
     "rule_id": "MR-057-01",
@@ -1677,7 +1816,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence:fallback",
-    "raw_text": "57. Members are reminded of the need to ensure that orders which are to be givenup to other Members for clearing, are done so in a timely fashion, and that it is the responsibility of all Members, executing and clearing, to ensure that they, and their Clients recognise the importance of transmitting any Client instructions and processing this business as swiftly as possible."
+    "raw_text": "57. Members are reminded of the need to ensure that orders which are to be givenup to other Members for clearing, are done so in a timely fashion, and that it is the responsibility of all Members, executing and clearing, to ensure that they, and their Clients recognise the importance of transmitting any Client instructions and processing this business as swiftly as possible.",
+    "paragraph_id": "MR-057-01"
   },
   {
     "rule_id": "MR-058-01",
@@ -1689,7 +1829,8 @@
     "rule_type": "state_transition",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Where it has not been possible to effect a give-up on trade date(“T”), then the Cleared Trade, created through the submission of the Give-Up Executor trade half and the system-generated Give-Up Clearer trade half, will be processed by the Clearing House together with all other Cleared Trades in accordance with the Clearing House Rules."
+    "raw_text": "Where it has not been possible to effect a give-up on trade date(“T”), then the Cleared Trade, created through the submission of the Give-Up Executor trade half and the system-generated Give-Up Clearer trade half, will be processed by the Clearing House together with all other Cleared Trades in accordance with the Clearing House Rules.",
+    "paragraph_id": "MR-058-01"
   },
   {
     "rule_id": "MR-059-01",
@@ -1701,7 +1842,8 @@
     "rule_type": "deadline",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "The deadline for processing Give-Ups that have not been processed on T, is 10:00(London time) on T+1."
+    "raw_text": "The deadline for processing Give-Ups that have not been processed on T, is 10:00(London time) on T+1.",
+    "paragraph_id": "MR-059-01"
   },
   {
     "rule_id": "MR-059-02",
@@ -1713,7 +1855,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence",
-    "raw_text": "This is to be achieved by the executing Member reversing the original Cleared Trade, and then submitting a Give-Up Executor trade half in the same manner as the original trade half, with the Trade Date and Time being the original time at which the Client order was executed."
+    "raw_text": "This is to be achieved by the executing Member reversing the original Cleared Trade, and then submitting a Give-Up Executor trade half in the same manner as the original trade half, with the Trade Date and Time being the original time at which the Client order was executed.",
+    "paragraph_id": "MR-059-02"
   },
   {
     "rule_id": "MR-059-03",
@@ -1725,7 +1868,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "However, Members should be aware that they may be required to provide the Exchange with such additional information as the Exchange may request from time to time to demonstrate why it was not possible to process the Give-Up on T."
+    "raw_text": "However, Members should be aware that they may be required to provide the Exchange with such additional information as the Exchange may request from time to time to demonstrate why it was not possible to process the Give-Up on T.",
+    "paragraph_id": "MR-059-03"
   },
   {
     "rule_id": "MR-060-A-1",
@@ -1737,7 +1881,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "subclause:A",
-    "raw_text": "(a) Entered into an over-the-counter contract with another Member;"
+    "raw_text": "(a) Entered into an over-the-counter contract with another Member;",
+    "paragraph_id": "MR-060-A-1"
   },
   {
     "rule_id": "MR-060-B-1",
@@ -1749,7 +1894,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:B:fallback",
-    "raw_text": "60. The OTC Bring-On category may be used where a Member has: (a) Entered into an over-the-counter contract with another Member; (b)"
+    "raw_text": "60. The OTC Bring-On category may be used where a Member has: (a) Entered into an over-the-counter contract with another Member; (b)",
+    "paragraph_id": "MR-060-B-1"
   },
   {
     "rule_id": "MR-061-01",
@@ -1761,7 +1907,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "An Agreed Trade that is submitted with the OTC Bring-On category shall therefore be treated in the same way as any other Agreed Trade made in the inter-office market."
+    "raw_text": "An Agreed Trade that is submitted with the OTC Bring-On category shall therefore be treated in the same way as any other Agreed Trade made in the inter-office market.",
+    "paragraph_id": "MR-061-01"
   },
   {
     "rule_id": "MR-062-01",
@@ -1773,7 +1920,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "It is the responsibility of the Members that are counterparties to the original over-the-counter contract to take any action that may be necessary to terminate or cancel such contract when the Agreed Trade represented by the Contingent Agreement to Trade is Executed."
+    "raw_text": "It is the responsibility of the Members that are counterparties to the original over-the-counter contract to take any action that may be necessary to terminate or cancel such contract when the Agreed Trade represented by the Contingent Agreement to Trade is Executed.",
+    "paragraph_id": "MR-062-01"
   },
   {
     "rule_id": "MR-062-02",
@@ -1785,7 +1933,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Neither the Exchange nor the Clearing House shall have any responsibility or liability to any person in respect of the original over-the-counter contract."
+    "raw_text": "Neither the Exchange nor the Clearing House shall have any responsibility or liability to any person in respect of the original over-the-counter contract.",
+    "paragraph_id": "MR-062-02"
   },
   {
     "rule_id": "MR-063-01",
@@ -1797,7 +1946,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "The Clearing House may offer services to enable Members to clear through the Clearing House Cleared Contracts representing multiple, previously executed, overthe-counter contracts(an \"OTC Backloading Service\")."
+    "raw_text": "The Clearing House may offer services to enable Members to clear through the Clearing House Cleared Contracts representing multiple, previously executed, overthe-counter contracts(an \"OTC Backloading Service\").",
+    "paragraph_id": "MR-063-01"
   },
   {
     "rule_id": "MR-063-02",
@@ -1809,7 +1959,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Such services shall be governed by the terms of any agreement pursuant to which the Clearing House and/or the Exchange makes such services available."
+    "raw_text": "Such services shall be governed by the terms of any agreement pursuant to which the Clearing House and/or the Exchange makes such services available.",
+    "paragraph_id": "MR-063-02"
   },
   {
     "rule_id": "MR-063-03",
@@ -1821,7 +1972,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Such contracts shall be input into the Matching System pursuant to a Contingent Agreement to Trade, in the same manner as an OTC Bring-On, save that the particulars of the Contingent Agreement to Trade shall be determined pursuant to the OTC Backloading Service."
+    "raw_text": "Such contracts shall be input into the Matching System pursuant to a Contingent Agreement to Trade, in the same manner as an OTC Bring-On, save that the particulars of the Contingent Agreement to Trade shall be determined pursuant to the OTC Backloading Service.",
+    "paragraph_id": "MR-063-03"
   },
   {
     "rule_id": "MR-063-04",
@@ -1833,7 +1985,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "The Exchange shall treat any Agreed Trade submitted to the Matching System resulting from an OTC Backloading Service in the same manner as any other Agreed Trade represented by a Contingent Agreement to Trade agreed in the inter-office market."
+    "raw_text": "The Exchange shall treat any Agreed Trade submitted to the Matching System resulting from an OTC Backloading Service in the same manner as any other Agreed Trade represented by a Contingent Agreement to Trade agreed in the inter-office market.",
+    "paragraph_id": "MR-063-04"
   },
   {
     "rule_id": "MR-064-A-1",
@@ -1845,7 +1998,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "subclause:A",
-    "raw_text": "(a) the over-the-counter transaction must: i. ii. iii."
+    "raw_text": "(a) the over-the-counter transaction must: i. ii. iii.",
+    "paragraph_id": "MR-064-A-1"
   },
   {
     "rule_id": "MR-064-B-1",
@@ -1857,7 +2011,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "subclause:B",
-    "raw_text": "have been booked by both counterparties to the transaction"
+    "raw_text": "have been booked by both counterparties to the transaction",
+    "paragraph_id": "MR-064-B-1"
   },
   {
     "rule_id": "MR-064-B-2",
@@ -1869,7 +2024,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "subclause:B",
-    "raw_text": "be booked within their trading systems"
+    "raw_text": "be booked within their trading systems",
+    "paragraph_id": "MR-064-B-2"
   },
   {
     "rule_id": "MR-064-B-3",
@@ -1881,7 +2037,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "subclause:B",
-    "raw_text": "and be documented as such"
+    "raw_text": "and be documented as such",
+    "paragraph_id": "MR-064-B-3"
   },
   {
     "rule_id": "MR-064-B-4",
@@ -1893,7 +2050,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "subclause:B",
-    "raw_text": "and the trade date of the original over-the-counter transaction must be prior to the trade date of the OTC Bring-On."
+    "raw_text": "and the trade date of the original over-the-counter transaction must be prior to the trade date of the OTC Bring-On.",
+    "paragraph_id": "MR-064-B-4"
   },
   {
     "rule_id": "MR-065-01",
@@ -1905,7 +2063,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "The OTC Take Off category may be used to convert a Client Contract to an OTC contract."
+    "raw_text": "The OTC Take Off category may be used to convert a Client Contract to an OTC contract.",
+    "paragraph_id": "MR-065-01"
   },
   {
     "rule_id": "MR-066-01",
@@ -1917,7 +2076,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "For each contract taken off exchange the member must be able to provide full details of the relevant Client Contract."
+    "raw_text": "For each contract taken off exchange the member must be able to provide full details of the relevant Client Contract.",
+    "paragraph_id": "MR-066-01"
   },
   {
     "rule_id": "MR-066-02",
@@ -1929,7 +2089,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "The OTC Take Off created must be for the same contractual commitment as the original Client Contract."
+    "raw_text": "The OTC Take Off created must be for the same contractual commitment as the original Client Contract.",
+    "paragraph_id": "MR-066-02"
   },
   {
     "rule_id": "MR-067-01",
@@ -1941,7 +2102,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Member must maintain a full audit trail for the OTC Take Off transaction including the client instructions to take each trade off exchange."
+    "raw_text": "Member must maintain a full audit trail for the OTC Take Off transaction including the client instructions to take each trade off exchange.",
+    "paragraph_id": "MR-067-01"
   },
   {
     "rule_id": "MR-068-01",
@@ -1953,7 +2115,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Neither the Exchange nor the Clearing House shall have any responsibility or liability to any person in respect of the over-the-counter contract."
+    "raw_text": "Neither the Exchange nor the Clearing House shall have any responsibility or liability to any person in respect of the over-the-counter contract.",
+    "paragraph_id": "MR-068-01"
   },
   {
     "rule_id": "MR-069-01",
@@ -1965,7 +2128,8 @@
     "rule_type": "state_transition",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "In the event that an IOM PTT Initiating Pair has been received into the Matching System(in accordance with Trading Regulation 2.15), an FPA will automatically start with the FPA details and fixed parameters(contract information) disseminated via the LME Market Data feeds."
+    "raw_text": "In the event that an IOM PTT Initiating Pair has been received into the Matching System(in accordance with Trading Regulation 2.15), an FPA will automatically start with the FPA details and fixed parameters(contract information) disseminated via the LME Market Data feeds.",
+    "paragraph_id": "MR-069-01"
   },
   {
     "rule_id": "MR-069-02",
@@ -1977,7 +2141,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence",
-    "raw_text": "It should be noted that, where the particulars of the PTT Orders are input to the Matching System by a Registered Intermediating Broker, the FPA will commence only following the approval by the Clearing Member(s) responsible for the resulting Agreed Trade."
+    "raw_text": "It should be noted that, where the particulars of the PTT Orders are input to the Matching System by a Registered Intermediating Broker, the FPA will commence only following the approval by the Clearing Member(s) responsible for the resulting Agreed Trade.",
+    "paragraph_id": "MR-069-02"
   },
   {
     "rule_id": "MR-069-03",
@@ -1989,7 +2154,8 @@
     "rule_type": "state_transition",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "If either leg of an IOM PTT Initiating Pair for TOM has been received after 12:30 using the ‘Normal’ trade category the Matching System will automatically reject the submission."
+    "raw_text": "If either leg of an IOM PTT Initiating Pair for TOM has been received after 12:30 using the ‘Normal’ trade category the Matching System will automatically reject the submission.",
+    "paragraph_id": "MR-069-03"
   },
   {
     "rule_id": "MR-069-04",
@@ -2001,7 +2167,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence",
-    "raw_text": "Any initiating bids or offers received after 12.30 for TOM will need to be booked using the ‘Exception Reportable’ trade category in order to pass validation."
+    "raw_text": "Any initiating bids or offers received after 12.30 for TOM will need to be booked using the ‘Exception Reportable’ trade category in order to pass validation.",
+    "paragraph_id": "MR-069-04"
   },
   {
     "rule_id": "MR-070-01",
@@ -2013,7 +2180,8 @@
     "rule_type": "reference_only",
     "testability": "non_testable",
     "split_basis": "sentence",
-    "raw_text": "Members wishing to participate in an active FPA can submit bids and offers into the matching system within the Auction Window."
+    "raw_text": "Members wishing to participate in an active FPA can submit bids and offers into the matching system within the Auction Window.",
+    "paragraph_id": "MR-070-01"
   },
   {
     "rule_id": "MR-070-02",
@@ -2025,7 +2193,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Bids and offers will be required to include the active FPA Auction ID in the Public Reference field, entering the fixed parameters(e.g. same price and same shape for a carry as the auction trade) within the relevant LMEsmart fields."
+    "raw_text": "Bids and offers will be required to include the active FPA Auction ID in the Public Reference field, entering the fixed parameters(e.g. same price and same shape for a carry as the auction trade) within the relevant LMEsmart fields.",
+    "paragraph_id": "MR-070-02"
   },
   {
     "rule_id": "MR-070-03",
@@ -2037,7 +2206,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Such Members must also enter the volume at which they are willing to bid/offer, which may be different from the volume of the IOM PTT Initiating Pair."
+    "raw_text": "Such Members must also enter the volume at which they are willing to bid/offer, which may be different from the volume of the IOM PTT Initiating Pair.",
+    "paragraph_id": "MR-070-03"
   },
   {
     "rule_id": "MR-070-04",
@@ -2049,7 +2219,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "When submitting auction bids/offers, the counterparty must be \"AUC\" and the Category, Price Type and Venue must be “Normal”, “Current” and “Inter-Office” respectively."
+    "raw_text": "When submitting auction bids/offers, the counterparty must be \"AUC\" and the Category, Price Type and Venue must be “Normal”, “Current” and “Inter-Office” respectively.",
+    "paragraph_id": "MR-070-04"
   },
   {
     "rule_id": "MR-071-A-1",
@@ -2061,7 +2232,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:A:fallback",
-    "raw_text": "71. Any bids or offers containing the following will be rejected on entry: (a) an invalid or expired Auction ID; (b) invalid fixed parameters; or(c) a combination of Category, Price Type and Venue other than “Normal”, “Current” and “Inter-Office”."
+    "raw_text": "71. Any bids or offers containing the following will be rejected on entry: (a) an invalid or expired Auction ID; (b) invalid fixed parameters; or(c) a combination of Category, Price Type and Venue other than “Normal”, “Current” and “Inter-Office”.",
+    "paragraph_id": "MR-071-A-1"
   },
   {
     "rule_id": "MR-071-B-1",
@@ -2073,7 +2245,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:B:fallback",
-    "raw_text": "71. Any bids or offers containing the following will be rejected on entry: (a) an invalid or expired Auction ID; (b) invalid fixed parameters; or(c) a combination of Category, Price Type and Venue other than “Normal”, “Current” and “Inter-Office”."
+    "raw_text": "71. Any bids or offers containing the following will be rejected on entry: (a) an invalid or expired Auction ID; (b) invalid fixed parameters; or(c) a combination of Category, Price Type and Venue other than “Normal”, “Current” and “Inter-Office”.",
+    "paragraph_id": "MR-071-B-1"
   },
   {
     "rule_id": "MR-071-C-1",
@@ -2085,7 +2258,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:C:fallback",
-    "raw_text": "71. Any bids or offers containing the following will be rejected on entry: (a) an invalid or expired Auction ID; (b) invalid fixed parameters; or(c) a combination of Category, Price Type and Venue other than “Normal”, “Current” and “Inter-Office”."
+    "raw_text": "71. Any bids or offers containing the following will be rejected on entry: (a) an invalid or expired Auction ID; (b) invalid fixed parameters; or(c) a combination of Category, Price Type and Venue other than “Normal”, “Current” and “Inter-Office”.",
+    "paragraph_id": "MR-071-C-1"
   },
   {
     "rule_id": "MR-072-D-1",
@@ -2097,7 +2271,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "subclause:D",
-    "raw_text": "(d)(iv), bids and offers may be matched based on bids and offers of differing volumes(\"partial fills\"), subject to the criteria and limitations specified in Trading Regulation 2.15.8"
+    "raw_text": "(d)(iv), bids and offers may be matched based on bids and offers of differing volumes(\"partial fills\"), subject to the criteria and limitations specified in Trading Regulation 2.15.8",
+    "paragraph_id": "MR-072-D-1"
   },
   {
     "rule_id": "MR-072-D-1",
@@ -2109,7 +2284,8 @@
     "rule_type": "permission",
     "testability": "testable",
     "split_basis": "subclause:D:fallback",
-    "raw_text": "72. Initiating bids and offers or those subsequently submitted into an auction can be cancelled prior to the end of the Auction Window. Initiating bids and offers for Give Ups, Cross trades and RIB orders are treated as atomic units and the cancellation of one side of such an order would result in the cancellation of both sides. Initiating bids and offers that remain unmatched at the end of the Auction Window will go to a cancelled state. Any joining bids and offers that remain unmatched at the end of the Auction Window will be disregarded. In accordance with Trading Regulation 2.15.8(d)(iv), bids and offers may be matched based on bids and offers of differing volumes(\"partial fills\"), subject to the criteria and limitations specified in Trading Regulation 2.15.8(d)(iv)."
+    "raw_text": "72. Initiating bids and offers or those subsequently submitted into an auction can be cancelled prior to the end of the Auction Window. Initiating bids and offers for Give Ups, Cross trades and RIB orders are treated as atomic units and the cancellation of one side of such an order would result in the cancellation of both sides. Initiating bids and offers that remain unmatched at the end of the Auction Window will go to a cancelled state. Any joining bids and offers that remain unmatched at the end of the Auction Window will be disregarded. In accordance with Trading Regulation 2.15.8(d)(iv), bids and offers may be matched based on bids and offers of differing volumes(\"partial fills\"), subject to the criteria and limitations specified in Trading Regulation 2.15.8(d)(iv).",
+    "paragraph_id": "MR-072-D-1"
   },
   {
     "rule_id": "MR-073-01",
@@ -2121,7 +2297,8 @@
     "rule_type": "state_transition",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "At the end of the auction, the Matching System will automatically match up any successful bids and offers, creating matched trades for submitting to clearing."
+    "raw_text": "At the end of the auction, the Matching System will automatically match up any successful bids and offers, creating matched trades for submitting to clearing.",
+    "paragraph_id": "MR-073-01"
   },
   {
     "rule_id": "MR-074-A-1",
@@ -2133,7 +2310,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:A:fallback",
-    "raw_text": "74. This section details the trade categories, orders for which, are to be treated as \"Out of Scope Orders\" for the purposes of Regulation 2.15 of the Trading Regulations: (a) OTC Bring-On / OTC Take-Off(as described in paragraphs 14 and 60 – 68) (b) Transfer(as described in paragraphs 14 and 28 – 35) (c) Reversal/Correction(as described in paragraphs 36 – 42) (d) Financing(as described in paragraphs 14 and 44 – 45) (e) Exception Reportable / Exception Non Reportable(as described in paragraph 14)"
+    "raw_text": "74. This section details the trade categories, orders for which, are to be treated as \"Out of Scope Orders\" for the purposes of Regulation 2.15 of the Trading Regulations: (a) OTC Bring-On / OTC Take-Off(as described in paragraphs 14 and 60 – 68) (b) Transfer(as described in paragraphs 14 and 28 – 35) (c) Reversal/Correction(as described in paragraphs 36 – 42) (d) Financing(as described in paragraphs 14 and 44 – 45) (e) Exception Reportable / Exception Non Reportable(as described in paragraph 14)",
+    "paragraph_id": "MR-074-A-1"
   },
   {
     "rule_id": "MR-074-B-1",
@@ -2145,7 +2323,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:B:fallback",
-    "raw_text": "74. This section details the trade categories, orders for which, are to be treated as \"Out of Scope Orders\" for the purposes of Regulation 2.15 of the Trading Regulations: (a) OTC Bring-On / OTC Take-Off(as described in paragraphs 14 and 60 – 68) (b) Transfer(as described in paragraphs 14 and 28 – 35) (c) Reversal/Correction(as described in paragraphs 36 – 42) (d) Financing(as described in paragraphs 14 and 44 – 45) (e) Exception Reportable / Exception Non Reportable(as described in paragraph 14)"
+    "raw_text": "74. This section details the trade categories, orders for which, are to be treated as \"Out of Scope Orders\" for the purposes of Regulation 2.15 of the Trading Regulations: (a) OTC Bring-On / OTC Take-Off(as described in paragraphs 14 and 60 – 68) (b) Transfer(as described in paragraphs 14 and 28 – 35) (c) Reversal/Correction(as described in paragraphs 36 – 42) (d) Financing(as described in paragraphs 14 and 44 – 45) (e) Exception Reportable / Exception Non Reportable(as described in paragraph 14)",
+    "paragraph_id": "MR-074-B-1"
   },
   {
     "rule_id": "MR-074-C-1",
@@ -2157,7 +2336,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:C:fallback",
-    "raw_text": "74. This section details the trade categories, orders for which, are to be treated as \"Out of Scope Orders\" for the purposes of Regulation 2.15 of the Trading Regulations: (a) OTC Bring-On / OTC Take-Off(as described in paragraphs 14 and 60 – 68) (b) Transfer(as described in paragraphs 14 and 28 – 35) (c) Reversal/Correction(as described in paragraphs 36 – 42) (d) Financing(as described in paragraphs 14 and 44 – 45) (e) Exception Reportable / Exception Non Reportable(as described in paragraph 14)"
+    "raw_text": "74. This section details the trade categories, orders for which, are to be treated as \"Out of Scope Orders\" for the purposes of Regulation 2.15 of the Trading Regulations: (a) OTC Bring-On / OTC Take-Off(as described in paragraphs 14 and 60 – 68) (b) Transfer(as described in paragraphs 14 and 28 – 35) (c) Reversal/Correction(as described in paragraphs 36 – 42) (d) Financing(as described in paragraphs 14 and 44 – 45) (e) Exception Reportable / Exception Non Reportable(as described in paragraph 14)",
+    "paragraph_id": "MR-074-C-1"
   },
   {
     "rule_id": "MR-074-D-1",
@@ -2169,7 +2349,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:D:fallback",
-    "raw_text": "74. This section details the trade categories, orders for which, are to be treated as \"Out of Scope Orders\" for the purposes of Regulation 2.15 of the Trading Regulations: (a) OTC Bring-On / OTC Take-Off(as described in paragraphs 14 and 60 – 68) (b) Transfer(as described in paragraphs 14 and 28 – 35) (c) Reversal/Correction(as described in paragraphs 36 – 42) (d) Financing(as described in paragraphs 14 and 44 – 45) (e) Exception Reportable / Exception Non Reportable(as described in paragraph 14)"
+    "raw_text": "74. This section details the trade categories, orders for which, are to be treated as \"Out of Scope Orders\" for the purposes of Regulation 2.15 of the Trading Regulations: (a) OTC Bring-On / OTC Take-Off(as described in paragraphs 14 and 60 – 68) (b) Transfer(as described in paragraphs 14 and 28 – 35) (c) Reversal/Correction(as described in paragraphs 36 – 42) (d) Financing(as described in paragraphs 14 and 44 – 45) (e) Exception Reportable / Exception Non Reportable(as described in paragraph 14)",
+    "paragraph_id": "MR-074-D-1"
   },
   {
     "rule_id": "MR-074-E-1",
@@ -2181,7 +2362,8 @@
     "rule_type": "workflow",
     "testability": "testable",
     "split_basis": "subclause:E:fallback",
-    "raw_text": "74. This section details the trade categories, orders for which, are to be treated as \"Out of Scope Orders\" for the purposes of Regulation 2.15 of the Trading Regulations: (a) OTC Bring-On / OTC Take-Off(as described in paragraphs 14 and 60 – 68) (b) Transfer(as described in paragraphs 14 and 28 – 35) (c) Reversal/Correction(as described in paragraphs 36 – 42) (d) Financing(as described in paragraphs 14 and 44 – 45) (e) Exception Reportable / Exception Non Reportable(as described in paragraph 14)"
+    "raw_text": "74. This section details the trade categories, orders for which, are to be treated as \"Out of Scope Orders\" for the purposes of Regulation 2.15 of the Trading Regulations: (a) OTC Bring-On / OTC Take-Off(as described in paragraphs 14 and 60 – 68) (b) Transfer(as described in paragraphs 14 and 28 – 35) (c) Reversal/Correction(as described in paragraphs 36 – 42) (d) Financing(as described in paragraphs 14 and 44 – 45) (e) Exception Reportable / Exception Non Reportable(as described in paragraph 14)",
+    "paragraph_id": "MR-074-E-1"
   },
   {
     "rule_id": "MR-075-01",
@@ -2193,6 +2375,7 @@
     "rule_type": "prohibition",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "A Member shall not mis-use the OTC Bring-On trade category in order to avoid the application to an Inter-Office Order of the Pre-Trade Transparency Requirements and Regulation 2.15 of the Trading Regulations."
+    "raw_text": "A Member shall not mis-use the OTC Bring-On trade category in order to avoid the application to an Inter-Office Order of the Pre-Trade Transparency Requirements and Regulation 2.15 of the Trading Regulations.",
+    "paragraph_id": "MR-075-01"
   }
 ]

@@ -3,6 +3,26 @@
 import json
 
 
+# ---------------------------------------------------------------------------
+# Prompt and pipeline versioning
+# ---------------------------------------------------------------------------
+# Increment MAKER_PROMPT_VERSION when MAKER_SYSTEM_PROMPT or
+# build_maker_user_prompt changes in a way that affects output quality.
+MAKER_PROMPT_VERSION = "1.0"
+
+# Increment CHECKER_PROMPT_VERSION when CHECKER_SYSTEM_PROMPT or
+# build_checker_user_prompt changes in a way that affects output quality.
+CHECKER_PROMPT_VERSION = "1.0"
+
+# Increment BDD_PROMPT_VERSION when BDD_SYSTEM_PROMPT or
+# build_bdd_user_prompt changes in a way that affects output quality.
+BDD_PROMPT_VERSION = "1.0"
+
+# Pipeline version tracks the overall pipelines.py schema.
+# Increment when summary fields or coverage logic change in a breaking way.
+PIPELINE_VERSION = "1.0"
+
+
 MAKER_SYSTEM_PROMPT = """You are the maker model for an LME test design workflow.
 You transform semantic rules into evidence-backed BDD test cases.
 Hard requirements:

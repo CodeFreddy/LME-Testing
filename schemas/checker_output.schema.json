@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "checker_output.schema.json",
+  "title": "Checker Output",
+  "description": "Checker evaluation of maker-generated test scenarios.",
+  "type": "object",
+  "required": [
+    "run_id", "case_id", "semantic_rule_id", "case_type",
+    "case_type_accepted", "coverage_relevance", "overall_status",
+    "blocking_findings_count", "is_blocking", "scores", "coverage_assessment"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "description": "Unique identifier for the pipeline run that produced this output."
+    },
+    "case_id": {
+      "type": "string",
+      "description": "ID of the scenario being reviewed.",
+      "pattern": "^TC-"
+    },
+    "semantic_rule_id": {
+      "type": "string",
+      "description": "ID of the semantic rule this case was generated from."
+    },
+    "case_type": {
+      "type": "string",
+      "description": "Type of test case as declared by maker.",
+      "enum": ["positive", "negative", "boundary", "exception", "state_transition", "data_validation"]
+    },
+    "case_type_accepted": {
+      "type": "boolean",
+      "description": "Whether the checker accepts the declared case_type as appropriate."
+    },
+    "coverage_relevance": {
+      "type": "string",
+      "description": "How directly this case covers its semantic rule.",
+      "enum": ["direct", "indirect", "not_relevant"]
+    },
+    "overall_status": {
+      "type": "string",
+      "description": "Overall pass/fail assessment of this case.",
+      "enum": ["pass", "fail"]
+    },
+    "blocking_findings_count": {
+      "type": "integer",
+      "description": "Number of blocking findings that prevent approval.",
+      "minimum": 0
+    },
+    "is_blocking": {
+      "type": "boolean",
+      "description": "Whether this case has any blocking issues."
+    },
+    "scores": {
+      "type": "object",
+      "description": "Quality scores for this scenario.",
+      "required": ["evidence_consistency", "requirement_coverage", "test_design_quality", "non_hallucination"],
+      "additionalProperties": false,
+      "properties": {
+        "evidence_consistency": {
+          "type": "integer",
+          "description": "Score for evidence consistency (1-5).",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "requirement_coverage": {
+          "type": "integer",
+          "description": "Score for requirement coverage (1-5).",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "test_design_quality": {
+          "type": "integer",
+          "description": "Score for test design quality (1-5).",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "non_hallucination": {
+          "type": "integer",
+          "description": "Score for hallucination risk (1-5, higher = less risk).",
+          "minimum": 1,
+          "maximum": 5
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "description": "List of specific findings from the checker review.",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "coverage_assessment": {
+      "type": "object",
+      "description": "Coverage assessment for this case against its semantic rule.",
+      "required": ["status"],
+      "additionalProperties": true,
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Coverage status for this case.",
+          "enum": ["covered", "partial", "uncovered", "not_applicable"]
+        },
+        "reason": {
+          "type": "string",
+          "description": "Human-readable reason for the coverage status."
+        },
+        "missing_aspects": {
+          "type": "array",
+          "description": "Aspects of the semantic rule not covered by this case.",
+          "items": {"type": "string"}
+        }
+      }
+    }
+  }
+}

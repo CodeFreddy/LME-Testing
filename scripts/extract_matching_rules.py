@@ -37,6 +37,7 @@ class Clause:
 @dataclass
 class AtomicRule:
     rule_id: str
+    paragraph_id: str
     clause_id: str
     clause_number: str
     section: str | None
@@ -457,6 +458,7 @@ def expand_atomic_chunks(clause: Clause, chunks: list[str], split_basis: str, id
         items.append(
             AtomicRule(
                 rule_id=rule_id,
+                paragraph_id=rule_id,
                 clause_id=clause.clause_id,
                 clause_number=clause.clause_number,
                 section=clause.section,
@@ -472,9 +474,11 @@ def expand_atomic_chunks(clause: Clause, chunks: list[str], split_basis: str, id
     if items:
         return items
     fallback_type = guess_rule_type(clause.raw_text)
+    fallback_rule_id = f"{id_prefix}-01" if id_prefix == clause.clause_id else f"{id_prefix}-1"
     return [
         AtomicRule(
-            rule_id=f"{id_prefix}-01" if id_prefix == clause.clause_id else f"{id_prefix}-1",
+            rule_id=fallback_rule_id,
+            paragraph_id=fallback_rule_id,
             clause_id=clause.clause_id,
             clause_number=clause.clause_number,
             section=clause.section,

@@ -13,6 +13,10 @@ runs/
 reports/
 .tmp_test/
 
+# Generated validation artifacts
+artifacts/**/validation_report.json
+artifacts/**/coverage_report.json
+
 # Environment files
 .env
 

@@ -1,0 +1,209 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "semantic_rule.schema.json",
+  "title": "Semantic Rule",
+  "description": "Normalized rule object used for downstream coverage logic and scenario generation.",
+  "type": "object",
+  "required": ["semantic_rule_id", "source", "classification", "evidence"],
+  "additionalProperties": true,
+  "properties": {
+    "semantic_rule_id": {
+      "type": "string",
+      "description": "Unique identifier for this semantic rule.",
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "examples": ["SR-MR-001-01", "SR-MR-003-01"]
+    },
+    "version": {
+      "type": "string",
+      "description": "Version identifier for this semantic rule artifact.",
+      "examples": ["1.0"]
+    },
+    "source": {
+      "type": "object",
+      "description": "Traceability metadata linking to source document.",
+      "required": ["doc_id", "doc_title", "doc_version", "atomic_rule_ids", "pages"],
+      "additionalProperties": true,
+      "properties": {
+        "doc_id": {
+          "type": "string",
+          "description": "Document identifier.",
+          "examples": ["lme_matching_rules_v2_2"]
+        },
+        "doc_title": {
+          "type": "string",
+          "description": "Human-readable document title.",
+          "examples": ["LME Matching Rules"]
+        },
+        "doc_version": {
+          "type": "string",
+          "description": "Document version identifier.",
+          "examples": ["2.2"]
+        },
+        "section": {
+          "type": "string",
+          "description": "Section heading from source document.",
+          "examples": ["Defined Terms", "General Information"]
+        },
+        "clause_refs": {
+          "type": "array",
+          "description": "References to source clauses.",
+          "items": {"type": "string"},
+          "examples": [["1"], ["3", "4"]]
+        },
+        "paragraph_ids": {
+          "type": "array",
+          "description": "Stable source paragraph anchors. Maps 1:1 with atomic_rule_ids when paragraph_id equals rule_id in the source atomic rules.",
+          "items": {"type": "string"}
+        },
+        "atomic_rule_ids": {
+          "type": "array",
+          "description": "IDs of atomic rules that contributed to this semantic rule.",
+          "items": {"type": "string"},
+          "minItems": 1
+        },
+        "pages": {
+          "type": "array",
+          "description": "Source document page numbers.",
+          "items": {"type": "integer", "minimum": 1},
+          "minItems": 1
+        }
+      }
+    },
+    "classification": {
+      "type": "object",
+      "description": "Rule classification and metadata.",
+      "required": ["rule_type", "coverage_eligible"],
+      "additionalProperties": true,
+      "properties": {
+        "rule_type": {
+          "type": "string",
+          "description": "Semantic rule type determining coverage requirements.",
+          "enum": ["obligation", "prohibition", "permission", "deadline", "state_transition", "data_constraint", "enum_definition", "workflow", "calculation", "reference_only"]
+        },
+        "rule_tags": {
+          "type": "array",
+          "description": "Domain tags for this rule.",
+          "items": {"type": "string"}
+        },
+        "testability": {
+          "type": "string",
+          "enum": ["testable", "non_testable", "partially_testable"]
+        },
+        "priority": {
+          "type": "string",
+          "description": "Relative priority for test generation.",
+          "enum": ["high", "medium", "low"]
+        },
+        "coverage_eligible": {
+          "type": "boolean",
+          "description": "Whether this rule is eligible for coverage tracking."
+        }
+      }
+    },
+    "statement": {
+      "type": "object",
+      "description": "Structured semantic statement of the rule.",
+      "additionalProperties": true,
+      "properties": {
+        "actor": {
+          "type": "object",
+          "description": "Actor who must perform or abstain from an action.",
+          "additionalProperties": true,
+          "properties": {
+            "value": {"type": ["string", "null"]},
+            "source_type": {"type": ["string", "null"], "enum": ["normalized", "inferred", "explicit", null]}
+          }
+        },
+        "action": {
+          "type": "object",
+          "description": "Action that is required or prohibited.",
+          "additionalProperties": true,
+          "properties": {
+            "value": {"type": ["string", "null"]},
+            "source_type": {"type": ["string", "null"], "enum": ["normalized", "inferred", "explicit", null]}
+          }
+        },
+        "object": {
+          "type": "object",
+          "description": "Object of the action.",
+          "additionalProperties": true,
+          "properties": {
+            "value": {"type": ["string", "null"]},
+            "source_type": {"type": ["string", "null"], "enum": ["normalized", "inferred", "explicit", null]}
+          }
+        },
+        "conditions": {
+          "type": "array",
+          "description": "Preconditions under which the rule applies.",
+          "items": {"type": "object"}
+        },
+        "constraints": {
+          "type": "array",
+          "description": "Constraints on the action or outcome.",
+          "items": {"type": "object"}
+        },
+        "outcome": {
+          "type": "object",
+          "description": "Expected outcome when the rule is triggered.",
+          "additionalProperties": true
+        },
+        "exceptions": {
+          "type": "array",
+          "description": "Explicit exceptions to the rule.",
+          "items": {"type": "object"}
+        }
+      }
+    },
+    "type_payload": {
+      "type": "object",
+      "description": "Type-specific structured data keyed by rule_type.",
+      "additionalProperties": true
+    },
+    "execution_mapping": {
+      "type": "object",
+      "description": "Mapping from rule to executable observables.",
+      "additionalProperties": true
+    },
+    "evidence": {
+      "type": "array",
+      "description": "Source quotes grounding this semantic rule.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["atomic_rule_id", "page", "quote"],
+        "additionalProperties": true,
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Which part of the semantic rule this evidence supports.",
+            "examples": ["statement"]
+          },
+          "quote": {
+            "type": "string",
+            "description": "Literal quote from the source document.",
+            "minLength": 1
+          },
+          "page": {
+            "type": "integer",
+            "description": "Source page number.",
+            "minimum": 1
+          },
+          "atomic_rule_id": {
+            "type": "string",
+            "description": "ID of the atomic rule this evidence maps to."
+          }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "description": "Review metadata.",
+      "additionalProperties": true
+    },
+    "test_design_hints": {
+      "type": "object",
+      "description": "Optional hints for test design.",
+      "additionalProperties": true
+    }
+  }
+}

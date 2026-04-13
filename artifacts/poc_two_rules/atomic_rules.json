@@ -9,7 +9,8 @@
     "rule_type": "obligation",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Where an order or trade fails the price validation check, Members are required to contact the Exchange to explain the rationale as to the price of the rejected order or trade."
+    "raw_text": "Where an order or trade fails the price validation check, Members are required to contact the Exchange to explain the rationale as to the price of the rejected order or trade.",
+    "paragraph_id": "MR-003-01"
   },
   {
     "rule_id": "MR-004-02",
@@ -21,6 +22,7 @@
     "rule_type": "deadline",
     "testability": "testable",
     "split_basis": "sentence",
-    "raw_text": "Requests must be made to LME Post-Trade Operations no later than 15 minutes prior to the relevant deadline(email: posttradeoperations@lme.com"
+    "raw_text": "Requests must be made to LME Post-Trade Operations no later than 15 minutes prior to the relevant deadline(email: posttradeoperations@lme.com",
+    "paragraph_id": "MR-004-02"
   }
 ]

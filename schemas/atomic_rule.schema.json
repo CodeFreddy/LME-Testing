@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atomic_rule.schema.json",
+  "title": "Atomic Rule",
+  "description": "Source-grounded normalized unit extracted from document content.",
+  "type": "object",
+  "required": ["rule_id", "clause_id", "raw_text"],
+  "additionalProperties": true,
+  "properties": {
+    "rule_id": {
+      "type": "string",
+      "description": "Unique identifier for this atomic rule within the document.",
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "examples": ["MR-001-01", "MR-003-01"]
+    },
+    "paragraph_id": {
+      "type": "string",
+      "description": "Stable source anchor: identifies the governing paragraph or split position within the source clause. For sentence-split rules, equals rule_id. For subclauses, derived from the subclause label.",
+      "examples": ["MR-001-01", "MR-001-A-a"]
+    },
+    "clause_id": {
+      "type": "string",
+      "description": "Identifier of the source clause this rule belongs to.",
+      "examples": ["MR-001", "MR-003"]
+    },
+    "clause_number": {
+      "type": "string",
+      "description": "Numeric or alphanumeric label of the clause within the document.",
+      "examples": ["1", "3"]
+    },
+    "section": {
+      "type": "string",
+      "description": "Section heading or name from the source document.",
+      "examples": ["Defined Terms", "General Information"]
+    },
+    "start_page": {
+      "type": "integer",
+      "description": "First page number in the source document where this rule appears.",
+      "minimum": 1
+    },
+    "end_page": {
+      "type": "integer",
+      "description": "Last page number in the source document where this rule appears.",
+      "minimum": 1
+    },
+    "rule_type": {
+      "type": "string",
+      "description": "Classification of the rule type at the atomic level.",
+      "enum": ["obligation", "prohibition", "permission", "deadline", "state_transition", "data_constraint", "enum_definition", "workflow", "calculation", "reference_only"]
+    },
+    "testability": {
+      "type": "string",
+      "description": "Whether this rule is directly testable.",
+      "enum": ["testable", "non_testable", "partially_testable"]
+    },
+    "split_basis": {
+      "type": "string",
+      "description": "How this rule was split from the source clause.",
+      "examples": ["sentence", "sentence:fallback", "clause"]
+    },
+    "raw_text": {
+      "type": "string",
+      "description": "The full text of the rule extracted from the source document.",
+      "minLength": 1
+    }
+  }
+}

@@ -1,5 +1,6 @@
 ﻿from __future__ import annotations
 
+import hashlib
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -9,6 +10,10 @@ from .prompts import (
     BDD_SYSTEM_PROMPT,
     CHECKER_SYSTEM_PROMPT,
     MAKER_SYSTEM_PROMPT,
+    BDD_PROMPT_VERSION,
+    CHECKER_PROMPT_VERSION,
+    MAKER_PROMPT_VERSION,
+    PIPELINE_VERSION,
     build_bdd_user_prompt,
     build_checker_user_prompt,
     build_maker_user_prompt,
@@ -31,6 +36,13 @@ RULE_TYPE_CASE_REQUIREMENTS = {
     "calculation": {"required": ["positive", "boundary", "data_validation"], "optional": ["negative"]},
     "reference_only": {"required": [], "optional": []},
 }
+
+
+def _artifact_hash(path: Path) -> str:
+    """Return a short SHA256 hex digest of a file, for source artifact traceability."""
+    if path.exists():
+        return hashlib.sha256(path.read_bytes()).hexdigest()[:16]
+    return "unknown"
 
 
 def _chunked(items: list[dict], size: int) -> list[list[dict]]:
@@ -94,7 +106,8 @@ def run_maker_pipeline(
             if rule.get("semantic_rule_id") not in completed_ids
         ]
 
-    provider = build_provider(config.provider_for_role("maker"))
+    provider_cfg = config.provider_for_role("maker")
+    provider = build_provider(provider_cfg)
     run_id = timestamp_slug()
     run_dir = ensure_dir(output_dir / run_id)
     results_path = run_dir / "maker_cases.jsonl"
@@ -133,7 +146,12 @@ def run_maker_pipeline(
     summary = {
         "run_id": run_id,
         "role": "maker",
+        "pipeline_version": PIPELINE_VERSION,
+        "prompt_version": MAKER_PROMPT_VERSION,
+        "provider": provider_cfg.name,
+        "model": provider_cfg.model,
         "input_path": str(semantic_rules_path),
+        "source_artifact_hash": _artifact_hash(semantic_rules_path),
         "output_dir": str(run_dir),
         "processed_rule_count": len(semantic_rules),
         "batch_count": total_batches,
@@ -205,6 +223,7 @@ def _calculate_coverage(semantic_rules: list[dict], reviews: list[dict]) -> dict
             "rule_coverage_status": coverage_status,
             "rule_pass_status": pass_status,
             "review_count": len(relevant_reviews),
+            "paragraph_ids": rule.get("source", {}).get("paragraph_ids", []),
         }
         counts[coverage_status] += 1
 
@@ -274,7 +293,8 @@ def run_checker_pipeline(
     if limit is not None:
         maker_records = maker_records[:limit]
 
-    provider = build_provider(config.provider_for_role("checker"))
+    provider_cfg = config.provider_for_role("checker")
+    provider = build_provider(provider_cfg)
     run_id = timestamp_slug()
     run_dir = ensure_dir(output_dir / run_id)
     reviews_path = run_dir / "checker_reviews.jsonl"
@@ -345,7 +365,12 @@ def run_checker_pipeline(
     summary = {
         "run_id": run_id,
         "role": "checker",
+        "pipeline_version": PIPELINE_VERSION,
+        "prompt_version": CHECKER_PROMPT_VERSION,
+        "provider": provider_cfg.name,
+        "model": provider_cfg.model,
         "input_rules": str(semantic_rules_path),
+        "source_rules_hash": _artifact_hash(semantic_rules_path),
         "input_cases": str(maker_cases_path),
         "output_dir": str(run_dir),
         "review_count": len(reviews),
@@ -388,7 +413,8 @@ def run_bdd_pipeline(
             )
         ]
 
-    provider = build_provider(config.provider_for_role("maker"))
+    provider_cfg = config.provider_for_role("maker")
+    provider = build_provider(provider_cfg)
     run_id = timestamp_slug()
     run_dir = ensure_dir(output_dir / run_id)
     results_path = run_dir / "bdd_cases.jsonl"
@@ -429,6 +455,10 @@ def run_bdd_pipeline(
     summary = {
         "run_id": run_id,
         "role": "bdd",
+        "pipeline_version": PIPELINE_VERSION,
+        "prompt_version": BDD_PROMPT_VERSION,
+        "provider": provider_cfg.name,
+        "model": provider_cfg.model,
         "input_cases": str(maker_cases_path),
         "output_dir": str(run_dir),
         "processed_scenario_count": total_cases,

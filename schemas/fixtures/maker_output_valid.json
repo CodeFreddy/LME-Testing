@@ -1,0 +1,74 @@
+[
+  {
+    "description": "Valid maker output record with positive case",
+    "run_id": "20260413T000000Z",
+    "semantic_rule_id": "SR-MR-003-01",
+    "requirement_ids": ["MR-003-01"],
+    "feature": "Contact Exchange on Price Validation Failure",
+    "scenarios": [
+      {
+        "scenario_id": "TC-SR-MR-003-01-positive-01",
+        "title": "Member contacts exchange on price validation failure",
+        "intent": "Validates that members contact exchange when orders fail price check",
+        "priority": "high",
+        "case_type": "positive",
+        "given": ["a member with valid LME session", "an order that has failed price validation check"],
+        "when": ["the member contacts the Exchange"],
+        "then": ["the Exchange records the contact", "the Exchange receives the rationale"],
+        "assumptions": [],
+        "evidence": [
+          {
+            "atomic_rule_id": "MR-003-01",
+            "page": 2,
+            "quote": "Where an order or trade fails the price validation check, Members are required to contact the Exchange."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "description": "Valid maker output with obligation rule requiring positive and negative cases",
+    "run_id": "20260413T000000Z",
+    "semantic_rule_id": "SR-MR-003-02",
+    "requirement_ids": ["MR-003-02"],
+    "feature": "Member contact requirements",
+    "scenarios": [
+      {
+        "scenario_id": "TC-SR-MR-003-02-positive-01",
+        "title": "Member provides additional information when required",
+        "intent": "Validates member provides required info",
+        "priority": "high",
+        "case_type": "positive",
+        "given": ["a member with valid LME session"],
+        "when": ["the Exchange requests additional information for correction"],
+        "then": ["the member provides the required information"],
+        "assumptions": [],
+        "evidence": [
+          {
+            "atomic_rule_id": "MR-003-02",
+            "page": 2,
+            "quote": "the Member may be required to provide such additional information as the Exchange deems necessary."
+          }
+        ]
+      },
+      {
+        "scenario_id": "TC-SR-MR-003-02-negative-01",
+        "title": "Member fails to provide required information",
+        "intent": "Validates consequence when member does not provide info",
+        "priority": "high",
+        "case_type": "negative",
+        "given": ["a member with valid LME session"],
+        "when": ["the Exchange requests additional information and member does not respond"],
+        "then": ["the order or trade remains unsubmitted"],
+        "assumptions": [],
+        "evidence": [
+          {
+            "atomic_rule_id": "MR-003-02",
+            "page": 2,
+            "quote": "the Member may be required to provide such additional information as the Exchange deems necessary."
+          }
+        ]
+      }
+    ]
+  }
+]

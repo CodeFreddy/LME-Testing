@@ -1,0 +1,48 @@
+[
+  {
+    "description": "Missing run_id",
+    "semantic_rule_id": "SR-MR-003-01",
+    "requirement_ids": ["MR-003-01"],
+    "feature": "Test feature",
+    "scenarios": [{"scenario_id": "TC-1", "case_type": "positive", "given": [], "when": [], "then": [], "evidence": [{"atomic_rule_id": "MR-001", "page": 1, "quote": "q"}]}]
+  },
+  {
+    "description": "Missing semantic_rule_id",
+    "run_id": "r1",
+    "requirement_ids": ["MR-003-01"],
+    "feature": "Test feature",
+    "scenarios": [{"scenario_id": "TC-1", "case_type": "positive", "given": [], "when": [], "then": [], "evidence": [{"atomic_rule_id": "MR-001", "page": 1, "quote": "q"}]}]
+  },
+  {
+    "description": "Empty requirement_ids",
+    "run_id": "r1",
+    "semantic_rule_id": "SR-MR-003-01",
+    "requirement_ids": [],
+    "feature": "Test feature",
+    "scenarios": [{"scenario_id": "TC-1", "case_type": "positive", "given": [], "when": [], "then": [], "evidence": [{"atomic_rule_id": "MR-001", "page": 1, "quote": "q"}]}]
+  },
+  {
+    "description": "Empty scenarios",
+    "run_id": "r1",
+    "semantic_rule_id": "SR-MR-003-01",
+    "requirement_ids": ["MR-003-01"],
+    "feature": "Test feature",
+    "scenarios": []
+  },
+  {
+    "description": "Invalid case_type",
+    "run_id": "r1",
+    "semantic_rule_id": "SR-MR-003-01",
+    "requirement_ids": ["MR-003-01"],
+    "feature": "Test feature",
+    "scenarios": [{"scenario_id": "TC-1", "case_type": "invalid_type", "given": [], "when": [], "then": [], "evidence": [{"atomic_rule_id": "MR-001", "page": 1, "quote": "q"}]}]
+  },
+  {
+    "description": "Empty evidence in scenario",
+    "run_id": "r1",
+    "semantic_rule_id": "SR-MR-003-01",
+    "requirement_ids": ["MR-003-01"],
+    "feature": "Test feature",
+    "scenarios": [{"scenario_id": "TC-1", "case_type": "positive", "given": [], "when": [], "then": [], "evidence": []}]
+  }
+]

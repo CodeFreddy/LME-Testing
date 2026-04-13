@@ -19,7 +19,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 # Ensure lme_testing is importable
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from lme_testing.config import ProjectConfig, ProviderConfig, RoleDefaults
 from lme_testing.pipelines import RULE_TYPE_CASE_REQUIREMENTS, run_checker_pipeline, run_maker_pipeline

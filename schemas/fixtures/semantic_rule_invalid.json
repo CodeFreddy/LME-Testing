@@ -1,0 +1,65 @@
+[
+  {
+    "description": "Missing semantic_rule_id",
+    "source": {
+      "doc_id": "lme_matching_rules_v2_2",
+      "doc_title": "LME Matching Rules",
+      "doc_version": "2.2",
+      "atomic_rule_ids": ["MR-001-01"],
+      "pages": [2]
+    },
+    "classification": {"rule_type": "obligation", "coverage_eligible": true},
+    "evidence": [{"quote": "q", "page": 2, "atomic_rule_id": "MR-001-01"}]
+  },
+  {
+    "description": "Invalid rule_type",
+    "semantic_rule_id": "SR-MR-001-01",
+    "source": {
+      "doc_id": "lme_matching_rules_v2_2",
+      "doc_title": "LME Matching Rules",
+      "doc_version": "2.2",
+      "atomic_rule_ids": ["MR-001-01"],
+      "pages": [2]
+    },
+    "classification": {"rule_type": "not_a_valid_type", "coverage_eligible": true},
+    "evidence": [{"quote": "q", "page": 2, "atomic_rule_id": "MR-001-01"}]
+  },
+  {
+    "description": "Empty evidence",
+    "semantic_rule_id": "SR-MR-001-01",
+    "source": {
+      "doc_id": "lme_matching_rules_v2_2",
+      "doc_title": "LME Matching Rules",
+      "doc_version": "2.2",
+      "atomic_rule_ids": ["MR-001-01"],
+      "pages": [2]
+    },
+    "classification": {"rule_type": "obligation", "coverage_eligible": true},
+    "evidence": []
+  },
+  {
+    "description": "Missing source.atomic_rule_ids",
+    "semantic_rule_id": "SR-MR-001-01",
+    "source": {
+      "doc_id": "lme_matching_rules_v2_2",
+      "doc_title": "LME Matching Rules",
+      "doc_version": "2.2",
+      "pages": [2]
+    },
+    "classification": {"rule_type": "obligation", "coverage_eligible": true},
+    "evidence": [{"quote": "q", "page": 2, "atomic_rule_id": "MR-001-01"}]
+  },
+  {
+    "description": "Missing coverage_eligible",
+    "semantic_rule_id": "SR-MR-001-01",
+    "source": {
+      "doc_id": "lme_matching_rules_v2_2",
+      "doc_title": "LME Matching Rules",
+      "doc_version": "2.2",
+      "atomic_rule_ids": ["MR-001-01"],
+      "pages": [2]
+    },
+    "classification": {"rule_type": "obligation"},
+    "evidence": [{"quote": "q", "page": 2, "atomic_rule_id": "MR-001-01"}]
+  }
+]

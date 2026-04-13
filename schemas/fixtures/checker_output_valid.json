@@ -1,0 +1,53 @@
+[
+  {
+    "description": "Valid checker output - pass",
+    "run_id": "20260413T000000Z",
+    "case_id": "TC-SR-MR-003-01-positive-01",
+    "semantic_rule_id": "SR-MR-003-01",
+    "case_type": "positive",
+    "case_type_accepted": true,
+    "coverage_relevance": "direct",
+    "overall_status": "pass",
+    "blocking_findings_count": 0,
+    "is_blocking": false,
+    "scores": {
+      "evidence_consistency": 5,
+      "requirement_coverage": 5,
+      "test_design_quality": 5,
+      "non_hallucination": 5
+    },
+    "findings": [],
+    "coverage_assessment": {
+      "status": "covered",
+      "reason": "All required aspects of the semantic rule are covered.",
+      "missing_aspects": []
+    }
+  },
+  {
+    "description": "Valid checker output - fail with blocking",
+    "run_id": "20260413T000000Z",
+    "case_id": "TC-SR-MR-003-01-negative-01",
+    "semantic_rule_id": "SR-MR-003-01",
+    "case_type": "negative",
+    "case_type_accepted": true,
+    "coverage_relevance": "direct",
+    "overall_status": "fail",
+    "blocking_findings_count": 2,
+    "is_blocking": true,
+    "scores": {
+      "evidence_consistency": 3,
+      "requirement_coverage": 3,
+      "test_design_quality": 3,
+      "non_hallucination": 2
+    },
+    "findings": [
+      {"type": "weak_evidence", "severity": "high", "message": "Evidence quote does not directly support negative case premise."},
+      {"type": "ambiguity", "severity": "medium", "message": "Scenario assumption conflicts with stated conditions."}
+    ],
+    "coverage_assessment": {
+      "status": "partial",
+      "reason": "Negative case only partially addresses the obligation.",
+      "missing_aspects": ["timing_constraint", "collateral_requirement"]
+    }
+  }
+]

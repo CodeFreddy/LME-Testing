@@ -237,6 +237,8 @@ The pipeline must support a stable source-level traceability anchor for governed
 - uniqueness validation output,
 - report or export examples showing the anchor.
 
+**Completed:** `paragraph_id` field added to AtomicRule (schema and extraction script). `paragraph_ids` added to semantic_rule source section. All 183 LME and 2 poc atomic rules updated with `paragraph_id = rule_id`. Uniqueness validation implemented in validate_rules.py (advisory for pre-existing duplicates). Coverage report and HTML report surface paragraph_ids. [2026/04/13]
+
 ---
 
 ## 6. Checker Stability Gate
@@ -298,6 +300,23 @@ Phase 1 is accepted only if:
 - checker instability can be surfaced on the baseline set,
 - a stable source anchor is available in governed upstream artifacts and preserved where applicable downstream,
 - required governance docs exist in the repo.
+
+---
+
+## Phase 1 Completion
+
+**Phase 1 — Baseline Control and Pipeline Hardening: COMPLETED 2026/04/13**
+
+All 7 acceptance gates passed:
+1. Artifact Schema Gate — JSON schemas for atomic_rule, semantic_rule, maker_output, checker_output
+2. Upstream Validation Pipeline Gate — validate_rules.py with schema, rule_type, duplicate, field checks
+3. Baseline CI Gate — CI workflow with smoke, schema, upstream validation jobs
+4. Model and Prompt Metadata Gate — prompt/pipeline versioning, provider/model in all summaries
+5. Stable Source Anchor Gate — paragraph_id in AtomicRule, propagation to semantic_rules, surfacing in reports
+6. Checker Stability Gate — scripts/checker_stability.py with deterministic stub comparison
+7. Documentation Gate — roadmap, acceptance, architecture, implementation_plan, model_governance, agent_guidelines
+
+Evidence: all CI jobs pass locally, smoke test passes, schema validation passes, upstream validation passes.
 
 ---
 

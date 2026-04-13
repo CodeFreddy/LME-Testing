@@ -105,6 +105,7 @@ def _render_rule_coverage_rows(status_by_rule: dict[str, dict]) -> str:
         rows.append(
             f"<tr>"
             f"<td>{html.escape(semantic_rule_id)}</td>"
+            f"<td>{html.escape(', '.join(item.get('paragraph_ids', [])))}</td>"
             f"<td>{html.escape(str(item.get('rule_type', '')))}</td>"
             f"<td>{html.escape(str(item.get('rule_coverage_status', '')))}</td>"
             f"<td>{html.escape(str(item.get('rule_pass_status', '')))}</td>"
@@ -230,6 +231,7 @@ applyFilters();
       <thead>
         <tr>
           <th>Semantic Rule</th>
+          <th>Paragraph IDs</th>
           <th>Rule Type</th>
           <th>Coverage Status</th>
           <th>Pass Status</th>

@@ -1,0 +1,30 @@
+[
+  {
+    "description": "Missing rule_id",
+    "clause_id": "MR-001",
+    "raw_text": "Some rule text"
+  },
+  {
+    "description": "Missing clause_id",
+    "rule_id": "MR-001-01",
+    "raw_text": "Some rule text"
+  },
+  {
+    "description": "Empty raw_text",
+    "rule_id": "MR-001-01",
+    "clause_id": "MR-001",
+    "raw_text": ""
+  },
+  {
+    "description": "Invalid rule_type value",
+    "rule_id": "MR-001-01",
+    "clause_id": "MR-001",
+    "rule_type": "invalid_type",
+    "raw_text": "Some rule text"
+  },
+  {
+    "description": "Missing required field raw_text",
+    "rule_id": "MR-001-01",
+    "clause_id": "MR-001"
+  }
+]

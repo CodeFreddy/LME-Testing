@@ -33,6 +33,38 @@ jobs:
       - name: Run artifact governance checks
         run: python scripts/check_artifact_governance.py
 
+  schema-validation:
+    name: Schema Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install jsonschema
+        run: pip install jsonschema
+
+      - name: Run schema validation
+        run: python scripts/validate_schemas.py
+
+  upstream-validation:
+    name: Upstream Rule Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install jsonschema
+        run: pip install jsonschema
+
+      - name: Run upstream validation pipeline
+        run: python scripts/validate_rules.py --input artifacts/lme_rules_v2_2/atomic_rules.json --fail-on-error
+
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest

@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-12 15:38:16 UTC`
+- `2026-04-13 03:30:12 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `Complete Phase 1: Baseline Control and Pipeline Hardening`
 - `Implement BDD export pipeline and script generation infrastructure`
 - `removed some md files`
 - `Update CLAUDE.md to reflect docs governance changes`
 - `Automate session handoff refresh on commit`
-- `Add roadmap comparison reference note`
 
 ---
 
