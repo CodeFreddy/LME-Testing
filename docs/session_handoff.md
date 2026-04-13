@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-13 12:47:42 UTC`
+- `2026-04-13 12:54:02 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `Fix import in generate_trend_report.py to work when run as script`
 - `Begin Phase 2: Add planner pipeline, normalized BDD contract, and step registry`
 - `Complete Phase 1: Baseline Control and Pipeline Hardening`
 - `Implement BDD export pipeline and script generation infrastructure`
 - `removed some md files`
-- `Update CLAUDE.md to reflect docs governance changes`
 
 ---
 

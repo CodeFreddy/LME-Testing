@@ -119,7 +119,7 @@ def main() -> int:
     elif args.current and args.previous:
         current = {"run_id": args.current.stem, **load_coverage(args.current)}
         previous = {"run_id": args.previous.stem, **load_coverage(args.previous)}
-        from .pipelines import calculate_drift  # type: ignore
+        from lme_testing.pipelines import calculate_drift  # type: ignore
         drift = calculate_drift(current, previous)
         trend = {
             "current_run": {"run_id": current["run_id"], "coverage_percent": current["coverage_percent"]},
