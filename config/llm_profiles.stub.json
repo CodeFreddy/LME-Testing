@@ -1,0 +1,18 @@
+{
+    "output_root": "runs",
+    "providers": {
+        "stub": {
+            "type": "stub",
+            "model": "stub-model",
+            "base_url": "http://stub",
+            "api_key": "stub"
+        }
+    },
+    "roles": {
+        "maker": "stub",
+        "checker": "stub",
+        "planner": "stub"
+    },
+    "maker_defaults": {},
+    "checker_defaults": {}
+}

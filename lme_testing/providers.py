@@ -63,18 +63,30 @@ class StubProvider:
         prompt_lower = system_prompt.lower()
         if "planner" in prompt_lower or "test_objective" in prompt_lower:
             return "planner"
-        if "bdd" in prompt_lower or "given_steps" in prompt_lower or "normalized" in prompt_lower:
-            return "bdd"
         if "checker" in prompt_lower or "coverage_relevance" in prompt_lower:
             return "checker"
+        # "maker" prompt contains "evidence-backed BDD" so check it before "bdd"
         if "maker" in prompt_lower or "scenario" in prompt_lower:
             return "maker"
+        if "bdd" in prompt_lower or "given_steps" in prompt_lower or "normalized" in prompt_lower:
+            return "bdd"
         return "maker"
 
     def _extract_semantic_rule_ids(self, user_prompt: str) -> list[str]:
-        # Extract semantic_rule_id values from the prompt JSON.
+        # Extract semantic_rule_id values from the INPUT section of the prompt only.
+        # Different pipelines use different section markers:
+        # - Planner/Maker/Checker: "Input semantic rules:"
+        # - BDD: "Input maker test cases:"
+        for marker in ("Input maker test cases:", "Input semantic rules:"):
+            marker_pos = user_prompt.rfind(marker)
+            if marker_pos != -1:
+                input_section = user_prompt[marker_pos + len(marker):]
+                break
+        else:
+            input_section = user_prompt
+
         ids: list[str] = []
-        for match in re.finditer(r'"semantic_rule_id"\s*:\s*"([^"]+)"', user_prompt):
+        for match in re.finditer(r'"semantic_rule_id"\s*:\s*"([^"]+)"', input_section):
             sid = match.group(1)
             if sid not in ids:
                 ids.append(sid)
@@ -123,18 +135,44 @@ class StubProvider:
         }
 
     def _stub_maker_response(self, rule_ids: list[str], user_prompt: str) -> dict:
-        # Try to extract requirement_ids and case types from the prompt.
+        # Extract required_case_types per semantic_rule_id from the user prompt.
+        # The prompt contains: Expected required_case_types map: {...}
         req_ids: dict[str, list[str]] = {}
+        case_type_map: dict[str, list[str]] = {}
         for match in re.finditer(r'"semantic_rule_id"\s*:\s*"([^"]+)"', user_prompt):
             sid = match.group(1)
             if sid not in req_ids:
                 req_ids[sid] = [f"R-{sid}"]
+                case_type_map[sid] = []
 
-        case_types = ["positive", "negative", "boundary", "exception"]
+        # Try to extract required_case_types from the input section
+        for marker in ("Input maker test cases:", "Input semantic rules:"):
+            marker_pos = user_prompt.rfind(marker)
+            if marker_pos != -1:
+                input_section = user_prompt[marker_pos + len(marker):]
+                break
+        else:
+            input_section = user_prompt
+
+        for match in re.finditer(r'"required_case_types"\s*:\s*\[([^\]]*)\]', input_section):
+            types_str = match.group(1)
+            # Find which rule this belongs to by looking backwards
+            before = input_section[:match.start()]
+            sid_matches = list(re.finditer(r'"semantic_rule_id"\s*:\s*"([^"]+)"', before))
+            if sid_matches:
+                sid = sid_matches[-1].group(1)
+                types = [t.strip().strip('"') for t in types_str.split(",") if t.strip()]
+                case_type_map[sid] = types
+
+        # Default case types if not found
+        default_types = ["positive", "negative"]
         results = []
         for sid in rule_ids:
+            required = case_type_map.get(sid, default_types)
+            if not required:
+                required = default_types
             scenarios = []
-            for i, ct in enumerate(case_types[:2]):  # 2 scenarios per rule
+            for i, ct in enumerate(required):
                 tc_id = f"TC-{sid}-{i+1}"
                 scenarios.append(
                     {

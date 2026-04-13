@@ -8,7 +8,7 @@ from .config import load_project_config
 from .pipelines import run_bdd_pipeline, run_checker_pipeline, run_maker_pipeline, run_planner_pipeline
 from .bdd_export import run_bdd_export
 from .reporting import generate_html_report
-from .step_registry import extract_steps_from_normalized_bdd, extract_steps_from_step_defs, compute_step_gaps, render_step_visibility_report
+from .step_registry import extract_steps_from_normalized_bdd, extract_steps_from_step_defs, compute_step_gaps, render_step_visibility_report, StepInventory
 
 
 def build_parser() -> argparse.ArgumentParser:

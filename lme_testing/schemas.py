@@ -171,13 +171,13 @@ def validate_planner_payload(payload: dict, expected_rule_ids: list[str] | None 
             if not isinstance(note, str):
                 raise SchemaError("dependency_notes items must be strings.")
 
-        if expected_rule_ids is not None:
-            if len(actual_rule_ids) != len(expected_rule_ids):
-                raise SchemaError("Planner must return exactly one result for each input rule.")
-            if set(actual_rule_ids) != set(expected_rule_ids):
-                raise SchemaError("Planner returned missing or extra semantic_rule_id values.")
-            if len(set(actual_rule_ids)) != len(actual_rule_ids):
-                raise SchemaError("Planner returned duplicate semantic_rule_id values.")
+    if expected_rule_ids is not None:
+        if len(actual_rule_ids) != len(expected_rule_ids):
+            raise SchemaError("Planner must return exactly one result for each input rule.")
+        if set(actual_rule_ids) != set(expected_rule_ids):
+            raise SchemaError("Planner returned missing or extra semantic_rule_id values.")
+        if len(set(actual_rule_ids)) != len(actual_rule_ids):
+            raise SchemaError("Planner returned duplicate semantic_rule_id values.")
     return payload
 
 
