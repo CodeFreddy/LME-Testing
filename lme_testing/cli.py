@@ -8,7 +8,7 @@ from .config import load_project_config
 from .pipelines import run_bdd_pipeline, run_checker_pipeline, run_maker_pipeline, run_planner_pipeline
 from .bdd_export import run_bdd_export
 from .reporting import generate_html_report
-from .step_registry import extract_steps_from_normalized_bdd, extract_steps_from_step_defs, compute_step_gaps, render_step_visibility_report, StepInventory
+from .step_registry import extract_steps_from_normalized_bdd, extract_steps_from_step_defs, compute_step_gaps, compute_step_matches, render_step_visibility_report, StepInventory, MatchReport
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -73,7 +73,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     step_registry = subparsers.add_parser(
         "step-registry",
-        help="Generate step visibility report from normalized BDD output (Phase 2 Gate 5).",
+        help="Generate step visibility report from normalized BDD output (Phase 3 Gate 1).",
     )
     step_registry.add_argument(
         "--bdd-cases",
@@ -90,6 +90,18 @@ def build_parser() -> argparse.ArgumentParser:
         "--output-dir",
         default="runs/step-registry",
         help="Output directory for step visibility report.",
+    )
+    step_registry.add_argument(
+        "--candidate-top-k",
+        type=int,
+        default=3,
+        help="Number of candidate suggestions per unmatched step (default: 3).",
+    )
+    step_registry.add_argument(
+        "--similarity-threshold",
+        type=float,
+        default=0.3,
+        help="Minimum similarity score to surface a candidate (default: 0.3).",
     )
 
     report = subparsers.add_parser(
@@ -177,15 +189,23 @@ def main() -> int:
         if args.step_defs:
             library_inventory = extract_steps_from_step_defs(Path(args.step_defs))
 
-        gaps = compute_step_gaps(bdd_inventory, library_inventory)
-        render_step_visibility_report(bdd_inventory, gaps, output_path)
+        report = compute_step_matches(
+            bdd_inventory,
+            library_inventory,
+            candidate_top_k=args.candidate_top_k,
+            similarity_threshold=args.similarity_threshold,
+        )
+        render_step_visibility_report(bdd_inventory, report, output_path)
 
         result = {
             "output_path": str(output_path),
             "total_steps": bdd_inventory.total_steps,
-            "unique_patterns": gaps.unique_patterns,
-            "matched_patterns": gaps.matched_patterns,
-            "unmatched_patterns": gaps.unmatched_patterns,
+            "unique_bdd_patterns": report.unique_bdd_patterns,
+            "exact_matches": report.exact_matches,
+            "parameterized_matches": report.parameterized_matches,
+            "candidates": len(report.candidates),
+            "unmatched": report.unmatched,
+            "reuse_score_count": len(report.reuse_scores),
         }
 
     print(json.dumps(result, ensure_ascii=False, indent=2))
