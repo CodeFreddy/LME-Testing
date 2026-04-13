@@ -10,17 +10,32 @@ from .prompts import (
     BDD_SYSTEM_PROMPT,
     CHECKER_SYSTEM_PROMPT,
     MAKER_SYSTEM_PROMPT,
+    PLANNER_SYSTEM_PROMPT,
     BDD_PROMPT_VERSION,
     CHECKER_PROMPT_VERSION,
     MAKER_PROMPT_VERSION,
+    PLANNER_PROMPT_VERSION,
     PIPELINE_VERSION,
     build_bdd_user_prompt,
     build_checker_user_prompt,
     build_maker_user_prompt,
+    build_planner_user_prompt,
 )
-from .bdd_export import write_feature_files, write_feature_files_from_llm, write_step_definitions, write_step_definitions_from_llm
+from .bdd_export import (
+    render_gherkin_from_normalized_bdd,
+    render_steps_from_normalized_bdd,
+    write_feature_files,
+    write_step_definitions,
+)
 from .providers import build_provider
-from .schemas import CASE_TYPES, parse_json_object, validate_checker_payload, validate_maker_payload
+from .schemas import (
+    CASE_TYPES,
+    parse_json_object,
+    validate_checker_payload,
+    validate_maker_payload,
+    validate_normalized_bdd_payload,
+    validate_planner_payload,
+)
 from .storage import append_jsonl, ensure_dir, load_json, load_jsonl, timestamp_slug, write_json
 
 
@@ -45,20 +60,110 @@ def _artifact_hash(path: Path) -> str:
     return "unknown"
 
 
+def run_planner_pipeline(
+    config: ProjectConfig,
+    semantic_rules_path: Path,
+    output_dir: Path,
+    limit: int | None,
+    batch_size: int,
+    resume_from: Path | None,
+) -> dict:
+    """Generate test planning artifacts from semantic rules."""
+    semantic_rules = load_json(semantic_rules_path)
+    if not isinstance(semantic_rules, list):
+        raise ValueError("semantic_rules.json must contain a list.")
+    if limit is not None:
+        semantic_rules = semantic_rules[:limit]
+
+    completed_ids: set[str] = set()
+    if resume_from and resume_from.exists():
+        for record in load_jsonl(resume_from):
+            semantic_rule_id = record.get("semantic_rule_id")
+            if semantic_rule_id:
+                completed_ids.add(semantic_rule_id)
+        semantic_rules = [
+            rule
+            for rule in semantic_rules
+            if rule.get("semantic_rule_id") not in completed_ids
+        ]
+
+    provider_cfg = config.provider_for_role("planner")
+    provider = build_provider(provider_cfg)
+    run_id = timestamp_slug()
+    run_dir = ensure_dir(output_dir / run_id)
+    results_path = run_dir / "planner_results.jsonl"
+    raw_path = run_dir / "planner_raw_responses.jsonl"
+    summary_path = run_dir / "summary.json"
+
+    total_batches = 0
+
+    for batch in _chunked(semantic_rules, batch_size):
+        response = provider.generate(
+            system_prompt=PLANNER_SYSTEM_PROMPT,
+            user_prompt=build_planner_user_prompt(batch),
+        )
+        raw_record = {
+            "run_id": run_id,
+            "batch_semantic_rule_ids": [item["semantic_rule_id"] for item in batch],
+            "response": response.raw_response,
+        }
+        append_jsonl(raw_path, [raw_record])
+
+        payload = validate_planner_payload(
+            parse_json_object(response.content),
+            expected_rule_ids=[item["semantic_rule_id"] for item in batch],
+        )
+        for item in payload["results"]:
+            item["run_id"] = run_id
+            # Carry through paragraph_ids and atomic_rule_ids from source rule
+            source_rule = next(
+                (r for r in batch if r.get("semantic_rule_id") == item.get("semantic_rule_id")), {}
+            )
+            if "paragraph_ids" not in item:
+                item["paragraph_ids"] = source_rule.get("source", {}).get("paragraph_ids", [])
+            if "atomic_rule_ids" not in item:
+                item["atomic_rule_ids"] = source_rule.get("source", {}).get("atomic_rule_ids", [])
+            if "rule_type" not in item:
+                item["rule_type"] = source_rule.get("classification", {}).get("rule_type", "unknown")
+            append_jsonl(results_path, [item])
+        total_batches += 1
+
+    summary = {
+        "run_id": run_id,
+        "role": "planner",
+        "pipeline_version": PIPELINE_VERSION,
+        "prompt_version": PLANNER_PROMPT_VERSION,
+        "provider": provider_cfg.name,
+        "model": provider_cfg.model,
+        "input_path": str(semantic_rules_path),
+        "source_artifact_hash": _artifact_hash(semantic_rules_path),
+        "output_dir": str(run_dir),
+        "processed_rule_count": len(semantic_rules),
+        "batch_count": total_batches,
+        "results_path": str(results_path),
+        "raw_path": str(raw_path),
+    }
+    write_json(summary_path, summary)
+    return summary
+
+
 def _chunked(items: list[dict], size: int) -> list[list[dict]]:
     if size <= 0:
         raise ValueError("batch_size must be greater than zero.")
     return [items[index:index + size] for index in range(0, len(items), size)]
 
 
-def _maker_record_from_result(result: dict, run_id: str) -> dict:
-    return {
+def _maker_record_from_result(result: dict, run_id: str, source_rule: dict | None = None) -> dict:
+    record = {
         "run_id": run_id,
         "semantic_rule_id": result["semantic_rule_id"],
         "requirement_ids": result.get("requirement_ids", []),
         "feature": result["feature"],
         "scenarios": result["scenarios"],
     }
+    if source_rule:
+        record["paragraph_ids"] = source_rule.get("source", {}).get("paragraph_ids", [])
+    return record
 
 
 def _required_case_types(rule: dict) -> dict:
@@ -138,7 +243,11 @@ def run_maker_pipeline(
                 for item in batch
             },
         )
-        records = [_maker_record_from_result(item, run_id=run_id) for item in payload["results"]]
+        source_by_id = {item["semantic_rule_id"]: item for item in batch}
+        records = [
+            _maker_record_from_result(item, run_id=run_id, source_rule=source_by_id.get(item["semantic_rule_id"]))
+            for item in payload["results"]
+        ]
         append_jsonl(results_path, records)
         total_batches += 1
         total_cases += sum(len(item["scenarios"]) for item in payload["results"])
@@ -236,6 +345,60 @@ def _calculate_coverage(semantic_rules: list[dict], reviews: list[dict]) -> dict
         "not_applicable": counts.get("not_applicable", 0),
         "coverage_percent": round((counts.get("fully_covered", 0) / total) * 100, 2) if total else 0.0,
         "status_by_rule": status_by_rule,
+    }
+
+
+def _coverage_status_weight(status: str) -> int:
+    """Weight for coverage status, used in drift calculation."""
+    return {"fully_covered": 3, "partially_covered": 2, "uncovered": 1, "not_applicable": 0}.get(status, 0)
+
+
+def calculate_drift(current_coverage: dict, previous_coverage: dict) -> dict:
+    """Calculate drift between two coverage reports.
+
+    Returns a drift report showing which rules improved, regressed, or are new.
+    """
+    current_status = current_coverage.get("status_by_rule", {})
+    previous_status = previous_coverage.get("status_by_rule", {})
+
+    rules_improved: list[str] = []
+    rules_regressed: list[str] = []
+    rules_unchanged: list[str] = []
+    new_rules: list[str] = []
+
+    all_rules = set(current_status.keys())
+
+    for rule_id in sorted(all_rules):
+        current = current_status.get(rule_id, {})
+        previous = previous_status.get(rule_id, {})
+
+        current_cov = current.get("rule_coverage_status", "")
+        previous_cov = previous.get("rule_coverage_status", "")
+
+        if rule_id not in previous_status:
+            new_rules.append(rule_id)
+        elif _coverage_status_weight(current_cov) > _coverage_status_weight(previous_cov):
+            rules_improved.append(rule_id)
+        elif _coverage_status_weight(current_cov) < _coverage_status_weight(previous_cov):
+            rules_regressed.append(rule_id)
+        else:
+            rules_unchanged.append(rule_id)
+
+    current_pct = current_coverage.get("coverage_percent", 0)
+    previous_pct = previous_coverage.get("coverage_percent", 0)
+
+    return {
+        "current_coverage_percent": current_pct,
+        "previous_coverage_percent": previous_pct,
+        "coverage_delta": round(current_pct - previous_pct, 2),
+        "rules_improved": rules_improved,
+        "rules_regressed": rules_regressed,
+        "rules_unchanged": rules_unchanged,
+        "new_rules": new_rules,
+        "improved_count": len(rules_improved),
+        "regressed_count": len(rules_regressed),
+        "unchanged_count": len(rules_unchanged),
+        "new_count": len(new_rules),
     }
 
 
@@ -391,7 +554,12 @@ def run_bdd_pipeline(
     batch_size: int,
     resume_from: Path | None,
 ) -> dict:
-    """Generate refined BDD/Gherkin from maker test cases."""
+    """Generate normalized BDD artifacts from maker test cases.
+
+    The BDD pipeline normalizes maker scenarios into a governed intermediate
+    BDD representation (not Gherkin text). Gherkin rendering and step-definition
+    generation are downstream renderers that consume this normalized output.
+    """
     maker_records = load_jsonl(maker_cases_path)
     if limit is not None:
         maker_records = maker_records[:limit]
@@ -399,58 +567,70 @@ def run_bdd_pipeline(
     completed_ids: set[str] = set()
     if resume_from and resume_from.exists():
         for record in load_jsonl(resume_from):
-            # BDD records have scenario_id inside scenarios array
-            for s in record.get("scenarios", []):
-                scenario_id = s.get("scenario_id")
-                if scenario_id:
-                    completed_ids.add(scenario_id)
+            semantic_rule_id = record.get("semantic_rule_id")
+            if semantic_rule_id:
+                completed_ids.add(semantic_rule_id)
         maker_records = [
             record
             for record in maker_records
-            if not any(
-                s.get("scenario_id") in completed_ids
-                for s in record.get("scenarios", [])
-            )
+            if record.get("semantic_rule_id") not in completed_ids
         ]
 
     provider_cfg = config.provider_for_role("maker")
     provider = build_provider(provider_cfg)
     run_id = timestamp_slug()
     run_dir = ensure_dir(output_dir / run_id)
-    results_path = run_dir / "bdd_cases.jsonl"
+    results_path = run_dir / "normalized_bdd.jsonl"
     raw_path = run_dir / "bdd_raw_responses.jsonl"
     summary_path = run_dir / "summary.json"
 
-    # Flatten scenarios for batch processing
-    all_scenarios: list[dict] = []
-    for record in maker_records:
-        for scenario in record.get("scenarios", []):
-            all_scenarios.append({
-                "semantic_rule_id": record["semantic_rule_id"],
-                "feature": record.get("feature", ""),
-                "scenario": scenario,
-            })
+    total_batches = 0
 
-    total_cases = 0
-
-    for batch in _chunked(all_scenarios, batch_size):
+    for batch in _chunked(maker_records, batch_size):
         response = provider.generate(
             system_prompt=BDD_SYSTEM_PROMPT,
             user_prompt=build_bdd_user_prompt(batch),
         )
         raw_record = {
             "run_id": run_id,
-            "batch_scenario_ids": [item.get("scenario", {}).get("scenario_id") for item in batch],
+            "batch_semantic_rule_ids": [item["semantic_rule_id"] for item in batch],
             "response": response.raw_response,
         }
         append_jsonl(raw_path, [raw_record])
 
-        payload = parse_json_object(response.content)
-        results = payload.get("results", [])
-        for result in results:
-            result["run_id"] = run_id
-            append_jsonl(results_path, [result])
-        total_cases += len(results)
+        payload = validate_normalized_bdd_payload(
+            parse_json_object(response.content),
+            expected_rule_ids=[item["semantic_rule_id"] for item in batch],
+        )
+        for item in payload["results"]:
+            item["run_id"] = run_id
+            # Carry planner/maker traceability from source records
+            source_record = next(
+                (r for r in batch if r.get("semantic_rule_id") == item.get("semantic_rule_id")), {}
+            )
+            if "paragraph_ids" not in item or not item["paragraph_ids"]:
+                item["paragraph_ids"] = source_record.get("paragraph_ids", [])
+            # Propagate paragraph_ids into each scenario
+            for scenario in item.get("scenarios", []):
+                if "paragraph_ids" not in scenario or not scenario.get("paragraph_ids"):
+                    scenario["paragraph_ids"] = item.get("paragraph_ids", [])
+                if "semantic_rule_ref" not in scenario:
+                    scenario["semantic_rule_ref"] = item.get("semantic_rule_id")
+            # Set metadata
+            item.setdefault("metadata", {})
+            item["metadata"]["maker_run_id"] = source_record.get("run_id", "")
+            item["metadata"]["paragraph_ids"] = item.get("paragraph_ids", [])
+            append_jsonl(results_path, [item])
+        total_batches += 1
+
+    # Render Gherkin feature files and step definitions from normalized BDD
+    feature_files: list[Path] = []
+    step_file: Path | None = None
+    if results_path.exists():
+        bdd_results = load_jsonl(results_path)
+        if bdd_results:
+            feature_files = render_gherkin_from_normalized_bdd(bdd_results, run_dir)
+            step_file = render_steps_from_normalized_bdd(bdd_results, run_dir)
 
     summary = {
         "run_id": run_id,
@@ -461,21 +641,12 @@ def run_bdd_pipeline(
         "model": provider_cfg.model,
         "input_cases": str(maker_cases_path),
         "output_dir": str(run_dir),
-        "processed_scenario_count": total_cases,
+        "processed_rule_count": total_batches,
         "results_path": str(results_path),
         "raw_path": str(raw_path),
+        "feature_files_count": len(feature_files),
+        "feature_files": [str(f) for f in feature_files],
+        "step_definitions_file": str(step_file) if step_file else None,
     }
     write_json(summary_path, summary)
-
-    # Export feature files and step definitions from LLM output
-    if results_path.exists():
-        bdd_results = load_jsonl(results_path)
-        if bdd_results:
-            feature_files = write_feature_files_from_llm(bdd_results, run_dir)
-            step_file = write_step_definitions_from_llm(bdd_results, run_dir)
-            summary["feature_files_count"] = len(feature_files)
-            summary["feature_files"] = [str(f) for f in feature_files]
-            summary["step_definitions_file"] = str(step_file)
-            write_json(summary_path, summary)
-
     return summary

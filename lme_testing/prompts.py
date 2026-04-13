@@ -16,11 +16,15 @@ CHECKER_PROMPT_VERSION = "1.0"
 
 # Increment BDD_PROMPT_VERSION when BDD_SYSTEM_PROMPT or
 # build_bdd_user_prompt changes in a way that affects output quality.
-BDD_PROMPT_VERSION = "1.0"
+BDD_PROMPT_VERSION = "2.0"
+
+# Increment PLANNER_PROMPT_VERSION when PLANNER_SYSTEM_PROMPT or
+# build_planner_user_prompt changes in a way that affects output quality.
+PLANNER_PROMPT_VERSION = "1.0"
 
 # Pipeline version tracks the overall pipelines.py schema.
 # Increment when summary fields or coverage logic change in a breaking way.
-PIPELINE_VERSION = "1.0"
+PIPELINE_VERSION = "2.0"
 
 
 MAKER_SYSTEM_PROMPT = """You are the maker model for an LME test design workflow.
@@ -60,59 +64,126 @@ Hard requirements:
 """
 
 
-BDD_SYSTEM_PROMPT = """You are the BDD rendering model for an LME test design workflow.
-You transform structured test cases into polished Gherkin .feature format AND Ruby Cucumber step definitions.
+PLANNER_SYSTEM_PROMPT = """You are the planner model for an LME test design workflow.
+You transform semantic rules into structured test planning artifacts.
 Hard requirements:
-- Output valid Gherkin syntax for each scenario.
-- Generate corresponding Ruby step definitions that integrate with ruby+cucumber+selenium/rest.
-- Preserve all traceability links (semantic_rule_id, atomic_rule_ids, evidence).
+- Return exactly one result per input semantic_rule_id.
+- Do not omit any input semantic_rule_id.
+- Do not return extra semantic_rule_id values that were not in the batch.
+- Keep every semantic_rule_id exactly unchanged.
+- test_objective must be concise and specific to what this test plan validates.
+- risk_level must be one of: high, medium, low. Infer from rule complexity, financial impact, and ambiguity.
+- scenario_family must be a short categorical name grouping related scenarios (e.g., price_validation, session_management, order_routing).
+- coverage_intent describes what the scenario set should collectively cover.
+- priority follows: high (blocking/obligation/deadline), medium (prohibition/state_transition), low (permission/reference_only).
+- dependency_notes capture prerequisites, cross-rule dependencies, or setup requirements.
+- recommended_validation_strategy suggests validation approach: smoke, regression, boundary, or exception.
+- Return JSON only.
+"""
+
+
+def build_planner_user_prompt(batch: list[dict]) -> str:
+    """Build user prompt for planner stage from semantic rules."""
+    schema = {
+        "results": [
+            {
+                "semantic_rule_id": "SR-MR-000-00",
+                "test_objective": "Validate that [specific behavior]",
+                "risk_level": "high",
+                "coverage_intent": "Cover positive, negative, and boundary cases for [rule subject]",
+                "scenario_family": "price_validation",
+                "dependency_notes": [],
+                "recommended_validation_strategy": "regression",
+                "priority": "high",
+                "paragraph_ids": ["MR-000-00"],
+                "atomic_rule_ids": ["MR-000-00"],
+                "rule_type": "obligation"
+            }
+        ]
+    }
+    return (
+        "Generate a test planning artifact for each semantic rule.\n"
+        "Return one result per semantic_rule_id.\n"
+        "Each result must include: semantic_rule_id, test_objective, risk_level, scenario_family, priority.\n"
+        "Optionally include: coverage_intent, dependency_notes, recommended_validation_strategy.\n"
+        "risk_level: high = complex/high-impact, medium = moderate risk, low = straightforward/rare.\n"
+        "priority: high = blocking rules (obligation/deadline), medium = prohibitions, low = permissions.\n"
+        "scenario_family: short category name for grouping (e.g., price_validation, session_management).\n"
+        "Return JSON matching this schema shape:\n"
+        f"{json.dumps(schema, ensure_ascii=False, indent=2)}\n"
+        "Input semantic rules:\n"
+        f"{json.dumps(batch, ensure_ascii=False, indent=2)}"
+    )
+
+
+BDD_SYSTEM_PROMPT = """You are the BDD normalization model for an LME test design workflow.
+You transform structured test cases into a normalized BDD representation that is independent of final Gherkin syntax.
+This normalized output is the governed intermediate artifact consumed by Gherkin renderers and step-definition mappers.
+Hard requirements:
+- Return exactly one result per input semantic_rule_id.
+- Do not omit any input semantic_rule_id.
+- Preserve all traceability links (semantic_rule_id, atomic_rule_ids, paragraph_ids).
 - Keep Given/When/Then steps concise and declarative.
-- Use proper Gherkin tags derived from case_type and priority.
+- step_text is the natural-language step (e.g., "a member with valid LME session").
+- step_pattern is the regex-extracted pattern for step binding (copy step_text as-is for simple patterns).
+- Use tags derived from case_type and priority (e.g., @positive, @high).
 - Do not invent additional steps beyond what is in the input.
-- Step definitions should use LME::Client, LME::API, LME::PostTrade patterns.
+- step_definitions code should use LME::Client, LME::API, LME::PostTrade patterns.
 - Return structured JSON only.
 """
 
 
 def build_bdd_user_prompt(batch: list[dict]) -> str:
-    """Build user prompt for BDD refinement from maker test cases."""
+    """Build user prompt for normalized BDD from maker test cases."""
     schema = {
         "results": [
             {
                 "semantic_rule_id": "SR-MR-000-00",
-                "feature_name": "matching_rules_price_validation",
-                "feature_file": "Feature: Contact Exchange on Price Validation Failure\n  SR-MR-000-00\n  Validates that Members contact the Exchange when orders/trades fail price validation.",
+                "feature_title": "LME Rulebook Terminology Compliance",
+                "feature_description": "Validates that capitalized terms resolve to LME Rulebook definitions.",
+                "paragraph_ids": ["MR-000-00"],
                 "scenarios": [
                     {
                         "scenario_id": "TC-SR-MR-000-00-positive-01",
+                        "title": "Capitalised terms resolve to LME Rulebook definitions",
                         "case_type": "positive",
                         "priority": "high",
-                        "given": ["a member with valid LME session", "an order that has failed price validation check"],
-                        "when": ["the member contacts the Exchange"],
-                        "then": ["the Exchange records the contact", "the Exchange receives the rationale"],
+                        "given_steps": [
+                            {"step_text": "a registered_intermediating_broker submits a document containing capitalised terms", "step_pattern": "a registered_intermediating_broker submits a document containing capitalised terms"}
+                        ],
+                        "when_steps": [
+                            {"step_text": "the system processes the document terminology", "step_pattern": "the system processes the document terminology"}
+                        ],
+                        "then_steps": [
+                            {"step_text": "the terms are assigned the meaning ascribed in the LME Rulebook", "step_pattern": "the terms are assigned the meaning ascribed in the LME Rulebook"},
+                            {"step_text": "the obligation is fulfilled", "step_pattern": "the obligation is fulfilled"}
+                        ],
+                        "assumptions": [],
+                        "paragraph_ids": ["MR-000-00"],
+                        "semantic_rule_ref": "SR-MR-000-00",
+                        "required_case_types": ["positive"]
                     }
                 ],
                 "step_definitions": {
                     "given": [
                         {
-                            "pattern": "a member with valid LME session",
-                            "code": "Given(/^a member with valid LME session$/) do\n  @session = LME::Client.login\nend"
-                        },
-                        {
-                            "pattern": "an order that has failed price validation check",
-                            "code": "Given(/^an order that has failed price validation check$/) do\n  @order_params = { price: '999999', metal: 'ALU' }\nend"
+                            "step_text": "a registered_intermediating_broker submits a document containing capitalised terms",
+                            "step_pattern": "a registered_intermediating_broker submits a document containing capitalised terms",
+                            "code": "Given(/^a registered_intermediating_broker submits a document containing capitalised terms$/) do\n  @broker = LME::Client.login(role: :intermediating_broker)\n  @document = LME::API.create_document(terms: :capitalised)\nend"
                         }
                     ],
                     "when": [
                         {
-                            "pattern": "the member contacts the Exchange",
-                            "code": "When(/^the member contacts the Exchange$/) do\n  LME::PostTrade.contact_exchange(reason: @response.rejection_reason)\nend"
+                            "step_text": "the system processes the document terminology",
+                            "step_pattern": "the system processes the document terminology",
+                            "code": "When(/^the system processes the document terminology$/) do\n  @response = LME::API.process_terminology(@document)\nend"
                         }
                     ],
                     "then": [
                         {
-                            "pattern": "the Exchange records the contact",
-                            "code": "Then(/^the Exchange records the contact$/) do\n  contact = LME::PostTrade.get_contact(reason: @response.rejection_reason)\n  expect(contact).not_to be_nil\nend"
+                            "step_text": "the terms are assigned the meaning ascribed in the LME Rulebook",
+                            "step_pattern": "the terms are assigned the meaning ascribed in the LME Rulebook",
+                            "code": "Then(/^the terms are assigned the meaning ascribed in the LME Rulebook$/) do\n  expect(@response.meaning_source).to eq('LME_Rulebook')\nend"
                         }
                     ]
                 }
@@ -120,16 +191,11 @@ def build_bdd_user_prompt(batch: list[dict]) -> str:
         ]
     }
     return (
-        "Transform the following test cases into:\n"
-        "1. Polished Gherkin .feature format (feature_file field)\n"
-        "2. Ruby Cucumber step definitions (step_definitions field)\n"
-        "For each scenario:\n"
-        "- Generate complete Gherkin with Feature/Scenario keywords and tags\n"
-        "- Generate Ruby step definitions using LME::Client, LME::API, LME::PostTrade patterns\n"
-        "- Match Given/When/Then steps to step patterns\n"
+        "Transform the following maker test cases into a normalized BDD representation.\n"
+        "The normalized BDD is a governed intermediate artifact, NOT final Gherkin text.\n"
         "Return JSON matching this schema shape:\n"
         f"{json.dumps(schema, ensure_ascii=False, indent=2)}\n"
-        "Input test cases:\n"
+        "Input maker test cases:\n"
         f"{json.dumps(batch, ensure_ascii=False, indent=2)}"
     )
 

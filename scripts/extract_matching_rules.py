@@ -53,6 +53,12 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Extract pages, clauses, and atomic rules from LME rule documents."
     )
+    parser.add_argument(
+        "--document-class",
+        choices=["rulebook", "api_spec", "policy", "workflow"],
+        default="rulebook",
+        help="Document class for extraction strategy and rule type inference.",
+    )
     parser.add_argument("--input", required=True, help="Path to the source PDF or Markdown file.")
     parser.add_argument(
         "--input-format",
@@ -360,9 +366,24 @@ def split_clauses_from_markdown(pages: list[PageText]) -> list[Clause]:
     return clauses
 
 
-def guess_rule_type(text: str) -> str:
+def guess_rule_type(text: str, document_class: str = "rulebook") -> str:
+    """Infer rule type from text content.
+
+    Uses document-class-specific hints when available, otherwise falls back
+    to the LME rulebook heuristic chain.
+    """
     lowered = text.lower()
     lowered_clean = re.sub(r"^\([a-e]\)\s*", "", lowered, flags=re.IGNORECASE)
+
+    # Import here to avoid circular import at module level
+    from document_classes import DocumentClass, infer_rule_type as class_infer
+
+    try:
+        doc_cls = DocumentClass(document_class)
+        if doc_cls != DocumentClass.RULEBOOK:
+            return class_infer(text, doc_cls)
+    except ValueError:
+        pass  # Unknown class, fall through to rulebook heuristics
     if re.search(r"within\s+\d+\s+(seconds?|minutes?|hours?|days?)", lowered_clean) or "no later than" in lowered_clean or "deadline" in lowered_clean or re.search(r"by\s+\d{1,2}:\d{2}", lowered_clean):
         return "deadline"
     if "must not" in lowered_clean or "shall not" in lowered_clean or "may not" in lowered_clean or "not permitted" in lowered_clean:
@@ -444,7 +465,7 @@ def refine_chunks(chunks: list[str]) -> list[str]:
     return [item for item in refined if item]
 
 
-def expand_atomic_chunks(clause: Clause, chunks: list[str], split_basis: str, id_prefix: str) -> list[AtomicRule]:
+def expand_atomic_chunks(clause: Clause, chunks: list[str], split_basis: str, id_prefix: str, document_class: str = "rulebook") -> list[AtomicRule]:
     items: list[AtomicRule] = []
     counter = 1
     for chunk in chunks:
@@ -454,7 +475,7 @@ def expand_atomic_chunks(clause: Clause, chunks: list[str], split_basis: str, id
         if not any(token in lowered for token in ("must", "may", "shall", "will", "deadline", "required", "should be", "is used to", "cancel", "reverse", "submit", "enter", "have been", "be booked", "be documented")):
             continue
         rule_id = f"{id_prefix}-{counter:02d}" if id_prefix == clause.clause_id else f"{id_prefix}-{counter}"
-        rule_type = guess_rule_type(chunk)
+        rule_type = guess_rule_type(chunk, document_class=document_class)
         items.append(
             AtomicRule(
                 rule_id=rule_id,
@@ -473,7 +494,7 @@ def expand_atomic_chunks(clause: Clause, chunks: list[str], split_basis: str, id
         counter += 1
     if items:
         return items
-    fallback_type = guess_rule_type(clause.raw_text)
+    fallback_type = guess_rule_type(clause.raw_text, document_class=document_class)
     fallback_rule_id = f"{id_prefix}-01" if id_prefix == clause.clause_id else f"{id_prefix}-1"
     return [
         AtomicRule(
@@ -492,7 +513,7 @@ def expand_atomic_chunks(clause: Clause, chunks: list[str], split_basis: str, id
     ]
 
 
-def split_atomic_rules(clause: Clause) -> list[AtomicRule]:
+def split_atomic_rules(clause: Clause, document_class: str = "rulebook") -> list[AtomicRule]:
     """Split one clause into deterministic atomic-rule candidates using subclauses, bullets, semicolons, then sentences."""
     subclauses = split_subclauses(clause.raw_text)
     if len(subclauses) > 1:
@@ -505,6 +526,7 @@ def split_atomic_rules(clause: Clause) -> list[AtomicRule]:
                     chunks=chunks,
                     split_basis=f"subclause:{label}",
                     id_prefix=f"{clause.clause_id}-{label}",
+                    document_class=document_class,
                 )
             )
         return items
@@ -520,11 +542,12 @@ def split_atomic_rules(clause: Clause) -> list[AtomicRule]:
                     chunks=bullet_chunks,
                     split_basis=f"bullet:{index}",
                     id_prefix=f"{clause.clause_id}-B{index}",
+                    document_class=document_class,
                 )
             )
         return items
 
-    return expand_atomic_chunks(clause, refine_chunks(split_sentences(clause.raw_text)), "sentence", clause.clause_id)
+    return expand_atomic_chunks(clause, refine_chunks(split_sentences(clause.raw_text)), "sentence", clause.clause_id, document_class=document_class)
 
 
 def write_json(path: Path, payload: object) -> None:
@@ -553,13 +576,14 @@ def main() -> None:
         pages = extract_pages_from_markdown(input_path)
         clauses = split_clauses_from_markdown(pages)
 
-    atomic_rules = [rule for clause in clauses for rule in split_atomic_rules(clause)]
+    atomic_rules = [rule for clause in clauses for rule in split_atomic_rules(clause, document_class=args.document_class)]
     metadata = {
         "doc_id": args.doc_id,
         "doc_title": args.doc_title,
         "doc_version": args.doc_version,
         "source_path": str(input_path),
         "source_format": input_format,
+        "document_class": args.document_class,
         "page_count": len(pages),
         "clause_count": len(clauses),
         "atomic_rule_count": len(atomic_rules),

@@ -1,0 +1,163 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "normalized_bdd.schema.json",
+  "title": "Normalized BDD",
+  "description": "Governed intermediate BDD artifact independent of final Gherkin syntax. Canonical representation consumed by Gherkin renderers and step-definition mappers.",
+  "type": "object",
+  "required": ["results", "run_id", "bdd_version"],
+  "additionalProperties": true,
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "description": "Unique identifier for the BDD normalization run."
+    },
+    "bdd_version": {
+      "type": "string",
+      "description": "BDD prompt version used for normalization."
+    },
+    "results": {
+      "type": "array",
+      "description": "Normalized BDD results, one per semantic rule.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["semantic_rule_id", "feature_title", "scenarios"],
+        "additionalProperties": true,
+        "properties": {
+          "semantic_rule_id": {
+            "type": "string",
+            "description": "Source semantic rule ID this BDD was generated from."
+          },
+          "test_objective": {
+            "type": "string",
+            "description": "Test objective from planner output, if available."
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": ["high", "medium", "low"],
+            "description": "Risk level from planner."
+          },
+          "scenario_family": {
+            "type": "string",
+            "description": "Scenario family grouping from planner."
+          },
+          "feature_title": {
+            "type": "string",
+            "description": "Short title for the feature."
+          },
+          "feature_description": {
+            "type": "string",
+            "description": "Description of what the feature validates."
+          },
+          "paragraph_ids": {
+            "type": "array",
+            "description": "Source paragraph IDs for traceability.",
+            "items": {"type": "string"}
+          },
+          "scenarios": {
+            "type": "array",
+            "description": "Normalized BDD scenarios for this feature.",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["scenario_id", "case_type", "given_steps", "when_steps", "then_steps"],
+              "additionalProperties": true,
+              "properties": {
+                "scenario_id": {
+                  "type": "string",
+                  "description": "Unique scenario identifier.",
+                  "pattern": "^TC-"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Short human-readable scenario title."
+                },
+                "case_type": {
+                  "type": "string",
+                  "description": "Type of test case.",
+                  "enum": ["positive", "negative", "boundary", "exception", "state_transition", "data_validation"]
+                },
+                "priority": {
+                  "type": "string",
+                  "enum": ["high", "medium", "low"]
+                },
+                "given_steps": {
+                  "type": "array",
+                  "description": "Given precondition steps.",
+                  "items": {
+                    "type": "object",
+                    "required": ["step_text", "step_pattern"],
+                    "properties": {
+                      "step_text": {"type": "string"},
+                      "step_pattern": {"type": "string"}
+                    }
+                  }
+                },
+                "when_steps": {
+                  "type": "array",
+                  "description": "When action or trigger steps.",
+                  "items": {
+                    "type": "object",
+                    "required": ["step_text", "step_pattern"],
+                    "properties": {
+                      "step_text": {"type": "string"},
+                      "step_pattern": {"type": "string"}
+                    }
+                  }
+                },
+                "then_steps": {
+                  "type": "array",
+                  "description": "Then expected outcome steps.",
+                  "items": {
+                    "type": "object",
+                    "required": ["step_text", "step_pattern"],
+                    "properties": {
+                      "step_text": {"type": "string"},
+                      "step_pattern": {"type": "string"}
+                    }
+                  }
+                },
+                "assumptions": {
+                  "type": "array",
+                  "description": "Known limitations or assumptions for this scenario.",
+                  "items": {"type": "string"}
+                },
+                "paragraph_ids": {
+                  "type": "array",
+                  "description": "Source paragraph IDs for this scenario.",
+                  "items": {"type": "string"}
+                },
+                "semantic_rule_ref": {
+                  "type": "string",
+                  "description": "Semantic rule ID this scenario traces to."
+                },
+                "required_case_types": {
+                  "type": "array",
+                  "description": "Required case types for this rule.",
+                  "items": {"type": "string"}
+                }
+              }
+            }
+          },
+          "style_hints": {
+            "type": "object",
+            "description": "BDD style conventions captured from existing assets. Reserved for style learning output.",
+            "additionalProperties": true
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Run traceability metadata.",
+            "properties": {
+              "planner_run_id": {"type": "string"},
+              "maker_run_id": {"type": "string"},
+              "paragraph_ids": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

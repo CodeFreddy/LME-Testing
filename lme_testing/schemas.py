@@ -136,6 +136,113 @@ def validate_maker_payload(
     return payload
 
 
+RISK_LEVELS = {"high", "medium", "low"}
+PLANNER_RISK_LEVELS = {"high", "medium", "low"}
+SCENARIO_FAMILIES: set[str] = set()  # Unrestricted; populated from data
+
+
+def validate_planner_payload(payload: dict, expected_rule_ids: list[str] | None = None) -> dict:
+    results = payload.get("results")
+    if not isinstance(results, list):
+        raise SchemaError("Planner payload must contain a 'results' list.")
+
+    actual_rule_ids: list[str] = []
+    for item in results:
+        if not isinstance(item, dict):
+            raise SchemaError("Each planner result must be an object.")
+        semantic_rule_id = item.get("semantic_rule_id")
+        if not isinstance(semantic_rule_id, str):
+            raise SchemaError("Each planner result must include semantic_rule_id.")
+        actual_rule_ids.append(semantic_rule_id)
+
+        if item.get("risk_level") not in PLANNER_RISK_LEVELS:
+            raise SchemaError(f"Invalid risk_level: {item.get('risk_level')}")
+        if item.get("priority") not in PLANNER_RISK_LEVELS:
+            raise SchemaError(f"Invalid priority: {item.get('priority')}")
+        if not isinstance(item.get("test_objective", ""), str):
+            raise SchemaError("test_objective must be a string.")
+        if not isinstance(item.get("scenario_family", ""), str):
+            raise SchemaError("scenario_family must be a string.")
+
+        dep_notes = item.get("dependency_notes", [])
+        if not isinstance(dep_notes, list):
+            raise SchemaError("dependency_notes must be a list.")
+        for note in dep_notes:
+            if not isinstance(note, str):
+                raise SchemaError("dependency_notes items must be strings.")
+
+        if expected_rule_ids is not None:
+            if len(actual_rule_ids) != len(expected_rule_ids):
+                raise SchemaError("Planner must return exactly one result for each input rule.")
+            if set(actual_rule_ids) != set(expected_rule_ids):
+                raise SchemaError("Planner returned missing or extra semantic_rule_id values.")
+            if len(set(actual_rule_ids)) != len(actual_rule_ids):
+                raise SchemaError("Planner returned duplicate semantic_rule_id values.")
+    return payload
+
+
+def validate_normalized_bdd_payload(payload: dict, expected_rule_ids: list[str] | None = None) -> dict:
+    results = payload.get("results")
+    if not isinstance(results, list):
+        raise SchemaError("Normalized BDD payload must contain a 'results' list.")
+
+    actual_rule_ids: list[str] = []
+    for item in results:
+        if not isinstance(item, dict):
+            raise SchemaError("Each BDD result must be an object.")
+        semantic_rule_id = item.get("semantic_rule_id")
+        if not isinstance(semantic_rule_id, str):
+            raise SchemaError("Each BDD result must include semantic_rule_id.")
+        actual_rule_ids.append(semantic_rule_id)
+
+        if not isinstance(item.get("feature_title"), str):
+            raise SchemaError("feature_title must be a string.")
+
+        scenarios = item.get("scenarios")
+        if not isinstance(scenarios, list) or not scenarios:
+            raise SchemaError("Each BDD result must include non-empty scenarios.")
+
+        scenario_ids: set[str] = set()
+        for scenario in scenarios:
+            scenario_id = scenario.get("scenario_id")
+            if not isinstance(scenario_id, str):
+                raise SchemaError("Each scenario must include scenario_id.")
+            if scenario_id in scenario_ids:
+                raise SchemaError(f"Duplicate scenario_id: {scenario_id}")
+            scenario_ids.add(scenario_id)
+
+            case_type = scenario.get("case_type")
+            if case_type not in CASE_TYPES:
+                raise SchemaError(f"Invalid case_type in BDD scenario: {case_type}")
+
+            for step_key in ("given_steps", "when_steps", "then_steps"):
+                steps = scenario.get(step_key)
+                if not isinstance(steps, list):
+                    raise SchemaError(f"{step_key} must be a list.")
+                for step in steps:
+                    if not isinstance(step, dict):
+                        raise SchemaError(f"Each step in {step_key} must be an object.")
+                    if not isinstance(step.get("step_text"), str):
+                        raise SchemaError("step_text must be a string.")
+                    if not isinstance(step.get("step_pattern"), str):
+                        raise SchemaError("step_pattern must be a string.")
+
+            assumptions = scenario.get("assumptions", [])
+            if not isinstance(assumptions, list):
+                raise SchemaError("assumptions must be a list.")
+
+        step_defs = item.get("step_definitions", {})
+        if not isinstance(step_defs, dict):
+            raise SchemaError("step_definitions must be an object.")
+
+    if expected_rule_ids is not None:
+        if len(actual_rule_ids) != len(expected_rule_ids):
+            raise SchemaError("BDD must return exactly one result for each input rule.")
+        if set(actual_rule_ids) != set(expected_rule_ids):
+            raise SchemaError("BDD returned missing or extra semantic_rule_id values.")
+    return payload
+
+
 def validate_checker_payload(payload: dict, expected_case_map: dict[str, str] | None = None) -> dict:
     results = payload.get("results")
     if not isinstance(results, list):

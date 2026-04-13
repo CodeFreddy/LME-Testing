@@ -199,3 +199,71 @@ def check_artifact_governance(repo_root: Path) -> list[str]:
     errors.extend(_check_atomic_rules(lme_dir / "atomic_rules.json"))
     errors.extend(_check_semantic_rules(lme_dir / "semantic_rules.json"))
     return errors
+
+
+# ---------------------------------------------------------------------------
+# Model Governance Checks (Phase 2 Gate 7)
+# ---------------------------------------------------------------------------
+
+REQUIRED_ARTIFACT_METADATA = {"run_id", "role", "pipeline_version", "prompt_version", "provider", "model"}
+BENCHMARK_DIR = REPO_ROOT / "benchmarks"
+# Only enforce metadata checks on runs produced after Phase 1 completion (2026/04/13)
+PHASE1_COMPLETION_DATE = "20260413"
+
+
+def _check_summary_metadata(summary_path: Path, required_fields: set[str]) -> list[str]:
+    """Check that a summary.json has required metadata fields."""
+    errors: list[str] = []
+    if not summary_path.exists():
+        return []  # Skip if no summary (not all run dirs may have summaries)
+    try:
+        payload = _load_json(summary_path)
+    except Exception as exc:
+        return [f"invalid JSON in {summary_path.relative_to(REPO_ROOT).as_posix()}: {exc}"]
+    if not isinstance(payload, dict):
+        return [f"summary must be a JSON object: {summary_path.relative_to(REPO_ROOT).as_posix()}"]
+    missing = sorted(required_fields - set(payload.keys()))
+    if missing:
+        errors.append(
+            f"summary missing required metadata {missing}: {summary_path.relative_to(REPO_ROOT).as_posix()}"
+        )
+    return errors
+
+
+def check_artifact_metadata_in_runs(repo_root: Path) -> list[str]:
+    """Check that all pipeline run summaries have required model/prompt metadata.
+
+    Only validates runs produced on or after Phase 1 completion (2026/04/13).
+    Pre-Phase-1 runs are skipped as they predate metadata enforcement.
+    """
+    errors: list[str] = []
+    runs_dir = repo_root / "runs"
+    if not runs_dir.exists():
+        return errors
+    for run_dir in runs_dir.iterdir():
+        if not run_dir.is_dir():
+            continue
+        # Skip runs before Phase 1 completion date
+        if run_dir.name < PHASE1_COMPLETION_DATE:
+            continue
+        summary_path = run_dir / "summary.json"
+        if summary_path.exists():
+            errors.extend(_check_summary_metadata(summary_path, REQUIRED_ARTIFACT_METADATA))
+        # Also check nested run dirs (e.g., runs/maker/<run_id>/summary.json)
+        for nested in run_dir.iterdir():
+            if nested.is_dir() and nested.name >= PHASE1_COMPLETION_DATE:
+                nested_summary = nested / "summary.json"
+                if nested_summary.exists():
+                    errors.extend(_check_summary_metadata(nested_summary, REQUIRED_ARTIFACT_METADATA))
+    return errors
+
+
+def check_model_governance(repo_root: Path) -> list[str]:
+    """Run all model governance checks.
+
+    Checks:
+    - All pipeline run summaries have required model/prompt metadata.
+    """
+    errors: list[str] = []
+    errors.extend(check_artifact_metadata_in_runs(repo_root))
+    return errors

@@ -1,6 +1,8 @@
 ﻿from __future__ import annotations
 
+import csv
 import html
+import io
 import json
 from pathlib import Path
 
@@ -118,6 +120,117 @@ def _render_rule_coverage_rows(status_by_rule: dict[str, dict]) -> str:
     return ''.join(rows)
 
 
+def _render_coverage_heatmap(status_by_rule: dict[str, dict]) -> str:
+    """Render a rule-type × coverage-status heatmap."""
+    # Collect all rule types and statuses
+    rule_types: set[str] = set()
+    statuses: set[str] = {"fully_covered", "partially_covered", "uncovered", "not_applicable"}
+    counts: dict[tuple[str, str], int] = {}
+    for rule_id, item in status_by_rule.items():
+        rt = item.get("rule_type", "unknown")
+        cov = item.get("rule_coverage_status", "uncovered")
+        rule_types.add(rt)
+        counts[(rt, cov)] = counts.get((rt, cov), 0) + 1
+
+    status_colors = {
+        "fully_covered": "#22c55e",
+        "partially_covered": "#eab308",
+        "uncovered": "#ef4444",
+        "not_applicable": "#94a3b8",
+    }
+
+    # Build matrix table
+    header = "<thead><tr><th>Rule Type</th>"
+    for s in ["fully_covered", "partially_covered", "uncovered", "not_applicable"]:
+        header += f"<th style='background:#f1f5f9;text-align:center'>{s.replace('_', ' ').title()}</th>"
+    header += "</tr></thead>"
+
+    rows = "<tbody>"
+    for rt in sorted(rule_types):
+        rows += f"<tr><td style='font-weight:600'>{html.escape(rt)}</td>"
+        for s in ["fully_covered", "partially_covered", "uncovered", "not_applicable"]:
+            count = counts.get((rt, s), 0)
+            color = status_colors[s]
+            opacity = 0.3 if count == 0 else 1.0
+            rows += f"<td style='background:{color};opacity:{opacity};text-align:center;font-weight:600'>{count}</td>"
+        rows += "</tr>"
+    rows += "</tbody>"
+
+    return f"<table style='border-collapse:collapse;min-width:500px'>{header}{rows}</table>"
+
+
+def _render_drift_view(drift_report: dict | None) -> str:
+    """Render a drift view section comparing current vs previous coverage."""
+    if not drift_report:
+        return "<p class='muted'>No previous coverage report available for drift comparison.</p>"
+
+    delta = drift_report.get("coverage_delta", 0)
+    delta_color = "#22c55e" if delta >= 0 else "#ef4444"
+    delta_sign = "+" if delta >= 0 else ""
+
+    improved = drift_report.get("rules_improved", [])
+    regressed = drift_report.get("rules_regressed", [])
+    unchanged = drift_report.get("rules_unchanged", [])
+    new_rules = drift_report.get("new_rules", [])
+
+    lines = [
+        f"<div class='grid'>",
+        f"<div class='metric' style='background:{'#22c55e20' if delta>=0 else '#ef444420'};border-color:{'#22c55e' if delta>=0 else '#ef4444'}'>",
+        f"<strong>Coverage Δ</strong><br/>",
+        f"<span style='color:{delta_color};font-size:1.5em'>{delta_sign}{delta}%</span><br/>",
+        f"<span class='muted'>prev: {drift_report.get('previous_coverage_percent', 0)}% → curr: {drift_report.get('current_coverage_percent', 0)}%</span>",
+        f"</div>",
+        f"<div class='metric'><strong>Improved</strong><br/><span style='color:#22c55e;font-size:1.5em'>{drift_report.get('improved_count', 0)}</span></div>",
+        f"<div class='metric'><strong>Regressed</strong><br/><span style='color:#ef4444;font-size:1.5em'>{drift_report.get('regressed_count', 0)}</span></div>",
+        f"<div class='metric'><strong>Unchanged</strong><br/><span style='color:#64748b;font-size:1.5em'>{drift_report.get('unchanged_count', 0)}</span></div>",
+        f"</div>",
+    ]
+
+    if regressed:
+        lines.append("<h3>Regressed Rules</h3>")
+        lines.append("<ul>")
+        for rule_id in regressed:
+            lines.append(f"<li><code>{html.escape(rule_id)}</code></li>")
+        lines.append("</ul>")
+
+    if improved:
+        lines.append("<h3>Improved Rules</h3>")
+        lines.append("<ul>")
+        for rule_id in improved:
+            lines.append(f"<li><code>{html.escape(rule_id)}</code></li>")
+        lines.append("</ul>")
+
+    return "\n".join(lines)
+
+
+def export_coverage_csv(coverage_report: dict, output_path: Path) -> None:
+    """Export coverage report to CSV."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    status_by_rule = coverage_report.get("status_by_rule", {})
+
+    with open(output_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow([
+            "semantic_rule_id", "rule_type", "rule_coverage_status", "rule_pass_status",
+            "required_case_types", "present_case_types", "accepted_case_types",
+            "missing_case_types", "review_count", "paragraph_ids",
+        ])
+        for rule_id in sorted(status_by_rule.keys()):
+            item = status_by_rule[rule_id]
+            writer.writerow([
+                rule_id,
+                item.get("rule_type", ""),
+                item.get("rule_coverage_status", ""),
+                item.get("rule_pass_status", ""),
+                "|".join(item.get("required_case_types", [])),
+                "|".join(item.get("present_case_types", [])),
+                "|".join(item.get("accepted_case_types", [])),
+                "|".join(item.get("missing_case_types", [])),
+                item.get("review_count", 0),
+                "|".join(item.get("paragraph_ids", [])),
+            ])
+
+
 def generate_html_report(
     maker_cases_path: Path,
     checker_reviews_path: Path,
@@ -125,12 +238,37 @@ def generate_html_report(
     checker_summary_path: Path,
     coverage_report_path: Path,
     output_html_path: Path,
+    previous_coverage_report_path: Path | None = None,
 ) -> dict:
+    """Generate HTML report from pipeline outputs.
+
+    Args:
+        maker_cases_path: Path to maker_cases.jsonl
+        checker_reviews_path: Path to checker_reviews.jsonl
+        maker_summary_path: Path to maker summary.json
+        checker_summary_path: Path to checker summary.json
+        coverage_report_path: Path to coverage_report.json
+        output_html_path: Output path for main HTML report
+        previous_coverage_report_path: Optional path to a previous coverage_report.json
+            for computing drift. If provided, a Drift View section is included.
+    """
     maker_cases = load_jsonl(maker_cases_path)
     checker_reviews = load_jsonl(checker_reviews_path)
     maker_summary = load_json(maker_summary_path)
     checker_summary = load_json(checker_summary_path)
     coverage_report = load_json(coverage_report_path)
+
+    # Import here to avoid circular dependency
+    from .pipelines import calculate_drift
+
+    drift_report: dict | None = None
+    if previous_coverage_report_path and previous_coverage_report_path.exists():
+        previous_coverage = load_json(previous_coverage_report_path)
+        drift_report = calculate_drift(coverage_report, previous_coverage)
+
+    # Export CSV alongside HTML
+    csv_path = output_html_path.with_suffix(".csv")
+    export_coverage_csv(coverage_report, csv_path)
 
     reviews_by_case = {item['case_id']: item for item in checker_reviews}
 
@@ -150,7 +288,7 @@ def generate_html_report(
             f"<td>{html.escape(feature)}</td>"
             f"<td>{scenario_count}</td>"
             f"<td>{html.escape(', '.join(maker_record.get('requirement_ids', [])))}</td>"
-            f"<td><details><summary>展开场景</summary>{''.join(_render_maker_scenario_block(s) for s in maker_record.get('scenarios', []))}</details></td>"
+            f"<td><details><summary>展开场景</summary>{''.join(_render_maker_scenario_block(s, paragraph_ids=maker_record.get('paragraph_ids', [])) for s in maker_record.get('scenarios', []))}</details></td>"
             f"</tr>"
         )
 
@@ -168,7 +306,7 @@ def generate_html_report(
                 f"<td>{html.escape(feature)}</td>"
                 f"<td>{html.escape(overall)}</td>"
                 f"<td>{html.escape(coverage)}</td>"
-                f"<td><details><summary>展开详情</summary>{_render_combined_detail(scenario, review)}</details></td>"
+                f"<td><details><summary>展开详情</summary>{_render_combined_detail(scenario, review, paragraph_ids=maker_record.get('paragraph_ids', []))}</details></td>"
                 f"</tr>"
             )
 
@@ -245,6 +383,19 @@ applyFilters();
         {_render_rule_coverage_rows(coverage_report.get('status_by_rule', {}))}
       </tbody>
     </table>
+  </div>
+  <div class="card">
+    <h2>导出</h2>
+    <p><a href="{html.escape(csv_path.name)}" download>Download Coverage CSV</a></p>
+    <p class="muted">Coverage report: {html.escape(str(coverage_report_path))}</p>
+  </div>
+  <div class="card">
+    <h2>Rule Type × Coverage Status Heatmap</h2>
+    {_render_coverage_heatmap(coverage_report.get('status_by_rule', {}))}
+  </div>
+  <div class="card">
+    <h2>Drift View</h2>
+    {_render_drift_view(drift_report)}
   </div>
   <div class="card">
     <h2>筛选</h2>
@@ -334,12 +485,16 @@ applyFilters();
         'output_html': str(output_html_path),
         'maker_html': str(maker_html_path),
         'checker_html': str(checker_html_path),
+        'coverage_csv': str(csv_path),
         'maker_case_count': len(maker_cases),
         'checker_review_count': len(checker_reviews),
     }
 
 
-def _render_maker_scenario_block(scenario: dict) -> str:
+def _render_maker_scenario_block(scenario: dict, paragraph_ids: list = None) -> str:
+    if paragraph_ids is None:
+        paragraph_ids = []
+    scenario_para_ids = scenario.get("paragraph_ids", paragraph_ids)
     return (
         '<div class="detail">'
         f'<div class="kv"><span class="label">Scenario ID</span>: {html.escape(str(scenario.get("scenario_id", "")))}</div>'
@@ -347,11 +502,12 @@ def _render_maker_scenario_block(scenario: dict) -> str:
         f'<div class="kv"><span class="label">Intent</span>: {html.escape(str(scenario.get("intent", "")))}</div>'
         f'<div class="kv"><span class="label">Priority</span>: {html.escape(str(scenario.get("priority", "")))}</div>'
         f'<div class="kv"><span class="label">Case Type</span>: {html.escape(str(scenario.get("case_type", scenario.get("scenario_type", ""))))}</div>'
-        f'<div class="kv"><span class="label">Given</span>{_list_html(scenario.get("given", []))}</div>'
-        f'<div class="kv"><span class="label">When</span>{_list_html(scenario.get("when", []))}</div>'
-        f'<div class="kv"><span class="label">Then</span>{_list_html(scenario.get("then", []))}</div>'
-        f'<div class="kv"><span class="label">Assumptions</span>{_list_html(scenario.get("assumptions", []))}</div>'
-        f'<div class="kv"><span class="label">Evidence</span>{_evidence_html(scenario.get("evidence", []))}</div>'
+        + (f'<div class="kv"><span class="label">Paragraph IDs</span>: {html.escape(", ".join(scenario_para_ids))}</div>' if scenario_para_ids else '')
+        + f'<div class="kv"><span class="label">Given</span>{_list_html(scenario.get("given", []))}</div>'
+        + f'<div class="kv"><span class="label">When</span>{_list_html(scenario.get("when", []))}</div>'
+        + f'<div class="kv"><span class="label">Then</span>{_list_html(scenario.get("then", []))}</div>'
+        + f'<div class="kv"><span class="label">Assumptions</span>{_list_html(scenario.get("assumptions", []))}</div>'
+        + f'<div class="kv"><span class="label">Evidence</span>{_evidence_html(scenario.get("evidence", []))}</div>'
         '</div>'
     )
 
@@ -370,5 +526,5 @@ def _render_checker_detail(review: dict) -> str:
     )
 
 
-def _render_combined_detail(scenario: dict, review: dict) -> str:
-    return _render_maker_scenario_block(scenario) + _render_checker_detail(review)
+def _render_combined_detail(scenario: dict, review: dict, paragraph_ids: list = None) -> str:
+    return _render_maker_scenario_block(scenario, paragraph_ids=paragraph_ids) + _render_checker_detail(review)

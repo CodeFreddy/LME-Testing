@@ -5,9 +5,10 @@ import json
 from pathlib import Path
 
 from .config import load_project_config
-from .pipelines import run_bdd_pipeline, run_checker_pipeline, run_maker_pipeline
+from .pipelines import run_bdd_pipeline, run_checker_pipeline, run_maker_pipeline, run_planner_pipeline
 from .bdd_export import run_bdd_export
 from .reporting import generate_html_report
+from .step_registry import extract_steps_from_normalized_bdd, extract_steps_from_step_defs, compute_step_gaps, render_step_visibility_report
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -21,6 +22,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    planner = subparsers.add_parser(
+        "planner",
+        help="Generate test planning artifacts from semantic rules (Phase 2).",
+    )
+    planner.add_argument("--input", default="artifacts/lme_rules_v2_2/semantic_rules.json")
+    planner.add_argument("--output-dir", default="runs/planner")
+    planner.add_argument("--limit", type=int, default=None)
+    planner.add_argument("--batch-size", type=int, default=4)
+    planner.add_argument("--resume-from", default=None)
 
     maker = subparsers.add_parser(
         "maker",
@@ -60,6 +71,27 @@ def build_parser() -> argparse.ArgumentParser:
     bdd_export.add_argument("--cases", required=True, help="Path to maker_cases.jsonl")
     bdd_export.add_argument("--output-dir", default="runs/bdd-export")
 
+    step_registry = subparsers.add_parser(
+        "step-registry",
+        help="Generate step visibility report from normalized BDD output (Phase 2 Gate 5).",
+    )
+    step_registry.add_argument(
+        "--bdd-cases",
+        required=True,
+        help="Path to normalized_bdd.jsonl from run_bdd_pipeline.",
+    )
+    step_registry.add_argument(
+        "--step-defs",
+        default=None,
+        help="Path to existing Ruby step definitions file (optional). "
+             "If provided, computes gap analysis against existing library.",
+    )
+    step_registry.add_argument(
+        "--output-dir",
+        default="runs/step-registry",
+        help="Output directory for step visibility report.",
+    )
+
     report = subparsers.add_parser(
         "report",
         help="Render maker/checker outputs into a human-readable HTML report.",
@@ -91,7 +123,16 @@ def main() -> int:
 
     config = load_project_config(Path(args.config))
 
-    if args.command == "maker":
+    if args.command == "planner":
+        result = run_planner_pipeline(
+            config=config,
+            semantic_rules_path=Path(args.input),
+            output_dir=Path(args.output_dir),
+            limit=args.limit,
+            batch_size=args.batch_size,
+            resume_from=Path(args.resume_from) if args.resume_from else None,
+        )
+    elif args.command == "maker":
         result = run_maker_pipeline(
             config=config,
             semantic_rules_path=Path(args.input),
@@ -124,6 +165,28 @@ def main() -> int:
             maker_cases_path=Path(args.cases),
             output_dir=Path(args.output_dir),
         )
+    elif args.command == "step-registry":
+        normalized_bdd_path = Path(args.bdd_cases)
+        output_dir = Path(args.output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_path = output_dir / "step_visibility.json"
+
+        bdd_inventory = extract_steps_from_normalized_bdd(normalized_bdd_path)
+
+        library_inventory = StepInventory()
+        if args.step_defs:
+            library_inventory = extract_steps_from_step_defs(Path(args.step_defs))
+
+        gaps = compute_step_gaps(bdd_inventory, library_inventory)
+        render_step_visibility_report(bdd_inventory, gaps, output_path)
+
+        result = {
+            "output_path": str(output_path),
+            "total_steps": bdd_inventory.total_steps,
+            "unique_patterns": gaps.unique_patterns,
+            "matched_patterns": gaps.matched_patterns,
+            "unmatched_patterns": gaps.unmatched_patterns,
+        }
 
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0

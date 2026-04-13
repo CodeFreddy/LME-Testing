@@ -24,7 +24,8 @@
     },
     "roles": {
         "maker": "maker_qwen",
-        "checker": "checker_minimax"
+        "checker": "checker_minimax",
+        "planner": "maker_qwen"
     },
     "maker_defaults": {
         "temperature": 0.1,

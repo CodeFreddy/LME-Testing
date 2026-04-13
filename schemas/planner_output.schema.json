@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "planner_output.schema.json",
+  "title": "Planner Output",
+  "description": "Test planning artifacts generated from semantic rules. Introduces a governed planning stage between semantic rules and BDD generation.",
+  "type": "object",
+  "required": ["results", "run_id", "planner_version"],
+  "additionalProperties": true,
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "description": "Unique identifier for the planner run that produced this output."
+    },
+    "planner_version": {
+      "type": "string",
+      "description": "Planner prompt version used for this run."
+    },
+    "results": {
+      "type": "array",
+      "description": "Planner results, one per input semantic rule.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["semantic_rule_id", "test_objective", "risk_level", "scenario_family", "priority"],
+        "additionalProperties": true,
+        "properties": {
+          "semantic_rule_id": {
+            "type": "string",
+            "description": "ID of the semantic rule this plan was generated from."
+          },
+          "test_objective": {
+            "type": "string",
+            "description": "Concise statement of what this test plan validates."
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": ["high", "medium", "low"],
+            "description": "Risk level of the scenarios planned for this rule."
+          },
+          "coverage_intent": {
+            "type": "string",
+            "description": "Description of what the generated scenarios should collectively cover."
+          },
+          "scenario_family": {
+            "type": "string",
+            "description": "Category or family name for grouping related scenarios (e.g., price_validation, session_management)."
+          },
+          "dependency_notes": {
+            "type": "array",
+            "description": "Notes about dependencies between scenarios or external prerequisites.",
+            "items": {"type": "string"}
+          },
+          "recommended_validation_strategy": {
+            "type": "string",
+            "description": "Recommended approach for validating the scenarios (e.g., smoke, regression, boundary)."
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["high", "medium", "low"],
+            "description": "Implementation priority for this rule's test plan."
+          },
+          "paragraph_ids": {
+            "type": "array",
+            "description": "Source paragraph IDs from the semantic rule for traceability.",
+            "items": {"type": "string"}
+          },
+          "atomic_rule_ids": {
+            "type": "array",
+            "description": "Source atomic rule IDs this plan is grounded in.",
+            "items": {"type": "string"}
+          },
+          "rule_type": {
+            "type": "string",
+            "description": "Classification rule type from the source semantic rule."
+          }
+        }
+      }
+    }
+  }
+}

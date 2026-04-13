@@ -21,6 +21,11 @@
       "items": {"type": "string"},
       "minItems": 1
     },
+    "paragraph_ids": {
+      "type": "array",
+      "description": "Source paragraph IDs for traceability.",
+      "items": {"type": "string"}
+    },
     "feature": {
       "type": "string",
       "description": "Short feature title for the generated scenarios."

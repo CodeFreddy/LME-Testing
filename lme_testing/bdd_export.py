@@ -393,9 +393,28 @@ def _extract_scenario_titles_from_feature_file(feature_file: str) -> dict[str, s
 
 
 def write_feature_files_from_llm(bdd_results: list[dict], output_dir: Path) -> list[Path]:
-    """Write feature files from LLM-generated content.
+    """DEPRECATED: Use render_gherkin_from_normalized_bdd instead.
+
+    Write feature files from LLM-generated content.
 
     Extracts Feature header and renders scenarios from structured data.
+    """
+    return render_gherkin_from_normalized_bdd(bdd_results, output_dir)
+
+
+def write_step_definitions_from_llm(bdd_results: list[dict], output_dir: Path) -> Path:
+    """DEPRECATED: Use render_steps_from_normalized_bdd instead.
+
+    Write step definitions directly from LLM-generated content.
+    """
+    return render_steps_from_normalized_bdd(bdd_results, output_dir)
+
+
+def render_gherkin_from_normalized_bdd(bdd_results: list[dict], output_dir: Path) -> list[Path]:
+    """Render Gherkin .feature files from normalized BDD output.
+
+    Consumes normalized BDD results (produced by run_bdd_pipeline) and
+    renders them into Gherkin .feature files.
     """
     features_dir = output_dir / "features" / "matching_rules"
     features_dir.mkdir(parents=True, exist_ok=True)
@@ -404,45 +423,57 @@ def write_feature_files_from_llm(bdd_results: list[dict], output_dir: Path) -> l
 
     for item in bdd_results:
         semantic_rule_id = item.get("semantic_rule_id", "unknown")
-        feature_name = item.get("feature_name", "unnamed_feature")
+        feature_title = item.get("feature_title", "Unnamed Feature")
+        feature_desc = item.get("feature_description", "")
         scenarios = item.get("scenarios", [])
+        paragraph_ids = item.get("paragraph_ids", [])
 
-        # Build feature header from feature_file if available
-        feature_file = item.get("feature_file", "")
-        if feature_file:
-            # Extract titles from feature_file
-            scenario_titles = _extract_scenario_titles_from_feature_file(feature_file)
+        # Build feature header
+        lines = []
+        lines.append(f"Feature: {feature_title}")
+        lines.append(f"  {semantic_rule_id}")
+        if paragraph_ids:
+            lines.append(f"  # paragraph_ids: {', '.join(paragraph_ids)}")
+        if feature_desc:
+            lines.append(f"  {feature_desc}")
+        lines.append("")
 
-            # Extract lines until we hit a Scenario or tag block
-            lines = feature_file.split("\n")
-            header_lines = []
-            for line in lines:
-                stripped = line.strip()
-                # Stop at first Scenario or @tag (which precedes scenario)
-                if stripped.startswith("Scenario:") or (stripped.startswith("@") and header_lines):
-                    break
-                header_lines.append(line)
-            feature_header = "\n".join(header_lines).rstrip()
-        else:
-            scenario_titles = {}
-            feature_header = f"Feature: {feature_name}\n  {semantic_rule_id}"
-
-        # Inject titles into scenarios before rendering
+        # Render each scenario
         for scenario in scenarios:
-            scenario_id = scenario.get("scenario_id", "")
-            if scenario_id in scenario_titles and not scenario.get("title"):
-                scenario["title"] = scenario_titles[scenario_id]
+            scenario_id = scenario.get("scenario_id", "unknown")
+            title = scenario.get("title", "Unnamed scenario")
+            case_type = scenario.get("case_type", "positive")
+            priority = scenario.get("priority", "medium")
 
-        # Render scenarios from structured data
-        output_lines = [feature_header, ""]
+            tags = build_tags(case_type, priority)
+            lines.append(f"  {' '.join(tags)}  # {scenario_id}")
+            lines.append(f"  Scenario: {title}")
 
-        for scenario in scenarios:
-            output_lines.append(render_scenario(scenario, semantic_rule_id))
-            output_lines.append("")
+            # Given steps
+            given_steps = scenario.get("given_steps", [])
+            for i, step in enumerate(given_steps):
+                step_text = step.get("step_text", "") if isinstance(step, dict) else step
+                prefix = "Given" if i == 0 else "And"
+                lines.append(f"    {prefix} {step_text}")
 
-        content = "\n".join(output_lines)
+            # When steps
+            when_steps = scenario.get("when_steps", [])
+            for i, step in enumerate(when_steps):
+                step_text = step.get("step_text", "") if isinstance(step, dict) else step
+                prefix = "When" if i == 0 else "And"
+                lines.append(f"    {prefix} {step_text}")
 
-        filename = f"{semantic_rule_id}_{sanitize_filename(feature_name)}.feature"
+            # Then steps
+            then_steps = scenario.get("then_steps", [])
+            for i, step in enumerate(then_steps):
+                step_text = step.get("step_text", "") if isinstance(step, dict) else step
+                prefix = "Then" if i == 0 else "And"
+                lines.append(f"    {prefix} {step_text}")
+
+            lines.append("")
+
+        content = "\n".join(lines)
+        filename = f"{semantic_rule_id}_{sanitize_filename(feature_title)}.feature"
         filepath = features_dir / filename
         filepath.write_text(content, encoding="utf-8")
         written_files.append(filepath)
@@ -450,10 +481,11 @@ def write_feature_files_from_llm(bdd_results: list[dict], output_dir: Path) -> l
     return written_files
 
 
-def write_step_definitions_from_llm(bdd_results: list[dict], output_dir: Path) -> Path:
-    """Write step definitions directly from LLM-generated content.
+def render_steps_from_normalized_bdd(bdd_results: list[dict], output_dir: Path) -> Path:
+    """Render Ruby Cucumber step definitions from normalized BDD output.
 
-    Uses the step_definitions field from LLM output directly.
+    Consumes normalized BDD results (produced by run_bdd_pipeline) and
+    renders them into Ruby step definition files.
     """
     steps_dir = output_dir / "features" / "step_definitions"
     steps_dir.mkdir(parents=True, exist_ok=True)
@@ -464,26 +496,29 @@ def write_step_definitions_from_llm(bdd_results: list[dict], output_dir: Path) -
     seen_patterns: set[str] = set()
 
     all_lines.append("# frozen_string_literal: true")
-    all_lines.append("# Step definitions - Generated from LME BDD Pipeline")
+    all_lines.append("# Step definitions - Generated from LME BDD Pipeline (Normalized BDD)")
     all_lines.append("# WARNING: Auto-generated - DO NOT EDIT MANUALLY")
     all_lines.append("")
 
     for item in bdd_results:
-        feature_name = item.get("feature_name", "unnamed")
+        feature_name = item.get("feature_title", "unnamed")
+        # Normalized BDD has step_definitions at result level
         step_defs = item.get("step_definitions", {})
 
         for step_type in ("given", "when", "then"):
             steps = step_defs.get(step_type, [])
             for step in steps:
-                pattern = step.get("pattern", "")
-                code = step.get("code", "")
+                step_text = step.get("step_text", "") if isinstance(step, dict) else ""
+                step_pattern = step.get("step_pattern", step_text) if isinstance(step, dict) else step
+                code = step.get("code", "") if isinstance(step, dict) else ""
 
-                # Avoid duplicates by pattern
-                if pattern and pattern not in seen_patterns:
-                    seen_patterns.add(pattern)
-                    if code:
-                        all_lines.append(code)
-                        all_lines.append("")
+                if not step_pattern or step_pattern in seen_patterns:
+                    continue
+                seen_patterns.add(step_pattern)
+
+                if code:
+                    all_lines.append(code)
+                    all_lines.append("")
 
     content = "\n".join(all_lines)
     filepath.write_text(content, encoding="utf-8")
