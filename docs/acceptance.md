@@ -519,6 +519,30 @@ Phase 2 is accepted only if:
 
 ---
 
+## Phase 2 Completion
+
+**Phase 2 — Planned Test Design and Normalized BDD Platform: COMPLETED 2026/04/13**
+
+All 7 acceptance gates infrastructure-complete (end-to-end validated with MiniMax-M2.7 on poc_two_rules):
+
+1. **Multi-Document Ingestion Gate** — `scripts/document_classes.py`: DocumentClass enum, ParsingStrategy, 4 strategies (rulebook/api_spec/policy/workflow), `infer_rule_type()` with class-specific keyword hints.
+
+2. **Planning Layer Gate** — `schemas/planner_output.schema.json` + `run_planner_pipeline` + `validate_planner_payload`. Planner run `runs/acceptance_e2e/20260413T133435Z/planner_results.jsonl` validated successfully. Traceability: paragraph_ids and atomic_rule_ids carried through.
+
+3. **Normalized BDD Contract Gate** — `schemas/normalized_bdd.schema.json` + `run_bdd_pipeline` + `validate_normalized_bdd_payload`. BDD run `runs/acceptance_e2e/20260413T134346Z/normalized_bdd.jsonl` produced 2 feature files + step_definitions. `run_bdd_export` renders Gherkin `.feature` files independently of normalized BDD.
+
+4. **Traceability Gate** — paragraph_ids propagate through planner → maker → BDD pipelines. Planner results carry source `paragraph_ids`/`atomic_rule_ids`. BDD `metadata` section carries `planner_run_id`, `maker_run_id`, `paragraph_ids`. Each scenario carries `semantic_rule_ref` and `paragraph_ids`.
+
+5. **Step Visibility Gate** — `lme_testing/step_registry.py`: `extract_steps_from_normalized_bdd()`, `compute_step_gaps()`, `render_step_visibility_report()`. CLI `step-registry` command. Step visibility report at `runs/acceptance_e2e/step-registry/step_visibility.json`: 27 total steps, 21 unique patterns, 21 unmatched (no step library provided).
+
+6. **Quality and Drift Reporting Gate** — `scripts/generate_trend_report.py`: pairwise and sequential drift comparison. `calculate_drift()` in `pipelines.py` computes status changes. Coverage reports include `status_by_rule` with `rule_coverage_status`.
+
+7. **Model Governance Enforcement Gate** — `scripts/check_model_governance.py` + `check_artifact_metadata_in_runs()` in `governance_checks.py`. Validates provider, model, prompt_version, pipeline_version in all run summaries. `StubProvider` enables deterministic smoke testing without real API calls.
+
+**Evidence**: End-to-end pipeline run with MiniMax-M2.7 (`runs/acceptance_e2e/`): planner → maker → bdd → checker → step-registry all completed. All governance checks pass. All 6 unit tests pass.
+
+---
+
 # Phase 3 Acceptance: Execution Readiness and Selective Enterprise Controls (9-18 Months)
 
 ## Phase Goal
