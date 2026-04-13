@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-13 14:10:56 UTC`
+- `2026-04-13 23:07:00 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `Sync TODO.md with session_handoff: Phase 2 complete, Phase 3 Gate 1 done`
 - `Phase 3 Gate 1: Add multi-tier step matching, reuse scores, and ownership`
 - `docs: mark Phase 2 complete with acceptance evidence`
 - `Fix schema parsing for MiniMax thinking blocks and align checker validation`
 - `StubProvider: fix role detection, schema ID extraction, case-type awareness`
-- `Add StubProvider for deterministic CI smoke testing`
 
 ---
 
