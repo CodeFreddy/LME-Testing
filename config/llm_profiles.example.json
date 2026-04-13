@@ -1,6 +1,12 @@
 ﻿{
     "output_root": "runs",
     "providers": {
+        "stub": {
+            "type": "stub",
+            "model": "stub-model",
+            "base_url": "http://stub",
+            "api_key": "stub"
+        },
         "maker_qwen": {
             "type": "openai_compatible",
             "api_format": "openai_chat_completions",
