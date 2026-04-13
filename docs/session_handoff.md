@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-13 13:20:04 UTC`
+- `2026-04-13 13:54:28 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `Fix schema parsing for MiniMax thinking blocks and align checker validation`
 - `StubProvider: fix role detection, schema ID extraction, case-type awareness`
 - `Add StubProvider for deterministic CI smoke testing`
 - `Fix import in generate_trend_report.py to work when run as script`
 - `Begin Phase 2: Add planner pipeline, normalized BDD contract, and step registry`
-- `Complete Phase 1: Baseline Control and Pipeline Hardening`
 
 ---
 

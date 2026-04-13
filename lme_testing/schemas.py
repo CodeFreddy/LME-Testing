@@ -23,6 +23,11 @@ COVERAGE_RELEVANCE = {"direct", "indirect", "not_relevant"}
 
 def _strip_markdown_fence(text: str) -> str:
     cleaned = text.strip()
+    # Strip <think>...</think> thinking blocks (common in MiniMax and other models).
+    # The block may appear before, inside, or around markdown fences.
+    # Use DOTALL so . matches newlines too.
+    cleaned = re.sub(r"<think>.*?</think>", "", cleaned, flags=re.DOTALL).strip()
+    # Strip markdown code fence
     fenced = re.match(r"^```(?:json)?\s*(.*?)\s*```$", cleaned, re.DOTALL | re.IGNORECASE)
     if fenced:
         return fenced.group(1).strip()
@@ -66,8 +71,8 @@ def validate_maker_payload(
             raise SchemaError("requirement_ids must be a list of strings.")
 
         scenarios = item.get("scenarios")
-        if not isinstance(scenarios, list) or not scenarios:
-            raise SchemaError("Each maker result must include non-empty scenarios.")
+        if not isinstance(scenarios, list):
+            raise SchemaError("Each maker result must include a scenarios list (may be empty for reference-only rules).")
 
         evidence_rule_ids: set[str] = set()
         scenario_ids: set[str] = set()
@@ -256,7 +261,6 @@ def validate_checker_payload(payload: dict, expected_case_map: dict[str, str] | 
             "case_type",
             "case_type_accepted",
             "coverage_relevance",
-            "overall_status",
             "blocking_findings_count",
             "is_blocking",
             "scores",
