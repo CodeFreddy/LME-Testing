@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Human Review</title>
+  <style>
+    body { font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif; margin: 24px; color: #1f2937; background: #f8fafc; }
+    h1, h2 { color: #0f172a; }
+    .card { background: white; border: 1px solid #cbd5e1; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06); }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(220px, 1fr)); gap: 12px; }
+    .metric { background: #eff6ff; border-radius: 10px; padding: 12px; border: 1px solid #bfdbfe; }
+    .toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    table { width: 100%; border-collapse: collapse; background: white; }
+    th, td { border: 1px solid #cbd5e1; padding: 10px; vertical-align: top; text-align: left; font-size: 13px; }
+    th { background: #e2e8f0; }
+    details { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; }
+    summary { cursor: pointer; font-weight: 600; }
+    textarea, select { width: 100%; box-sizing: border-box; margin-top: 4px; }
+    .issue-picker { margin-top: 4px; border: 1px solid #cbd5e1; border-radius: 8px; background: #f8fafc; }
+    .issue-picker summary { list-style: none; }
+    .issue-picker[open] summary { margin-bottom: 8px; }
+    .issue-summary { color: #334155; font-size: 12px; }
+    .issue-table { width: 100%; border-collapse: collapse; background: white; }
+    .issue-table th, .issue-table td { border: 1px solid #e2e8f0; padding: 6px 8px; font-size: 12px; }
+    .issue-table th { background: #f1f5f9; }
+    .muted { color: #64748b; font-size: 12px; }
+    .warning { color: #92400e; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 8px 10px; margin-top: 8px; }
+    button { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; cursor: pointer; }
+    ul { margin: 8px 0 0 18px; }
+  </style>
+</head>
+<body>
+  <h1>Human Review</h1>
+  <div class="card">
+    <div class="grid">
+      <div class="metric"><strong>Total Cases</strong><br/>2</div>
+      <div class="metric"><strong>Checker Blocking Suggestions</strong><br/>1</div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Field Guide</h2>
+    <ul>
+      <li><strong>Decision</strong>: final human action. If it is not <code>pending</code>, the system executes this action.</li>
+      <li><strong>Block Recommendation Review</strong>: human review of the checker blocking recommendation. It is used for audit only and does not override <code>Decision</code>.</li>
+      <li><strong>Issue Types</strong>: open the panel and select one or more checkboxes. These tags are used for stats and targeted rewrite guidance.</li>
+    </ul>
+    <div class="warning">If <code>Decision</code> is already set to <code>approve</code>, <code>rewrite</code>, or <code>reject</code>, the system follows that decision even if <code>Block Recommendation Review</code> is still <code>pending_review</code>.</div>
+  </div>
+  <div class="card">
+    <h2>Issue Type Reference</h2>
+    <ul><li><strong>rule_misread:</strong> 规则理解错误 - 测试案例误解了 semantic rule 的核心含义或适用条件。<li><li><strong>bad_assertion:</strong> 断言不合理 - Then 断言不准确、不充分，或无法证明规则是否满足。<li><li><strong>weak_evidence:</strong> 证据不足 - 引用的 evidence 过弱、过长或没有逐条对应到当前场景。<li><li><strong>wrong_case_type:</strong> 案例类型错误 - case_type 与规则要求不匹配，例如把边界案例写成正例。<li><li><strong>unclear_steps:</strong> 步骤不清晰 - Given/When/Then 表达模糊，阅读者难以理解或执行。<li><li><strong>missing_negative_case:</strong> 缺少负例 - 当前规则需要 negative case，但 maker 没有提供有效负例。<li><li><strong>missing_boundary_case:</strong> 缺少边界案例 - 当前规则需要 boundary case，但 maker 没有提供有效边界测试。<li><li><strong>non_executable_scenario:</strong> 场景不可执行 - 场景无法在测试平台中落地执行或无法验证结果。<li><li><strong>coverage_dispute:</strong> 覆盖判断争议 - checker 对 covered/partial/uncovered 的判断与人工理解不一致。<li><li><strong>duplicate_coverage:</strong> 重复覆盖 - 多个案例重复覆盖同一 slot，但遗漏了其他必选 case type。<li></ul>
+  </div>
+  <div class="card">
+    <div class="toolbar">
+      <label>Overall <select id="overallFilter"><option value="">All</option><option value="pass">pass</option><option value="fail">fail</option><option value="missing">missing</option></select></label>
+      <label>Coverage <select id="coverageFilter"><option value="">All</option><option value="covered">covered</option><option value="partial">partial</option><option value="uncovered">uncovered</option><option value="missing">missing</option></select></label>
+      <label>Checker Blocking <select id="blockingFilter"><option value="">All</option><option value="true">true</option><option value="false">false</option></select></label>
+      <button id="saveBtn">Download JSON</button>
+      <label><button type="button" id="loadBtn">Import JSON</button><input id="loadInput" type="file" accept="application/json" style="display:none" /></label>
+    </div>
+    <div class="muted">This page is static. Download the resulting JSON and pass it to the rewrite command.</div>
+  </div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Semantic Rule</th>
+          <th>Case ID</th>
+          <th>Feature</th>
+          <th>Case Type</th>
+          <th>Overall</th>
+          <th>Coverage</th>
+          <th>Checker Blocking</th>
+          <th>Blocking Category</th>
+          <th>Blocking Reason</th>
+          <th>Detail</th>
+          <th>Human Review</th>
+        </tr>
+      </thead>
+      <tbody id="reviewRows"><tr data-case-id="SCENARIO-001" data-overall="pass" data-coverage="covered" data-blocking="false"><td>SR-MR-003-01</td><td>SCENARIO-001</td><td>Price Validation</td><td>happy_path</td><td>pass</td><td>covered</td><td>False</td><td>none</td><td></td><td><details><summary>Details</summary><div><strong>Given</strong><ul><li>Order submitted with valid price</li></ul></div><div><strong>When</strong><ul><li>Order enters matching engine</li></ul></div><div><strong>Then</strong><ul><li>Order proceeds to matching</li></ul></div><div><strong>Assumptions</strong><ul><li>Price within daily range</li></ul></div><div><strong>Evidence</strong><div><strong>MR-003</strong>: Price must be validated against Exchange reference</div></div><div><strong>Checker Findings</strong><div><strong>completeness</strong>: All steps present</div></div><div><strong>Coverage Reason</strong>: Covers happy path scenario</div></details></td><td><div><label>Decision<br/><select data-field="review_decision" data-case-id="SCENARIO-001"><option value="pending" selected>pending</option><option value="approve">approve</option><option value="rewrite">rewrite</option><option value="reject">reject</option></select></label></div><div><label>Block Recommendation Review<br/><select data-field="block_recommendation_review" data-case-id="SCENARIO-001"><option value="not_applicable" selected>not_applicable</option><option value="pending_review">pending_review</option><option value="confirmed">confirmed</option><option value="dismissed">dismissed</option></select></label></div><div><label>Issue Types</label><details class="issue-picker"><summary class="issue-summary" data-issue-summary="SCENARIO-001">None selected</summary><table class="issue-table"><thead><tr><th>Select</th><th>Label</th><th>Code</th><th>Description</th></tr></thead><tbody><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-001" data-issue-code="rule_misread" /></td><td>规则理解错误</td><td>rule_misread</td><td>测试案例误解了 semantic rule 的核心含义或适用条件。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-001" data-issue-code="bad_assertion" /></td><td>断言不合理</td><td>bad_assertion</td><td>Then 断言不准确、不充分，或无法证明规则是否满足。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-001" data-issue-code="weak_evidence" /></td><td>证据不足</td><td>weak_evidence</td><td>引用的 evidence 过弱、过长或没有逐条对应到当前场景。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-001" data-issue-code="wrong_case_type" /></td><td>案例类型错误</td><td>wrong_case_type</td><td>case_type 与规则要求不匹配，例如把边界案例写成正例。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-001" data-issue-code="unclear_steps" /></td><td>步骤不清晰</td><td>unclear_steps</td><td>Given/When/Then 表达模糊，阅读者难以理解或执行。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-001" data-issue-code="missing_negative_case" /></td><td>缺少负例</td><td>missing_negative_case</td><td>当前规则需要 negative case，但 maker 没有提供有效负例。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-001" data-issue-code="missing_boundary_case" /></td><td>缺少边界案例</td><td>missing_boundary_case</td><td>当前规则需要 boundary case，但 maker 没有提供有效边界测试。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-001" data-issue-code="non_executable_scenario" /></td><td>场景不可执行</td><td>non_executable_scenario</td><td>场景无法在测试平台中落地执行或无法验证结果。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-001" data-issue-code="coverage_dispute" /></td><td>覆盖判断争议</td><td>coverage_dispute</td><td>checker 对 covered/partial/uncovered 的判断与人工理解不一致。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-001" data-issue-code="duplicate_coverage" /></td><td>重复覆盖</td><td>duplicate_coverage</td><td>多个案例重复覆盖同一 slot，但遗漏了其他必选 case type。</td></tr></tbody></table></details></div><div><label>Comment<br/><textarea data-field="human_comment" data-case-id="SCENARIO-001" rows="4" cols="36"></textarea></label></div></td></tr><tr data-case-id="SCENARIO-002" data-overall="warn" data-coverage="partial" data-blocking="true"><td>SR-MR-004-02</td><td>SCENARIO-002</td><td>Time Extension</td><td>violation</td><td>warn</td><td>partial</td><td>True</td><td>missing_assertion</td><td>No negative assertion for failure case</td><td><details><summary>Details</summary><div><strong>Given</strong><ul><li>Extension request received</li></ul></div><div><strong>When</strong><ul><li>Current time is 10 minutes before deadline</li></ul></div><div><strong>Then</strong><ul><li>Extension request is rejected</li></ul></div><div><strong>Assumptions</strong><ul><li>Trading hours active</li></ul></div><div><strong>Evidence</strong><div><strong>MR-004</strong>: Extensions require 15 minute notice</div></div><div><strong>Checker Findings</strong><div><strong>missing_steps</strong>: Needs additional edge cases</div></div><div><strong>Coverage Reason</strong>: Covers violation but not happy path</div></details></td><td><div><label>Decision<br/><select data-field="review_decision" data-case-id="SCENARIO-002"><option value="pending" selected>pending</option><option value="approve">approve</option><option value="rewrite">rewrite</option><option value="reject">reject</option></select></label></div><div><label>Block Recommendation Review<br/><select data-field="block_recommendation_review" data-case-id="SCENARIO-002"><option value="not_applicable">not_applicable</option><option value="pending_review" selected>pending_review</option><option value="confirmed">confirmed</option><option value="dismissed">dismissed</option></select></label></div><div><label>Issue Types</label><details class="issue-picker"><summary class="issue-summary" data-issue-summary="SCENARIO-002">None selected</summary><table class="issue-table"><thead><tr><th>Select</th><th>Label</th><th>Code</th><th>Description</th></tr></thead><tbody><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-002" data-issue-code="rule_misread" /></td><td>规则理解错误</td><td>rule_misread</td><td>测试案例误解了 semantic rule 的核心含义或适用条件。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-002" data-issue-code="bad_assertion" /></td><td>断言不合理</td><td>bad_assertion</td><td>Then 断言不准确、不充分，或无法证明规则是否满足。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-002" data-issue-code="weak_evidence" /></td><td>证据不足</td><td>weak_evidence</td><td>引用的 evidence 过弱、过长或没有逐条对应到当前场景。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-002" data-issue-code="wrong_case_type" /></td><td>案例类型错误</td><td>wrong_case_type</td><td>case_type 与规则要求不匹配，例如把边界案例写成正例。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-002" data-issue-code="unclear_steps" /></td><td>步骤不清晰</td><td>unclear_steps</td><td>Given/When/Then 表达模糊，阅读者难以理解或执行。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-002" data-issue-code="missing_negative_case" /></td><td>缺少负例</td><td>missing_negative_case</td><td>当前规则需要 negative case，但 maker 没有提供有效负例。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-002" data-issue-code="missing_boundary_case" /></td><td>缺少边界案例</td><td>missing_boundary_case</td><td>当前规则需要 boundary case，但 maker 没有提供有效边界测试。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-002" data-issue-code="non_executable_scenario" /></td><td>场景不可执行</td><td>non_executable_scenario</td><td>场景无法在测试平台中落地执行或无法验证结果。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-002" data-issue-code="coverage_dispute" /></td><td>覆盖判断争议</td><td>coverage_dispute</td><td>checker 对 covered/partial/uncovered 的判断与人工理解不一致。</td></tr><tr><td><input type="checkbox" data-field="issue_type_option" data-case-id="SCENARIO-002" data-issue-code="duplicate_coverage" /></td><td>重复覆盖</td><td>duplicate_coverage</td><td>多个案例重复覆盖同一 slot，但遗漏了其他必选 case type。</td></tr></tbody></table></details></div><div><label>Comment<br/><textarea data-field="human_comment" data-case-id="SCENARIO-002" rows="4" cols="36"></textarea></label></div></td></tr></tbody>
+    </table>
+  </div>
+<script>
+const reviewState = {"metadata": {"maker_cases_path": "runs\\demo\\maker_cases.jsonl", "checker_reviews_path": "runs\\demo\\checker_reviews.jsonl", "total_cases": 2}, "reviews": [{"case_id": "SCENARIO-001", "semantic_rule_id": "SR-MR-003-01", "review_decision": "pending", "block_recommendation_review": "not_applicable", "human_comment": "", "issue_types": []}, {"case_id": "SCENARIO-002", "semantic_rule_id": "SR-MR-004-02", "review_decision": "pending", "block_recommendation_review": "pending_review", "human_comment": "", "issue_types": []}], "issue_type_options": [{"code": "rule_misread", "label": "规则理解错误", "description": "测试案例误解了 semantic rule 的核心含义或适用条件。"}, {"code": "bad_assertion", "label": "断言不合理", "description": "Then 断言不准确、不充分，或无法证明规则是否满足。"}, {"code": "weak_evidence", "label": "证据不足", "description": "引用的 evidence 过弱、过长或没有逐条对应到当前场景。"}, {"code": "wrong_case_type", "label": "案例类型错误", "description": "case_type 与规则要求不匹配，例如把边界案例写成正例。"}, {"code": "unclear_steps", "label": "步骤不清晰", "description": "Given/When/Then 表达模糊，阅读者难以理解或执行。"}, {"code": "missing_negative_case", "label": "缺少负例", "description": "当前规则需要 negative case，但 maker 没有提供有效负例。"}, {"code": "missing_boundary_case", "label": "缺少边界案例", "description": "当前规则需要 boundary case，但 maker 没有提供有效边界测试。"}, {"code": "non_executable_scenario", "label": "场景不可执行", "description": "场景无法在测试平台中落地执行或无法验证结果。"}, {"code": "coverage_dispute", "label": "覆盖判断争议", "description": "checker 对 covered/partial/uncovered 的判断与人工理解不一致。"}, {"code": "duplicate_coverage", "label": "重复覆盖", "description": "多个案例重复覆盖同一 slot，但遗漏了其他必选 case type。"}]};
+const reviewMap = new Map(reviewState.reviews.map(item => [item.case_id, item]));
+const rows = Array.from(document.querySelectorAll('#reviewRows tr'));
+const issueTypeOptions = reviewState.issue_type_options || [];
+
+function syncIssueSummary(caseId) {
+  const review = reviewMap.get(caseId);
+  const summaryEl = document.querySelector(`[data-issue-summary="${caseId}"]`);
+  if (!review || !summaryEl) return;
+  const labels = (review.issue_types || [])
+    .map(code => issueTypeOptions.find(item => item.code === code))
+    .filter(Boolean)
+    .map(item => item.label);
+  summaryEl.textContent = labels.length ? labels.join(', ') : 'None selected';
+}
+
+function syncField(el) {
+  const caseId = el.dataset.caseId;
+  const field = el.dataset.field;
+  const review = reviewMap.get(caseId);
+  if (!review) return;
+  if (field === 'issue_type_option') {
+    const selected = new Set(review.issue_types || []);
+    const issueCode = el.dataset.issueCode;
+    if (el.checked) selected.add(issueCode); else selected.delete(issueCode);
+    review.issue_types = Array.from(selected);
+    syncIssueSummary(caseId);
+  } else {
+    review[field] = el.value;
+  }
+}
+
+for (const el of document.querySelectorAll('[data-field]')) {
+  el.addEventListener('change', () => syncField(el));
+  el.addEventListener('input', () => syncField(el));
+}
+for (const review of reviewMap.values()) syncIssueSummary(review.case_id);
+
+function applyFilters() {
+  const overall = document.getElementById('overallFilter').value;
+  const coverage = document.getElementById('coverageFilter').value;
+  const blocking = document.getElementById('blockingFilter').value;
+  for (const row of rows) {
+    const show = (!overall || row.dataset.overall === overall) && (!coverage || row.dataset.coverage === coverage) && (!blocking || row.dataset.blocking === blocking);
+    row.style.display = show ? '' : 'none';
+  }
+}
+
+document.getElementById('overallFilter').addEventListener('change', applyFilters);
+document.getElementById('coverageFilter').addEventListener('change', applyFilters);
+document.getElementById('blockingFilter').addEventListener('change', applyFilters);
+
+function downloadReviews() {
+  const payload = { metadata: reviewState.metadata, reviews: Array.from(reviewMap.values()) };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'human_reviews.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('saveBtn').addEventListener('click', downloadReviews);
+document.getElementById('loadBtn').addEventListener('click', () => document.getElementById('loadInput').click());
+document.getElementById('loadInput').addEventListener('change', async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  const payload = JSON.parse(text);
+  for (const item of (payload.reviews || [])) {
+    const normalized = {
+      ...item,
+      review_decision: item.review_decision === 'approved' ? 'approve' : item.review_decision === 'needs_rewrite' ? 'rewrite' : item.review_decision === 'rejected' ? 'reject' : item.review_decision,
+      block_recommendation_review: item.block_recommendation_review || (item.human_block_decision === 'not_requested' ? 'not_applicable' : item.human_block_decision === 'pending' ? 'pending_review' : item.human_block_decision === 'confirmed' ? 'confirmed' : item.human_block_decision ? 'dismissed' : 'not_applicable')
+    };
+    reviewMap.set(normalized.case_id, normalized);
+    for (const el of document.querySelectorAll(`[data-case-id="${normalized.case_id}"]`)) {
+      const field = el.dataset.field;
+      if (!field) continue;
+      if (field === 'issue_type_option') el.checked = (normalized.issue_types || []).includes(el.dataset.issueCode);
+      else el.value = normalized[field] ?? '';
+    }
+    syncIssueSummary(normalized.case_id);
+  }
+});
+</script>
+</body>
+</html>

@@ -5,11 +5,16 @@ import json
 from pathlib import Path
 
 from .config import load_project_config
-from .pipelines import run_bdd_pipeline, run_checker_pipeline, run_maker_pipeline, run_planner_pipeline
+from .schemas import init_schema_config_dir
+from .pipelines import run_bdd_pipeline, run_checker_pipeline, run_maker_pipeline, run_planner_pipeline, run_rewrite_pipeline
 from .bdd_export import run_bdd_export
 from .reporting import generate_html_report
 from .step_registry import extract_steps_from_normalized_bdd, extract_steps_from_step_defs, compute_step_gaps, compute_step_matches, render_step_visibility_report, StepInventory, MatchReport
 from .signals import compute_governance_signals, write_signals_report
+from .human_review import generate_human_review_page
+from .logging_utils import configure_logging
+from .review_session import ReviewSessionManager, serve_review_session
+from .workflow_session import choose_start_step, discover_workflow_artifacts, start_workflow_session
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -41,7 +46,7 @@ def build_parser() -> argparse.ArgumentParser:
     maker.add_argument("--input", default="artifacts/lme_rules_v2_2/semantic_rules.json")
     maker.add_argument("--output-dir", default="runs/maker")
     maker.add_argument("--limit", type=int, default=None)
-    maker.add_argument("--batch-size", type=int, default=1)
+    maker.add_argument("--batch-size", type=int, default=4)
     maker.add_argument("--resume-from", default=None)
 
     checker = subparsers.add_parser(
@@ -52,7 +57,7 @@ def build_parser() -> argparse.ArgumentParser:
     checker.add_argument("--cases", required=True)
     checker.add_argument("--output-dir", default="runs/checker")
     checker.add_argument("--limit", type=int, default=None)
-    checker.add_argument("--batch-size", type=int, default=1)
+    checker.add_argument("--batch-size", type=int, default=4)
     checker.add_argument("--resume-from", default=None)
 
     bdd = subparsers.add_parser(
@@ -130,6 +135,66 @@ def build_parser() -> argparse.ArgumentParser:
         default="runs/governance_signals.json",
         help="Output path for the signals JSON file.",
     )
+
+    rewrite = subparsers.add_parser(
+        "rewrite",
+        help="Regenerate maker outputs for rules flagged by human review.",
+    )
+    rewrite.add_argument("--rules", default="artifacts/lme_rules_v2_2/semantic_rules.json")
+    rewrite.add_argument("--cases", required=True)
+    rewrite.add_argument("--checker-reviews", required=True)
+    rewrite.add_argument("--human-reviews", required=True)
+    rewrite.add_argument("--output-dir", default="runs/rewrite")
+    rewrite.add_argument("--limit", type=int, default=None)
+    rewrite.add_argument("--batch-size", type=int, default=4)
+
+    human_review = subparsers.add_parser(
+        "human-review",
+        help="Generate a minimal local HTML page for human audit and export of review decisions.",
+    )
+    human_review.add_argument("--maker-cases", required=True)
+    human_review.add_argument("--checker-reviews", required=True)
+    human_review.add_argument("--output-html", required=True)
+
+    review_session = subparsers.add_parser(
+        "review-session",
+        help="Start a local review session server that saves reviews and runs rewrite/checker/report.",
+    )
+    review_session.add_argument("--rules", default="artifacts/lme_rules_v2_2/semantic_rules.json")
+    review_session.add_argument("--cases", required=True)
+    review_session.add_argument("--checker-reviews", required=True)
+    review_session.add_argument("--maker-summary", default=None)
+    review_session.add_argument("--checker-summary", default=None)
+    review_session.add_argument("--coverage-report", default=None)
+    review_session.add_argument("--output-dir", default="runs/review_sessions")
+    review_session.add_argument("--rewrite-batch-size", type=int, default=1)
+    review_session.add_argument("--checker-batch-size", type=int, default=1)
+    review_session.add_argument("--host", default="127.0.0.1")
+    review_session.add_argument("--port", type=int, default=8765)
+
+    workflow_session = subparsers.add_parser(
+        "workflow-session",
+        help="Run the end-to-end workflow and auto-start review-session after first checker output.",
+    )
+    workflow_session.add_argument("--source", default="docs/materials/LME_Matching_Rules_Aug_2022.md")
+    workflow_session.add_argument("--artifacts-dir", default="artifacts/lme_rules_v2_2")
+    workflow_session.add_argument("--maker-cases", default=None)
+    workflow_session.add_argument("--maker-summary", default=None)
+    workflow_session.add_argument("--checker-reviews", default=None)
+    workflow_session.add_argument("--checker-summary", default=None)
+    workflow_session.add_argument("--coverage-report", default=None)
+    workflow_session.add_argument(
+        "--start-step",
+        choices=["extract", "semantic", "maker", "checker", "review"],
+        default=None,
+    )
+    workflow_session.add_argument("--output-dir", default="runs/review_sessions")
+    workflow_session.add_argument("--maker-batch-size", type=int, default=1)
+    workflow_session.add_argument("--checker-batch-size", type=int, default=1)
+    workflow_session.add_argument("--host", default="127.0.0.1")
+    workflow_session.add_argument("--port", type=int, default=8765)
+    workflow_session.add_argument("--write-page-text", action="store_true")
+
     return parser
 
 
@@ -166,6 +231,7 @@ def main() -> int:
         return 0
 
     config = load_project_config(Path(args.config))
+    init_schema_config_dir(config.config_dir)
 
     if args.command == "planner":
         result = run_planner_pipeline(
@@ -239,6 +305,91 @@ def main() -> int:
             "unmatched": report.unmatched,
             "reuse_score_count": len(report.reuse_scores),
         }
+    elif args.command == "rewrite":
+        output_dir = Path(args.output_dir)
+        log_path = configure_logging("rewrite", output_dir / "logs")
+        print(json.dumps({"status": "starting", "log_path": str(log_path)}, ensure_ascii=False, indent=2))
+        result = run_rewrite_pipeline(
+            config=config,
+            semantic_rules_path=Path(args.rules),
+            maker_cases_path=Path(args.cases),
+            checker_reviews_path=Path(args.checker_reviews),
+            human_reviews_path=Path(args.human_reviews),
+            output_dir=output_dir,
+            limit=args.limit,
+            batch_size=args.batch_size,
+        )
+    elif args.command == "human-review":
+        output_html_path = Path(args.output_html)
+        log_path = configure_logging("human-review", output_html_path.resolve().parent / "logs")
+        print(json.dumps({"status": "starting", "log_path": str(log_path)}, ensure_ascii=False, indent=2))
+        result = generate_human_review_page(
+            maker_cases_path=Path(args.maker_cases),
+            checker_reviews_path=Path(args.checker_reviews),
+            output_html_path=output_html_path,
+        )
+    elif args.command == "review-session":
+        output_dir = Path(args.output_dir)
+        log_path = configure_logging("review-session", output_dir / "logs")
+        print(json.dumps({"status": "starting", "log_path": str(log_path)}, ensure_ascii=False, indent=2))
+        manager = ReviewSessionManager(
+            config=config,
+            rules_path=Path(args.rules),
+            maker_cases_path=Path(args.cases),
+            checker_reviews_path=Path(args.checker_reviews),
+            output_root=output_dir,
+            repo_root=Path.cwd(),
+            rewrite_batch_size=args.rewrite_batch_size,
+            checker_batch_size=args.checker_batch_size,
+            initial_maker_summary_path=Path(args.maker_summary) if args.maker_summary else None,
+            initial_checker_summary_path=Path(args.checker_summary) if args.checker_summary else None,
+            initial_coverage_report_path=Path(args.coverage_report) if args.coverage_report else None,
+        )
+        server, url = serve_review_session(manager=manager, host=args.host, port=args.port)
+        print(json.dumps({"session_id": manager.session_id, "url": url, "output_dir": str(manager.session_dir)}, ensure_ascii=False, indent=2))
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            server.shutdown()
+        return 0
+    elif args.command == "workflow-session":
+        output_dir = Path(args.output_dir)
+        log_path = configure_logging("workflow-session", output_dir / "logs")
+        print(json.dumps({"status": "starting", "log_path": str(log_path)}, ensure_ascii=False, indent=2))
+        artifacts = discover_workflow_artifacts(
+            repo_root=Path.cwd(),
+            source_path=Path(args.source),
+            artifacts_dir=Path(args.artifacts_dir),
+            maker_cases_path=Path(args.maker_cases) if args.maker_cases else None,
+            maker_summary_path=Path(args.maker_summary) if args.maker_summary else None,
+            checker_reviews_path=Path(args.checker_reviews) if args.checker_reviews else None,
+            checker_summary_path=Path(args.checker_summary) if args.checker_summary else None,
+            coverage_report_path=Path(args.coverage_report) if args.coverage_report else None,
+        )
+        start_step = choose_start_step(artifacts, args.start_step)
+        print(json.dumps({"status": "running_step", "step": start_step}, ensure_ascii=False, indent=2))
+        result = start_workflow_session(
+            config=config,
+            repo_root=Path.cwd(),
+            artifacts=artifacts,
+            output_root=output_dir,
+            host=args.host,
+            port=args.port,
+            start_step=start_step,
+            maker_batch_size=args.maker_batch_size,
+            checker_batch_size=args.checker_batch_size,
+            write_page_text=args.write_page_text,
+        )
+        if result is None:
+            print("[workflow] Workflow aborted by user.", flush=True)
+            return 1
+        server, url, manager = result
+        print(json.dumps({"session_id": manager.session_id, "start_step": start_step, "url": url, "output_dir": str(manager.session_dir)}, ensure_ascii=False, indent=2))
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            server.shutdown()
+        return 0
 
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0

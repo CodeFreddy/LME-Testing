@@ -1,13 +1,13 @@
 ﻿from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 
 
-# 生成 run 目录使用的 UTC 时间戳，保证 maker/checker 输出按轮次隔离。
+# 生成 run 目录使用本地时间戳，保证 maker/checker 输出按轮次隔离。
 def timestamp_slug() -> str:
-    return datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    return datetime.now().astimezone().strftime("%Y%m%dT%H%M%S%z")
 
 
 # 确保目录存在。

@@ -6,6 +6,7 @@ import re
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
 from .config import ProviderConfig
 
@@ -312,6 +313,18 @@ class StubProvider:
 class OpenAICompatibleProvider:
     def __init__(self, config: ProviderConfig):
         self.config = config
+        self._executor = ThreadPoolExecutor(max_workers=4)
+        self._interrupted = False
+
+    def shutdown(self) -> None:
+        """Shut down the executor without waiting for threads blocked on urlopen.
+
+        Called by workflow_session when a KeyboardInterrupt aborts the pipeline,
+        preventing Python's atexit from joining live-but-stuck threads and raising
+        KeyboardInterrupt inside the atexit handler itself.
+        """
+        self._interrupted = True
+        self._executor.shutdown(wait=False, cancel_futures=True)
 
     # 向兼容 OpenAI Chat Completions 的接口发起调用。
     def generate(self, system_prompt: str, user_prompt: str) -> ModelResponse:
@@ -334,9 +347,24 @@ class OpenAICompatibleProvider:
         url = f"{self.config.base_url}/chat/completions"
         request = urllib.request.Request(url=url, data=body, headers=headers, method="POST")
 
+        # Use a thread so that Ctrl+C (KeyboardInterrupt / SIGINT) can break the
+        # blocking urlopen call on Windows, where socket I/O is not signal-alertable.
+        # The caller (pipelines) catches KeyboardInterrupt and aborts gracefully.
+        timeout = getattr(self.config, "timeout_seconds", 300)
+
+        def _do_request() -> dict:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                return json.loads(response.read().decode("utf-8"))
+
+        future = self._executor.submit(_do_request)
         try:
-            with urllib.request.urlopen(request, timeout=self.config.timeout_seconds) as response:
-                raw = json.loads(response.read().decode("utf-8"))
+            raw = future.result(timeout=timeout + 5)
+        except FuturesTimeoutError:
+            future.cancel()
+            raise ProviderError(f"Provider '{self.config.name}' request timed out after {timeout}s (Ctrl+C to abort).")
+        except (KeyboardInterrupt, InterruptedError):
+            future.cancel()
+            raise KeyboardInterrupt("Request cancelled by user (Ctrl+C)")
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="ignore")
             raise ProviderError(

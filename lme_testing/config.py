@@ -41,8 +41,9 @@ class ProjectConfig:
     providers: dict[str, ProviderConfig]
     roles: dict[str, str]
     output_root: Path
-    maker_defaults: RoleDefaults
-    checker_defaults: RoleDefaults
+    config_dir: Path = Path("config")
+    maker_defaults: RoleDefaults = field(default_factory=RoleDefaults)
+    checker_defaults: RoleDefaults = field(default_factory=RoleDefaults)
 
     def provider_for_role(self, role: str) -> ProviderConfig:
         provider_name = self.roles.get(role)
@@ -144,6 +145,7 @@ def load_project_config(path: Path) -> ProjectConfig:
         providers=providers,
         roles=roles,
         output_root=output_root,
+        config_dir=path.parent,
         maker_defaults=_build_role_defaults(raw.get("maker_defaults")),
         checker_defaults=_build_role_defaults(raw.get("checker_defaults")),
     )

@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-14 12:20:00 UTC`
+- `2026-04-14 16:01:24 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `Restore review session, web portal, and workflow modules; add demo_for_boss.md`
 - `Phase 3 complete: Gates 1-6 all done 鈥?execution readiness, oracles, signals, release governance`
 - `Sync TODO.md with session_handoff: Phase 2 complete, Phase 3 Gate 1 done`
 - `Phase 3 Gate 1: Add multi-tier step matching, reuse scores, and ownership`
 - `docs: mark Phase 2 complete with acceptance evidence`
-- `Fix schema parsing for MiniMax thinking blocks and align checker validation`
 
 ---
 

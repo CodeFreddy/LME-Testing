@@ -37,7 +37,12 @@ def _is_local_link(target: str) -> bool:
 
 def find_absolute_local_markdown_links(repo_root: Path) -> list[str]:
     violations: list[str] = []
+    # Exclude backup/working-copy directories from governance scanning
+    exclude_dirs = {"LME-Testing-master", ".claude", ".git", "__pycache__"}
     for path in sorted(repo_root.rglob("*.md")):
+        # Skip paths inside excluded directories
+        if any(part in exclude_dirs for part in path.relative_to(repo_root).parts):
+            continue
         rel_path = path.relative_to(repo_root).as_posix()
         text = path.read_text(encoding="utf-8")
         for line_number, line in enumerate(text.splitlines(), start=1):

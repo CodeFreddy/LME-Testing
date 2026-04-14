@@ -2,10 +2,34 @@
 
 import json
 import re
+from pathlib import Path
+from typing import Any
 
 
 class SchemaError(ValueError):
     """模型输出不符合预期 JSON 结构时抛出。"""
+
+
+# Module-level config dir for load_issue_type_options
+_config_dir: Path | None = None
+
+
+def init_schema_config_dir(config_dir: Path) -> None:
+    """Set the config directory path for load_issue_type_options."""
+    global _config_dir
+    _config_dir = config_dir
+
+
+def load_issue_type_options() -> list[dict]:
+    """Load human review issue type options from config/human_review_options.json."""
+    if _config_dir is None:
+        config_dir = Path("config")
+    else:
+        config_dir = _config_dir
+    options_path = config_dir / "human_review_options.json"
+    text = options_path.read_text(encoding="utf-8-sig")
+    data = json.loads(text)
+    return data.get("issue_types", [])
 
 
 MAX_QUOTE_LENGTH = 220
@@ -255,6 +279,12 @@ def validate_checker_payload(payload: dict, expected_case_map: dict[str, str] | 
 
     actual_case_ids: list[str] = []
     for item in results:
+        # Accept either case_id or scenario_id (maker uses scenario_id; checker may use either)
+        case_id = item.get("case_id") or item.get("scenario_id")
+        if case_id is None:
+            raise SchemaError("Checker payload item missing both 'case_id' and 'scenario_id'.")
+        item["case_id"] = case_id  # Normalize
+
         required = (
             "case_id",
             "semantic_rule_id",
@@ -303,4 +333,59 @@ def validate_checker_payload(payload: dict, expected_case_map: dict[str, str] | 
             expected_rule_id = expected_case_map[item["case_id"]]
             if item["semantic_rule_id"] != expected_rule_id:
                 raise SchemaError("Checker returned a semantic_rule_id that does not match the input case.")
+    return payload
+
+
+VALID_REVIEW_DECISIONS = {"approve", "rewrite", "reject"}
+VALID_BLOCK_RECOMMENDATION_REVIEWS = {"not_applicable", "pending_review", "confirmed", "dismissed"}
+
+
+def validate_human_review_payload(payload: dict, expected_case_map: dict[str, str] | None = None) -> dict:
+    """Validate a human review payload.
+
+    Args:
+        payload: Dict with a ``reviews`` list of human review decisions.
+        expected_case_map: Optional dict mapping case_id -> semantic_rule_id for validation.
+
+    Returns:
+        The validated payload.
+
+    Raises:
+        SchemaError: If the payload structure is invalid.
+    """
+    reviews = payload.get("reviews")
+    if not isinstance(reviews, list):
+        raise SchemaError("Human review payload must contain a 'reviews' list.")
+
+    seen_case_ids: set[str] = set()
+    for item in reviews:
+        if not isinstance(item, dict):
+            raise SchemaError("Each review item must be an object.")
+        case_id = item.get("case_id")
+        if not isinstance(case_id, str):
+            raise SchemaError("Each review item must include case_id.")
+        if case_id in seen_case_ids:
+            raise SchemaError(f"Duplicate case_id in human review: {case_id}")
+        seen_case_ids.add(case_id)
+
+        decision = item.get("review_decision") or item.get("decision")
+        if decision not in VALID_REVIEW_DECISIONS:
+            raise SchemaError(f"Invalid review decision: {decision}")
+
+        block_rec = item.get("block_recommendation_review")
+        if block_rec is not None and block_rec not in VALID_BLOCK_RECOMMENDATION_REVIEWS:
+            raise SchemaError(f"Invalid block_recommendation_review value: {block_rec}")
+
+        issue_types = item.get("issue_types")
+        if issue_types is not None and not isinstance(issue_types, list):
+            raise SchemaError("issue_types must be a list.")
+
+        comment = item.get("comment")
+        if comment is not None and not isinstance(comment, str):
+            raise SchemaError("comment must be a string.")
+
+        if expected_case_map is not None:
+            if case_id not in expected_case_map:
+                raise SchemaError(f"Human review case_id not in expected case map: {case_id}")
+
     return payload
