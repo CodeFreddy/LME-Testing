@@ -1,0 +1,42 @@
+{
+  "$schema": "./benchmark_thresholds.schema.json",
+  "description": "Governance thresholds for benchmark gates and release promotion in LME-Testing.",
+  "version": "1.0.0",
+  "updated": "2026-04-14",
+  "schema_validation": {
+    "failure_rate": {
+      "threshold": 0.0,
+      "description": "Hard fail if any schema validation fails in governed artifacts",
+      "gate": "blocking"
+    }
+  },
+  "checker_instability": {
+    "threshold": 0.05,
+    "description": "Warn if instability rate exceeds 5% on baseline set",
+    "gate": "warning"
+  },
+  "coverage": {
+    "minimum_coverage_percent": 80.0,
+    "description": "Minimum coverage percent required for release",
+    "gate": "blocking"
+  },
+  "step_binding": {
+    "minimum_binding_rate": 0.3,
+    "description": "Minimum binding rate (exact+parameterized / unique patterns)",
+    "gate": "advisory"
+  },
+  "benchmark_suite": {
+    "required_for_tier1": true,
+    "required_for_tier2": true,
+    "required_for_phase3_promotion": true,
+    "baseline_runs_required": 1,
+    "stub_deterministic": true
+  },
+  "release_gates": {
+    "schema_validation_must_pass": true,
+    "ci_must_pass": true,
+    "smoke_test_must_pass": true,
+    "governance_signals_available": true,
+    "approved_provider_required": true
+  }
+}

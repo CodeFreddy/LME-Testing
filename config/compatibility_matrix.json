@@ -1,0 +1,62 @@
+{
+  "$schema": "./compatibility_matrix.schema.json",
+  "description": "Compatibility matrix mapping provider/model combinations to Phase 3 capabilities and artifact contracts.",
+  "version": "1.0.0",
+  "updated": "2026-04-14",
+  "matrix": [
+    {
+      "provider": "stub",
+      "model": "stub-model",
+      "phases": {
+        "phase1": {"compatible": true, "artifacts_validated": true},
+        "phase2": {"compatible": true, "artifacts_validated": true},
+        "phase3": {"compatible": true, "artifacts_validated": true}
+      },
+      "pipelines": {
+        "maker": true,
+        "checker": true,
+        "planner": true,
+        "bdd": true,
+        "step_registry": true,
+        "executable_scenario": true
+      },
+      "notes": "Deterministic stub. All artifact schemas validated."
+    },
+    {
+      "provider": "minimax",
+      "model": "MiniMax-M2.7",
+      "phases": {
+        "phase1": {"compatible": true, "artifacts_validated": true},
+        "phase2": {"compatible": true, "artifacts_validated": true},
+        "phase3": {"compatible": true, "artifacts_validated": true}
+      },
+      "pipelines": {
+        "maker": true,
+        "checker": true,
+        "planner": true,
+        "bdd": true,
+        "step_registry": true,
+        "executable_scenario": true
+      },
+      "notes": "Primary model. All phases validated end-to-end."
+    },
+    {
+      "provider": "qwen",
+      "model": "qwen3.5-plus",
+      "phases": {
+        "phase1": {"compatible": true, "artifacts_validated": true},
+        "phase2": {"compatible": true, "artifacts_validated": "partial"},
+        "phase3": {"compatible": false, "artifacts_validated": false}
+      },
+      "pipelines": {
+        "maker": true,
+        "checker": false,
+        "planner": "partial",
+        "bdd": false,
+        "step_registry": false,
+        "executable_scenario": false
+      },
+      "notes": "Experimental. Only maker role approved. Not validated for Phase 3."
+    }
+  ]
+}

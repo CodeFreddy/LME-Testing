@@ -25,6 +25,7 @@ from schemas import (
     validate_semantic_rule,
     validate_maker_output,
     validate_checker_output,
+    validate_executable_scenario,
     validate_artifact_list,
     validate_jsonl,
 )

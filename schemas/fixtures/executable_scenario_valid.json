@@ -1,0 +1,157 @@
+[
+  {
+    "executable_scenario_id": "ES-SR-MR-003-01-positive-01",
+    "semantic_rule_ref": "SR-MR-003-01",
+    "scenario_id": "TC-SR-MR-003-01-positive-01",
+    "case_type": "positive",
+    "priority": "high",
+    "feature_title": "Price Validation Failure Obligation",
+    "environment": {
+      "target": "LME-API",
+      "runtime": "staging",
+      "dependencies": [
+        {"name": "LME-Exchange", "version": "2.1", "type": "service"},
+        {"name": "LME-Member-DB", "version": "1.4", "type": "database"}
+      ],
+      "config": {
+        "timeout_ms": 5000,
+        "retry_attempts": 3
+      }
+    },
+    "input_data": {
+      "test_data_ref": "fixtures/td_price_validation.json",
+      "parameters": {
+        "order_type": "standard",
+        "price_band": "mid"
+      },
+      "seed": {
+        "member_id": "M-001",
+        "session_token": "seed-session-abc123"
+      }
+    },
+    "setup_hooks": [
+      {
+        "hook_id": "setup-member-auth",
+        "type": "authentication",
+        "description": "Authenticate test member and obtain session token",
+        "script_ref": "hooks/authenticate_member.rb",
+        "parameters": {"role": "member"},
+        "order": 1
+      },
+      {
+        "hook_id": "seed-order",
+        "type": "seed",
+        "description": "Seed a test order that will fail price validation",
+        "script_ref": "hooks/seed_rejected_order.rb",
+        "parameters": {"rejection_code": "PRICE_BAND_VIOLATION"},
+        "order": 2
+      }
+    ],
+    "assertions": [
+      {
+        "assertion_id": "assert-obligation-fulfilled",
+        "type": "compliance_check",
+        "description": "Obligation to contact exchange is fulfilled after price validation failure",
+        "oracle_ref": "oracles.compliance.obligation_status",
+        "expected_outcome": "fulfilled",
+        "bound_step": "the obligation is fulfilled"
+      },
+      {
+        "assertion_id": "assert-contact-recorded",
+        "type": "field_validation",
+        "description": "Contact action is recorded in the system",
+        "oracle_ref": "oracles.field.not_null",
+        "expected_outcome": "pass",
+        "bound_step": "the action is recorded in the system",
+        "parameters": {"field": "contact_record_id"}
+      },
+      {
+        "assertion_id": "assert-processing-result",
+        "type": "null_check",
+        "description": "Processing result is not null after obligation fulfillment",
+        "oracle_ref": "oracles.field.not_null",
+        "expected_outcome": "pass",
+        "bound_step": "processing result is not null",
+        "parameters": {"field": "processing_result"}
+      }
+    ],
+    "cleanup_hooks": [
+      {
+        "hook_id": "cleanup-member-session",
+        "type": "reset",
+        "description": "Reset member session and clear test data",
+        "script_ref": "hooks/reset_member_session.rb",
+        "parameters": {"member_id": "M-001"},
+        "order": 1
+      }
+    ],
+    "step_bindings": [
+      {
+        "step_type": "given",
+        "step_text": "a member has submitted an order or trade",
+        "step_pattern": "a member has submitted an order or trade",
+        "binding_status": "exact",
+        "step_definition_ref": "step_defs/common_member_steps.rb",
+        "library_name": "lme-common",
+        "confidence": 1.0
+      },
+      {
+        "step_type": "given",
+        "step_text": "the order or trade has failed the price validation check",
+        "step_pattern": "the order or trade has failed the price validation check",
+        "binding_status": "exact",
+        "step_definition_ref": "step_defs/validation_steps.rb",
+        "library_name": "lme-validation",
+        "confidence": 1.0
+      },
+      {
+        "step_type": "when",
+        "step_text": "the member contacts the Exchange to explain the rationale as to the price of the rejected order or trade",
+        "step_pattern": "the member contacts the Exchange to explain the rationale as to the price of the rejected order or trade",
+        "binding_status": "exact",
+        "step_definition_ref": "step_defs/obligation_steps.rb",
+        "library_name": "lme-obligations",
+        "confidence": 1.0
+      },
+      {
+        "step_type": "then",
+        "step_text": "the obligation is fulfilled",
+        "step_pattern": "the obligation is fulfilled",
+        "binding_status": "exact",
+        "step_definition_ref": "step_defs/obligation_steps.rb",
+        "library_name": "lme-obligations",
+        "confidence": 1.0
+      },
+      {
+        "step_type": "then",
+        "step_text": "the action is recorded in the system",
+        "step_pattern": "the action is recorded in the system",
+        "binding_status": "exact",
+        "step_definition_ref": "step_defs/audit_steps.rb",
+        "library_name": "lme-audit",
+        "confidence": 1.0
+      },
+      {
+        "step_type": "then",
+        "step_text": "processing result is not null",
+        "step_pattern": "processing result is not null",
+        "binding_status": "synthetic",
+        "step_definition_ref": null,
+        "library_name": "",
+        "confidence": 1.0
+      }
+    ],
+    "traceability": {
+      "paragraph_ids": ["MR-003-01"],
+      "atomic_rule_ids": ["MR-003-01"],
+      "planner_run_id": "20260413T133435Z",
+      "maker_run_id": "20260413T134259Z",
+      "normalized_bdd_run_id": "20260413T134346Z"
+    },
+    "metadata": {
+      "run_id": "ES-20260414T000000Z",
+      "executable_scenario_version": "1.0.0",
+      "generated_at": "2026-04-14T00:00:00Z"
+    }
+  }
+]

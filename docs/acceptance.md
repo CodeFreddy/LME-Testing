@@ -606,6 +606,8 @@ An `ExecutableScenario` representation includes:
 - sample executable artifacts,
 - contract validation tests.
 
+**Completed:** `schemas/executable_scenario.schema.json` with required fields: executable_scenario_id, semantic_rule_ref, scenario_id, case_type, environment, input_data, step_bindings. Optional: assertions, cleanup_hooks, traceability, metadata. Enum-constrained fields: case_type (8 values), binding_status (6 values), assertion type (8 values), hook type (8 values). Fixtures: `schemas/fixtures/executable_scenario_valid.json` and `schemas/fixtures/executable_scenario_invalid.json`. Unit tests: 14 ExecutableScenarioSchemaTests all passing. [2026/04/14]
+
 ---
 
 ## 3. Deterministic Oracle Gate
@@ -631,6 +633,8 @@ Deterministic checks exist for at least the high-value structured categories, su
 - unit tests,
 - scenario outputs using deterministic checks.
 
+**Completed:** `lme_testing/oracles/` framework with 8 oracle modules (field_validation, state_validation, calculation_validation, deadline_check, event_sequence, pass_fail_accounting, null_check, compliance_check). Auto-registration via `@register_oracle`. `evaluate_assertion()` API for single-assertion evaluation. `OracleResult` with pass/fail/undetermined/error status. Unit tests: 38 oracle tests all passing. [2026/04/14]
+
 ---
 
 ## 4. Governance Signals Gate
@@ -654,6 +658,8 @@ The platform can track and review signals such as:
 - metric definitions,
 - telemetry or reporting docs,
 - monitoring or generation test output.
+
+**Completed:** `lme_testing/signals/` module with `compute_governance_signals()` API. Four signal types: SchemaSignals, CheckerInstabilitySignals, CoverageSignals, StepBindingSignals. CLI `governance-signals` command. Signals computed against actual runs: coverage=100%, step_binding_rate=35.4%, checker_instability=0%, schema_failure=0%. Unit tests: 9 signals tests all passing. [2026/04/14]
 
 ---
 
@@ -680,6 +686,8 @@ The repo or release process defines:
 - compatibility records,
 - migration templates.
 
+**Completed:** `config/approved_providers.json` (Tier 1/2/3 with MiniMax-M2.7 and stub), `config/compatibility_matrix.json` (provider × phase/pipeline compatibility), `config/benchmark_thresholds.json` (numeric gates for schema/coverage/instability), `docs/releases/RELEASES.md` (release records), `scripts/check_release_governance.py` (5 automated checks), CI job `Release Governance`. All governance checks pass. [2026/04/14]
+
 ---
 
 ## 6. Phase 3 Exit Criteria
@@ -693,6 +701,19 @@ Phase 3 is accepted only if:
 - provider rollout requires benchmark pass and rollback path,
 - governance signals are available for release review,
 - the quality gate has demonstrated that it can block promotion when thresholds fail.
+
+**Phase 3 Exit — COMPLETED 2026/04/14**
+
+All 6 Phase 3 acceptance gates passed:
+
+1. **Step Definition Integration Gate** ✅ — `lme_testing/step_registry.py`: exact, parameterized, candidate 3-tier matching; reuse scores; ownership mapping.
+2. **Execution Readiness Gate** ✅ — `schemas/executable_scenario.schema.json` + `validate_executable_scenario()`; 14 schema tests passing.
+3. **Deterministic Oracle Gate** ✅ — `lme_testing/oracles/`: 8 oracle modules (field_validation, state_validation, calculation_validation, deadline_check, event_sequence, pass_fail_accounting, null_check, compliance_check); 38 oracle tests passing.
+4. **Governance Signals Gate** ✅ — `lme_testing/signals/`: 4 signal types computed from run artifacts; CLI + CI wired; 9 signal tests passing.
+5. **Release Governance Gate** ✅ — `config/approved_providers.json`, `config/compatibility_matrix.json`, `config/benchmark_thresholds.json`, `docs/releases/RELEASES.md`, `scripts/check_release_governance.py`; CI `Release Governance` job wired.
+6. **Phase 3 Exit** ✅ — All gates 1-5 verified.
+
+**Evidence**: 73 unit tests passing; all 4 governance checks pass; coverage=100%, step_binding_rate=35.4%, checker_instability=0%, schema_failure=0%.
 
 ---
 

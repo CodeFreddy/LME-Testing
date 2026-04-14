@@ -1,0 +1,275 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "executable_scenario.schema.json",
+  "title": "Executable Scenario",
+  "description": "Execution-ready scenario that extends normalized BDD with environment, input data, hooks, assertions, and step definition bindings. Produced by the execution readiness stage in Phase 3 Gate 2.",
+  "type": "object",
+  "required": ["executable_scenario_id", "semantic_rule_ref", "scenario_id", "case_type", "environment", "input_data", "step_bindings"],
+  "additionalProperties": true,
+  "properties": {
+    "executable_scenario_id": {
+      "type": "string",
+      "description": "Unique identifier for this executable scenario.",
+      "pattern": "^ES-"
+    },
+    "semantic_rule_ref": {
+      "type": "string",
+      "description": "Source semantic rule ID this executable scenario is derived from."
+    },
+    "scenario_id": {
+      "type": "string",
+      "description": "Source normalized BDD scenario ID this executable scenario is bound to.",
+      "pattern": "^TC-"
+    },
+    "case_type": {
+      "type": "string",
+      "description": "Type of test case determining coverage requirements.",
+      "enum": ["positive", "negative", "boundary", "exception", "state_transition", "data_validation"]
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["high", "medium", "low"]
+    },
+    "feature_title": {
+      "type": "string",
+      "description": "Feature title from the source normalized BDD."
+    },
+    "environment": {
+      "type": "object",
+      "description": "Environment requirements for execution.",
+      "additionalProperties": true,
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Execution target identifier (e.g., 'LME-API', 'LME-PostTrade')."
+        },
+        "runtime": {
+          "type": "string",
+          "description": "Runtime environment (e.g., 'staging', 'production', 'mock')."
+        },
+        "dependencies": {
+          "type": "array",
+          "description": "Required external dependencies or services.",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": {"type": "string"},
+              "version": {"type": "string"},
+              "type": {"type": "string"}
+            }
+          }
+        },
+        "config": {
+          "type": "object",
+          "description": "Environment-specific configuration key-value pairs.",
+          "additionalProperties": true
+        }
+      }
+    },
+    "input_data": {
+      "type": "object",
+      "description": "Input data requirements for this scenario.",
+      "additionalProperties": true,
+      "properties": {
+        "test_data_ref": {
+          "type": "string",
+          "description": "Reference to a test data fixture or seed file."
+        },
+        "parameters": {
+          "type": "object",
+          "description": "Scenario-specific input parameters.",
+          "additionalProperties": true
+        },
+        "seed": {
+          "type": "object",
+          "description": "Initial state or seed data for this scenario.",
+          "additionalProperties": true
+        }
+      }
+    },
+    "setup_hooks": {
+      "type": "array",
+      "description": "Setup hooks to run before scenario execution.",
+      "items": {
+        "type": "object",
+        "required": ["hook_id", "type", "description"],
+        "properties": {
+          "hook_id": {
+            "type": "string",
+            "description": "Unique identifier for this hook."
+          },
+          "type": {
+            "type": "string",
+            "enum": ["setup", "seed", "authentication", "provisioning"]
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of what this hook does."
+          },
+          "script_ref": {
+            "type": "string",
+            "description": "Reference to an external script or step definition to execute."
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Hook-specific parameters.",
+            "additionalProperties": true
+          },
+          "order": {
+            "type": "integer",
+            "description": "Execution order for this hook (lower runs first)."
+          }
+        }
+      }
+    },
+    "assertions": {
+      "type": "array",
+      "description": "Deterministic assertion references for this scenario.",
+      "items": {
+        "type": "object",
+        "required": ["assertion_id", "type", "description"],
+        "properties": {
+          "assertion_id": {
+            "type": "string",
+            "description": "Unique identifier for this assertion."
+          },
+          "type": {
+            "type": "string",
+            "enum": ["field_validation", "state_validation", "calculation_validation", "deadline_check", "event_sequence", "pass_fail_accounting", "null_check", "compliance_check"]
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of what this assertion validates."
+          },
+          "oracle_ref": {
+            "type": "string",
+            "description": "Reference to the deterministic oracle module that evaluates this assertion."
+          },
+          "expected_outcome": {
+            "type": "string",
+            "description": "Expected outcome of this assertion (e.g., 'pass', 'fail', 'non_null')."
+          },
+          "bound_step": {
+            "type": "string",
+            "description": "The BDD step text this assertion is bound to."
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Assertion-specific parameters.",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "cleanup_hooks": {
+      "type": "array",
+      "description": "Cleanup hooks to run after scenario execution.",
+      "items": {
+        "type": "object",
+        "required": ["hook_id", "type", "description"],
+        "properties": {
+          "hook_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["cleanup", "reset", "teardown", "rollback"]
+          },
+          "description": {
+            "type": "string"
+          },
+          "script_ref": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "order": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "step_bindings": {
+      "type": "array",
+      "description": "Bindings between BDD steps and step definitions.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["step_type", "step_text", "step_pattern", "binding_status"],
+        "properties": {
+          "step_type": {
+            "type": "string",
+            "enum": ["given", "when", "then"]
+          },
+          "step_text": {
+            "type": "string",
+            "description": "Original BDD step text."
+          },
+          "step_pattern": {
+            "type": "string",
+            "description": "Normalized step pattern from BDD."
+          },
+          "binding_status": {
+            "type": "string",
+            "enum": ["exact", "parameterized", "candidate", "unmatched", "synthetic"],
+            "description": "How this step was bound to a step definition."
+          },
+          "step_definition_ref": {
+            "type": ["string", "null"],
+            "description": "Reference to the bound step definition (file path or identifier). Null for synthetic steps."
+          },
+          "library_name": {
+            "type": "string",
+            "description": "Owner library name for this step definition."
+          },
+          "capture_group_mapping": {
+            "type": "object",
+            "description": "Mapping from BDD capture groups to step definition groups.",
+            "additionalProperties": true
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Binding confidence score."
+          }
+        }
+      }
+    },
+    "traceability": {
+      "type": "object",
+      "description": "Traceability metadata linking back to upstream artifacts.",
+      "properties": {
+        "paragraph_ids": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "atomic_rule_ids": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "planner_run_id": {
+          "type": "string"
+        },
+        "maker_run_id": {
+          "type": "string"
+        },
+        "normalized_bdd_run_id": {
+          "type": "string"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Run traceability metadata.",
+      "properties": {
+        "run_id": {"type": "string"},
+        "executable_scenario_version": {"type": "string"},
+        "generated_at": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

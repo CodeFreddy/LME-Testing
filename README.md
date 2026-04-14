@@ -53,7 +53,7 @@
 - `main.py`
   - 项目命令行入口
 - `lme_testing/cli.py`
-  - 注册 `maker`、`checker`、`report` 三个命令
+  - 注册 `maker`、`checker`、`report`、`planner`、`bdd`、`step-registry`、`governance-signals` 命令
 
 ### 核心实现
 
@@ -129,7 +129,7 @@ HTML 报表
   -> 再决定是否继续收紧 prompt、schema 或 coverage 规则
 ```
 
-## 三个最重要的命令
+## 四个最重要的命令
 
 ### 1. maker
 
@@ -167,6 +167,15 @@ HTML 报表
 - `maker_readable.html`
 - `checker_readable.html`
 
+### 4. governance-signals
+
+作用：计算平台治理信号，供发布审查参考。
+
+典型输出：
+
+- `runs/governance_signals.json`
+- schema failure rate、checker instability rate、coverage trend、step binding rate
+
 ## 推荐上手顺序
 
 第一次接手，不要直接跑全量规则。建议按下面顺序：
@@ -184,6 +193,7 @@ HTML 报表
 ```powershell
 python scripts/check_docs_governance.py
 python scripts/check_artifact_governance.py
+python scripts/check_release_governance.py
 ```
 
 如果本机 `python` 不在 `PATH`，请改用你环境里的 Python 可执行路径运行同样命令。
@@ -224,3 +234,98 @@ powershell -ExecutionPolicy Bypass -File scripts/setup_git_hooks.ps1
 - 详细调用方式与参数说明： [docs/maker_checker_usage.md](docs/maker_checker_usage.md)
 - 规则模型设计： [docs/rule_model_and_parsing_design.md](docs/rule_model_and_parsing_design.md)
 - 规则抽取脚本说明： [docs/rule_extraction_script_guide.md](docs/rule_extraction_script_guide.md)
+
+## Phase 3 新增内容（2026-04-14 完成）
+
+### 新增 CLI 命令
+
+```powershell
+# governance-signals: 计算治理信号（Phase 3 Gate 4）
+python main.py governance-signals --repo-root . --output runs/governance_signals.json
+
+# step-registry: BDD step 与步骤定义库的匹配分析（Phase 3 Gate 1）
+python main.py step-registry --bdd-cases runs/acceptance_e2e/20260413T134346Z/normalized_bdd.jsonl --output-dir runs/step-registry
+```
+
+### 新增治理检查
+
+```powershell
+# Release Governance 检查（Phase 3 Gate 5）
+python scripts/check_release_governance.py
+```
+
+### 可执行场景模式（Phase 3 Gate 2）
+
+`schemas/executable_scenario.schema.json` 在 BDD 场景基础上扩展了：
+
+- 环境依赖（environment）
+- 输入数据（input_data）
+- Setup / Cleanup Hooks
+- 确定性断言（assertions）
+- Step 定义绑定（step_bindings）
+
+支持断言类型：field_validation、state_validation、calculation_validation、deadline_check、event_sequence、pass_fail_accounting、null_check、compliance_check。
+
+### 确定性 Oracle 框架（Phase 3 Gate 3）
+
+`lme_testing/oracles/` 下有 8 个确定性 Oracle 模块：
+
+| Oracle | 作用 |
+|--------|------|
+| field_validation | 字段类型、枚举、范围、格式校验 |
+| state_validation | 系统状态期望值、允许/禁止状态 |
+| calculation_validation | 数值计算、公式误差校验 |
+| deadline_check | 时间窗口、截止时间校验 |
+| event_sequence | 事件顺序校验 |
+| pass_fail_accounting | 通过/失败计数门槛 |
+| null_check | 空值/非空断言 |
+| compliance_check | 义务/禁止/权限合规状态 |
+
+用法示例：
+
+```python
+from lme_testing.oracles import evaluate_assertion
+
+result = evaluate_assertion(
+    {'assertion_id': 't1', 'type': 'null_check',
+     'parameters': {'field': 'result', 'expected': 'non_null'}},
+    {'input_data': {'result': 'ok'}}, None, {}
+)
+print(result.status)  # pass / fail / unable_to_determine / error
+```
+
+### 治理信号（Phase 3 Gate 4）
+
+`lme_testing/signals/` 计算四类平台运营信号：
+
+- **Schema 信号**：schema 校验失败率
+- **Checker 不稳定信号**：重复运行结果差异率
+- **覆盖率信号**：最新覆盖率及趋势（improving/declining/stable）
+- **Step 绑定信号**：step 绑定成功率（exact + parameterized / unique patterns）
+
+当前运行数据：
+
+```
+schema_failure_rate:    0.0%
+checker_instability:   0.0%
+coverage_percent:       100.0%
+step_binding_rate:     35.4%
+coverage_trend:         improving
+```
+
+### Release 治理（Phase 3 Gate 5）
+
+`config/` 目录下新增三个配置文件：
+
+- `approved_providers.json` — Tier-1/2/3 模型分级，当前：stub（Tier 1）、MiniMax-M2.7（Tier 1）、qwen3.5-plus（Tier 2 实验性）
+- `compatibility_matrix.json` — 模型 × 阶段 × Pipeline 兼容性矩阵
+- `benchmark_thresholds.json` — 数值化治理门槛（schema failure = 0 阻断、coverage ≥ 80% 阻断、instability ≤ 5% 警告）
+
+`docs/releases/RELEASES.md` 记录每个正式版本的完成状态和 Benchmark 证据。
+
+CI 新增 `Release Governance` job，每次 push/PR 均检查：
+- approved_providers.json 格式和字段
+- compatibility_matrix.json 完整性
+- benchmark_thresholds.json 数值合理性
+- docs/releases/ 有至少一个版本记录
+- governance_signals.json 已生成且未超阈值

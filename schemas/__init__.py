@@ -45,6 +45,7 @@ ATOMIC_RULE_SCHEMA = _load_schema("atomic_rule")
 SEMANTIC_RULE_SCHEMA = _load_schema("semantic_rule")
 MAKER_OUTPUT_SCHEMA = _load_schema("maker_output")
 CHECKER_OUTPUT_SCHEMA = _load_schema("checker_output")
+EXECUTABLE_SCENARIO_SCHEMA = _load_schema("executable_scenario")
 
 
 def validate_atomic_rule(artifact: dict) -> list[str]:
@@ -80,6 +81,15 @@ def validate_checker_output(artifact: dict) -> list[str]:
     Returns a list of error messages. Empty list means valid.
     """
     validator = Draft7Validator(CHECKER_OUTPUT_SCHEMA)
+    return _format_errors(validator.iter_errors(artifact))
+
+
+def validate_executable_scenario(artifact: dict) -> list[str]:
+    """Validate an executable_scenario artifact against its schema.
+
+    Returns a list of error messages. Empty list means valid.
+    """
+    validator = Draft7Validator(EXECUTABLE_SCENARIO_SCHEMA)
     return _format_errors(validator.iter_errors(artifact))
 
 
@@ -211,6 +221,9 @@ def _main() -> int:
     checker_parser = subparsers.add_parser("checker", help="Validate checker_reviews.jsonl")
     checker_parser.add_argument("file", help="Path to checker_reviews.jsonl")
 
+    executable_parser = subparsers.add_parser("executable-scenario", help="Validate executable_scenario.json or JSONL")
+    executable_parser.add_argument("file", help="Path to executable_scenario artifact")
+
     args = parser.parse_args()
     path = Path(args.file)
 
@@ -226,6 +239,8 @@ def _main() -> int:
         result = validate_jsonl(path, validate_maker_output)
     elif args.command == "checker":
         result = validate_jsonl(path, validate_checker_output)
+    elif args.command == "executable-scenario":
+        result = validate_artifact_list(path, validate_executable_scenario) if path.suffix == ".json" else validate_jsonl(path, validate_executable_scenario)
     else:
         return 1
 

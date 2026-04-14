@@ -90,3 +90,16 @@ jobs:
 
       - name: Run end-to-end smoke
         run: python .github/workflows/smoke_test.py
+
+  release-governance:
+    name: Release Governance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run release governance checks
+        run: python scripts/check_release_governance.py

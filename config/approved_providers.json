@@ -1,0 +1,47 @@
+{
+  "$schema": "./approved_providers.schema.json",
+  "description": "Tier-1 approved providers and models for LME-Testing production use.",
+  "version": "1.0.0",
+  "updated": "2026-04-14",
+  "providers": [
+    {
+      "provider_name": "stub",
+      "type": "stub",
+      "model": "stub-model",
+      "tier": 1,
+      "status": "approved",
+      "approved_for_roles": ["maker", "checker", "planner"],
+      "notes": "Deterministic stub for CI, testing, and smoke tests. No real API calls.",
+      "benchmark_status": "pass",
+      "benchmark_date": "2026-04-13",
+      "rollback_available": true
+    },
+    {
+      "provider_name": "minimax",
+      "type": "openai_compatible",
+      "model": "MiniMax-M2.7",
+      "base_url": "https://api.minimax.chat/v1",
+      "tier": 1,
+      "status": "approved",
+      "approved_for_roles": ["maker", "checker", "planner"],
+      "notes": "Primary production model. Passed Phase 1-3 acceptance gates.",
+      "benchmark_status": "pass",
+      "benchmark_date": "2026-04-13",
+      "rollback_available": true
+    },
+    {
+      "provider_name": "qwen",
+      "type": "openai_compatible",
+      "model": "qwen3.5-plus",
+      "base_url": "https://coding.dashscope.aliyuncs.com/v1",
+      "tier": 2,
+      "status": "experimental",
+      "approved_for_roles": ["maker"],
+      "notes": "Experimental for maker role. Requires benchmark before Tier-1 promotion.",
+      "benchmark_status": "partial",
+      "benchmark_date": "2026-04-13",
+      "rollback_available": true
+    }
+  ],
+  "disallowed": []
+}

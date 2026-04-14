@@ -9,6 +9,7 @@ from .pipelines import run_bdd_pipeline, run_checker_pipeline, run_maker_pipelin
 from .bdd_export import run_bdd_export
 from .reporting import generate_html_report
 from .step_registry import extract_steps_from_normalized_bdd, extract_steps_from_step_defs, compute_step_gaps, compute_step_matches, render_step_visibility_report, StepInventory, MatchReport
+from .signals import compute_governance_signals, write_signals_report
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -114,6 +115,21 @@ def build_parser() -> argparse.ArgumentParser:
     report.add_argument("--checker-summary", required=True)
     report.add_argument("--coverage-report", required=True)
     report.add_argument("--output-html", required=True)
+
+    signals = subparsers.add_parser(
+        "governance-signals",
+        help="Compute governance signals from run artifacts (Phase 3 Gate 4).",
+    )
+    signals.add_argument(
+        "--repo-root",
+        default=".",
+        help="Path to the repository root (default: current directory).",
+    )
+    signals.add_argument(
+        "--output",
+        default="runs/governance_signals.json",
+        help="Output path for the signals JSON file.",
+    )
     return parser
 
 
@@ -130,6 +146,22 @@ def main() -> int:
             coverage_report_path=Path(args.coverage_report),
             output_html_path=Path(args.output_html),
         )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+
+    if args.command == "governance-signals":
+        repo_root = Path(args.repo_root).resolve()
+        output_path = Path(args.output)
+        signals = compute_governance_signals(repo_root)
+        write_signals_report(signals, output_path)
+        result = {
+            "output_path": str(output_path),
+            "schema_failure_rate": signals.schema_signals.failure_rate,
+            "checker_instability_rate": signals.checker_instability_signals.instability_rate,
+            "coverage_percent": signals.coverage_signals.latest_coverage_percent,
+            "step_binding_rate": signals.step_binding_signals.binding_rate,
+            "coverage_trend": signals.coverage_signals.coverage_trend,
+        }
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
 

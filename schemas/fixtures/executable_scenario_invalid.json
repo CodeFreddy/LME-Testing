@@ -1,0 +1,20 @@
+[
+  {
+    "executable_scenario_id": "ES-SR-MR-003-01-positive-01",
+    "case_type": "positive",
+    "priority": "high",
+    "environment": {
+      "target": "LME-API"
+    },
+    "input_data": {
+      "test_data_ref": "fixtures/td_price_validation.json"
+    },
+    "step_bindings": [
+      {
+        "step_type": "given",
+        "step_text": "a member has submitted an order or trade",
+        "binding_status": "exact"
+      }
+    ]
+  }
+]
