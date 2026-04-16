@@ -32,6 +32,7 @@ from .bdd_export import (
 from .providers import build_provider
 from .schemas import (
     CASE_TYPES,
+    SchemaError,
     parse_json_object,
     validate_checker_payload,
     validate_maker_payload,
@@ -202,17 +203,26 @@ def run_maker_pipeline(
     if limit is not None:
         semantic_rules = semantic_rules[:limit]
 
+    # Build completed set from resume file
     completed_ids: set[str] = set()
     if resume_from and resume_from.exists():
         for record in load_jsonl(resume_from):
             semantic_rule_id = record.get("semantic_rule_id")
             if semantic_rule_id:
                 completed_ids.add(semantic_rule_id)
-        semantic_rules = [
-            rule
-            for rule in semantic_rules
-            if rule.get("semantic_rule_id") not in completed_ids
-        ]
+
+    # Deduplicate by semantic_rule_id (artifacts may contain duplicate entries)
+    seen_ids: set[str] = set()
+    unique_rules: list[dict] = []
+    for rule in semantic_rules:
+        sid = rule.get("semantic_rule_id")
+        if sid and sid not in seen_ids:
+            seen_ids.add(sid)
+            unique_rules.append(rule)
+    semantic_rules = [
+        rule for rule in unique_rules
+        if rule.get("semantic_rule_id") not in completed_ids
+    ]
 
     provider_cfg = config.provider_for_role("maker")
     provider = build_provider(provider_cfg)
@@ -235,25 +245,42 @@ def run_maker_pipeline(
         batch_rule_ids = [item["semantic_rule_id"] for item in batch]
         print(f"[maker] Batch {batch_num}/{total_batch_count}: calling API for rules {batch_rule_ids}...", flush=True)
         augmented_batch = [_augment_rule_with_case_requirements(item) for item in batch]
-        response = provider.generate(
-            system_prompt=MAKER_SYSTEM_PROMPT,
-            user_prompt=build_maker_user_prompt(augmented_batch),
-        )
-        raw_record = {
-            "run_id": run_id,
-            "batch_semantic_rule_ids": batch_rule_ids,
-            "response": response.raw_response,
-        }
-        append_jsonl(raw_path, [raw_record])
 
-        payload = validate_maker_payload(
-            parse_json_object(response.content),
-            expected_rule_ids=batch_rule_ids,
-            expected_required_case_types={
-                item["semantic_rule_id"]: _required_case_types(item)["required"]
+        # Retry once on JSON parse/validation errors
+        for attempt in range(2):
+            response = provider.generate(
+                system_prompt=MAKER_SYSTEM_PROMPT,
+                user_prompt=build_maker_user_prompt(augmented_batch),
+            )
+            raw_record = {
+                "run_id": run_id,
+                "batch_semantic_rule_ids": batch_rule_ids,
+                "response": response.raw_response,
+            }
+
+            reference_only_rules = {
+                item["semantic_rule_id"]
                 for item in batch
-            },
-        )
+                if item.get("classification", {}).get("rule_type") == "reference_only"
+            }
+            try:
+                payload = validate_maker_payload(
+                    parse_json_object(response.content),
+                    expected_rule_ids=batch_rule_ids,
+                    expected_required_case_types={
+                        item["semantic_rule_id"]: _required_case_types(item)["required"]
+                        for item in batch
+                    },
+                    reference_only_rules=reference_only_rules,
+                )
+                break  # Success
+            except SchemaError as exc:
+                if attempt == 0 and "not valid JSON" in str(exc):
+                    print(f"[maker] Batch {batch_num}: JSON error, retrying once...", flush=True)
+                    continue  # Retry
+                raise
+
+        append_jsonl(raw_path, [raw_record])
         source_by_id = {item["semantic_rule_id"]: item for item in batch}
         records = [
             _maker_record_from_result(item, run_id=run_id, source_rule=source_by_id.get(item["semantic_rule_id"]))

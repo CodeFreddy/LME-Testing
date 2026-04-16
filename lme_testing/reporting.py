@@ -83,20 +83,23 @@ def _evidence_html(items: list[dict]) -> str:
     return ''.join(rendered)
 
 
-def _findings_html(findings: list[dict]) -> str:
+def _findings_html(findings: list) -> str:
     if not findings:
         return '&nbsp;'
     blocks = []
     for item in findings:
-        blocks.append(
-            '<div class="detail">'
-            f'<div class="kv"><span class="label">Severity</span>: {html.escape(str(item.get("severity", "")))}</div>'
-            f'<div class="kv"><span class="label">Category</span>: {html.escape(str(item.get("category", "")))}</div>'
-            f'<div class="kv"><span class="label">Summary</span>: {html.escape(str(item.get("summary", "")))}</div>'
-            f'<div class="kv"><span class="label">Details</span>: {html.escape(str(item.get("details", "")))}</div>'
-            f'<div class="kv"><span class="label">Suggested Fix</span>: {html.escape(str(item.get("suggested_fix", "")))}</div>'
-            '</div>'
-        )
+        if isinstance(item, str):
+            blocks.append(f'<div class="detail"><div class="kv">{html.escape(item)}</div></div>')
+        else:
+            blocks.append(
+                '<div class="detail">'
+                f'<div class="kv"><span class="label">Severity</span>: {html.escape(str(item.get("severity", "")))}</div>'
+                f'<div class="kv"><span class="label">Category</span>: {html.escape(str(item.get("category", "")))}</div>'
+                f'<div class="kv"><span class="label">Summary</span>: {html.escape(str(item.get("summary", "")))}</div>'
+                f'<div class="kv"><span class="label">Details</span>: {html.escape(str(item.get("details", "")))}</div>'
+                f'<div class="kv"><span class="label">Suggested Fix</span>: {html.escape(str(item.get("suggested_fix", "")))}</div>'
+                '</div>'
+            )
     return ''.join(blocks)
 
 

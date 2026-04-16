@@ -95,7 +95,7 @@ def _render_case_detail(scenario: dict, checker: dict) -> str:
         for item in scenario.get("evidence", [])
     ) or "&nbsp;"
     findings = "".join(
-        f'<div><strong>{html.escape(str(item.get("category", "")))}</strong>: {html.escape(str(item.get("summary", "")))}</div>'
+        html.escape(str(item)) if isinstance(item, str) else f'<div><strong>{html.escape(str(item.get("category", "")))}</strong>: {html.escape(str(item.get("summary", "")))}</div>'
         for item in checker.get("findings", [])
     ) or "&nbsp;"
     return (

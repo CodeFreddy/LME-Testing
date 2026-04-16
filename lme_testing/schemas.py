@@ -73,6 +73,7 @@ def validate_maker_payload(
     payload: dict,
     expected_rule_ids: list[str] | None = None,
     expected_required_case_types: dict[str, list[str]] | None = None,
+    reference_only_rules: set[str] | None = None,
 ) -> dict:
     results = payload.get("results")
     if not isinstance(results, list):
@@ -135,11 +136,15 @@ def validate_maker_payload(
                 if "\n" in quote:
                     raise SchemaError("Evidence quote must be a single short line.")
                 evidence_rule_ids.add(atomic_rule_id)
-        if not set(requirement_ids).issubset(evidence_rule_ids):
+        # Only validate evidence coverage when there are scenarios (reference-only rules with
+        # empty required_case_types may legitimately return no scenarios)
+        if scenarios and not set(requirement_ids).issubset(evidence_rule_ids):
             raise SchemaError(
                 f"Maker result {semantic_rule_id} does not provide evidence for every requirement_id."
             )
-        if expected_required_case_types is not None:
+        if expected_required_case_types is not None and not (
+                reference_only_rules and semantic_rule_id in reference_only_rules
+            ):
             required_case_types = expected_required_case_types.get(semantic_rule_id, [])
             if required_case_types:
                 if set(scenario_case_types) != set(required_case_types):
@@ -150,7 +155,7 @@ def validate_maker_payload(
                     raise SchemaError(
                         f"Maker result {semantic_rule_id} must return exactly one scenario per required case type."
                     )
-            elif len(scenario_case_types) != 1:
+            elif not scenarios and len(scenario_case_types) != 1:
                 raise SchemaError(
                     f"Maker result {semantic_rule_id} with no required_case_types must return exactly one conservative scenario."
                 )
