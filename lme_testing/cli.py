@@ -171,6 +171,8 @@ def build_parser() -> argparse.ArgumentParser:
     review_session.add_argument("--checker-batch-size", type=int, default=1)
     review_session.add_argument("--host", default="127.0.0.1")
     review_session.add_argument("--port", type=int, default=8765)
+    review_session.add_argument("--normalized-bdd", default=None, help="Path to normalized_bdd.jsonl to link into the session.")
+    review_session.add_argument("--step-registry", default=None, help="Path to step_visibility.json from step-registry pipeline.")
 
     workflow_session = subparsers.add_parser(
         "workflow-session",
@@ -344,6 +346,8 @@ def main() -> int:
             initial_maker_summary_path=Path(args.maker_summary) if args.maker_summary else None,
             initial_checker_summary_path=Path(args.checker_summary) if args.checker_summary else None,
             initial_coverage_report_path=Path(args.coverage_report) if args.coverage_report else None,
+            normalized_bdd_path=Path(args.normalized_bdd) if args.normalized_bdd else None,
+            step_registry_path=Path(args.step_registry) if args.step_registry else None,
         )
         server, url = serve_review_session(manager=manager, host=args.host, port=args.port)
         print(json.dumps({"session_id": manager.session_id, "url": url, "output_dir": str(manager.session_dir)}, ensure_ascii=False, indent=2))

@@ -49,6 +49,8 @@ class ReviewSessionManager:
         initial_maker_summary_path: Path | None = None,
         initial_checker_summary_path: Path | None = None,
         initial_coverage_report_path: Path | None = None,
+        normalized_bdd_path: Path | None = None,
+        step_registry_path: Path | None = None,
     ) -> None:
         self.config = config
         self.rules_path = rules_path.resolve()
@@ -71,8 +73,15 @@ class ReviewSessionManager:
             "current_maker_cases_path": str(Path(maker_cases_path).resolve()),
             "current_checker_reviews_path": str(Path(checker_reviews_path).resolve()),
             "current_report_path": None,
+            "normalized_bdd_path": str(normalized_bdd_path.resolve()) if normalized_bdd_path else None,
+            "step_registry_path": str(step_registry_path.resolve()) if step_registry_path else None,
             "history": [],
             "iterations": {},
+            "stage_gates": {
+                "review_decided": False,
+                "bdd_edited": False,
+                "scripts_viewed": False,
+            },
         }
         self._ensure_iteration_dirs(0)
         self._state["iterations"]["0"] = {
@@ -85,6 +94,13 @@ class ReviewSessionManager:
             "checker_summary_path": str(initial_checker_summary_path.resolve()) if initial_checker_summary_path else None,
             "maker_summary_path": str(initial_maker_summary_path.resolve()) if initial_maker_summary_path else None,
             "coverage_report_path": str(initial_coverage_report_path.resolve()) if initial_coverage_report_path else None,
+            "normalized_bdd_path": str(normalized_bdd_path.resolve()) if normalized_bdd_path else None,
+            "step_registry_path": str(step_registry_path.resolve()) if step_registry_path else None,
+            "stage_gates": {
+                "review_decided": False,
+                "bdd_edited": False,
+                "scripts_viewed": False,
+            },
         }
         if initial_maker_summary_path and initial_checker_summary_path and initial_coverage_report_path:
             initial_report = self._render_iteration_report(0)
@@ -135,14 +151,204 @@ class ReviewSessionManager:
         write_json(snapshot_path, normalized)
         write_json(latest_path, normalized)
         state["iterations"][str(iteration)]["human_reviews_latest_path"] = str(latest_path)
+        reviews = normalized.get("reviews", [])
+        any_decided = any(r.get("review_decision", "pending") != "pending" for r in reviews)
+        if any_decided:
+            if "stage_gates" not in state:
+                state["stage_gates"] = {"review_decided": False, "bdd_edited": False, "scripts_viewed": False}
+            state["stage_gates"]["review_decided"] = True
+            state["iterations"][str(iteration)]["stage_gates"]["review_decided"] = True
         self._save_manifest(state)
-        logger.info("Saved human reviews. session_id=%s iteration=%s saved=%s latest=%s review_count=%s", state["session_id"], iteration, snapshot_path, latest_path, len(normalized.get("reviews", [])))
+        logger.info("Saved human reviews. session_id=%s iteration=%s saved=%s latest=%s review_count=%s", state["session_id"], iteration, snapshot_path, latest_path, len(reviews))
         return {
             "iteration": iteration,
             "saved_review_path": str(snapshot_path),
             "latest_review_path": str(latest_path),
-            "review_count": len(normalized.get("reviews", [])),
+            "review_count": len(reviews),
+            "review_decided": any_decided,
         }
+
+    def bdd_payload(self) -> dict[str, Any]:
+        state = self._load_state()
+        iteration = int(state["current_iteration"])
+        normalized_bdd_path = state.get("normalized_bdd_path") or state["iterations"][str(iteration)].get("normalized_bdd_path")
+        if not normalized_bdd_path:
+            return {"bdd_path": None, "has_bdd": False, "scenarios_by_rule": [], "total_count": 0}
+        normalized_bdd_path = Path(normalized_bdd_path)
+        if not normalized_bdd_path.exists():
+            return {"bdd_path": str(normalized_bdd_path), "has_bdd": False, "scenarios_by_rule": [], "total_count": 0}
+
+        bdd_records = load_jsonl(normalized_bdd_path)
+        latest_reviews_path = Path(state["iterations"][str(iteration)]["human_reviews_latest_path"])
+        approved_case_ids: set[str] = set()
+        if latest_reviews_path.exists():
+            reviews_data = load_json(latest_reviews_path)
+            approved_case_ids = {r["case_id"] for r in reviews_data.get("reviews", []) if r.get("review_decision") == "approve"}
+
+        scenarios_by_rule: list[dict[str, Any]] = []
+        total_count = 0
+        for record in bdd_records:
+            semantic_rule_id = record.get("semantic_rule_id", "")
+            scenarios: list[dict[str, Any]] = []
+            for scenario in record.get("scenarios", []):
+                scenario_id = scenario.get("scenario_id", "")
+                if scenario_id in approved_case_ids or not approved_case_ids:
+                    scenarios.append({
+                        "scenario_id": scenario_id,
+                        "case_type": scenario.get("case_type", ""),
+                        "priority": scenario.get("priority", ""),
+                        "given_steps": scenario.get("given_steps", []),
+                        "when_steps": scenario.get("when_steps", []),
+                        "then_steps": scenario.get("then_steps", []),
+                        "approved": scenario_id in approved_case_ids,
+                    })
+                    total_count += 1
+            if scenarios:
+                scenarios_by_rule.append({
+                    "semantic_rule_id": semantic_rule_id,
+                    "feature_title": record.get("feature_title", ""),
+                    "scenarios": scenarios,
+                })
+        return {
+            "bdd_path": str(normalized_bdd_path),
+            "has_bdd": True,
+            "scenarios_by_rule": scenarios_by_rule,
+            "total_count": total_count,
+        }
+
+    def save_bdd_edits(self, payload: dict[str, Any]) -> dict[str, Any]:
+        state = self._load_state()
+        if state["status"] != "running":
+            raise ValueError("Session is already finalized and cannot accept new edits.")
+        iteration = int(state["current_iteration"])
+        bdd_dir = ensure_dir(self._iteration_dir(iteration) / "bdd")
+        edits = payload.get("edits", [])
+        timestamp = timestamp_slug()
+        snapshot_path = bdd_dir / f"human_bdd_edits_{timestamp}.json"
+        latest_path = bdd_dir / "human_bdd_edits_latest.json"
+        write_json(snapshot_path, {"edits": edits, "timestamp": timestamp})
+        write_json(latest_path, {"edits": edits, "timestamp": timestamp})
+        if edits:
+            if "stage_gates" not in state:
+                state["stage_gates"] = {"review_decided": False, "bdd_edited": False, "scripts_viewed": False}
+            state["stage_gates"]["bdd_edited"] = True
+            state["iterations"][str(iteration)]["stage_gates"]["bdd_edited"] = True
+        self._save_manifest(state)
+        logger.info("Saved BDD edits. session_id=%s iteration=%s saved=%s latest=%s edit_count=%s", state["session_id"], iteration, snapshot_path, latest_path, len(edits))
+        return {"saved_path": str(snapshot_path), "latest_path": str(latest_path), "edit_count": len(edits)}
+
+    def scripts_payload(self) -> dict[str, Any]:
+        """Return step registry visibility data for the Scripts tab."""
+        state = self._load_state()
+        iteration = int(state["current_iteration"])
+        # Mark scripts as viewed when tab is loaded
+        if "stage_gates" not in state:
+            state["stage_gates"] = {"review_decided": False, "bdd_edited": False, "scripts_viewed": False}
+        state["stage_gates"]["scripts_viewed"] = True
+        state["iterations"][str(iteration)]["stage_gates"]["scripts_viewed"] = True
+        self._save_manifest(state)
+        step_registry_path = state.get("step_registry_path") or state["iterations"][str(iteration)].get("step_registry_path")
+
+        if not step_registry_path:
+            return {
+                "has_registry": False,
+                "registry_path": None,
+                "summary": {},
+                "steps_by_type": {"given": [], "when": [], "then": []},
+                "gaps": [],
+                "candidates": [],
+            }
+
+        step_registry_path = Path(step_registry_path)
+        if not step_registry_path.exists():
+            return {
+                "has_registry": False,
+                "registry_path": str(step_registry_path),
+                "summary": {},
+                "steps_by_type": {"given": [], "when": [], "then": []},
+                "gaps": [],
+                "candidates": [],
+            }
+
+        registry_data = load_json(step_registry_path)
+        summary = {
+            "total_steps": registry_data.get("total_steps", 0),
+            "given_count": registry_data.get("given_count", 0),
+            "when_count": registry_data.get("when_count", 0),
+            "then_count": registry_data.get("then_count", 0),
+            "unique_bdd_patterns": registry_data.get("unique_bdd_patterns", 0),
+            "exact_matches": registry_data.get("exact_matches", 0),
+            "parameterized_matches": registry_data.get("parameterized_matches", 0),
+            "candidates": len(registry_data.get("candidates", [])),
+            "unmatched": registry_data.get("unmatched", 0),
+            "reuse_scores": registry_data.get("reuse_scores", {}),
+        }
+
+        steps_by_type: dict[str, list[dict]] = {"given": [], "when": [], "then": []}
+        for step_type in ("given", "when", "then"):
+            key = f"{step_type}_steps"
+            if key in registry_data:
+                steps_by_type[step_type] = registry_data[key]
+            elif step_type in registry_data:
+                steps_by_type[step_type] = registry_data[step_type]
+
+        return {
+            "has_registry": True,
+            "registry_path": str(step_registry_path),
+            "summary": summary,
+            "steps_by_type": steps_by_type,
+            "gaps": registry_data.get("gaps", []),
+            "candidates": registry_data.get("candidates", []),
+        }
+
+    def stage_payload(self) -> dict[str, Any]:
+        """Return current stage gates and allowed transitions."""
+        state = self._load_state()
+        iteration = int(state["current_iteration"])
+        gates = state.get("stage_gates", {"review_decided": False, "bdd_edited": False, "scripts_viewed": False})
+        iter_gates = state["iterations"][str(iteration)].get("stage_gates", gates)
+        # Merge: iteration gates override session gates
+        merged_gates = {**gates, **iter_gates}
+        return {
+            "review_decided": merged_gates.get("review_decided", False),
+            "bdd_edited": merged_gates.get("bdd_edited", False),
+            "scripts_viewed": merged_gates.get("scripts_viewed", False),
+            "status": state["status"],
+        }
+
+    def advance_stage(self, to_stage: str) -> dict[str, Any]:
+        """Attempt to advance to a named stage. Returns success/failure with reason."""
+        gates = self.stage_payload()
+        stage_order = ["review", "bdd", "scripts", "finalize"]
+        current_idx = 0
+        if gates["review_decided"]:
+            current_idx = 1
+        if gates["bdd_edited"]:
+            current_idx = 2
+        if gates["scripts_viewed"]:
+            current_idx = 3
+        target_idx = stage_order.index(to_stage) if to_stage in stage_order else -1
+        if target_idx < 0:
+            return {"success": False, "error": f"Unknown stage: {to_stage}"}
+        if target_idx > current_idx + 1:
+            return {"success": False, "error": f"Complete '{stage_order[current_idx]}' stage before advancing to '{to_stage}'"}
+        return {"success": True, "current_stage": stage_order[current_idx], "target_stage": to_stage}
+
+    def save_scripts_edits(self, payload: dict[str, Any]) -> dict[str, Any]:
+        """Save step definition edits to session snapshot."""
+        state = self._load_state()
+        if state["status"] != "running":
+            raise ValueError("Session is already finalized and cannot accept new edits.")
+        iteration = int(state["current_iteration"])
+        scripts_dir = ensure_dir(self._iteration_dir(iteration) / "scripts")
+        edits = payload.get("edits", [])
+        timestamp = timestamp_slug()
+        snapshot_path = scripts_dir / f"human_scripts_edits_{timestamp}.json"
+        latest_path = scripts_dir / "human_scripts_edits_latest.json"
+        write_json(snapshot_path, {"edits": edits, "timestamp": timestamp})
+        write_json(latest_path, {"edits": edits, "timestamp": timestamp})
+        logger.info("Saved scripts edits. session_id=%s iteration=%s saved=%s latest=%s edit_count=%s", state["session_id"], iteration, snapshot_path, latest_path, len(edits))
+        return {"saved_path": str(snapshot_path), "latest_path": str(latest_path), "edit_count": len(edits)}
 
     def submit_reviews(self, payload: dict[str, Any]) -> dict[str, Any]:
         save_result = self.save_reviews(payload)
@@ -392,6 +598,7 @@ class ReviewSessionManager:
         ensure_dir(base / "rewrite")
         ensure_dir(base / "checker")
         ensure_dir(base / "report")
+        ensure_dir(base / "bdd")
 
     def _load_state(self) -> dict[str, Any]:
         if self.manifest_path.exists():
@@ -461,6 +668,15 @@ def _build_handler(manager: ReviewSessionManager):
                 if parsed.path == "/api/history":
                     self._send_json({"history": manager.session_payload().get("history", [])})
                     return
+                if parsed.path == "/api/bdd":
+                    self._send_json(manager.bdd_payload())
+                    return
+                if parsed.path == "/api/scripts":
+                    self._send_json(manager.scripts_payload())
+                    return
+                if parsed.path == "/api/stage":
+                    self._send_json(manager.stage_payload())
+                    return
                 if parsed.path == "/report.html":
                     self._send_file(str(manager.current_report_file("report")), repo_root)
                     return
@@ -500,6 +716,16 @@ def _build_handler(manager: ReviewSessionManager):
                     return
                 if parsed.path == "/api/finalize":
                     self._send_json(manager.finalize_session())
+                    return
+                if parsed.path == "/api/bdd/save":
+                    self._send_json(manager.save_bdd_edits(payload))
+                    return
+                if parsed.path == "/api/scripts/save":
+                    self._send_json(manager.save_scripts_edits(payload))
+                    return
+                if parsed.path == "/api/stage/advance":
+                    target = payload.get("to_stage", "")
+                    self._send_json(manager.advance_stage(target))
                     return
                 self.send_error(HTTPStatus.NOT_FOUND, "Not found")
             except Exception as exc:
@@ -590,10 +816,85 @@ def _render_review_session_shell() -> str:
     button { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; cursor: pointer; }
     ul { margin: 8px 0 0 18px; }
     pre { white-space: pre-wrap; word-break: break-word; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; font-size: 12px; }
+    .tab-bar { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; }
+    .tab-btn { padding: 8px 16px; border: 1px solid #cbd5e1; border-radius: 8px 8px 0 0; background: #f1f5f9; cursor: pointer; }
+    .tab-btn.active { background: white; border-bottom-color: white; font-weight: 600; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .bdd-rule-block { background: white; border: 1px solid #cbd5e1; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+    .bdd-rule-header { font-weight: 700; color: #0f172a; margin-bottom: 10px; font-size: 14px; }
+    .step-group { margin-bottom: 10px; }
+    .step-label { font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 4px; }
+    .step-textarea { width: 100%; box-sizing: border-box; font-family: monospace; font-size: 12px; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px; resize: vertical; }
+    .bdd-scenario-card { margin-left: 12px; margin-bottom: 10px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; }
+    .scripts-metrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+    .scripts-metric { background: #eff6ff; border-radius: 10px; padding: 10px; border: 1px solid #bfdbfe; text-align: center; }
+    .scripts-metric strong { font-size: 20px; display: block; }
+    .scripts-metric span { font-size: 11px; color: #64748b; }
+    .step-block { background: white; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+    .step-block-header { font-weight: 700; margin-bottom: 8px; }
+    .step-type-section { margin-bottom: 12px; }
+    .step-item { margin-bottom: 8px; padding: 6px 8px; border: 1px solid #e2e8f0; border-radius: 6px; }
+    .step-item.exact { border-left: 3px solid #166534; }
+    .step-item.parameterized { border-left: 3px solid #92400e; }
+    .step-item.candidate { border-left: 3px solid #1d4ed8; }
+    .step-item.unmatched { border-left: 3px solid #991b1b; background: #fff5f5; }
+    .step-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .step-item-badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+    .badge-exact { background: #dcfce7; color: #166534; }
+    .badge-parameterized { background: #fff7ed; color: #92400e; }
+    .badge-candidate { background: #dbeafe; color: #1d4ed8; }
+    .badge-unmatched { background: #fee2e2; color: #991b1b; }
+    .step-item-text { font-family: monospace; font-size: 12px; color: #334155; }
+    .step-item-pattern { font-family: monospace; font-size: 11px; color: #64748b; margin-top: 2px; }
+    .suggestion-item { margin-left: 12px; padding: 4px 8px; border-left: 2px solid #e2e8f0; font-size: 12px; }
+    .stage-progress { display: flex; align-items: center; gap: 0; margin-bottom: 16px; background: white; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px 20px; box-shadow: 0 4px 12px rgba(15,23,42,0.06); }
+    .stage-step { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 12px; border-radius: 8px; transition: background 0.2s; }
+    .stage-step:hover { background: #f1f5f9; }
+    .stage-step.active { background: #eff6ff; cursor: default; }
+    .stage-step.active:hover { background: #eff6ff; }
+    .stage-step.completed { cursor: pointer; }
+    .stage-step.completed:hover { background: #f0fdf4; }
+    .stage-step.locked { cursor: not-allowed; opacity: 0.5; }
+    .stage-step.locked:hover { background: transparent; }
+    .stage-dot { width: 28px; height: 28px; border-radius: 50%; background: #e2e8f0; color: #64748b; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+    .stage-step.active .stage-dot { background: #2563eb; color: white; }
+    .stage-step.completed .stage-dot { background: #16a34a; color: white; }
+    .stage-label { font-size: 13px; font-weight: 600; color: #64748b; }
+    .stage-step.active .stage-label { color: #1e40af; }
+    .stage-step.completed .stage-label { color: #166534; }
+    .stage-arrow { color: #cbd5e1; font-size: 18px; margin: 0 4px; }
   </style>
 </head>
 <body>
   <h1>Review Session</h1>
+  <div class="stage-progress" id="stageProgress">
+    <div class="stage-step" data-stage="review" id="stage-review">
+      <div class="stage-dot">1</div>
+      <div class="stage-label">Scenario Review</div>
+    </div>
+    <div class="stage-arrow">→</div>
+    <div class="stage-step" data-stage="bdd" id="stage-bdd">
+      <div class="stage-dot">2</div>
+      <div class="stage-label">BDD Edit</div>
+    </div>
+    <div class="stage-arrow">→</div>
+    <div class="stage-step" data-stage="scripts" id="stage-scripts">
+      <div class="stage-dot">3</div>
+      <div class="stage-label">Scripts</div>
+    </div>
+    <div class="stage-arrow">→</div>
+    <div class="stage-step" data-stage="finalize" id="stage-finalize">
+      <div class="stage-dot">4</div>
+      <div class="stage-label">Finalize</div>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="review">Scenario Review</button>
+    <button class="tab-btn" data-tab="bdd">BDD Review</button>
+    <button class="tab-btn" data-tab="scripts">Scripts</button>
+  </div>
+  <div id="tab-review" class="tab-panel active">
   <div class="card" id="summaryCard">加载中...</div>
   <div class="card">
     <h2>字段说明</h2>
@@ -637,12 +938,196 @@ def _render_review_session_shell() -> str:
       <tbody id="reviewRows"></tbody>
     </table>
   </div>
+  </div>
+  <div id="tab-bdd" class="tab-panel">
+    <div class="card">
+      <div class="toolbar">
+        <button id="saveBddBtn">Save BDD Edits</button>
+        <span id="bddStatus" class="muted"></span>
+      </div>
+    </div>
+    <div id="bddContent"><em>加载中...</em></div>
+  </div>
+  <div id="tab-scripts" class="tab-panel">
+    <div class="card">
+      <div class="toolbar">
+        <button id="saveScriptsBtn">Save Scripts Edits</button>
+        <span id="scriptsStatus" class="muted"></span>
+      </div>
+    </div>
+    <div id="scriptsContent"><em>加载中...</em></div>
+  </div>
 <script>
 let sessionPayload = null;
 let reviewMap = new Map();
 let pollTimer = null;
+let bddPayload = null;
+let scriptsPayload = null;
+let currentStageGates = { review_decided: false, bdd_edited: false, scripts_viewed: false };
 function escapeHtml(value) { return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'); }
-function issueOptionMap() { return new Map((sessionPayload.issue_type_options || []).map(item => [item.code, item])); }
+const STAGE_ORDER = ['review', 'bdd', 'scripts', 'finalize'];
+const STAGE_TAB_MAP = { review: 'review', bdd: 'bdd', scripts: 'scripts', finalize: 'review' };
+function currentStageIdx(gates) {
+  if (gates.scripts_viewed) return 3;
+  if (gates.bdd_edited) return 2;
+  if (gates.review_decided) return 1;
+  return 0;
+}
+function refreshStageProgress(gates) {
+  currentStageGates = gates;
+  const idx = currentStageIdx(gates);
+  STAGE_ORDER.forEach((stage, i) => {
+    const el = document.getElementById('stage-' + stage);
+    if (!el) return;
+    el.classList.remove('active', 'completed', 'locked');
+    if (i === idx) el.classList.add('active');
+    else if (i < idx) el.classList.add('completed');
+    else el.classList.add('locked');
+    el.querySelector('.stage-dot').textContent = i < idx ? '✓' : (i + 1);
+  });
+  // Sync tab buttons with stage
+  const currentTab = STAGE_TAB_MAP[STAGE_ORDER[idx]];
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  tabBtns.forEach(btn => {
+    const tab = btn.dataset.tab;
+    const tabIdx = STAGE_TAB_MAP[tab] === 'review' ? 0 : STAGE_TAB_MAP[tab] === 'bdd' ? 1 : STAGE_TAB_MAP[tab] === 'scripts' ? 2 : 3;
+    if (tabIdx > idx + 1) {
+      btn.disabled = true;
+      btn.title = `Complete "${STAGE_ORDER[idx]}" stage first`;
+    } else {
+      btn.disabled = false;
+      btn.title = '';
+    }
+  });
+}
+async function loadStageData() {
+  try {
+    const resp = await fetch('/api/stage');
+    const data = await resp.json();
+    refreshStageProgress(data);
+  } catch(e) { console.error('Failed to load stage data', e); }
+}
+function switchTab(tab) {
+  const idx = currentStageIdx(currentStageGates);
+  const tabStageIdx = tab === 'review' ? 0 : tab === 'bdd' ? 1 : tab === 'scripts' ? 2 : 3;
+  if (tabStageIdx > idx + 1) {
+    alert(`Complete "${STAGE_ORDER[idx]}" stage before accessing this tab.`);
+    return;
+  }
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelector('[data-tab="' + tab + '"]').classList.add('active');
+  if (tab === 'bdd' && !bddPayload) loadBddData();
+  if (tab === 'scripts' && !scriptsPayload) loadScriptsData();
+}
+function loadBddData() {
+  fetch('/api/bdd').then(r => r.json()).then(data => {
+    bddPayload = data;
+    renderBddTab(data);
+  });
+}
+function renderBddTab(data) {
+  const el = document.getElementById('bddContent');
+  if (!data.has_bdd) { el.innerHTML = '<em>No normalized BDD file linked. Run the BDD pipeline first, then restart the session with --normalized-bdd.</em>'; return; }
+  el.innerHTML = data.scenarios_by_rule.map(rule => `
+    <div class="bdd-rule-block">
+      <div class="bdd-rule-header">${escapeHtml(rule.semantic_rule_id)} — ${escapeHtml(rule.feature_title)}</div>
+      ${rule.scenarios.map(s => `
+        <div class="bdd-scenario-card">
+          <div><strong>${escapeHtml(s.scenario_id)}</strong> <em>(${escapeHtml(s.case_type)}, ${escapeHtml(s.priority)})</em></div>
+          <div class="step-group">
+            <div class="step-label">Given</div>
+            ${s.given_steps.map((st,i) => `<textarea class="step-textarea" rows="2" data-scenario="${escapeHtml(s.scenario_id)}" data-step-type="given" data-step-index="${i}">${escapeHtml(st.step_text || '')}</textarea>`).join('')}
+          </div>
+          <div class="step-group">
+            <div class="step-label">When</div>
+            ${s.when_steps.map((st,i) => `<textarea class="step-textarea" rows="2" data-scenario="${escapeHtml(s.scenario_id)}" data-step-type="when" data-step-index="${i}">${escapeHtml(st.step_text || '')}</textarea>`).join('')}
+          </div>
+          <div class="step-group">
+            <div class="step-label">Then</div>
+            ${s.then_steps.map((st,i) => `<textarea class="step-textarea" rows="2" data-scenario="${escapeHtml(s.scenario_id)}" data-step-type="then" data-step-index="${i}">${escapeHtml(st.step_text || '')}</textarea>`).join('')}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+async function saveBddEdits() {
+  const byScenario = {};
+  document.querySelectorAll('.step-textarea').forEach(ta => {
+    const sid = ta.dataset.scenario, stype = ta.dataset.stepType, sidx = parseInt(ta.dataset.stepIndex);
+    if (!byScenario[sid]) byScenario[sid] = { scenario_id: sid, given_steps: [], when_steps: [], then_steps: [] };
+    byScenario[sid][stype + '_steps'][sidx] = { step_text: ta.value, step_pattern: '' };
+  });
+  const edits = Object.values(byScenario);
+  const result = await postJson('/api/bdd/save', { edits });
+  document.getElementById('bddStatus').textContent = `已保存 ${result.edit_count} 条编辑到 ${escapeHtml(result.latest_path)}`;
+  await loadStageData();
+}
+function loadScriptsData() {
+  fetch('/api/scripts').then(r => r.json()).then(data => {
+    scriptsPayload = data;
+    renderScriptsTab(data);
+  });
+}
+function matchBadgeClass(type) {
+  const map = { exact: 'badge-exact', parameterized: 'badge-parameterized', candidate: 'badge-candidate', unmatched: 'badge-unmatched' };
+  return map[type] || '';
+}
+function renderScriptsTab(data) {
+  const el = document.getElementById('scriptsContent');
+  if (!data.has_registry) {
+    el.innerHTML = '<em>No step registry linked. Run the step-registry pipeline first, then restart the session with --step-registry pointing to step_visibility.json.</em>';
+    return;
+  }
+  const s = data.summary || {};
+  el.innerHTML = `
+    <div class="scripts-metrics">
+      <div class="scripts-metric"><strong>${s.total_steps || 0}</strong><span>Total Steps</span></div>
+      <div class="scripts-metric"><strong>${s.exact_matches || 0}</strong><span>Exact Matches</span></div>
+      <div class="scripts-metric"><strong>${s.parameterized_matches || 0}</strong><span>Parameterized</span></div>
+      <div class="scripts-metric"><strong>${s.unmatched || 0}</strong><span>Unmatched (Gaps)</span></div>
+      <div class="scripts-metric"><strong>${s.candidates || 0}</strong><span>Candidates</span></div>
+      <div class="scripts-metric"><strong>${s.unique_bdd_patterns || 0}</strong><span>Unique Patterns</span></div>
+    </div>
+    <div>
+      ${['given', 'when', 'then'].map(type => {
+        const steps = (data.steps_by_type && data.steps_by_type[type]) || [];
+        if (!steps.length) return '';
+        return `<div class="step-type-section">
+          <h3 style="text-transform:uppercase;">${type} (${steps.length})</h3>
+          ${steps.map(step => `
+            <div class="step-item ${step.match_type || ''}">
+              <div class="step-item-header">
+                <span class="step-item-text">${escapeHtml(step.step_text || '')}</span>
+                ${step.match_type ? `<span class="step-item-badge ${matchBadgeClass(step.match_type)}">${escapeHtml(step.match_type || '')}</span>` : ''}
+              </div>
+              ${step.step_pattern ? `<div class="step-item-pattern">${escapeHtml(step.step_pattern || '')}</div>` : ''}
+              ${step.library_step_text ? `<div class="step-item-pattern">→ ${escapeHtml(step.library_step_text || '')}</div>` : ''}
+              ${step.confidence && step.match_type !== 'exact' ? `<div class="muted" style="font-size:11px;">confidence: ${(step.confidence * 100).toFixed(0)}%</div>` : ''}
+              ${step.suggestions && step.suggestions.length ? `<div style="margin-top:4px;"><strong>Suggestions:</strong>${step.suggestions.map(sg => `<div class="suggestion-item">${escapeHtml(sg.library_step_text || '')} (${((sg.similarity || 0) * 100).toFixed(0)}%)</div>`).join('')}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>`;
+      }).join('')}
+    </div>
+    ${(data.gaps && data.gaps.length) ? `<div class="step-type-section">
+      <h3 style="color:#991b1b;">GAPS (${data.gaps.length})</h3>
+      ${data.gaps.map(g => `<div class="step-item unmatched">
+        <div class="step-item-text">${escapeHtml(g.step_text || '')}</div>
+        ${g.step_pattern ? `<div class="step-item-pattern">${escapeHtml(g.step_pattern || '')}</div>` : ''}
+        ${g.source_scenario_ids && g.source_scenario_ids.length ? `<div class="muted" style="font-size:11px;">来源: ${escapeHtml(g.source_scenario_ids.join(', '))}</div>` : ''}
+      </div>`).join('')}
+    </div>` : ''}
+  `;
+}
+async function saveScriptsEdits() {
+  const edits = scriptsPayload ? Object.values(scriptsPayload).map(d => d) : [];
+  const result = await postJson('/api/scripts/save', { edits });
+  document.getElementById('scriptsStatus').textContent = `已保存到 ${escapeHtml(result.latest_path)}`;
+  await loadStageData();
+} new Map((sessionPayload.issue_type_options || []).map(item => [item.code, item])); }
 function issueSummaryText(review) { const selected = review.issue_types || []; if (!selected.length) return 'None selected'; const map = issueOptionMap(); return selected.map(code => map.get(code)?.label || code).join(', '); }
 function issueTableHtml(review) { return (sessionPayload.issue_type_options || []).map(item => `
     <tr>
@@ -681,11 +1166,11 @@ function renderResult(title, bodyHtml, cssClass='') { const card = document.getE
 function renderHistory() { const items = sessionPayload.history || []; document.getElementById('historyCard').innerHTML = items.length ? items.map(item => `<div><strong>Iteration ${item.iteration}</strong>: checker=${escapeHtml(item.checker_summary_path || '')}</div>`).join('') : '暂无历史'; }
 function resultLinksHtml(links) { return Object.entries(links || {}).map(([key, href]) => `<div><a href="${href}" target="_blank">${escapeHtml(key)}</a></div>`).join(''); }
 async function saveDraft() { const result = await postJson('/api/reviews/save', currentPayload()); renderResult('保存成功', `<div><strong>Iteration</strong>: ${result.iteration}</div><div><strong>Snapshot</strong>: ${escapeHtml(result.saved_review_path)}</div><div><strong>Latest</strong>: ${escapeHtml(result.latest_review_path)}</div>`); }
-async function refreshSession() { const response = await fetch('/api/session'); sessionPayload = await response.json(); reviewMap = new Map(sessionPayload.reviews.map(item => [item.case_id, item])); document.getElementById('summaryCard').innerHTML = `<div class="grid"><div class="metric"><strong>Session ID</strong><br/>${escapeHtml(sessionPayload.session_id)}</div><div class="metric"><strong>Status</strong><br/>${escapeHtml(sessionPayload.session_status)}</div><div class="metric"><strong>Current Iteration</strong><br/>${escapeHtml(String(sessionPayload.current_iteration))}</div></div><div class="muted">Latest review path: ${escapeHtml(sessionPayload.metadata.latest_review_path || '')}</div><div class="muted">Current report path: ${escapeHtml(sessionPayload.metadata.current_report_path || '')}</div>`; renderRows(); renderHistory(); applyFilters(); }
+async function refreshSession() { const response = await fetch('/api/session'); sessionPayload = await response.json(); reviewMap = new Map(sessionPayload.reviews.map(item => [item.case_id, item])); document.getElementById('summaryCard').innerHTML = `<div class="grid"><div class="metric"><strong>Session ID</strong><br/>${escapeHtml(sessionPayload.session_id)}</div><div class="metric"><strong>Status</strong><br/>${escapeHtml(sessionPayload.session_status)}</div><div class="metric"><strong>Current Iteration</strong><br/>${escapeHtml(String(sessionPayload.current_iteration))}</div></div><div class="muted">Latest review path: ${escapeHtml(sessionPayload.metadata.latest_review_path || '')}</div><div class="muted">Current report path: ${escapeHtml(sessionPayload.metadata.current_report_path || '')}</div>`; renderRows(); renderHistory(); applyFilters(); await loadStageData(); }
 async function pollJob(jobId) { const response = await fetch(`/api/status/${jobId}`); const payload = await response.json(); if (payload.status === 'queued' || payload.status === 'running') { renderResult('后台执行中', `<div class="status-running">状态: ${escapeHtml(payload.status)}</div>`, 'status-running'); pollTimer = setTimeout(() => pollJob(jobId), 2000); return; } if (payload.status === 'failed') { renderResult('执行失败', `<pre>${escapeHtml(payload.error || '')}</pre>`, 'status-failed'); return; } const result = payload.result || {}; await refreshSession(); renderResult('执行成功', `<div class="status-succeeded">状态: ${escapeHtml(payload.status)}</div><div><strong>Next Iteration</strong>: ${escapeHtml(String(result.next_iteration || ''))}</div><pre>${escapeHtml(JSON.stringify({ rewrite_summary: result.rewrite_summary, checker_summary: result.checker_summary, report_summary: result.report_summary }, null, 2))}</pre><div>${resultLinksHtml(result.links)}</div>`, 'status-succeeded'); }
 async function submitAndRun() { if (pollTimer) clearTimeout(pollTimer); const result = await postJson('/api/submit', currentPayload()); renderResult('已提交', `<div>Job ID: ${escapeHtml(result.job_id)}</div><div>Latest: ${escapeHtml(result.latest_review_path)}</div>`); pollJob(result.job_id); }
 async function finalizeSession() { const result = await postJson('/api/finalize', {}); if (result.final_report_url) { window.location.href = result.final_report_url; return; } await refreshSession(); renderResult('Session Finalized', `<div class="status-finalized">??: ${escapeHtml(result.status)}</div><div><strong>Final Report</strong>: ${escapeHtml(result.final_report_path || "")}</div><div>${resultLinksHtml({ report_html: result.final_report_url, maker_html: result.final_maker_url, checker_html: result.final_checker_url })}</div>`, 'status-finalized'); }
-async function bootstrap() { await refreshSession(); document.getElementById('overallFilter').addEventListener('change', applyFilters); document.getElementById('coverageFilter').addEventListener('change', applyFilters); document.getElementById('blockingFilter').addEventListener('change', applyFilters); document.getElementById('saveBtn').addEventListener('click', saveDraft); document.getElementById('submitBtn').addEventListener('click', submitAndRun); document.getElementById('finalizeBtn').addEventListener('click', finalizeSession); }
+async function bootstrap() { await refreshSession(); document.getElementById('overallFilter').addEventListener('change', applyFilters); document.getElementById('coverageFilter').addEventListener('change', applyFilters); document.getElementById('blockingFilter').addEventListener('change', applyFilters); document.getElementById('saveBtn').addEventListener('click', saveDraft); document.getElementById('submitBtn').addEventListener('click', submitAndRun); document.getElementById('finalizeBtn').addEventListener('click', finalizeSession); document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab))); document.getElementById('saveBddBtn').addEventListener('click', saveBddEdits); document.getElementById('saveScriptsBtn').addEventListener('click', saveScriptsEdits); document.querySelectorAll('.stage-step').forEach(el => el.addEventListener('click', () => { const stage = el.dataset.stage; if (stage === 'finalize') { if (confirm('Finalize this review session? No further edits will be possible.')) finalizeSession(); } else { const tab = STAGE_TAB_MAP[stage]; if (tab) switchTab(tab); } })); }
 bootstrap();
 </script>
 </body>

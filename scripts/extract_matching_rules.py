@@ -3,10 +3,14 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 import zlib
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Iterable
+
+# Ensure lme_testing and schemas are importable
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
 HEADER_RE = re.compile(r"LME Matching Rules Version\s+[0-9.]+\s+Page\s+\d+")
@@ -90,6 +94,11 @@ def parse_args() -> argparse.Namespace:
         "--write-page-text",
         action="store_true",
         help="Write one normalized text file per extracted page.",
+    )
+    parser.add_argument(
+        "--validate",
+        action="store_true",
+        help="Validate atomic_rules.json output against the atomic_rule schema after writing.",
     )
     return parser.parse_args()
 
@@ -592,9 +601,28 @@ def main() -> None:
     write_json(output_dir / "metadata.json", metadata)
     write_json(output_dir / "pages.json", [asdict(page) for page in pages])
     write_json(output_dir / "clauses.json", [asdict(clause) for clause in clauses])
-    write_json(output_dir / "atomic_rules.json", [asdict(rule) for rule in atomic_rules])
+    atomic_rules_path = output_dir / "atomic_rules.json"
+    write_json(atomic_rules_path, [asdict(rule) for rule in atomic_rules])
     if args.write_page_text:
         write_page_text_files(output_dir, pages)
+
+    if args.validate:
+        from schemas import validate_atomic_rule, validate_artifact_list
+
+        result = validate_artifact_list(atomic_rules_path, validate_atomic_rule)
+        total = result["total"]
+        valid = result["valid_count"]
+        invalid = result["invalid_count"]
+        errors = result.get("errors_by_index") or []
+        status = "PASS" if invalid == 0 else "FAIL"
+        print(f"[{status}] atomic_rules.json: {total} total, {valid} valid, {invalid} invalid")
+        for err in errors[:5]:
+            for msg in err["errors"][:2]:
+                print(f"  [{err['index']}] {msg}")
+        if len(errors) > 5:
+            print(f"  ... and {len(errors) - 5} more errors")
+        if invalid > 0:
+            raise SystemExit(1)
 
     print(json.dumps(metadata, indent=2, ensure_ascii=False))
 

@@ -172,6 +172,8 @@ def start_workflow_session(
         initial_maker_summary_path=current_artifacts.maker_summary_path,
         initial_checker_summary_path=current_artifacts.checker_summary_path,
         initial_coverage_report_path=current_artifacts.coverage_report_path,
+        normalized_bdd_path=None,
+        step_registry_path=None,
     )
     server, url = serve_review_session(manager=manager, host=host, port=port)
     return server, url, manager

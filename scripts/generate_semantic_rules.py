@@ -3,7 +3,11 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from pathlib import Path
+
+# Ensure lme_testing and schemas are importable
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
 def parse_args() -> argparse.Namespace:
@@ -28,6 +32,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--doc-id", default="lme_matching_rules_v2_2", help="Document identifier.")
     parser.add_argument("--doc-title", default="LME Matching Rules", help="Document title.")
     parser.add_argument("--doc-version", default="2.2", help="Document version.")
+    parser.add_argument(
+        "--validate",
+        action="store_true",
+        help="Validate semantic_rules.json output against the semantic_rule schema after writing.",
+    )
     return parser.parse_args()
 
 
@@ -425,6 +434,25 @@ def main() -> None:
     semantic_rules = [build_semantic_rule(rule, doc_id, doc_title, doc_version) for rule in atomic_rules]
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(semantic_rules, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    if args.validate:
+        from schemas import validate_semantic_rule, validate_artifact_list
+
+        result = validate_artifact_list(output_path, validate_semantic_rule)
+        total = result["total"]
+        valid = result["valid_count"]
+        invalid = result["invalid_count"]
+        errors = result.get("errors_by_index") or []
+        status = "PASS" if invalid == 0 else "FAIL"
+        print(f"[{status}] semantic_rules.json: {total} total, {valid} valid, {invalid} invalid")
+        for err in errors[:5]:
+            for msg in err["errors"][:2]:
+                print(f"  [{err['index']}] {msg}")
+        if len(errors) > 5:
+            print(f"  ... and {len(errors) - 5} more errors")
+        if invalid > 0:
+            raise SystemExit(1)
+
     print(json.dumps({
         "semantic_rule_count": len(semantic_rules),
         "output": str(output_path),
