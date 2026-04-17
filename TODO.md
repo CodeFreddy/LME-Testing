@@ -20,13 +20,11 @@
 - [x] **Gate 6: Quality and Drift Reporting** — Reports showing baseline drift, unstable judgments
 - [x] **Gate 7: Model Governance Enforcement Gate** — Benchmark checks before model/prompt adoption
 
-## Phase 3 Post-Completion Items
+## Phase 3 Post-Completion Items (ALL DONE 2026/04/17)
 
-These items are **not yet started** — they are next-phase work:
-
-- [ ] **Web Portal BDD Stage** — Add BDD tab to review portal: display AI-generated normalized BDD per approved scenario, allow human to edit Given/When/Then steps in-browser, save to session snapshot for audit trail
-- [ ] **Web Portal Scripts Stage** — Add Scripts tab: display generated Ruby step definitions, show step registry gap analysis (matched/unmatched/reuse score), allow human edits, save to session snapshot
-- [ ] **Stage Progression UI** — Add explicit stage buttons (Maker Review → BDD Edit → Scripts Review → Finalize) with gate logic in portal session state
+- [x] **Web Portal BDD Stage** — BDD tab displays normalized BDD per approved scenario with editable Given/When/Then steps; saves to `human_bdd_edits_latest.json` in session snapshot
+- [x] **Web Portal Scripts Stage** — Scripts tab displays step registry visibility with match quality badges (exact/parameterized/candidate/unmatched); saves edits to session snapshot
+- [x] **Stage Progression UI** — 4-stage progress bar (Scenario Review → BDD Edit → Scripts → Finalize) with gate logic enforcing tab unlock order
 
 ## Phase 3 Gates (COMPLETE 2026/04/14)
 
