@@ -206,7 +206,7 @@ semantic_rules.json
 |------|------------|--------|---------|
 | schema_failure_rate | `runs/schema_validation_latest.json` (from CI schema-validation job) | ✅ 真实数据 | S1-T01 |
 | checker_instability_rate | StubProvider 运行 | ⚠️ 不代表真实 LLM | S1-T03b |
-| coverage_percent | 全量运行数据（路径未对齐）| 🔄 待对齐 | S1-T02 |
+| coverage_percent | `runs/checker/<run_id>/coverage_report.json` via `--runs-dir` | 🔄 全量数据待写入 | S1-T02 + S1-T04 |
 | step_binding_success_rate | 模拟 step library | ⚠️ 不代表真实 LME | Stage 3 |
 
 ---
@@ -349,4 +349,4 @@ source document
 | `tests/` | 单元测试（78 个） |
 | `samples/ruby_cucumber/` | Ruby Cucumber 原型（存档，非主路径） |
 
-**`runs/` 目录结构：** 见 `docs/run_directory_structure.md`（S1-T02 产出后补充）
+**`runs/` 目录结构：** 见 `docs/run_directory_structure.md`

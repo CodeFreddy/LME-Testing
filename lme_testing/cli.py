@@ -130,12 +130,17 @@ def build_parser() -> argparse.ArgumentParser:
 
     signals = subparsers.add_parser(
         "governance-signals",
-        help="Compute governance signals from run artifacts (Phase 3 Gate 4).",
+        help="Compute governance signals from run artifacts.",
     )
     signals.add_argument(
         "--repo-root",
         default=".",
         help="Path to the repository root (default: current directory).",
+    )
+    signals.add_argument(
+        "--runs-dir",
+        default=None,
+        help="Path to runs directory (default: <repo-root>/runs). Use this to analyze runs from a different location.",
     )
     signals.add_argument(
         "--output",
@@ -232,7 +237,8 @@ def main() -> int:
     if args.command == "governance-signals":
         repo_root = Path(args.repo_root).resolve()
         output_path = Path(args.output)
-        signals = compute_governance_signals(repo_root)
+        runs_dir = Path(args.runs_dir).resolve() if args.runs_dir else None
+        signals = compute_governance_signals(repo_root, runs_dir=runs_dir)
         write_signals_report(signals, output_path)
         result = {
             "output_path": str(output_path),

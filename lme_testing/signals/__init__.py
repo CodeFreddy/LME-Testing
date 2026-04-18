@@ -354,16 +354,20 @@ def _compute_step_binding_signals(runs_dir: Path) -> StepBindingSignals:
     return signals
 
 
-def compute_governance_signals(repo_root: Path) -> GovernanceSignals:
+def compute_governance_signals(repo_root: Path, runs_dir: Path | None = None) -> GovernanceSignals:
     """Compute all governance signals for a repository.
 
     Args:
         repo_root: Path to the repository root.
+        runs_dir: Optional explicit path to the runs directory. Defaults to
+            <repo_root>/runs. Use this to analyze runs from a different location
+            (e.g. a full 183-rule run stored elsewhere).
 
     Returns:
         GovernanceSignals with all four signal categories populated.
     """
-    runs_dir = repo_root / "runs"
+    if runs_dir is None:
+        runs_dir = repo_root / "runs"
     now = datetime.now().isoformat(timespec="seconds") + "Z"
 
     schema_signals, schema_source = _compute_schema_signals(runs_dir)
