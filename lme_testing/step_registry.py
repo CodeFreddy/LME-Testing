@@ -37,6 +37,11 @@ class StepEntry:
     code: str = ""
     source_scenario_ids: list[str] = field(default_factory=list)
     source_semantic_rule_ids: list[str] = field(default_factory=list)
+    # Match metadata (populated by compute_step_matches)
+    match_type: str = ""  # "exact" | "parameterized" | "candidate" | "unmatched"
+    library_step_text: str = ""
+    confidence: float = 0.0
+    suggestions: list[dict] = field(default_factory=list)
 
 
 @dataclass
@@ -307,6 +312,11 @@ def compute_step_matches(
                     library_name=library_inventory.library_name,
                 ))
                 reuse_counts[_step_key(lib_step)] += 1
+                # Annotate the inventory entry with match metadata
+                bdd_step.match_type = "exact"
+                bdd_step.confidence = 1.0
+                bdd_step.library_step_text = lib_step.step_text
+                bdd_step.suggestions = []
                 continue
 
         # 2. Parameterized match
@@ -339,6 +349,11 @@ def compute_step_matches(
         if best_param_match is not None:
             matches.append(best_param_match)
             reuse_counts[_step_key(best_param_match.library_step)] += 1
+            # Annotate the inventory entry
+            bdd_step.match_type = "parameterized"
+            bdd_step.confidence = best_param_match.confidence
+            bdd_step.library_step_text = best_param_match.library_step.step_text if best_param_match.library_step else ""
+            bdd_step.suggestions = []
             continue
 
         # 3. Candidate matching (deferred — compute similarity only for unmatched)
@@ -371,6 +386,10 @@ def compute_step_matches(
                 capture_group_mapping=None,
                 library_name="",
             ))
+            bdd_step.match_type = "candidate"
+            bdd_step.confidence = top_candidates[0]["similarity"]
+            bdd_step.library_step_text = ""
+            bdd_step.suggestions = top_candidates
         else:
             matches.append(StepMatch(
                 bdd_step=bdd_step,
@@ -380,6 +399,10 @@ def compute_step_matches(
                 capture_group_mapping=None,
                 library_name="",
             ))
+            bdd_step.match_type = "unmatched"
+            bdd_step.confidence = 0.0
+            bdd_step.library_step_text = ""
+            bdd_step.suggestions = []
 
     # --- Compute reuse scores ---
     total_unique = max(len(seen), 1)
@@ -649,6 +672,32 @@ def render_step_visibility_report(
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     if isinstance(report, MatchReport):
+        # Deduplicate steps by pattern, keeping annotated entry
+        seen_patterns: dict[str, StepEntry] = {}
+        for step in inventory.all_steps():
+            key = _step_key(step)
+            if key not in seen_patterns:
+                seen_patterns[key] = step
+
+        def serialize_steps(steps: list[StepEntry]) -> list[dict]:
+            result = []
+            for s in steps:
+                key = _step_key(s)
+                if key in seen_patterns:
+                    entry = seen_patterns.pop(key)
+                    result.append({
+                        "step_text": entry.step_text,
+                        "step_pattern": entry.step_pattern,
+                        "match_type": entry.match_type,
+                        "library_step_text": entry.library_step_text,
+                        "confidence": entry.confidence,
+                        "source_scenario_ids": entry.source_scenario_ids,
+                        "suggestions": entry.suggestions,
+                    })
+            return result
+
+        gaps = [s for s in seen_patterns.values() if s.match_type == "unmatched"]
+
         rep: dict = {
             "total_steps": inventory.total_steps,
             "given_count": len(inventory.given_steps),
@@ -661,6 +710,18 @@ def render_step_visibility_report(
             "unmatched": report.unmatched,
             "reuse_scores": report.reuse_scores,
             "ownership": report.ownership,
+            "given_steps": serialize_steps(inventory.given_steps),
+            "when_steps": serialize_steps(inventory.when_steps),
+            "then_steps": serialize_steps(inventory.then_steps),
+            "gaps": [
+                {
+                    "step_text": g.step_text,
+                    "step_pattern": g.step_pattern,
+                    "step_type": g.step_type,
+                    "source_scenario_ids": g.source_scenario_ids,
+                }
+                for g in gaps
+            ],
         }
     else:
         # Legacy GapReport

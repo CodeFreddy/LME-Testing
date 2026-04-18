@@ -34,3 +34,26 @@
 - [x] **Gate 4: Governance Signals** — Schema failure rate, instability, binding success
 - [x] **Gate 5: Release Governance** — Release tags, compatibility matrix, benchmark gates
 - [x] **Gate 6: Phase 3 Exit** — All above
+
+## End-to-End POC Verification (2026/04/17)
+
+Successfully ran full 2-rule end-to-end POC:
+
+1. **Maker** → 2 rules → 5 scenarios (qwen3.5-plus, ~2 min)
+2. **Checker** → 5 reviews (MiniMax-M2.5, ~1 min)
+3. **Report** → `runs/report.html`, `maker_readable.html`, `checker_readable.html`, `report.csv`
+4. **BDD** → `normalized_bdd.jsonl` + `.feature` files + Ruby step definitions
+5. **BDD Export** → template-based `.feature` files and step definitions (no LLM)
+6. **Step Registry** → gap analysis linking normalized BDD to step visibility
+7. **Review Session** → web UI at `http://127.0.0.1:8765` with Scenario Review, BDD, Scripts, Finalize tabs
+
+**Bugs Fixed During POC:**
+- `review_session.py` line ~1130: `issueOptionMap` function definition corrupted into orphan statement — restored as proper function
+- `review_session.py` line ~1129: `saveScriptsEdits` async function missing closing `}` — added brace
+- `step_registry.py`: `StepEntry` dataclass lacked match metadata fields; `compute_step_matches` never annotated inventory entries; `render_step_visibility_report` never wrote per-step details — all fixed to surface step-level data in Scripts tab
+
+## Known Issues / Open Questions
+
+- **Step-registry output path inconsistency**: Writes directly to `runs/step-registry/step_visibility.json` without a timestamped run_id subfolder (other pipelines use `runs/<pipeline>/<run_id>/`). Session manifest works fine but design is inconsistent.
+- **Scripts tab is read-only display**: The `saveScriptsEdits` button and save mechanism are scaffolded but not wired to a real edit workflow. Step definitions are managed locally in `bdd_export.py` `TEMPLATE_REGISTRY` and Ruby step definition files, not via GUI.
+- **No formal schema** for `atomic_rule` and `semantic_rule` artifacts yet — recommended next step per session handoff.

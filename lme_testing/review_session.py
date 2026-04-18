@@ -1127,7 +1127,8 @@ async function saveScriptsEdits() {
   const result = await postJson('/api/scripts/save', { edits });
   document.getElementById('scriptsStatus').textContent = `已保存到 ${escapeHtml(result.latest_path)}`;
   await loadStageData();
-} new Map((sessionPayload.issue_type_options || []).map(item => [item.code, item])); }
+}
+function issueOptionMap() { return new Map((sessionPayload.issue_type_options || []).map(item => [item.code, item])); }
 function issueSummaryText(review) { const selected = review.issue_types || []; if (!selected.length) return 'None selected'; const map = issueOptionMap(); return selected.map(code => map.get(code)?.label || code).join(', '); }
 function issueTableHtml(review) { return (sessionPayload.issue_type_options || []).map(item => `
     <tr>
