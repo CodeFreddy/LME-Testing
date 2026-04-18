@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-18 01:25:44 UTC`
+- `2026-04-18 01:26:56 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `docs: update session_handoff and TODO to reflect completed schema work`
 - `feat: wire formal JSON Schema validation into extraction scripts and CI`
 - `fix: JS syntax bugs in review-session UI and annotate step registry output`
 - `docs: refresh session_handoff with completed Phase 3 post-completion items`
 - `docs: update TODO and session_handoff 鈥?Phase 3 post-completion items all done`
-- `feat: add BDD tab, Scripts tab, and stage progression UI to review portal`
 
 ---
 

@@ -52,8 +52,18 @@ Successfully ran full 2-rule end-to-end POC:
 - `review_session.py` line ~1129: `saveScriptsEdits` async function missing closing `}` — added brace
 - `step_registry.py`: `StepEntry` dataclass lacked match metadata fields; `compute_step_matches` never annotated inventory entries; `render_step_visibility_report` never wrote per-step details — all fixed to surface step-level data in Scripts tab
 
+## Formal Schema Validation Wired (DONE 2026/04/18)
+
+Extraction scripts and CI now enforce JSON Schema validation by default:
+
+- `extract_matching_rules.py`: `--skip-validate` flag added (validation is now default); renamed from `--validate`
+- `generate_semantic_rules.py`: same `--skip-validate` inversion
+- `validate_rules.py`: now accepts `--semantic-rules` to validate `semantic_rules.json` alongside `atomic_rules.json`; `upstream-validation` CI job passes both
+- `schemas/fixtures/atomic_rule_invalid.json`: expanded to 8 cases (added rule_id pattern, start_page/end_page type errors)
+- `schemas/fixtures/semantic_rule_invalid.json`: expanded to 10 cases (added semantic_rule_id pattern, pages type, atomic_rule_ids empty, priority enum, empty evidence quote)
+- `tests/test_schemas.py`: added targeted tests for edge cases
+
 ## Known Issues / Open Questions
 
 - **Step-registry output path inconsistency**: Writes directly to `runs/step-registry/step_visibility.json` without a timestamped run_id subfolder (other pipelines use `runs/<pipeline>/<run_id>/`). Session manifest works fine but design is inconsistent.
 - **Scripts tab is read-only display**: The `saveScriptsEdits` button and save mechanism are scaffolded but not wired to a real edit workflow. Step definitions are managed locally in `bdd_export.py` `TEMPLATE_REGISTRY` and Ruby step definition files, not via GUI.
-- **No formal schema** for `atomic_rule` and `semantic_rule` artifacts yet — recommended next step per session handoff.
