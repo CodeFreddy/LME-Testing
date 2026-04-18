@@ -337,13 +337,18 @@ Output: `runs/step-registry/step_visibility.json` — unmatched steps, exact/par
 
 ### Web GUI — What it shows
 
-The review-session web UI (`http://127.0.0.1:8765`) currently displays:
+The review-session web UI (`http://127.0.0.1:8765`) has 4 stages:
 
-- Semantic rules
-- Maker-generated BDD scenarios (`given/when/then`)
-- Checker reviews and coverage report
+- **Scenario Review** — approve/rewrite/reject each test case
+- **BDD Review** — view normalized BDD scenarios, edit Given/When/Then steps inline
+- **Scripts** — view step registry visibility with match quality badges (exact/parameterized/candidate/unmatched)
+- **Finalize** — lock session and generate final HTML report
 
-It does **not** yet display normalized BDD or step registry output — those are file-based artifacts you inspect directly in `runs/bdd/` and `runs/step-registry/`.
+The HTML report includes:
+- Clickable coverage metrics in "运行摘要" — clicking filters the "Rule 级覆盖判定" table
+- Rule ID links jump to the corresponding sub-header in "场景审核明细" with highlighting
+- Color-coded case-type pills (gray=Required, green=Present, blue=Accepted, red=Missing)
+- Coverage Status + Rule Type dropdown filters with rule count
 
 See `docs/architecture.md` for the full pipeline diagram and artifact contracts.
 

@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-18 09:29:31 UTC`
+- `2026-04-18 10:33:50 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `docs: update README, demo_for_boss.md, TODO.md with report UX and portal features`
 - `fix: report UX 鈥?rule ID jump, color pills, filters, WindowsPath guard`
 - `fix: step-registry Python matching 鈥?two bugs fixed`
 - `feat: wire governance-signals into CI pipeline`
 - `fix: add human-scripts-edits CLI flags and BDD prompt version bump`
-- `feat: complete Python step definitions migration`
 
 ---
 

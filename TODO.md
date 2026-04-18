@@ -92,12 +92,13 @@ Switching from Ruby Cucumber to Python step definitions as the global rule:
 - `release-governance` job now `needs: governance-signals` so it runs after signals are computed
 - `check_release_governance.py` now sees a current `governance_signals.json` and passes all 5 checks
 
-Current signals (from latest run): 50% coverage, 25% binding rate (2 exact + 0 parameterized + 15 candidates vs 68 unique patterns). Step binding low because step-registry matches against Ruby step defs — Python migration should improve this.
+## Report UX Improvements (DONE 2026/04/18)
 
-## Step-Registry Python Matching Fix (DONE 2026/04/18)
+HTML report (`generate_html_report()` in `reporting.py`):
 
-Fixed two bugs preventing step-registry from matching BDD steps against Python STEP_LIBRARY:
-1. `StepEntry` dataclass was missing `library_name` field — Mode 1 import in `extract_steps_from_python_step_defs` failed silently (TypeError on `library_name=`)
-2. `_build_library_index()` was indexing library by `step_pattern` (contains `(?:a|an|the)` placeholders) instead of `step_text` (literal, matches BDD step_text exactly)
-
-After fix: 20/20 BDD steps matched (100% exact), 0 unmatched, vs previously 0 exact/parameterized matches.
+- **Rule ID jump**: clicking a rule ID in "Rule 级覆盖判定" uses native browser anchor navigation to jump to the sub-header row in "场景审核明细" with blue highlight on matching data rows
+- **`link.hash` fix**: changed from `getAttribute('href')` (returned full URL) to `link.hash` (returns `#rule-detail-XXX` fragment) for correct rule ID extraction
+- **Color-coded case-type pills**: inline chips in sub-header rows and coverage table columns — gray=Required, green=Present, blue=Accepted, red-strikethrough=Missing
+- **Clickable coverage metrics**: clicking Fully Covered / Partially Covered / Uncovered / Not Applicable in "运行摘要" filters the "Rule 级覆盖判定" table with active highlight state
+- **Rule 级覆盖判定 filters**: Coverage Status + Rule Type dropdowns with "X / Y 条规则" count and clear button
+- **`WindowsPath` empty name guard**: `apply_human_step_edits()` and `run_rewrite_pipeline` now guard against empty/invalid `human_scripts_edits_path` values (`Path("")` or `Path(".")`)
