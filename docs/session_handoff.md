@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-18 13:24:49 UTC`
+- `2026-04-18 13:31:12 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `docs: rewrite README.md Project Status with honest verification table`
 - `docs: v2.0 revisions 鈥?honest capability boundaries and Stage 1 plan`
 - `fix: smoke-test uploads governance_signals.json directly, no separate job`
 - `fix: smoke-test writes governance_signals.json before temp dir cleanup`
 - `feat: wire governance-signals CI artifact and add unit tests for uncovered modules`
-- `feat: enhance release governance and add unit tests for uncovered modules`
 
 ---
 

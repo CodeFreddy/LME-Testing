@@ -4,7 +4,32 @@
 
 ## Project Status
 
-**All Phases Complete** — Phase 1 (Baseline Control), Phase 2 (Normalized BDD), Phase 3 (Execution Readiness) are done as of 2026/04/14.
+### Verification Status
+
+| Dimension | Status | Data |
+|-----------|--------|------|
+| Framework implementation | ✅ Complete | Code in `lme_testing/`, `schemas/`, `pipelines.py` |
+| Schema contracts (7 schemas) | ✅ Complete | CI `schema-validation` job passes |
+| POC E2E (2 rules) | ✅ Complete | `poc_two_rules` E2E verified |
+| Full 183-rule quality baseline | 🔄 In Progress | Stage 1 S1-T04 |
+| Checker real instability | 🔄 Unknown | Currently 0% from StubProvider; S1-T03b needed |
+| Schema signal real data | 🔄 Missing | S1-T01 in progress |
+| Governance signals coverage path | 🔄 Path mismatch | S1-T02 in progress |
+| Real LME API execution | ⏳ Blocked | Stage 3, LME VM access needed |
+
+### Verification Type Key
+
+| Type | Meaning |
+|------|---------|
+| `code_implementation` | Code written, logically correct |
+| `stub_verified` | StubProvider or POC (≤2 rules) verified |
+| `real_data_verified` | Real LLM API + real-scale data verified |
+
+> **Honest statement:** "All Phases Complete" claims from 2026-04-14 were based on code completion only. The v2.0 docs (2026-04-18) correct this — see `docs/roadmap.md` Section一 for full current-state table.
+
+### Current Stage: Stage 1 — Real Data Access
+
+See `docs/roadmap.md` for Stage 0/1/2/3 definition. Stage 1 tasks S1-T01 through S1-T05 are in `docs/implementation_plan.md`.
 
 ---
 
@@ -140,10 +165,10 @@ All commands: `python main.py <command> [options]`
 | `checker` | Assess scenario quality and compute rule coverage |
 | `report` | Render JSON/JSONL outputs as HTML |
 | `rewrite` | Regenerate cases flagged by human review |
-| `planner` | Enrich rules with test objectives and scenario families (Phase 2) |
-| `bdd` | Convert scenarios to normalized BDD representation (Phase 2) |
-| `bdd-export` | Render normalized BDD into Gherkin `.feature` files (Phase 2) |
-| `step-registry` | Map BDD steps to step definition library, surface gaps (Phase 3) |
+| `planner` | Enrich rules with test objectives and scenario families |
+| `bdd` | Convert scenarios to normalized BDD representation |
+| `bdd-export` | Render normalized BDD into Gherkin `.feature` files |
+| `step-registry` | Map BDD steps to step definition library, surface gaps |
 | `human-review` | Generate a static HTML review page (no server needed) |
 | `review-session` | **Web GUI** — interactive review at `http://127.0.0.1:8765` |
 | `workflow-session` | Run E2E pipeline, auto-start `review-session` after checker |
@@ -244,7 +269,7 @@ reports/                  # HTML report outputs
 
 ---
 
-## Phase 3 Capabilities
+## Extended Capabilities
 
 ### Deterministic Oracles
 
@@ -263,13 +288,16 @@ result = evaluate_assertion(
 
 ### Governance Signals
 
-```
-schema_failure_rate:    0.0%
-checker_instability:    0.0%
-coverage_percent:     100.0%
-step_binding_rate:    35.4%
-coverage_trend:       improving
-```
+Governance signals require real data to be meaningful. Current signal sources:
+
+| Signal | Value | Data Source |
+|--------|-------|-------------|
+| `schema_failure_rate` | — | No persistent data (S1-T01 fix pending) |
+| `checker_instability` | 0% | StubProvider (not real LLM) |
+| `coverage_percent` | — | Full-run data not yet readable (S1-T02 fix pending) |
+| `step_binding_rate` | 35.4% | Simulated step library, not real LME API |
+
+Real numbers will be available after Stage 1 tasks complete.
 
 ### Release Governance
 
@@ -298,7 +326,7 @@ python main.py --config config/llm_profiles.example.json maker `
   --output-dir runs/maker --batch-size 4
 ```
 
-### Stage 2 — Normalized BDD (Phase 2)
+### Stage 2 — Normalized BDD
 
 Refines maker output into a structured normalized BDD artifact (`normalized_bdd.jsonl`):
 
@@ -310,7 +338,7 @@ python main.py --config config/llm_profiles.example.json bdd `
 
 Output: `runs/bdd/<run_id>/normalized_bdd.jsonl` — machine-readable BDD with step-level `given_steps`, `when_steps`, `then_steps`.
 
-### Stage 3 — BDD Export (Phase 2)
+### Stage 3 — BDD Export
 
 Renders normalized BDD into Gherkin `.feature` files (no LLM call — template-based):
 
@@ -322,7 +350,7 @@ python main.py bdd-export `
 
 Output: `runs/bdd-export/` with `*.feature` files and `step_definitions.py`.
 
-### Stage 4 — Step Registry (Phase 3)
+### Stage 4 — Step Registry
 
 Maps BDD steps to existing step definition library, surfaces reuse gaps and candidates:
 
