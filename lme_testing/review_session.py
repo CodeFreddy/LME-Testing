@@ -157,6 +157,8 @@ class ReviewSessionManager:
             if "stage_gates" not in state:
                 state["stage_gates"] = {"review_decided": False, "bdd_edited": False, "scripts_viewed": False}
             state["stage_gates"]["review_decided"] = True
+            if "stage_gates" not in state["iterations"][str(iteration)]:
+                state["iterations"][str(iteration)]["stage_gates"] = {"review_decided": False, "bdd_edited": False, "scripts_viewed": False}
             state["iterations"][str(iteration)]["stage_gates"]["review_decided"] = True
         self._save_manifest(state)
         logger.info("Saved human reviews. session_id=%s iteration=%s saved=%s latest=%s review_count=%s", state["session_id"], iteration, snapshot_path, latest_path, len(reviews))
@@ -232,6 +234,8 @@ class ReviewSessionManager:
             if "stage_gates" not in state:
                 state["stage_gates"] = {"review_decided": False, "bdd_edited": False, "scripts_viewed": False}
             state["stage_gates"]["bdd_edited"] = True
+            if "stage_gates" not in state["iterations"][str(iteration)]:
+                state["iterations"][str(iteration)]["stage_gates"] = {"review_decided": False, "bdd_edited": False, "scripts_viewed": False}
             state["iterations"][str(iteration)]["stage_gates"]["bdd_edited"] = True
         self._save_manifest(state)
         logger.info("Saved BDD edits. session_id=%s iteration=%s saved=%s latest=%s edit_count=%s", state["session_id"], iteration, snapshot_path, latest_path, len(edits))
@@ -245,6 +249,8 @@ class ReviewSessionManager:
         if "stage_gates" not in state:
             state["stage_gates"] = {"review_decided": False, "bdd_edited": False, "scripts_viewed": False}
         state["stage_gates"]["scripts_viewed"] = True
+        if "stage_gates" not in state["iterations"][str(iteration)]:
+            state["iterations"][str(iteration)]["stage_gates"] = {"review_decided": False, "bdd_edited": False, "scripts_viewed": False}
         state["iterations"][str(iteration)]["stage_gates"]["scripts_viewed"] = True
         self._save_manifest(state)
         step_registry_path = state.get("step_registry_path") or state["iterations"][str(iteration)].get("step_registry_path")
@@ -354,6 +360,13 @@ class ReviewSessionManager:
         return {"saved_path": str(snapshot_path), "latest_path": str(latest_path), "edit_count": len(edits)}
 
     def submit_reviews(self, payload: dict[str, Any]) -> dict[str, Any]:
+        # Un-finalize the session if the user returns after viewing the final report
+        # and wants to start a new review iteration
+        state = self._load_state()
+        if state.get("status") == "finalized":
+            state["status"] = "running"
+            self._save_manifest(state)
+            logger.info("Session un-finalized for new iteration. session_id=%s", self.session_id)
         save_result = self.save_reviews(payload)
         iteration = int(save_result["iteration"])
         latest_path = Path(save_result["latest_review_path"])
@@ -471,6 +484,10 @@ class ReviewSessionManager:
 
             next_iteration = iteration + 1
             self._ensure_iteration_dirs(next_iteration)
+            # Carry forward normalized_bdd and step_registry paths from current iteration
+            # so the BDD review and Scripts tabs remain usable for the new iteration's cases
+            curr_normalized = state.get("normalized_bdd_path") or state["iterations"][str(iteration)].get("normalized_bdd_path")
+            curr_step_reg = state.get("step_registry_path") or state["iterations"][str(iteration)].get("step_registry_path")
             next_state = {
                 "iteration": next_iteration,
                 "maker_cases_path": rewrite_summary["merged_cases_path"],
@@ -481,11 +498,16 @@ class ReviewSessionManager:
                 "checker_summary_path": str(Path(checker_summary["output_dir"]) / "summary.json"),
                 "maker_summary_path": str(Path(rewrite_summary["output_dir"]) / "summary.json"),
                 "coverage_report_path": checker_summary["coverage_report_path"],
+                "normalized_bdd_path": curr_normalized,
+                "step_registry_path": curr_step_reg,
+                "stage_gates": {"review_decided": False, "bdd_edited": False, "scripts_viewed": False},
             }
             state["iterations"][str(next_iteration)] = next_state
             state["current_iteration"] = next_iteration
             state["current_maker_cases_path"] = rewrite_summary["merged_cases_path"]
             state["current_checker_reviews_path"] = checker_summary["results_path"]
+            state["normalized_bdd_path"] = curr_normalized
+            state["step_registry_path"] = curr_step_reg
             report_path = self._render_iteration_report(next_iteration, state=state)
             next_state["report_path"] = str(report_path)
             state["current_report_path"] = str(report_path)
@@ -690,6 +712,10 @@ def _build_handler(manager: ReviewSessionManager):
                 if parsed.path == "/checker_readable.html":
                     self._send_file(str(manager.current_report_file("checker")), repo_root)
                     return
+                if parsed.path == "/coverage.csv":
+                    csv_path = manager.current_report_file("report").with_suffix(".csv")
+                    self._send_download(csv_path, repo_root)
+                    return
                 if parsed.path.startswith("/api/status/"):
                     job_id = parsed.path.rsplit("/", 1)[-1]
                     try:
@@ -778,6 +804,26 @@ def _build_handler(manager: ReviewSessionManager):
             self.send_response(HTTPStatus.OK)
             self.send_header("Content-Type", mime_type)
             self.send_header("Content-Length", str(len(content)))
+            self.end_headers()
+            self.wfile.write(content)
+
+        def _send_download(self, raw_path: Path, root: Path) -> None:
+            """Serve a file as a forced download with Content-Disposition header."""
+            if not raw_path.exists() or not raw_path.is_file():
+                self.send_error(HTTPStatus.NOT_FOUND, "File not found")
+                return
+            try:
+                raw_path.relative_to(root)
+            except ValueError:
+                self.send_error(HTTPStatus.FORBIDDEN, "Path outside repo root")
+                return
+            content = raw_path.read_bytes()
+            filename = raw_path.name
+            mime_type = mimetypes.guess_type(str(raw_path))[0] or "application/octet-stream"
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", mime_type)
+            self.send_header("Content-Length", str(len(content)))
+            self.send_header("Content-Disposition", f"attachment; filename={filename}")
             self.end_headers()
             self.wfile.write(content)
 
@@ -1194,7 +1240,10 @@ async function refreshSession() { const response = await fetch('/api/session'); 
 async function pollJob(jobId) { const response = await fetch(`/api/status/${jobId}`); const payload = await response.json(); if (payload.status === 'queued' || payload.status === 'running') { renderResult('后台执行中', `<div class="status-running">状态: ${escapeHtml(payload.status)}</div>`, 'status-running'); pollTimer = setTimeout(() => pollJob(jobId), 2000); return; } if (payload.status === 'failed') { renderResult('执行失败', `<pre>${escapeHtml(payload.error || '')}</pre>`, 'status-failed'); return; } const result = payload.result || {}; await refreshSession(); renderResult('执行成功', `<div class="status-succeeded">状态: ${escapeHtml(payload.status)}</div><div><strong>Next Iteration</strong>: ${escapeHtml(String(result.next_iteration || ''))}</div><pre>${escapeHtml(JSON.stringify({ rewrite_summary: result.rewrite_summary, checker_summary: result.checker_summary, report_summary: result.report_summary }, null, 2))}</pre><div>${resultLinksHtml(result.links)}</div>`, 'status-succeeded'); }
 async function submitAndRun() { if (pollTimer) clearTimeout(pollTimer); const result = await postJson('/api/submit', currentPayload()); renderResult('已提交', `<div>Job ID: ${escapeHtml(result.job_id)}</div><div>Latest: ${escapeHtml(result.latest_review_path)}</div>`); pollJob(result.job_id); }
 async function finalizeSession() { const result = await postJson('/api/finalize', {}); if (result.final_report_url) { window.location.href = result.final_report_url; return; } await refreshSession(); renderResult('Session Finalized', `<div class="status-finalized">??: ${escapeHtml(result.status)}</div><div><strong>Final Report</strong>: ${escapeHtml(result.final_report_path || "")}</div><div>${resultLinksHtml({ report_html: result.final_report_url, maker_html: result.final_maker_url, checker_html: result.final_checker_url })}</div>`, 'status-finalized'); }
-async function bootstrap() { await refreshSession(); document.getElementById('overallFilter').addEventListener('change', applyFilters); document.getElementById('coverageFilter').addEventListener('change', applyFilters); document.getElementById('blockingFilter').addEventListener('change', applyFilters); document.getElementById('saveBtn').addEventListener('click', saveDraft); document.getElementById('submitBtn').addEventListener('click', submitAndRun); document.getElementById('finalizeBtn').addEventListener('click', finalizeSession); document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab))); document.getElementById('saveBddBtn').addEventListener('click', saveBddEdits); document.getElementById('saveScriptsBtn').addEventListener('click', saveScriptsEdits); document.querySelectorAll('.stage-step').forEach(el => el.addEventListener('click', () => { const stage = el.dataset.stage; if (stage === 'finalize') { if (confirm('Finalize this review session? No further edits will be possible.')) finalizeSession(); } else { const tab = STAGE_TAB_MAP[stage]; if (tab) switchTab(tab); } })); }
+async function bootstrap() { await refreshSession(); attachHandlers(); }
+function attachHandlers() { document.getElementById('overallFilter').addEventListener('change', applyFilters); document.getElementById('coverageFilter').addEventListener('change', applyFilters); document.getElementById('blockingFilter').addEventListener('change', applyFilters); document.getElementById('saveBtn').addEventListener('click', saveDraft); document.getElementById('submitBtn').addEventListener('click', submitAndRun); document.getElementById('finalizeBtn').addEventListener('click', finalizeSession); document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab))); document.getElementById('saveBddBtn').addEventListener('click', saveBddEdits); document.getElementById('saveScriptsBtn').addEventListener('click', saveScriptsEdits); document.querySelectorAll('.stage-step').forEach(el => el.addEventListener('click', () => { const stage = el.dataset.stage; if (stage === 'finalize') { if (confirm('Finalize this review session? No further edits will be possible.')) finalizeSession(); } else { const tab = STAGE_TAB_MAP[stage]; if (tab) switchTab(tab); } })); }
+// Re-attach handlers and refresh state when navigating via browser back/forward (bfcache restore)
+window.addEventListener('pageshow', async (event) => { if (event.persisted) { await refreshSession(); attachHandlers(); } });
 bootstrap();
 </script>
 </body>
