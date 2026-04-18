@@ -148,7 +148,7 @@ semantic_rules.json
 
 **设计约束（明确）：**
 - **单用户设计**：Web UI 运行在 localhost:8765，无认证，无多用户并发支持
-- Session snapshot 使用原子写入（S1-T03 完成后）
+- Session snapshot 使用原子写入（tmp + rename），防止快速连续保存损坏文件
 - 不支持跨 session 共享状态
 
 ### 4.6 Reporting 模块

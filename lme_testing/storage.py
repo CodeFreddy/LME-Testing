@@ -36,6 +36,13 @@ def write_json(path: Path, data: object) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 原子写入 JSON 文件：先写 .tmp，再 rename。防止快速连续写入导致文件损坏。
+def atomic_write_json(path: Path, data: object) -> None:
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp.replace(path)  # 跨平台原子操作（同一文件系统内）
+
+
 # 追加写 JSONL，用于记录批量模型调用结果。
 def append_jsonl(path: Path, records: list[dict]) -> None:
     if not records:

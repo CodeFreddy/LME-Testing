@@ -18,7 +18,7 @@ from .human_review import _render_case_detail
 from .pipelines import _case_map_from_maker_records, run_checker_pipeline, run_rewrite_pipeline
 from .reporting import generate_html_report
 from .schemas import load_issue_type_options, validate_human_review_payload
-from .storage import ensure_dir, load_json, load_jsonl, timestamp_slug, write_json
+from .storage import atomic_write_json, ensure_dir, load_json, load_jsonl, timestamp_slug, write_json
 
 logger = logging.getLogger(__name__)
 
@@ -148,8 +148,8 @@ class ReviewSessionManager:
         timestamp = timestamp_slug()
         snapshot_path = reviews_dir / f"human_reviews_{timestamp}.json"
         latest_path = reviews_dir / "human_reviews_latest.json"
-        write_json(snapshot_path, normalized)
-        write_json(latest_path, normalized)
+        atomic_write_json(snapshot_path, normalized)
+        atomic_write_json(latest_path, normalized)
         state["iterations"][str(iteration)]["human_reviews_latest_path"] = str(latest_path)
         reviews = normalized.get("reviews", [])
         any_decided = any(r.get("review_decision", "pending") != "pending" for r in reviews)
@@ -228,8 +228,8 @@ class ReviewSessionManager:
         timestamp = timestamp_slug()
         snapshot_path = bdd_dir / f"human_bdd_edits_{timestamp}.json"
         latest_path = bdd_dir / "human_bdd_edits_latest.json"
-        write_json(snapshot_path, {"edits": edits, "timestamp": timestamp})
-        write_json(latest_path, {"edits": edits, "timestamp": timestamp})
+        atomic_write_json(snapshot_path, {"edits": edits, "timestamp": timestamp})
+        atomic_write_json(latest_path, {"edits": edits, "timestamp": timestamp})
         if edits:
             if "stage_gates" not in state:
                 state["stage_gates"] = {"review_decided": False, "bdd_edited": False, "scripts_viewed": False}
@@ -351,8 +351,8 @@ class ReviewSessionManager:
         timestamp = timestamp_slug()
         snapshot_path = scripts_dir / f"human_scripts_edits_{timestamp}.json"
         latest_path = scripts_dir / "human_scripts_edits_latest.json"
-        write_json(snapshot_path, {"edits": edits, "timestamp": timestamp})
-        write_json(latest_path, {"edits": edits, "timestamp": timestamp})
+        atomic_write_json(snapshot_path, {"edits": edits, "timestamp": timestamp})
+        atomic_write_json(latest_path, {"edits": edits, "timestamp": timestamp})
         # Persist path in state so rewrite jobs can find it
         state["human_scripts_edits_latest_path"] = str(latest_path)
         self._save_manifest(state)
