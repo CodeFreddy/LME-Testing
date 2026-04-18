@@ -9,6 +9,8 @@ from pathlib import Path
 # Ensure lme_testing and schemas are importable
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from schemas import validate_semantic_rule, validate_artifact_list
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -33,9 +35,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--doc-title", default="LME Matching Rules", help="Document title.")
     parser.add_argument("--doc-version", default="2.2", help="Document version.")
     parser.add_argument(
-        "--validate",
+        "--skip-validate",
         action="store_true",
-        help="Validate semantic_rules.json output against the semantic_rule schema after writing.",
+        help="Skip JSON Schema validation of semantic_rules.json after writing.",
     )
     return parser.parse_args()
 
@@ -435,9 +437,7 @@ def main() -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(semantic_rules, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    if args.validate:
-        from schemas import validate_semantic_rule, validate_artifact_list
-
+    if not args.skip_validate:
         result = validate_artifact_list(output_path, validate_semantic_rule)
         total = result["total"]
         valid = result["valid_count"]

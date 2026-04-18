@@ -63,7 +63,7 @@ jobs:
         run: pip install jsonschema
 
       - name: Run upstream validation pipeline
-        run: python scripts/validate_rules.py --input artifacts/lme_rules_v2_2/atomic_rules.json --fail-on-error
+        run: python scripts/validate_rules.py --input artifacts/lme_rules_v2_2/atomic_rules.json --semantic-rules artifacts/lme_rules_v2_2/semantic_rules.json --fail-on-error
 
   unit-tests:
     name: Unit Tests

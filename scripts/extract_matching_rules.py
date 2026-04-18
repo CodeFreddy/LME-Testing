@@ -12,6 +12,8 @@ from typing import Iterable
 # Ensure lme_testing and schemas are importable
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from schemas import validate_atomic_rule, validate_artifact_list
+
 
 HEADER_RE = re.compile(r"LME Matching Rules Version\s+[0-9.]+\s+Page\s+\d+")
 PAGE_RE = re.compile(r"LME Matching Rules Version\s+[0-9.]+\s+Page\s+(\d+)")
@@ -96,9 +98,9 @@ def parse_args() -> argparse.Namespace:
         help="Write one normalized text file per extracted page.",
     )
     parser.add_argument(
-        "--validate",
+        "--skip-validate",
         action="store_true",
-        help="Validate atomic_rules.json output against the atomic_rule schema after writing.",
+        help="Skip JSON Schema validation of atomic_rules.json after writing.",
     )
     return parser.parse_args()
 
@@ -606,9 +608,7 @@ def main() -> None:
     if args.write_page_text:
         write_page_text_files(output_dir, pages)
 
-    if args.validate:
-        from schemas import validate_atomic_rule, validate_artifact_list
-
+    if not args.skip_validate:
         result = validate_artifact_list(atomic_rules_path, validate_atomic_rule)
         total = result["total"]
         valid = result["valid_count"]

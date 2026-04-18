@@ -26,5 +26,27 @@
     "description": "Missing required field raw_text",
     "rule_id": "MR-001-01",
     "clause_id": "MR-001"
+  },
+  {
+    "description": "rule_id with space violates pattern ^[A-Za-z0-9_-]+$",
+    "rule_id": "MR 001-01",
+    "clause_id": "MR-001",
+    "raw_text": "Some rule text"
+  },
+  {
+    "description": "start_page as string instead of integer",
+    "rule_id": "MR-001-01",
+    "clause_id": "MR-001",
+    "start_page": "2",
+    "end_page": 2,
+    "raw_text": "Some rule text"
+  },
+  {
+    "description": "end_page as string instead of integer",
+    "rule_id": "MR-001-01",
+    "clause_id": "MR-001",
+    "start_page": 1,
+    "end_page": "3",
+    "raw_text": "Some rule text"
   }
 ]

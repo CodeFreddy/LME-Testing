@@ -32,7 +32,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from schemas import validate_atomic_rule, validate_artifact_list
+from schemas import validate_atomic_rule, validate_artifact_list, validate_semantic_rule
 
 
 ALLOWED_RULE_TYPES = frozenset([
@@ -166,7 +166,10 @@ def check_paragraph_ids(atomic_rules: list[dict]) -> dict:
     }
 
 
-def produce_validation_report(atomic_rules_path: Path) -> dict:
+def produce_validation_report(
+    atomic_rules_path: Path,
+    semantic_rules_path: Path | None = None,
+) -> dict:
     """Run all validation checks and produce a structured report."""
     with open(atomic_rules_path, encoding="utf-8") as f:
         atomic_rules = json.load(f)
@@ -186,8 +189,21 @@ def produce_validation_report(atomic_rules_path: Path) -> dict:
         + required_field_result["missing_count"]
     )
 
-    report = {
+    semantic_result: dict | None = None
+    if semantic_rules_path is not None and semantic_rules_path.exists():
+        semantic_schema_result = validate_artifact_list(semantic_rules_path, validate_semantic_rule)
+        semantic_result = {
+            "valid": semantic_schema_result["invalid_count"] == 0,
+            "valid_count": semantic_schema_result["valid_count"],
+            "invalid_count": semantic_schema_result["invalid_count"],
+            "errors": semantic_schema_result["errors_by_index"],
+        }
+        if not semantic_result["valid"]:
+            total_invalid += semantic_schema_result["invalid_count"]
+
+    report: dict = {
         "input_path": str(atomic_rules_path),
+        "semantic_rules_path": str(semantic_rules_path) if semantic_rules_path else None,
         "total_rules": len(atomic_rules),
         "validation_passed": total_invalid == 0,
         "schema_validation": {
@@ -200,6 +216,7 @@ def produce_validation_report(atomic_rules_path: Path) -> dict:
         "required_field_validation": required_field_result,
         "paragraph_id_validation": paragraph_id_result,
         "duplicate_detection": duplicate_result,
+        "semantic_schema_validation": semantic_result,
         "summary": {
             "total_invalid": total_invalid,
             "validation_passed": total_invalid == 0,
@@ -259,6 +276,18 @@ def print_report(report: dict) -> None:
     for g in dd["duplicate_groups"][:2]:
         print(f"    Group ({g['count']} rules): clause_ids={g['clause_ids']}, rule_ids={g['rule_ids'][:3]}")
 
+    if report.get("semantic_schema_validation"):
+        sv = report["semantic_schema_validation"]
+        print(f"  Semantic rules schema: {sv['valid_count']}/{sv['valid_count'] + sv['invalid_count']} valid", end="")
+        if sv["invalid_count"] > 0:
+            print(f", {sv['invalid_count']} invalid")
+            for e in sv["errors"][:3]:
+                print(f"    Index {e['index']}: {e['errors'][0]}")
+        else:
+            print()
+    else:
+        print(f"  Semantic rules schema: not checked (no --semantic-rules provided)")
+
     print()
     if passed:
         print("Validation PASSED — no blocking errors found.")
@@ -285,6 +314,11 @@ def main() -> int:
         action="store_true",
         help="Exit with code 1 if validation finds any errors.",
     )
+    parser.add_argument(
+        "--semantic-rules",
+        default=None,
+        help="Path to semantic_rules.json to validate in the same report.",
+    )
     args = parser.parse_args()
 
     input_path = Path(args.input)
@@ -292,8 +326,9 @@ def main() -> int:
         print(f"ERROR: file not found: {input_path}")
         return 1
 
+    semantic_rules_path = Path(args.semantic_rules) if args.semantic_rules else None
     try:
-        report = produce_validation_report(input_path)
+        report = produce_validation_report(input_path, semantic_rules_path=semantic_rules_path)
     except Exception as e:
         print(f"ERROR: validation failed: {e}")
         import traceback

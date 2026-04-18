@@ -194,6 +194,30 @@ class AtomicRuleSchemaTests(unittest.TestCase):
             errors = validate_atomic_rule(artifact)
             self.assertGreater(len(errors), 0)
 
+    def test_atomic_rule_rule_id_pattern_violation(self) -> None:
+        """rule_id with spaces must fail schema validation."""
+        artifact = {
+            "rule_id": "MR 001-01",
+            "clause_id": "MR-001",
+            "raw_text": "Some rule text",
+        }
+        errors = validate_atomic_rule(artifact)
+        self.assertGreater(len(errors), 0)
+        self.assertTrue(any("rule_id" in e for e in errors))
+
+    def test_atomic_rule_start_page_string_type(self) -> None:
+        """start_page as string must fail integer type check."""
+        artifact = {
+            "rule_id": "MR-001-01",
+            "clause_id": "MR-001",
+            "start_page": "2",
+            "end_page": 2,
+            "raw_text": "Some rule text",
+        }
+        errors = validate_atomic_rule(artifact)
+        self.assertGreater(len(errors), 0)
+        self.assertTrue(any("start_page" in e for e in errors))
+
 
 class SemanticRuleSchemaTests(unittest.TestCase):
     def test_valid_semantic_rule_passes(self) -> None:
@@ -211,6 +235,59 @@ class SemanticRuleSchemaTests(unittest.TestCase):
         for artifact in artifacts:
             errors = validate_semantic_rule(artifact)
             self.assertGreater(len(errors), 0)
+
+    def test_semantic_rule_atomic_rule_ids_empty(self) -> None:
+        """atomic_rule_ids must have at least 1 item (minItems: 1)."""
+        artifact = {
+            "semantic_rule_id": "SR-MR-001-01",
+            "source": {
+                "doc_id": "lme_matching_rules_v2_2",
+                "doc_title": "LME Matching Rules",
+                "doc_version": "2.2",
+                "atomic_rule_ids": [],
+                "pages": [2],
+            },
+            "classification": {"rule_type": "obligation", "coverage_eligible": True},
+            "evidence": [{"quote": "q", "page": 2, "atomic_rule_id": "MR-001-01"}],
+        }
+        errors = validate_semantic_rule(artifact)
+        self.assertGreater(len(errors), 0)
+
+    def test_semantic_rule_priority_invalid_enum(self) -> None:
+        """priority must be high/medium/low."""
+        artifact = {
+            "semantic_rule_id": "SR-MR-001-01",
+            "source": {
+                "doc_id": "lme_matching_rules_v2_2",
+                "doc_title": "LME Matching Rules",
+                "doc_version": "2.2",
+                "atomic_rule_ids": ["MR-001-01"],
+                "pages": [2],
+            },
+            "classification": {"rule_type": "obligation", "priority": "critical", "coverage_eligible": True},
+            "evidence": [{"quote": "q", "page": 2, "atomic_rule_id": "MR-001-01"}],
+        }
+        errors = validate_semantic_rule(artifact)
+        self.assertGreater(len(errors), 0)
+        self.assertTrue(any("priority" in e for e in errors))
+
+    def test_semantic_rule_evidence_quote_empty(self) -> None:
+        """evidence quote must be non-empty (minLength: 1)."""
+        artifact = {
+            "semantic_rule_id": "SR-MR-001-01",
+            "source": {
+                "doc_id": "lme_matching_rules_v2_2",
+                "doc_title": "LME Matching Rules",
+                "doc_version": "2.2",
+                "atomic_rule_ids": ["MR-001-01"],
+                "pages": [2],
+            },
+            "classification": {"rule_type": "obligation", "coverage_eligible": True},
+            "evidence": [{"quote": "", "page": 2, "atomic_rule_id": "MR-001-01"}],
+        }
+        errors = validate_semantic_rule(artifact)
+        self.assertGreater(len(errors), 0)
+        self.assertTrue(any("quote" in e.lower() for e in errors))
 
 
 class MakerOutputSchemaTests(unittest.TestCase):

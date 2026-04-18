@@ -61,5 +61,70 @@
     },
     "classification": {"rule_type": "obligation"},
     "evidence": [{"quote": "q", "page": 2, "atomic_rule_id": "MR-001-01"}]
+  },
+  {
+    "description": "semantic_rule_id with space violates pattern ^[A-Za-z0-9_-]+$",
+    "semantic_rule_id": "SR MR-001-01",
+    "source": {
+      "doc_id": "lme_matching_rules_v2_2",
+      "doc_title": "LME Matching Rules",
+      "doc_version": "2.2",
+      "atomic_rule_ids": ["MR-001-01"],
+      "pages": [2]
+    },
+    "classification": {"rule_type": "obligation", "coverage_eligible": true},
+    "evidence": [{"quote": "q", "page": 2, "atomic_rule_id": "MR-001-01"}]
+  },
+  {
+    "description": "source.pages contains non-integer string",
+    "semantic_rule_id": "SR-MR-001-01",
+    "source": {
+      "doc_id": "lme_matching_rules_v2_2",
+      "doc_title": "LME Matching Rules",
+      "doc_version": "2.2",
+      "atomic_rule_ids": ["MR-001-01"],
+      "pages": ["2"]
+    },
+    "classification": {"rule_type": "obligation", "coverage_eligible": true},
+    "evidence": [{"quote": "q", "page": 2, "atomic_rule_id": "MR-001-01"}]
+  },
+  {
+    "description": "source.atomic_rule_ids is empty array (minItems: 1)",
+    "semantic_rule_id": "SR-MR-001-01",
+    "source": {
+      "doc_id": "lme_matching_rules_v2_2",
+      "doc_title": "LME Matching Rules",
+      "doc_version": "2.2",
+      "atomic_rule_ids": [],
+      "pages": [2]
+    },
+    "classification": {"rule_type": "obligation", "coverage_eligible": true},
+    "evidence": [{"quote": "q", "page": 2, "atomic_rule_id": "MR-001-01"}]
+  },
+  {
+    "description": "classification.priority invalid enum (must be high/medium/low)",
+    "semantic_rule_id": "SR-MR-001-01",
+    "source": {
+      "doc_id": "lme_matching_rules_v2_2",
+      "doc_title": "LME Matching Rules",
+      "doc_version": "2.2",
+      "atomic_rule_ids": ["MR-001-01"],
+      "pages": [2]
+    },
+    "classification": {"rule_type": "obligation", "priority": "critical", "coverage_eligible": true},
+    "evidence": [{"quote": "q", "page": 2, "atomic_rule_id": "MR-001-01"}]
+  },
+  {
+    "description": "evidence quote is empty string (minLength: 1)",
+    "semantic_rule_id": "SR-MR-001-01",
+    "source": {
+      "doc_id": "lme_matching_rules_v2_2",
+      "doc_title": "LME Matching Rules",
+      "doc_version": "2.2",
+      "atomic_rule_ids": ["MR-001-01"],
+      "pages": [2]
+    },
+    "classification": {"rule_type": "obligation", "coverage_eligible": true},
+    "evidence": [{"quote": "", "page": 2, "atomic_rule_id": "MR-001-01"}]
   }
 ]
