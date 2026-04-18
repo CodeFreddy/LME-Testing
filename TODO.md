@@ -63,6 +63,14 @@ Extraction scripts and CI now enforce JSON Schema validation by default:
 - `schemas/fixtures/semantic_rule_invalid.json`: expanded to 10 cases (added semantic_rule_id pattern, pages type, atomic_rule_ids empty, priority enum, empty evidence quote)
 - `tests/test_schemas.py`: added targeted tests for edge cases
 
-## Known Issues / Open Questions
+## Scripts Tab Edit Workflow (DONE 2026/04/18)
 
-- **Scripts tab is read-only display**: The `saveScriptsEdits` button and save mechanism are scaffolded but not wired to a real edit workflow. Step definitions are managed locally in `bdd_export.py` `TEMPLATE_REGISTRY` and Ruby step definition files, not via GUI.
+Scripts tab now supports full edit → save → downstream wiring:
+
+- `saveScriptsEdits` JS function collects step text from textareas (both regular and gap steps) and POSTs to `/api/scripts/save`
+- `save_scripts_edits` Python method persists `human_scripts_edits_latest.json` in session snapshot and records the path in session state
+- `--human-scripts-edits` flag added to `bdd` and `rewrite` CLI subcommands; rewrite jobs automatically pick up the latest saved edits from state
+- `apply_human_step_edits()` updates `step_text`, `step_pattern`, and `code` in normalized BDD results; gap steps are appended as new entries
+- `TEMPLATE_REGISTRY` expanded with 16 real Ruby implementations learned from `samples/ruby_cucumber/` (terminology validation, price validation contact, trade resubmission, venue-specific, matching rules adoption)
+- `generate_step_definition(human_edited=True)` prefers template matches and falls back to `_generate_implementation()` for real code, not `pending` stubs
+- `map_step_to_template` gains multi-strategy matching: exact substring, parameterized prefix, and token-overlap with `require_exact` safety flag
