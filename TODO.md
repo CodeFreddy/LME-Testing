@@ -65,5 +65,4 @@ Extraction scripts and CI now enforce JSON Schema validation by default:
 
 ## Known Issues / Open Questions
 
-- **Step-registry output path inconsistency**: Writes directly to `runs/step-registry/step_visibility.json` without a timestamped run_id subfolder (other pipelines use `runs/<pipeline>/<run_id>/`). Session manifest works fine but design is inconsistent.
 - **Scripts tab is read-only display**: The `saveScriptsEdits` button and save mechanism are scaffolded but not wired to a real edit workflow. Step definitions are managed locally in `bdd_export.py` `TEMPLATE_REGISTRY` and Ruby step definition files, not via GUI.
