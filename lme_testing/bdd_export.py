@@ -869,8 +869,12 @@ def apply_human_step_edits(
     """
     import json as _json
 
+    if not human_scripts_edits_path:
+        return bdd_results
     edits_path = Path(human_scripts_edits_path)
-    if not edits_path.exists():
+    if edits_path.name in ("", ".", ".."):
+        return bdd_results
+    if not edits_path.is_file():
         return bdd_results
 
     with edits_path.open(encoding="utf-8") as f:

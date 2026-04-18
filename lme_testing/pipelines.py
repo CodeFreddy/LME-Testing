@@ -2,10 +2,13 @@
 
 import hashlib
 import json
+import logging
 import re
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 from .config import ProjectConfig
 from .prompts import (
@@ -876,9 +879,10 @@ def run_rewrite_pipeline(
 
     # If human scripts edits are provided, convert merged records to normalized BDD
     # and apply human step edits before rendering step definitions
-    if human_scripts_edits_path and Path(human_scripts_edits_path).exists():
+    _edits_path = Path(human_scripts_edits_path) if human_scripts_edits_path else None
+    if _edits_path and _edits_path.name not in ("", ".", "..") and _edits_path.exists():
         normalized_bdd = _maker_records_to_normalized_bdd(merged_records)
-        normalized_bdd = apply_human_step_edits(normalized_bdd, Path(human_scripts_edits_path))
+        normalized_bdd = apply_human_step_edits(normalized_bdd, _edits_path)
         ensure_dir(output_dir / "bdd")
         step_file = render_steps_from_normalized_bdd(normalized_bdd, output_dir / "bdd")
         logger.info("Rewritten step definitions with human edits. step_file=%s", step_file)

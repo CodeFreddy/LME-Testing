@@ -45,6 +45,27 @@ def _render_page(title: str, body: str, extra_script: str = "") -> str:
     li {{ margin: 4px 0; }}
     pre {{ white-space: pre-wrap; word-break: break-word; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; font-size: 12px; }}
     code {{ background: #e2e8f0; padding: 2px 6px; border-radius: 6px; }}
+    .rule-row:hover {{ background: #f8fafc; }}
+    .rule-row.highlighted {{ background: #eff6ff; outline: 2px solid #3b82f6; outline-offset: -2px; }}
+    .rule-row.dimmed {{ opacity: 0.4; }}
+    .rule-link {{ color: #2563eb; text-decoration: none; font-weight: 600; cursor: pointer; }}
+    .rule-link:hover {{ text-decoration: underline; color: #1d4ed8; }}
+    .rule-group-header th {{ background: #f1f5f9 !important; border-top: 2px solid #cbd5e1; }}
+    .rule-group-id {{ font-weight: 700; color: #0f172a; font-size: 13px; }}
+    .coverage-fully-covered {{ color: #16a34a; font-weight: 600; }}
+    .coverage-partially-covered {{ color: #ca8a04; font-weight: 600; }}
+    .coverage-uncovered {{ color: #dc2626; font-weight: 600; }}
+    .coverage-not-applicable {{ color: #64748b; }}
+    .metric.clickable {{ cursor: pointer; transition: background 0.15s; }}
+    .metric.clickable:hover {{ background: #dbeafe; }}
+    .metric.clickable.active {{ background: #bfdbfe; outline: 2px solid #3b82f6; outline-offset: -2px; }}
+    .case-pills {{ display: inline-flex; flex-wrap: wrap; gap: 4px; align-items: center; }}
+    .case-pill {{ display: inline-block; padding: 1px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; white-space: nowrap; }}
+    .case-pill-req {{ background: #e2e8f0; color: #334155; }}
+    .case-pill-present {{ background: #dcfce7; color: #15803d; border: 1px solid #86efac; }}
+    .case-pill-accepted {{ background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }}
+    .case-pill-missing {{ background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; text-decoration: line-through; }}
+    .rule-pill-sep {{ color: #cbd5e1; margin: 0 2px; font-size: 10px; }}
   </style>
 </head>
 <body>
@@ -66,6 +87,32 @@ def _list_html(items: list[str]) -> str:
     if not items:
         return '&nbsp;'
     return '<ul>' + ''.join(f'<li>{html.escape(str(item))}</li>' for item in items) + '</ul>'
+
+
+def _case_type_pills(items: list[str], pill_class: str) -> str:
+    if not items:
+        return '&nbsp;'
+    return ''.join(f'<span class="case-pill {pill_class}">{html.escape(str(item))}</span>' for item in items)
+
+
+def _case_type_pills_html(required: list, present: list, accepted: list, missing: list) -> str:
+    """Render case types as inline color-coded pills grouped by role."""
+    parts = []
+    if required:
+        parts.append(f'<span class="case-pill case-pill-req">Req</span> ' + _case_type_pills(required, 'case-pill-req'))
+    if present:
+        if parts:
+            parts.append('<span class="rule-pill-sep">|</span>')
+        parts.append(f'<span class="case-pill case-pill-present">Present</span> ' + _case_type_pills(present, 'case-pill-present'))
+    if accepted:
+        if parts:
+            parts.append('<span class="rule-pill-sep">|</span>')
+        parts.append(f'<span class="case-pill case-pill-accepted">Accept</span> ' + _case_type_pills(accepted, 'case-pill-accepted'))
+    if missing:
+        if parts:
+            parts.append('<span class="rule-pill-sep">|</span>')
+        parts.append(f'<span class="case-pill case-pill-missing">Missing</span> ' + _case_type_pills(missing, 'case-pill-missing'))
+    return ''.join(parts) if parts else '&nbsp;'
 
 
 def _evidence_html(items: list[dict]) -> str:
@@ -107,17 +154,19 @@ def _render_rule_coverage_rows(status_by_rule: dict[str, dict]) -> str:
     rows = []
     for semantic_rule_id in sorted(status_by_rule):
         item = status_by_rule[semantic_rule_id]
+        status = item.get('rule_coverage_status', '')
+        status_class = status.replace('_', '-')
         rows.append(
-            f"<tr>"
-            f"<td>{html.escape(semantic_rule_id)}</td>"
+            f"<tr class='rule-row' data-rule='{html.escape(semantic_rule_id)}' data-status='{html.escape(status)}'>"
+            f"<td><a href='#rule-detail-{html.escape(semantic_rule_id)}' class='rule-link'>{html.escape(semantic_rule_id)}</a></td>"
             f"<td>{html.escape(', '.join(item.get('paragraph_ids', [])))}</td>"
             f"<td>{html.escape(str(item.get('rule_type', '')))}</td>"
-            f"<td>{html.escape(str(item.get('rule_coverage_status', '')))}</td>"
+            f"<td class='coverage-{html.escape(status_class)}'>{html.escape(status)}</td>"
             f"<td>{html.escape(str(item.get('rule_pass_status', '')))}</td>"
-            f"<td>{_list_html(item.get('required_case_types', []))}</td>"
-            f"<td>{_list_html(item.get('present_case_types', []))}</td>"
-            f"<td>{_list_html(item.get('accepted_case_types', []))}</td>"
-            f"<td>{_list_html(item.get('missing_case_types', []))}</td>"
+            f"<td><div class='case-pills'>{_case_type_pills(item.get('required_case_types', []), 'case-pill-req')}</div></td>"
+            f"<td><div class='case-pills'>{_case_type_pills(item.get('present_case_types', []), 'case-pill-present')}</div></td>"
+            f"<td><div class='case-pills'>{_case_type_pills(item.get('accepted_case_types', []), 'case-pill-accepted')}</div></td>"
+            f"<td><div class='case-pills'>{_case_type_pills(item.get('missing_case_types', []), 'case-pill-missing')}</div></td>"
             f"</tr>"
         )
     return ''.join(rows)
@@ -275,16 +324,20 @@ def generate_html_report(
 
     reviews_by_case = {item['case_id']: item for item in checker_reviews}
 
-    combined_rows = []
+    combined_rows: list[str] = []
     overall_values: list[str] = []
     coverage_values: list[str] = []
-    maker_rows = []
-    checker_rows = []
+    maker_rows: list[str] = []
+    checker_rows: list[str] = []
+    status_by_rule = coverage_report.get('status_by_rule', {})
 
     for maker_record in maker_cases:
         semantic_rule_id = maker_record['semantic_rule_id']
         feature = maker_record.get('feature', '')
         scenario_count = len(maker_record.get('scenarios', []))
+        rule_item = status_by_rule.get(semantic_rule_id, {})
+        rule_status = rule_item.get('rule_coverage_status', '')
+        rule_status_class = rule_status.replace('_', '-')
         maker_rows.append(
             f"<tr>"
             f"<td>{html.escape(semantic_rule_id)}</td>"
@@ -295,6 +348,17 @@ def generate_html_report(
             f"</tr>"
         )
 
+        # Sub-header row as anchor for rule-level navigation
+        combined_rows.append(
+            f"<tr id='rule-detail-{html.escape(semantic_rule_id)}' class='rule-group-header' style='background:#f1f5f9'>"
+            f"<th colspan='6' style='text-align:left;padding:6px 10px;border:none'>"
+            f"<span class='rule-group-id' style='font-weight:700;color:#0f172a'>{html.escape(semantic_rule_id)}</span>"
+            f"<span style='margin-left:16px;font-weight:normal;color:#64748b;font-size:12px'>"
+            f"Coverage: <span class='coverage-{html.escape(rule_status_class)}'>{html.escape(rule_status)}</span>"
+            f" | {_case_type_pills_html(rule_item.get('required_case_types', []), rule_item.get('present_case_types', []), rule_item.get('accepted_case_types', []), rule_item.get('missing_case_types', []))}"
+            f"</span>"
+            f"</th></tr>"
+        )
         for scenario in maker_record.get('scenarios', []):
             case_id = scenario.get('scenario_id', '')
             review = reviews_by_case.get(case_id, {})
@@ -328,8 +392,17 @@ def generate_html_report(
 const overallFilter = document.getElementById('overallFilter');
 const coverageFilter = document.getElementById('coverageFilter');
 const keywordFilter = document.getElementById('keywordFilter');
+const coverageStatusFilter = document.getElementById('coverageStatusFilter');
+const ruleTypeFilter = document.getElementById('ruleTypeFilter');
+const clearRuleFilters = document.getElementById('clearRuleFilters');
+const ruleVisibleCount = document.getElementById('ruleVisibleCount');
+
+// Scenario detail table rows (data-overall)
 const tableRows = Array.from(document.querySelectorAll('tbody tr[data-overall]'));
-function applyFilters() {
+// Coverage table rows (data-status)
+const coverageRows = Array.from(document.querySelectorAll('tbody tr[data-status]'));
+
+function applyScenarioFilters() {
   const overall = overallFilter.value;
   const coverage = coverageFilter.value;
   const keyword = keywordFilter.value.trim().toLowerCase();
@@ -345,10 +418,69 @@ function applyFilters() {
   }
   document.getElementById('visibleCount').innerText = String(visible);
 }
-overallFilter.addEventListener('change', applyFilters);
-coverageFilter.addEventListener('change', applyFilters);
-keywordFilter.addEventListener('input', applyFilters);
-applyFilters();
+
+function applyCoverageTableFilters() {
+  const status = coverageStatusFilter.value;
+  const ruleType = ruleTypeFilter.value;
+  let visible = 0;
+  for (const row of coverageRows) {
+    const matchesStatus = !status || row.dataset.status === status;
+    // rule type is in the 3rd cell (index 2)
+    const cellText = row.cells[2] ? row.cells[2].innerText.trim() : '';
+    const matchesRuleType = !ruleType || cellText === ruleType;
+    const show = matchesStatus && matchesRuleType;
+    row.style.display = show ? '' : 'none';
+    if (show) visible += 1;
+  }
+  // Also show/hide rule-group-header rows based on whether any data row beneath is visible
+  document.querySelectorAll('tr.rule-group-header').forEach(header => {
+    const ruleId = header.id.replace('rule-detail-', '');
+    const dataRows = document.querySelectorAll(`tr[data-rule="${CSS.escape(ruleId)}"]`);
+    const anyVisible = Array.from(dataRows).some(r => r.style.display !== 'none');
+    header.style.display = anyVisible ? '' : 'none';
+  });
+  ruleVisibleCount.innerText = `${visible} / ${coverageRows.length} 条规则`;
+  // Show clear button only when a filter is active
+  clearRuleFilters.style.display = (status || ruleType) ? '' : 'none';
+}
+
+overallFilter.addEventListener('change', applyScenarioFilters);
+coverageFilter.addEventListener('change', applyScenarioFilters);
+keywordFilter.addEventListener('input', applyScenarioFilters);
+coverageStatusFilter.addEventListener('change', applyCoverageTableFilters);
+ruleTypeFilter.addEventListener('change', applyCoverageTableFilters);
+clearRuleFilters.addEventListener('click', () => {
+  coverageStatusFilter.value = '';
+  ruleTypeFilter.value = '';
+  applyCoverageTableFilters();
+});
+
+// Clickable summary metrics → filter coverage table
+document.querySelectorAll('[data-coverage-filter]').forEach(el => {
+  el.addEventListener('click', () => {
+    const filter = el.dataset.coverageFilter;
+    coverageStatusFilter.value = filter;
+    // Toggle active state
+    document.querySelectorAll('[data-coverage-filter]').forEach(m => m.classList.remove('active'));
+    el.classList.add('active');
+    applyCoverageTableFilters();
+  });
+});
+
+// Click on rule link in coverage table → jump to and highlight that rule's cases
+document.querySelectorAll('.rule-link').forEach(link => {
+  link.addEventListener('click', () => {
+    const ruleId = link.hash.replace('#rule-detail-', '');
+    keywordFilter.value = '';
+    applyScenarioFilters();
+    setTimeout(() => {
+      document.querySelectorAll('tr[data-rule]').forEach(el => el.classList.remove('highlighted'));
+      document.querySelectorAll(`tr[data-rule="${CSS.escape(ruleId)}"]`).forEach(el => el.classList.add('highlighted'));
+    }, 50);
+  });
+});
+applyScenarioFilters();
+applyCoverageTableFilters();
 """
 
     combined_body = f"""
@@ -359,15 +491,40 @@ applyFilters();
       <div class="metric"><strong>Maker Rule 数</strong><br/>{maker_summary.get('merged_rule_count', maker_summary.get('processed_rule_count', 0))}</div>
       <div class="metric"><strong>Maker Scenario 数</strong><br/>{maker_summary.get('scenario_count', 0)}</div>
       <div class="metric"><strong>Checker Review 数</strong><br/>{checker_summary.get('merged_review_count', checker_summary.get('review_count', 0))}</div>
-      <div class="metric"><strong>Fully Covered</strong><br/>{coverage_report.get('fully_covered', 0)}</div>
-      <div class="metric"><strong>Partially Covered</strong><br/>{coverage_report.get('partially_covered', 0)}</div>
-      <div class="metric"><strong>Uncovered</strong><br/>{coverage_report.get('uncovered', 0)}</div>
-      <div class="metric"><strong>Not Applicable</strong><br/>{coverage_report.get('not_applicable', 0)}</div>
+      <div class="metric clickable" data-coverage-filter="fully_covered"><strong>Fully Covered</strong><br/><span class="coverage-fully-covered">{coverage_report.get('fully_covered', 0)}</span></div>
+      <div class="metric clickable" data-coverage-filter="partially_covered"><strong>Partially Covered</strong><br/><span class="coverage-partially-covered">{coverage_report.get('partially_covered', 0)}</span></div>
+      <div class="metric clickable" data-coverage-filter="uncovered"><strong>Uncovered</strong><br/><span class="coverage-uncovered">{coverage_report.get('uncovered', 0)}</span></div>
+      <div class="metric clickable" data-coverage-filter="not_applicable"><strong>Not Applicable</strong><br/><span class="coverage-not-applicable">{coverage_report.get('not_applicable', 0)}</span></div>
       <div class="metric"><strong>覆盖率</strong><br/>{coverage_report.get('coverage_percent', 0)}%</div>
     </div>
   </div>
   <div class="card">
     <h2>Rule 级覆盖判定</h2>
+    <div class="toolbar">
+      <label>Coverage Status
+        <select id="coverageStatusFilter">
+          <option value="">全部</option>
+          <option value="fully_covered">Fully Covered</option>
+          <option value="partially_covered">Partially Covered</option>
+          <option value="uncovered">Uncovered</option>
+          <option value="not_applicable">Not Applicable</option>
+        </select>
+      </label>
+      <label>Rule Type
+        <select id="ruleTypeFilter">
+          <option value="">全部</option>
+          <option value="obligation">obligation</option>
+          <option value="prohibition">prohibition</option>
+          <option value="permission">permission</option>
+          <option value="deadline">deadline</option>
+          <option value="state_transition">state_transition</option>
+          <option value="data_constraint">data_constraint</option>
+          <option value="reference_only">reference_only</option>
+        </select>
+      </label>
+      <span id="ruleVisibleCount" class="muted"></span>
+      <button id="clearRuleFilters" style="display:none">清除筛选</button>
+    </div>
     <table>
       <thead>
         <tr>
@@ -389,7 +546,7 @@ applyFilters();
   </div>
   <div class="card">
     <h2>导出</h2>
-    <p><a href="{html.escape(csv_path.name)}" download>Download Coverage CSV</a></p>
+    <p><a href="/coverage.csv" download>Download Coverage CSV</a></p>
     <p class="muted">Coverage report: {html.escape(str(coverage_report_path))}</p>
   </div>
   <div class="card">
