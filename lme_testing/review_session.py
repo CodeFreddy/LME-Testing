@@ -347,6 +347,9 @@ class ReviewSessionManager:
         latest_path = scripts_dir / "human_scripts_edits_latest.json"
         write_json(snapshot_path, {"edits": edits, "timestamp": timestamp})
         write_json(latest_path, {"edits": edits, "timestamp": timestamp})
+        # Persist path in state so rewrite jobs can find it
+        state["human_scripts_edits_latest_path"] = str(latest_path)
+        self._save_manifest(state)
         logger.info("Saved scripts edits. session_id=%s iteration=%s saved=%s latest=%s edit_count=%s", state["session_id"], iteration, snapshot_path, latest_path, len(edits))
         return {"saved_path": str(snapshot_path), "latest_path": str(latest_path), "edit_count": len(edits)}
 
@@ -441,6 +444,7 @@ class ReviewSessionManager:
                 output_dir=rewrite_dir,
                 limit=None,
                 batch_size=self.rewrite_batch_size,
+                human_scripts_edits_path=Path(state.get("human_scripts_edits_latest_path") or ""),
             )
             checker_summary = run_checker_pipeline(
                 config=self.config,
@@ -1097,14 +1101,15 @@ function renderScriptsTab(data) {
         if (!steps.length) return '';
         return `<div class="step-type-section">
           <h3 style="text-transform:uppercase;">${type} (${steps.length})</h3>
-          ${steps.map(step => `
+          ${steps.map((step, idx) => `
             <div class="step-item ${step.match_type || ''}">
               <div class="step-item-header">
-                <span class="step-item-text">${escapeHtml(step.step_text || '')}</span>
-                ${step.match_type ? `<span class="step-item-badge ${matchBadgeClass(step.match_type)}">${escapeHtml(step.match_type || '')}</span>` : ''}
+                <span class="step-item-badge ${matchBadgeClass(step.match_type)}">${escapeHtml(step.match_type || 'unmatched')}</span>
+                ${step.source_scenario_ids && step.source_scenario_ids.length ? `<span class="muted" style="font-size:11px;">来源: ${escapeHtml(step.source_scenario_ids.join(', '))}</span>` : ''}
               </div>
-              ${step.step_pattern ? `<div class="step-item-pattern">${escapeHtml(step.step_pattern || '')}</div>` : ''}
-              ${step.library_step_text ? `<div class="step-item-pattern">→ ${escapeHtml(step.library_step_text || '')}</div>` : ''}
+              <textarea class="step-textarea" data-step-type="${type}" data-step-index="${idx}" rows="2" placeholder="step text">${escapeHtml(step.step_text || '')}</textarea>
+              ${step.step_pattern ? `<div class="step-item-pattern">pattern: ${escapeHtml(step.step_pattern || '')}</div>` : ''}
+              ${step.library_step_text ? `<div class="step-item-pattern">→ lib: ${escapeHtml(step.library_step_text || '')}</div>` : ''}
               ${step.confidence && step.match_type !== 'exact' ? `<div class="muted" style="font-size:11px;">confidence: ${(step.confidence * 100).toFixed(0)}%</div>` : ''}
               ${step.suggestions && step.suggestions.length ? `<div style="margin-top:4px;"><strong>Suggestions:</strong>${step.suggestions.map(sg => `<div class="suggestion-item">${escapeHtml(sg.library_step_text || '')} (${((sg.similarity || 0) * 100).toFixed(0)}%)</div>`).join('')}</div>` : ''}
             </div>
@@ -1113,17 +1118,35 @@ function renderScriptsTab(data) {
       }).join('')}
     </div>
     ${(data.gaps && data.gaps.length) ? `<div class="step-type-section">
-      <h3 style="color:#991b1b;">GAPS (${data.gaps.length})</h3>
-      ${data.gaps.map(g => `<div class="step-item unmatched">
-        <div class="step-item-text">${escapeHtml(g.step_text || '')}</div>
-        ${g.step_pattern ? `<div class="step-item-pattern">${escapeHtml(g.step_pattern || '')}</div>` : ''}
-        ${g.source_scenario_ids && g.source_scenario_ids.length ? `<div class="muted" style="font-size:11px;">来源: ${escapeHtml(g.source_scenario_ids.join(', '))}</div>` : ''}
-      </div>`).join('')}
+      <h3 style="color:#991b1b;">GAPS (${data.gaps.length}) — 需要人工实现</h3>
+      ${data.gaps.map((g, idx) => `
+        <div class="step-item unmatched">
+          <div class="step-item-header">
+            <span class="step-item-badge badge-unmatched">GAP</span>
+            ${g.source_scenario_ids && g.source_scenario_ids.length ? `<span class="muted" style="font-size:11px;">来源: ${escapeHtml(g.source_scenario_ids.join(', '))}</span>` : ''}
+          </div>
+          <textarea class="step-textarea" data-gap-index="${idx}" rows="2" placeholder="step text (editable)">${escapeHtml(g.step_text || '')}</textarea>
+          ${g.step_pattern ? `<div class="step-item-pattern">pattern: ${escapeHtml(g.step_pattern || '')}</div>` : ''}
+        </div>`).join('')}
     </div>` : ''}
   `;
 }
 async function saveScriptsEdits() {
-  const edits = scriptsPayload ? Object.values(scriptsPayload).map(d => d) : [];
+  const edits = [];
+  document.querySelectorAll('.step-textarea[data-step-type]').forEach(ta => {
+    edits.push({
+      step_type: ta.dataset.stepType,
+      step_index: parseInt(ta.dataset.stepIndex),
+      step_text: ta.value,
+    });
+  });
+  document.querySelectorAll('.step-textarea[data-gap-index]').forEach(ta => {
+    edits.push({
+      is_gap: true,
+      gap_index: parseInt(ta.dataset.gapIndex),
+      step_text: ta.value,
+    });
+  });
   const result = await postJson('/api/scripts/save', { edits });
   document.getElementById('scriptsStatus').textContent = `已保存到 ${escapeHtml(result.latest_path)}`;
   await loadStageData();

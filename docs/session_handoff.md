@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-18 01:38:54 UTC`
+- `2026-04-18 04:52:07 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `feat: wire Scripts tab edits into step definition generation`
 - `docs: update TODO 鈥?step-registry output path fixed`
 - `fix: step-registry output uses run_id subfolder like other pipelines`
 - `docs: update session_handoff and TODO to reflect completed schema work`
 - `feat: wire formal JSON Schema validation into extraction scripts and CI`
-- `fix: JS syntax bugs in review-session UI and annotate step registry output`
 
 ---
 

@@ -70,6 +70,12 @@ def build_parser() -> argparse.ArgumentParser:
     bdd.add_argument("--limit", type=int, default=None)
     bdd.add_argument("--batch-size", type=int, default=4)
     bdd.add_argument("--resume-from", default=None)
+    bdd.add_argument(
+        "--human-scripts-edits",
+        default=None,
+        help="Path to human_scripts_edits_latest.json from a review session. "
+             "When provided, step definitions reflect human-edited and gap steps.",
+    )
 
     bdd_export = subparsers.add_parser(
         "bdd-export",
@@ -148,6 +154,12 @@ def build_parser() -> argparse.ArgumentParser:
     rewrite.add_argument("--output-dir", default="runs/rewrite")
     rewrite.add_argument("--limit", type=int, default=None)
     rewrite.add_argument("--batch-size", type=int, default=4)
+    rewrite.add_argument(
+        "--human-scripts-edits",
+        default=None,
+        help="Path to human_scripts_edits_latest.json. When provided, applies "
+             "human step edits when rendering step definitions.",
+    )
 
     human_review = subparsers.add_parser(
         "human-review",
@@ -272,6 +284,7 @@ def main() -> int:
             limit=args.limit,
             batch_size=args.batch_size,
             resume_from=Path(args.resume_from) if args.resume_from else None,
+            human_scripts_edits_path=Path(args.human_scripts_edits) if args.human_scripts_edits else None,
         )
     elif args.command == "bdd-export":
         result = run_bdd_export(
@@ -323,6 +336,7 @@ def main() -> int:
             output_dir=output_dir,
             limit=args.limit,
             batch_size=args.batch_size,
+            human_scripts_edits_path=Path(args.human_scripts_edits) if args.human_scripts_edits else None,
         )
     elif args.command == "human-review":
         output_html_path = Path(args.output_html)

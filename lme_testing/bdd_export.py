@@ -104,6 +104,150 @@ end''',
   expect(@browser.text).to include(text)
 end''',
     },
+    # Terminology validation patterns (learned from samples/ruby_cucumber/)
+    "terminology_assigned": {
+        "given_pattern": "terms are assigned the meaning ascribed in the LME Rulebook",
+        "given_code": '''Given(/^the terms are assigned the meaning ascribed in the LME Rulebook$/) do
+  @validation_result = LME::API.validate_terminology(@document)
+end''',
+    },
+    "terminology_compliant": {
+        "then_pattern": "terms are assigned the meaning ascribed in the LME Rulebook",
+        "then_code": '''Then(/^the terms are assigned the meaning ascribed in the LME Rulebook$/) do
+  expect(@validation_result.compliant).to be(true)
+  expect(@validation_result.source).to eq('LME Rulebook')
+end''',
+    },
+    "terminology_deviation": {
+        "then_pattern": "system identifies the deviation from the LME Rulebook",
+        "then_code": '''Then(/^the system identifies the deviation from the LME Rulebook$/) do
+  expect(@validation_result.compliant).to be(false)
+  expect(@validation_result.errors).to include('TERM_DEVIATION')
+end''',
+    },
+    "obligation_fulfilled": {
+        "then_pattern": "obligation is fulfilled",
+        "then_code": '''Then(/^the obligation is fulfilled$/) do
+  expect(@validation_result.status).to eq('fulfilled')
+end''',
+    },
+    "obligation_not_fulfilled": {
+        "then_pattern": "obligation is not fulfilled",
+        "then_code": '''Then(/^the obligation is not fulfilled$/) do
+  expect(@validation_result.status).to eq('rejected')
+end''',
+    },
+    # Price validation contact workflow (learned from samples/ruby_cucumber/)
+    "contact_exchange_reason": {
+        "when_pattern": "member contacts Exchange to explain",
+        "when_code": '''When(/^the Member contacts the Exchange to explain the rationale for the price$/) do
+  @contact_response = LME::PostTrade.contact_exchange(
+    reason: @validation_result.rejection_reason
+  )
+end''',
+    },
+    "compliance_recorded": {
+        "then_pattern": "processing result indicates compliance",
+        "then_code": '''Then(/^the processing result indicates compliance$/) do
+  expect(@contact_response).not_to be_nil
+  expect(@contact_response.status).to eq('RECORDED')
+  compliance = LME::PostTrade.get_compliance_status(@validation_result.rejection_reason)
+  expect(compliance).to eq('COMPLIANT')
+end''',
+    },
+    "non_compliance": {
+        "then_pattern": "processing result indicates non-compliance",
+        "then_code": '''Then(/^the processing result indicates non-compliance or failure$/) do
+  expect(@contact_response).to be_nil
+  compliance = LME::PostTrade.get_compliance_status('trade_without_contact')
+  expect(compliance).to eq('NON_COMPLIANT')
+end''',
+    },
+    # Trade re-submission patterns (learned from samples/ruby_cucumber/)
+    "trade_failed_checks": {
+        "given_pattern": "trade submission resulted in Failed Checks",
+        "given_code": '''Given(/^trade submission resulted in Failed Checks$/) do
+  @trade_params = { price: '999999', metal: 'ALU', quantity: 25 }
+  @trade_submission = LME::API.submit_trade(@trade_params)
+  expect(@trade_submission.status).to eq('SUBMITTED')
+end''',
+    },
+    "resubmit_original_form": {
+        "when_pattern": "Member requests to re-submit the trade in its original form",
+        "when_code": '''When(/^Member requests to re-submit the trade in its original form$/) do
+  @resubmission_response = LME::API.resubmit_trade(
+    @trade_submission.id, original_form: @trade_params
+  )
+end''',
+    },
+    "resubmission_permitted": {
+        "then_pattern": "system permits the trade re-submission",
+        "then_code": '''Then(/^system permits the trade re-submission$/) do
+  expect(@resubmission_response.status).to eq('PERMITTED')
+end''',
+    },
+    # Venue-specific validation patterns
+    "venue_business_transacted": {
+        "given_pattern": "business is transacted on the Exchange",
+        "given_code": '''Given(/^business is transacted on the Exchange$/) do
+  @session = LME::Client.login(
+    username: ENV['LME_USERNAME'] || 'test_trader',
+    password: ENV['LME_PASSWORD'] || 'test_pass'
+  )
+end''',
+    },
+    "venue_trade_agreement": {
+        "when_pattern": "trade agreement occurs",
+        "when_code": '''When(/^trade agreement occurs$/) do
+  @trade_agreement = LME::PostTrade.create_agreement
+end''',
+    },
+    "venue_price_validation": {
+        "then_pattern": "business is subject to price validation",
+        "then_code": '''Then(/^business is subject to price validation$/) do
+  expect(@trade_agreement.price_validation_required).to be(true)
+end''',
+    },
+    # Matching rules adoption patterns
+    "exchange_defines_matching_rules": {
+        "given_pattern": "Exchange defines matching rules",
+        "given_code": '''Given(/^the Exchange defines matching rules$/) do
+  @rules = LME::PostTrade.define_matching_rules(version: '1.0')
+end''',
+    },
+    "rules_submitted_adoption": {
+        "when_pattern": "rules are submitted for adoption",
+        "when_code": '''When(/^the rules are submitted for adoption$/) do
+  @adoption_status = LME::PostTrade.submit_adoption(@rules)
+end''',
+    },
+    "rules_adopted": {
+        "then_pattern": "rules are recognized as part of Administrative Procedures",
+        "then_code": '''Then(/^the rules are recognized as part of Administrative Procedures$/) do
+  expect(@adoption_status.adopted).to be(true)
+  expect(@adoption_status.classification).to eq('Administrative_Procedures')
+end''',
+    },
+    # LME trading environment
+    "lme_environment_active": {
+        "given_pattern": "LME trading environment is active",
+        "given_code": '''Given(/^LME trading environment is active$/) do
+  @env = LME::Client.environment
+  expect(@env.status).to eq('active')
+end''',
+    },
+    "trade_on_any_venue": {
+        "when_pattern": "trade agreement occurs on any venue",
+        "when_code": '''When(/^trade agreement occurs on any venue$/) do
+  @agreement = LME::PostTrade.create_agreement
+end''',
+    },
+    "trade_subject_to_validation": {
+        "then_pattern": "trade is subject to price validation",
+        "then_code": '''Then(/^trade is subject to price validation$/) do
+  expect(@agreement.price_validation_required).to be(true)
+end''',
+    },
 }
 
 
@@ -215,45 +359,225 @@ def extract_step_pattern(step: str) -> str:
     return pattern
 
 
-def map_step_to_template(step: str, step_type: str) -> str | None:
-    """Map a step to a known template if available."""
+def _step_tokens(text: str) -> set[str]:
+    """Return significant (non-stopword) tokens from step text for matching."""
+    stopwords = {"a", "an", "the", "to", "is", "are", "be", "that", "this", "it", "of", "in", "for", "on", "and", "or", "with", "as", "at", "by"}
+    return {w for w in re.findall(r'\w+', text.lower()) if w not in stopwords and len(w) > 2}
+
+
+def map_step_to_template(step: str, step_type: str, require_exact: bool = False) -> str | None:
+    """Map a step to a known template if available.
+
+    Uses multi-strategy matching:
+    - exact substring match (fast path for common patterns)
+    - token-overlap match (handles rephrasing)
+    - parameterized prefix match (handles "GET request to /path" variants)
+
+    When require_exact=True (used for human-edited steps), only exact substring
+    matches are accepted to avoid applying wrong templates.
+    """
     step_lower = step.lower()
 
-    for key, template in TEMPLATE_REGISTRY.items():
+    for template in TEMPLATE_REGISTRY.values():
         pattern_field = f"{step_type}_pattern"
-        if pattern_field in template:
-            if template[pattern_field].lower() in step_lower or step_lower in template[pattern_field].lower():
+        if pattern_field not in template:
+            continue
+        pattern = template[pattern_field]
+        pattern_lower = pattern.lower()
+
+        if require_exact:
+            # Strict: only accept exact or near-exact substring match
+            if pattern_lower in step_lower or step_lower in pattern_lower:
+                return template.get(f"{step_type}_code")
+            continue
+
+        # Flexible matching (original behavior + improvements)
+        # 1. Exact substring (either direction)
+        if pattern_lower in step_lower or step_lower in pattern_lower:
+            return template.get(f"{step_type}_code")
+
+        # 2. Parameterized prefix: "GET request to" matches "GET request to /api/users"
+        if "(" not in pattern:
+            # Non-parameterized pattern — check prefix overlap
+            words = pattern_lower.split()
+            if len(words) >= 2 and step_lower.startswith(" ".join(words[:2])):
+                return template.get(f"{step_type}_code")
+
+        # 3. Token overlap: require at least 2 significant words in common
+        pattern_toks = _step_tokens(pattern)
+        step_toks = _step_tokens(step)
+        overlap = pattern_toks & step_toks
+        if len(overlap) >= 2 and len(pattern_toks) >= 2:
+            # Only accept if the overlap represents meaningful content (not common filler)
+            if len(overlap) / len(pattern_toks) >= 0.4:
                 return template.get(f"{step_type}_code")
 
     return None
 
 
-def generate_step_definition(step: str, step_type: str, step_index: int, feature_name: str) -> str:
-    """Generate Ruby step definition code for a given step."""
-    # Try to use template
-    template_code = map_step_to_template(step, step_type)
+def generate_step_definition(
+    step: str,
+    step_type: str,
+    step_index: int,
+    feature_name: str,
+    human_edited: bool = False,
+) -> str:
+    """Generate Ruby step definition code for a given step.
+
+    Args:
+        step: The Gherkin step text (e.g., "member submits an order").
+        step_type: One of "given", "when", "then".
+        step_index: Index of this step within its type group (for disambiguation).
+        feature_name: Name of the feature this step belongs to.
+        human_edited: If True, prefer template matches even when not exact.
+                      Used when a human has manually reviewed and customized the step.
+    """
+    # Try to use template (use exact matching for human-edited to avoid wrong templates)
+    template_code = map_step_to_template(step, step_type, require_exact=not human_edited)
     if template_code:
         return template_code
 
-    # Generate generic step definition
+    # Generate generic step definition with pattern extracted from step text
     pattern = extract_step_pattern(step)
     step_text = step.capitalize()
 
+    # When human-edited but no template matched, generate a real implementation
+    # rather than a pending stub — the human's step text is specific enough
+    # to warrant real code.
+    if human_edited:
+        code = _generate_implementation(step, step_type, pattern, step_text)
+        if code:
+            return code
+
+    keyword_map = {"given": "Given", "when": "When", "then": "Then"}
+    keyword = keyword_map.get(step_type, "Given")
+    return f'''{keyword}(/^{pattern}$/) do
+  # Human-edited step — review and implement: {step_text}
+  pending "Step not fully implemented: {step}"
+end'''
+
+
+def _generate_implementation(step: str, step_type: str, pattern: str, step_text: str) -> str | None:
+    """Attempt to generate a non-trivial Ruby implementation based on step text analysis.
+
+    Returns None if no meaningful implementation can be generated from the step text.
+    """
+    step_lower = step.lower()
+    keyword_map = {"given": "Given", "when": "When", "then": "Then"}
+    keyword = keyword_map.get(step_type, "Given")
+
+    # Detect common LME step semantics from text patterns
     if step_type == "given":
-        return f'''Given(/^{pattern}$/) do
-  # TODO: Implement: {step_text}
-  pending "Step not implemented: {step}"
+        if "session" in step_lower or "login" in step_lower or "member" in step_lower:
+            return f'''Given(/^{pattern}$/) do
+  @session = LME::Client.login(
+    username: ENV['LME_USERNAME'] || 'test_trader',
+    password: ENV['LME_PASSWORD'] || 'test_pass'
+  )
 end'''
+        if "environment" in step_lower and "active" in step_lower:
+            return f'''Given(/^{pattern}$/) do
+  @env = LME::Client.environment
+  expect(@env.status).to eq('active')
+end'''
+        if "trade" in step_lower or "submission" in step_lower:
+            return f'''Given(/^{pattern}$/) do
+  @trade_params = {{ price: '999999', metal: 'ALU', quantity: 25 }}
+  @trade_submission = LME::API.submit_trade(@trade_params)
+end'''
+        if "document" in step_lower or "terminology" in step_lower or "terms" in step_lower:
+            return f'''Given(/^{pattern}$/) do
+  @document = LME::API.create_document(broker: @broker, terms: :capitalised)
+end'''
+        if "exchange" in step_lower and "matching rules" in step_lower:
+            return f'''Given(/^{pattern}$/) do
+  @rules = LME::PostTrade.define_matching_rules(version: '1.0')
+end'''
+
     elif step_type == "when":
-        return f'''When(/^{pattern}$/) do
-  # TODO: Implement: {step_text}
-  pending "Step not implemented: {step}"
+        if "contact" in step_lower and "exchange" in step_lower:
+            return f'''When(/^{pattern}$/) do
+  @contact_response = LME::PostTrade.contact_exchange(
+    reason: @response&.rejection_reason || @validation_result&.rejection_reason
+  )
 end'''
-    else:  # then
-        return f'''Then(/^{pattern}$/) do
-  # TODO: Implement: {step_text}
-  pending "Step not implemented: {step}"
+        if "api" in step_lower and "get" in step_lower:
+            return f'''When(/^{pattern}$/) do
+  @response = LME::API.get(endpoint, @session.token)
 end'''
+        if "api" in step_lower and "post" in step_lower:
+            return f'''When(/^{pattern}$/) do
+  @response = LME::API.post(endpoint, @session.token, JSON.parse(payload))
+end'''
+        if "submit" in step_lower or "submits" in step_lower:
+            return f'''When(/^{pattern}$/) do
+  @response = @session.submit_order(@order_params)
+end'''
+        if "trade" in step_lower and ("agreement" in step_lower or "occur" in step_lower):
+            return f'''When(/^{pattern}$/) do
+  @trade_agreement = LME::PostTrade.create_agreement
+end'''
+        if "rules" in step_lower and "adoption" in step_lower:
+            return f'''When(/^{pattern}$/) do
+  @adoption_status = LME::PostTrade.submit_adoption(@rules)
+end'''
+        if "re-submit" in step_lower or "resubmit" in step_lower:
+            return f'''When(/^{pattern}$/) do
+  @resubmission_response = LME::API.resubmit_trade(
+    @trade_submission.id, original_form: @trade_params
+  )
+end'''
+
+    elif step_type == "then":
+        if "price validation" in step_lower:
+            return f'''Then(/^{pattern}$/) do
+  expect(@trade_agreement.price_validation_required).to be(true)
+end'''
+        if ("compliance" in step_lower or "compliant" in step_lower) and "not" not in step_lower:
+            return f'''Then(/^{pattern}$/) do
+  expect(@contact_response).not_to be_nil
+  expect(@contact_response.status).to eq('RECORDED')
+  compliance = LME::PostTrade.get_compliance_status(@validation_result.rejection_reason)
+  expect(compliance).to eq('COMPLIANT')
+end'''
+        if "non-compliance" in step_lower or ("not" in step_lower and "compliant" in step_lower):
+            return f'''Then(/^{pattern}$/) do
+  expect(@contact_response).to be_nil
+  compliance = LME::PostTrade.get_compliance_status('trade_without_contact')
+  expect(compliance).to eq('NON_COMPLIANT')
+end'''
+        if "obligation" in step_lower and "fulfilled" in step_lower:
+            return f'''Then(/^{pattern}$/) do
+  expect(@validation_result.status).to eq('fulfilled')
+end'''
+        if "obligation" in step_lower and ("not" in step_lower or "rejected" in step_lower):
+            return f'''Then(/^{pattern}$/) do
+  expect(@validation_result.status).to eq('rejected')
+end'''
+        if "terminology" in step_lower or ("terms" in step_lower and "rulebook" in step_lower):
+            return f'''Then(/^{pattern}$/) do
+  expect(@validation_result.compliant).to be(true)
+  expect(@validation_result.source).to eq('LME Rulebook')
+end'''
+        if "deviation" in step_lower:
+            return f'''Then(/^{pattern}$/) do
+  expect(@validation_result.compliant).to be(false)
+  expect(@validation_result.errors).to include('TERM_DEVIATION')
+end'''
+        if "re-submission" in step_lower or "resubmit" in step_lower:
+            return f'''Then(/^{pattern}$/) do
+  expect(@resubmission_response.status).to eq('PERMITTED')
+end'''
+        if "api" in step_lower and "successful" in step_lower:
+            return f'''Then(/^{pattern}$/) do
+  expect(@response.status).to be_between(200, 299)
+end'''
+        if "api" in step_lower and "contains" in step_lower:
+            return f'''Then(/^{pattern}$/) do
+  expect(@response.body).to have_key(field)
+end'''
+
+    return None
 
 
 def render_step_definitions(feature_name: str, scenarios: list[dict]) -> str:
@@ -481,12 +805,99 @@ def render_gherkin_from_normalized_bdd(bdd_results: list[dict], output_dir: Path
     return written_files
 
 
-def render_steps_from_normalized_bdd(bdd_results: list[dict], output_dir: Path) -> Path:
+def apply_human_step_edits(
+    bdd_results: list[dict],
+    human_scripts_edits_path: Path,
+) -> list[dict]:
+    """Apply human step edits from Scripts tab to normalized BDD results.
+
+    Modifies step_text, step_pattern, and code fields in-place.
+    Gap steps (is_gap=True) are appended as new entries in step_definitions.
+
+    Returns the modified bdd_results list.
+    """
+    import json as _json
+
+    edits_path = Path(human_scripts_edits_path)
+    if not edits_path.exists():
+        return bdd_results
+
+    with edits_path.open(encoding="utf-8") as f:
+        payload = _json.load(f)
+
+    edits: list[dict] = payload.get("edits", [])
+    if not edits:
+        return bdd_results
+
+    for edit in edits:
+        step_type = edit.get("step_type", "")
+        step_index = edit.get("step_index")
+        gap_index = edit.get("gap_index")
+        step_text = edit.get("step_text", "").strip()
+        is_gap = edit.get("is_gap", False)
+
+        if not step_text:
+            continue
+
+        # Extract pattern from the (possibly new) step text
+        step_pattern = extract_step_pattern(step_text)
+
+        # Generate Ruby code: prefer template, fall back to implementation generator
+        template_code = map_step_to_template(step_text, step_type, require_exact=False)
+        if template_code:
+            code = template_code
+        else:
+            generated = _generate_implementation(step_text, step_type, step_pattern, step_text.capitalize())
+            code = generated or ""
+
+        if is_gap:
+            # Append gap step as a new entry in the appropriate step type array
+            for item in bdd_results:
+                step_defs = item.setdefault("step_definitions", {})
+                type_steps = step_defs.setdefault(step_type, [])
+                type_steps.append({
+                    "step_text": step_text,
+                    "step_pattern": step_pattern,
+                    "code": code,
+                    "human_edited": True,
+                    "is_gap": True,
+                    "gap_index": gap_index,
+                })
+        else:
+            # Update existing step by step_type + step_index
+            for item in bdd_results:
+                step_defs = item.get("step_definitions", {})
+                type_steps = step_defs.get(step_type, [])
+                if step_index is not None and 0 <= step_index < len(type_steps):
+                    type_steps[step_index] = {
+                        **type_steps[step_index],
+                        "step_text": step_text,
+                        "step_pattern": step_pattern,
+                        "code": code,
+                        "human_edited": True,
+                    }
+                    break
+
+    return bdd_results
+
+
+def render_steps_from_normalized_bdd(
+    bdd_results: list[dict],
+    output_dir: Path,
+    human_scripts_edits_path: Path | None = None,
+) -> Path:
     """Render Ruby Cucumber step definitions from normalized BDD output.
 
     Consumes normalized BDD results (produced by run_bdd_pipeline) and
     renders them into Ruby step definition files.
+
+    If ``human_scripts_edits_path`` is provided, applies human step edits
+    (from the Scripts tab) before rendering — this ensures edited and gap
+    steps get proper Ruby implementations rather than pending stubs.
     """
+    if human_scripts_edits_path:
+        bdd_results = apply_human_step_edits(bdd_results, human_scripts_edits_path)
+
     steps_dir = output_dir / "features" / "step_definitions"
     steps_dir.mkdir(parents=True, exist_ok=True)
 
@@ -502,15 +913,16 @@ def render_steps_from_normalized_bdd(bdd_results: list[dict], output_dir: Path) 
 
     for item in bdd_results:
         feature_name = item.get("feature_title", "unnamed")
-        # Normalized BDD has step_definitions at result level
         step_defs = item.get("step_definitions", {})
 
         for step_type in ("given", "when", "then"):
             steps = step_defs.get(step_type, [])
-            for step in steps:
-                step_text = step.get("step_text", "") if isinstance(step, dict) else ""
-                step_pattern = step.get("step_pattern", step_text) if isinstance(step, dict) else step
-                code = step.get("code", "") if isinstance(step, dict) else ""
+            for idx, step in enumerate(steps):
+                step_dict = step if isinstance(step, dict) else {}
+                step_text = step_dict.get("step_text", "") if isinstance(step, dict) else ""
+                step_pattern = step_dict.get("step_pattern", step_text) if isinstance(step, dict) else step
+                code = step_dict.get("code", "") if isinstance(step, dict) else ""
+                human_edited = step_dict.get("human_edited", False)
 
                 if not step_pattern or step_pattern in seen_patterns:
                     continue
@@ -518,6 +930,13 @@ def render_steps_from_normalized_bdd(bdd_results: list[dict], output_dir: Path) 
 
                 if code:
                     all_lines.append(code)
+                    all_lines.append("")
+                elif human_edited:
+                    # Human-edited steps with no stored code: generate from templates
+                    generated = generate_step_definition(
+                        step_text, step_type, idx, feature_name, human_edited=True
+                    )
+                    all_lines.append(generated)
                     all_lines.append("")
 
     content = "\n".join(all_lines)

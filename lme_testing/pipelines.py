@@ -24,6 +24,7 @@ from .prompts import (
     build_planner_user_prompt,
 )
 from .bdd_export import (
+    apply_human_step_edits,
     render_gherkin_from_normalized_bdd,
     render_steps_from_normalized_bdd,
     write_feature_files,
@@ -619,6 +620,7 @@ def run_bdd_pipeline(
     limit: int | None,
     batch_size: int,
     resume_from: Path | None,
+    human_scripts_edits_path: Path | None = None,
 ) -> dict:
     """Generate normalized BDD artifacts from maker test cases.
 
@@ -696,7 +698,9 @@ def run_bdd_pipeline(
         bdd_results = load_jsonl(results_path)
         if bdd_results:
             feature_files = render_gherkin_from_normalized_bdd(bdd_results, run_dir)
-            step_file = render_steps_from_normalized_bdd(bdd_results, run_dir)
+            step_file = render_steps_from_normalized_bdd(
+                bdd_results, run_dir, human_scripts_edits_path=human_scripts_edits_path
+            )
 
     summary = {
         "run_id": run_id,
@@ -745,6 +749,47 @@ def _load_human_reviews(path: Path) -> list[dict]:
     return []
 
 
+def _maker_records_to_normalized_bdd(maker_records: list[dict]) -> list[dict]:
+    """Convert maker_records (list of {semantic_rule_id, feature, scenarios}) to
+    normalized BDD format (list of {semantic_rule_id, feature_title, step_definitions}).
+
+    This allows apply_human_step_edits and render_steps_from_normalized_bdd to
+    be used with the output of the rewrite pipeline.
+    """
+    results: list[dict] = []
+    for record in maker_records:
+        semantic_rule_id = record.get("semantic_rule_id", "unknown")
+        feature_title = record.get("feature", "Unnamed Feature")
+        scenarios = record.get("scenarios", [])
+
+        # Build step_definitions by flattening all scenarios' steps
+        step_definitions: dict[str, list[dict]] = {"given": [], "when": [], "then": []}
+        seen: dict[str, set[str]] = {"given": set(), "when": set(), "then": set()}
+
+        for scenario in scenarios:
+            for step_type in ("given", "when", "then"):
+                steps = scenario.get(step_type, [])
+                for step_text in steps:
+                    step_str = step_text if isinstance(step_text, str) else ""
+                    if not step_str:
+                        continue
+                    # Deduplicate by step_text within each type
+                    if step_str not in seen[step_type]:
+                        seen[step_type].add(step_str)
+                        step_definitions[step_type].append({
+                            "step_text": step_str,
+                            "step_pattern": step_str,
+                            "code": "",
+                        })
+
+        results.append({
+            "semantic_rule_id": semantic_rule_id,
+            "feature_title": feature_title,
+            "step_definitions": step_definitions,
+        })
+    return results
+
+
 def run_rewrite_pipeline(
     config: ProjectConfig,
     semantic_rules_path: Path,
@@ -754,11 +799,15 @@ def run_rewrite_pipeline(
     output_dir: Path,
     limit: int | None,
     batch_size: int,
+    human_scripts_edits_path: Path | None = None,
 ) -> dict:
     """Rewrite maker cases based on human review decisions.
 
     Cases marked ``decision = rewrite`` are regenerated. All others are kept.
     Returns a summary with ``merged_cases_path`` pointing to the combined output.
+
+    If ``human_scripts_edits_path`` is provided, applies human step edits
+    (from the Scripts tab) when rendering step definitions.
     """
     maker_records = load_jsonl(maker_cases_path)
     checker_reviews = load_jsonl(checker_reviews_path)
@@ -824,6 +873,15 @@ def run_rewrite_pipeline(
 
     # Path to the rewritten-only cases (output of maker pipeline)
     rewritten_cases_path = output_dir / "maker" / "maker_cases.jsonl"
+
+    # If human scripts edits are provided, convert merged records to normalized BDD
+    # and apply human step edits before rendering step definitions
+    if human_scripts_edits_path and Path(human_scripts_edits_path).exists():
+        normalized_bdd = _maker_records_to_normalized_bdd(merged_records)
+        normalized_bdd = apply_human_step_edits(normalized_bdd, Path(human_scripts_edits_path))
+        ensure_dir(output_dir / "bdd")
+        step_file = render_steps_from_normalized_bdd(normalized_bdd, output_dir / "bdd")
+        logger.info("Rewritten step definitions with human edits. step_file=%s", step_file)
 
     summary = {
         "run_id": timestamp_slug(),
