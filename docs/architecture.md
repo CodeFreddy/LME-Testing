@@ -1,912 +1,352 @@
-# Architecture
+# LME Testing — Revised Architecture
 
-## Purpose
-
-This document defines the architecture of the repository at the system level.
-
-It serves four goals:
-
-1. describe the current pipeline clearly,
-2. define artifact contracts and module boundaries,
-3. separate deterministic responsibilities from LLM-assisted responsibilities,
-4. guide future evolution without allowing implicit architecture drift.
-
-This document should be read together with:
-
-- `docs/roadmap.md`
-- `docs/implementation_plan.md`
-- `docs/acceptance.md`
-- `docs/model_governance.md`
-- `docs/agent_guidelines.md`
-- `docs/testing_governance.md`
+**版本：** 2.0  
+**修订日期：** 2026-04-18  
+**修订原因：** 补充实际验证状态说明，修正若干模块边界描述，新增已知限制和设计约束章节。
 
 ---
 
-## Architectural Summary
+## 一、系统定位（诚实版）
 
-The repository is currently a **document-driven test design system**.
+LME Testing 是一个**文档驱动的 AI 辅助测试设计工具**，面向单一领域（LME 匹配规则）的本地单用户使用场景。
 
-Its current architecture is centered on a structured transformation pipeline:
+### 当前是什么
 
-`source documents -> extraction -> atomic rules -> semantic rules -> maker -> checker -> human review -> rewrite -> report`
+- 将 LME 规则文档转化为结构化 BDD 测试场景的流水线工具
+- 提供人工审核、重写、报告的完整本地工作流
+- 有完整 schema 契约和 CI 验证的框架
 
-This architecture is optimized for:
-- rule extraction,
-- test scenario generation,
-- coverage analysis,
-- human review,
-- structured reporting.
+### 当前不是什么
 
-It is **not yet** a full execution platform.
-
-Execution integration, step definition mapping, deterministic runtime assertions, and heavy hosted collaboration are future architectural layers, not current core layers.
+- **不是**通用测试生成平台（针对 LME 领域优化）
+- **不是**多用户协作平台（明确的单用户设计）
+- **不是**测试执行引擎（生成测试设计产物，不执行）
+- **不是**已在生产规模验证的系统（全量 183 条规则质量基准尚未建立）
 
 ---
 
-## Current System Boundary
+## 二、架构原则
 
-### What the system currently is
+以下原则经过实践验证，继续有效：
 
-The current system is a pipeline that transforms source documents into structured test design artifacts and reviewable outputs.
+1. **Artifacts are first-class contracts** — 结构化产物优于自由文本，所有 LLM 输出必须经 Schema 验证
+2. **Upstream quality first** — 上游规则质量决定下游一切；无效的 atomic_rule 会污染整个流水线
+3. **Deterministic before LLM** — 能确定性验证的（schema check、enum check、字段验证），不依赖 LLM 判断
+4. **Human review is a control layer** — 人工审核是架构的必要组成，不是可选功能
+5. **Durable context is repo-readable** — 所有可复现行为的控制资产（prompts、schemas、configs）必须在 repo 中
 
-### What the system currently is not
+新增原则（基于实践教训）：
 
-The current system is not yet:
-
-- a general-purpose test execution framework,
-- a runtime orchestration system,
-- a multi-user enterprise review platform,
-- a step-definition-aware BDD execution engine.
-
-This distinction matters because architecture decisions should be aligned with the actual system stage, not an assumed end-state.
+6. **Real data before governance claims** — governance 指标必须标注数据来源（`real_api` / `stub` / `no_data`），不用 stub 数据支撑治理声明
+7. **Honest capability boundary** — 系统能力边界以最近一次真实验证为准，不外推
 
 ---
 
-## Architectural Principles
+## 三、当前流水线
 
-### 1. Artifacts are first-class contracts
+### 核心流水线（代码完整，POC 验证通过）
 
-The system is built around governed artifacts, not around ad hoc prompt outputs.
+```
+Source Documents (PDF/TXT)
+        │
+        ▼
+[extract_matching_rules.py]
+        │  atomic_rules.json
+        ▼
+[generate_semantic_rules.py]
+        │  semantic_rules.json
+        ▼
+[validate_rules.py] ──────── schema validation (blocking)
+        │
+        ▼
+[Maker: LLM-assisted]  ◄─── MAKER_SYSTEM_PROMPT (versioned)
+        │  maker_cases.jsonl
+        ▼
+[BDD Pipeline] ────────────  normalized_bdd.jsonl
+        │
+        ▼
+[BDD Export] ──────────────  .feature files + step_definitions.py
+        │
+        ▼
+[Step Registry] ───────────  step_visibility.json
+        │
+        ├─────────────────────────────────────┐
+        ▼                                     ▼
+[Checker: LLM-assisted]              [Human Review]
+        │  checker_reviews.jsonl             │  approve / rewrite / reject
+        │  coverage_report.json             │
+        └──────────────┬──────────────────────┘
+                       ▼
+              [Rewrite if needed]
+                       │
+                       ▼
+              [HTML Report Generation]
+                       │
+                       ▼
+              [Governance Signals]
+```
 
-Artifacts must be:
-- structured,
-- versionable,
-- traceable,
-- schema-validatable,
-- reviewable.
+### 扩展流水线（代码完整，验证状态见备注）
 
-### 2. Upstream correctness matters more than downstream cleverness
-
-If upstream rule extraction is invalid, downstream maker/checker quality becomes unreliable.
-
-### 3. LLMs assist judgment and generation, but contracts remain deterministic
-
-LLM-assisted stages may propose or interpret, but the overall architecture must remain controlled by:
-- schemas,
-- deterministic validation,
-- explicit pipeline stages,
-- benchmark gates,
-- and acceptance rules.
-
-No new LLM-driven stage should become part of the governed baseline unless its outputs are contract-defined, reviewable, and traceable.
-
-### 4. Module boundaries must remain explicit
-
-Business logic, provider logic, schema logic, review logic, and reporting logic should not be mixed casually.
-
-### 5. Traceability is part of the architecture
-
-The architecture must preserve the ability to trace downstream artifacts back to upstream sources.
-
-### 6. Durable execution context must be repo-readable
-
-If behavior is expected to be repeatable across humans, models, providers, or sessions, its governing inputs must live in repo-readable assets such as:
-- schemas,
-- prompts,
-- configs,
-- benchmark data,
-- acceptance rules,
-- implementation tasks.
-
-Durable system behavior must not depend only on transient conversation context.
-
-### 7. New LLM-driven stages require contract-first introduction
-
-Future planner, normalized BDD, or similar stages must not be introduced as free-form pipeline expansions.
-
-Before a new LLM-assisted stage becomes part of the governed baseline, the architecture should define:
-- the artifact contract,
-- validation rules,
-- traceability expectations,
-- reviewability requirements,
-- failure behavior.
-
-This is especially important for planner outputs and normalized BDD artifacts.
+```
+semantic_rules.json
+        │
+        ▼
+[Planner: LLM-assisted]  ── planner_results.jsonl
+        │                    （验证状态：Stub/POC 通过，全量未验证）
+        ▼
+[Maker: enriched input]
+```
 
 ---
 
-## High-Level Pipeline
+## 四、模块边界
 
-## Current pipeline
+### 4.1 Ingestion / Extraction 模块
 
-The current architecture can be represented as:
+**拥有：** 文档读取、解析、规则候选提取、source anchor 生成  
+**不拥有：** 场景生成策略、provider 逻辑、报告渲染
 
-1. **Source documents**
-2. **Extraction**
-3. **Atomic rule normalization**
-4. **Semantic rule normalization**
-5. **Scenario generation (maker)**
-6. **Scenario assessment (checker)**
-7. **Human review**
-8. **Rewrite**
-9. **Reporting**
+**已知限制：**
+- PDF 解析依赖 `pdfminer` / 标准库，对复杂布局 PDF（表格、多栏、图形）解析质量有限
+- 多文档类型支持当前实现为 `DocumentClass` enum + keyword matching，不是真正的结构感知解析框架
+- 这是设计上的简化，不是 bug，但不应对外声称"支持任意文档类型"
 
-### Stage overview
+### 4.2 Rule Normalization 模块
 
-#### 1. Source documents
-Input source materials such as:
-- specifications,
-- rulebooks,
-- product behavior docs,
-- API docs,
-- policy / compliance docs,
-- or other structured business documents.
+**拥有：** atomic rule 生成、semantic rule 生成、trace 链接、schema 对齐、rule_type 解释  
+**不拥有：** review UI、报告、provider 传输细节
 
-#### 2. Extraction
-Transforms source material into intermediate structured rule candidates.
+**已知限制：**
+- `infer_rule_type()` 基于关键词推断，对模糊表述的规则可能分类错误
+- duplicate detection 是基于文本相似度的启发式方法，不是语义去重
 
-#### 3. Atomic rule normalization
-Represents document-level rule statements in a granular, source-grounded form.
+### 4.3 Generation 模块（Maker / Planner / BDD）
 
-#### 4. Semantic rule normalization
-Transforms atomic rules into semantically richer structures used by downstream generation and coverage logic.
+**拥有：** maker 生成、rewrite、planner、normalized BDD 生成、BDD export  
+**不拥有：** provider adapter 内部逻辑、schema 注册策略、长期分析逻辑
 
-#### 5. Scenario generation (maker)
-Generates structured BDD-style or scenario-style test design artifacts from semantic rules.
+**已知限制：**
+- Maker 输出质量依赖 LLM，概率性。真实质量基准待 S1-T04 建立
+- Planner 阶段增加 API 调用成本，当前未量化其对最终 maker 质量的贡献
+- BDD style learning 暂缓：无真实 BDD 样本，自循环优化无意义
 
-#### 6. Scenario assessment (checker)
-Evaluates generated scenarios for quality and coverage against semantic rules.
+### 4.4 Evaluation 模块（Checker）
 
-#### 7. Human review
-Allows human reviewers to approve, reject, or request rewrite for generated results.
+**拥有：** checker 评估、benchmark 比较、stability 比较  
+**不拥有：** 人工决策工作流、runtime 执行 pass/fail 真值、provider 传输
 
-#### 8. Rewrite
-Regenerates targeted outputs after human review decisions.
+**已知限制（关键）：**
+- Checker 本身是 LLM，其输出概率性，不是确定性真值
+- 当前 `checker_instability_rate = 0%` 基于 StubProvider，**不代表真实 LLM 行为**
+- 真实 MiniMax instability 率在 S1-T03b 完成后才能知晓
 
-#### 9. Reporting
-Produces human-readable and machine-usable outputs summarizing the pipeline results.
+### 4.5 Review 模块
 
----
+**拥有：** review 状态、决策存储、人工工作流控制（approve/rewrite/reject）、session snapshot  
+**不拥有：** 规则提取、provider 逻辑、确定性执行断言
 
-## Target Future Pipeline
+**设计约束（明确）：**
+- **单用户设计**：Web UI 运行在 localhost:8765，无认证，无多用户并发支持
+- Session snapshot 使用原子写入（S1-T03 完成后）
+- 不支持跨 session 共享状态
 
-The longer-term target architecture extends the current pipeline rather than replacing it.
+### 4.6 Reporting 模块
 
-Target future pipeline:
+**拥有：** HTML 报告生成、CSV 导出、coverage 聚合、traceability 视图、audit-style 运行摘要  
+**不拥有：** 业务规则生成逻辑、provider 选择、schema 迁移策略
 
-`source documents -> extraction -> atomic rules -> semantic rules -> planning -> normalized BDD -> step mapping -> executable scenario contract -> execution integration -> deterministic oracle -> report and analytics`
+### 4.7 Provider / Model Strategy 模块
 
-This target architecture adds:
-- planning layer,
-- normalized BDD contract,
-- BDD style-learning support,
-- step definition registry and mapping,
-- execution-ready handoff,
-- deterministic runtime validation,
-- selective governance signals.
+**拥有：** provider-specific API 调用、retry、structured output、metadata capture  
+**不拥有：** 场景生成业务逻辑、报告渲染、review 工作流
 
-These are future extensions, not current assumptions.
+**当前支持的 Provider：**
 
-The ordering is intentional:
-- planning should follow governed semantic rules,
-- normalized BDD should exist before syntax-specific outputs become the canonical handoff,
-- execution integration should follow normalized BDD and step mapping,
-- deterministic oracle layers should be introduced where business value justifies them.
+| Provider | Tier | 验证状态 | 适用 Role |
+|----------|------|---------|-----------|
+| stub | 1 | ✅ CI/Smoke | maker/checker/planner |
+| minimax/MiniMax-M2.7 | 1 | ✅ POC（2条规则），全量质量待测 | maker/checker/planner |
+| qwen/qwen3.5-plus | 2 | ⚠️ Experimental | maker only |
 
----
+**注意：** compatibility_matrix.json 中标注的 "all phases compatible" 是基于代码兼容性，不代表输出质量已验证。
 
-## Artifact Model
+### 4.8 Schema / Contract 模块
 
-Artifacts are the backbone of this architecture.
+**拥有：** artifact 结构定义、schema 验证、契约演进支持  
+**不拥有：** provider 调用、文档解析、UI 工作流
 
-## Artifact categories
+**当前 Schema 清单（7套，CI 验证）：**
+- `atomic_rule.schema.json`
+- `semantic_rule.schema.json`
+- `maker_output.schema.json`
+- `checker_output.schema.json`
+- `planner_output.schema.json`
+- `normalized_bdd.schema.json`
+- `executable_scenario.schema.json`
 
-### 1. Source-level artifacts
-Represent original or parsed content from documents.
+### 4.9 Oracle 模块
 
-Examples:
-- raw source file metadata,
-- parsed sections,
-- clauses,
-- extraction traces,
-- stable source anchors such as paragraph-level identity where applicable.
+**拥有：** 8 个确定性断言模块（field_validation、state_validation、calculation_validation、deadline_check、event_sequence、pass_fail_accounting、null_check、compliance_check）  
+**不拥有：** LLM 判断逻辑、场景生成
 
-### 2. Rule-level artifacts
-Represent normalized rule structures.
+**已知限制：**
+- 8 个 oracle 存在且有单元测试，但**尚未在真实 LME 规则场景上运行验证**
+- `@register_oracle` 自动注册机制是提前设计的框架抽象，在真实场景验证之前不应扩展
+- Oracle 适用规则类型（哪些 LME 规则适合确定性验证）待 S1-T04 基准建立后识别
 
-Examples:
-- `atomic_rule`
-- `semantic_rule`
+### 4.10 Governance Signals 模块
 
-### 3. Generation artifacts
-Represent outputs produced from rules.
+**拥有：** 4 类信号计算（schema / instability / coverage / step binding）、JSON 输出  
+**不拥有：** 实时监控、告警、持久化数据库
 
-Examples:
-- maker outputs,
-- checker outputs,
-- rewrite outputs,
-- planner outputs in future phases,
-- normalized BDD outputs in future phases,
-- syntax-specific BDD renderings such as `.feature` exports in future phases.
+**当前信号数据来源状态：**
 
-### 4. Review artifacts
-Represent human review state and decisions.
-
-Examples:
-- review draft,
-- review decision records,
-- conflict markers in future collaboration flows.
-
-### 5. Reporting artifacts
-Represent summarized results for humans or external systems.
-
-Examples:
-- HTML reports,
-- JSON exports,
-- CSV exports,
-- quality summaries,
-- benchmark summaries,
-- audit-style run summaries.
+| 信号 | 当前数据来源 | 可信度 | 修复任务 |
+|------|------------|--------|---------|
+| schema_failure_rate | 无（从 coverage report 推断）| ⚠️ 假数据 | S1-T01 |
+| checker_instability_rate | StubProvider 运行 | ⚠️ 不代表真实 LLM | S1-T03b |
+| coverage_percent | 全量运行数据（路径未对齐）| 🔄 待对齐 | S1-T02 |
+| step_binding_success_rate | 模拟 step library | ⚠️ 不代表真实 LME | Stage 3 |
 
 ---
 
-## Core Artifact Contracts
+## 五、Artifact 契约
 
-## 1. Atomic Rule
+### Artifact 生命周期
 
-### Role
-The atomic rule is the source-grounded normalized unit extracted from document content.
+```
+Source → atomic_rule → semantic_rule → [planner_output] → maker_output
+       → normalized_bdd → [executable_scenario] → checker_output
+       → human_review → report
+```
 
-### Architectural responsibility
-It preserves:
-- source intent at low semantic abstraction,
-- traceability back to source sections or clauses,
-- stable source anchors where available,
-- input granularity for downstream semantic normalization.
+### 关键 Artifact 属性
 
-### Must remain
-- source-linked,
-- schema-governed,
-- minimally opinionated,
-- reviewable.
+每个 governed artifact 必须包含：
+- `provider`, `model`, `prompt_version`, `run_timestamp`, `pipeline_version`
 
-### Must not become
-- overloaded with downstream generation assumptions,
-- a substitute for semantic planning,
-- free-form text blobs without structure.
+每个 rule-level artifact 必须包含：
+- `paragraph_id`（stable source anchor）
+- `rule_type`（controlled enum）
+- `source.atomic_rule_ids`（traceability）
 
----
+### Artifact 修改规则
 
-## 2. Semantic Rule
-
-### Role
-The semantic rule is the normalized rule object used for downstream coverage logic and scenario generation.
-
-### Architectural responsibility
-It bridges:
-- source-grounded rule meaning,
-- downstream scenario generation,
-- rule-type-aware coverage expectations.
-
-### Must remain
-- schema-governed,
-- traceable to atomic rules,
-- traceable to stable source anchors where applicable,
-- semantically clear,
-- fit for maker/checker consumption.
-
-### May contain
-- rule type,
-- execution-oriented hints,
-- observables,
-- constraints,
-- scenario-relevant metadata.
-
-### Must not be treated as
-- a directly executable test script,
-- a substitute for a future execution contract.
+修改任何 artifact schema 必须同时更新：
+- schema 文件
+- 对应 fixture（valid + invalid）
+- 相关单元测试
+- `docs/acceptance.md` 对应 gate 的 Evidence
 
 ---
 
-## 3. Maker Output
+## 六、Traceability 模型
 
-### Role
-Represents generated test scenarios or BDD-style design outputs from semantic rules.
+### 当前可追溯路径
 
-### Architectural responsibility
-It is a design artifact, not runtime truth.
+```
+source document
+  → paragraph_id（stable anchor）
+    → atomic_rule（rule_id, paragraph_id）
+      → semantic_rule（semantic_rule_id, atomic_rule_ids, paragraph_ids）
+        → maker_output（semantic_rule_id, paragraph_ids）
+          → checker_output（case_id, semantic_rule_id）
+            → coverage_report（rule_coverage_status per semantic_rule_id）
+              → HTML report（clickable rule ID → scenario detail）
+```
 
-### Must remain
-- structured,
-- schema-validatable,
-- traceable to semantic rules,
-- traceable to stable source anchors when available,
-- reviewable by checker and humans.
+### 当前 traceability 的已知缺口
 
-### Must not be treated as
-- execution proof,
-- final oracle,
-- provider-specific raw output.
-
----
-
-## 4. Checker Output
-
-### Role
-Represents assessment of maker outputs for quality and coverage.
-
-### Architectural responsibility
-It acts as a governed evaluation artifact for design-stage quality.
-
-### Must remain
-- structured,
-- schema-validatable,
-- explainable at artifact level,
-- traceable to governed source anchors when applicable,
-- distinguishable from deterministic runtime assertions.
-
-### Must not be treated as
-- infallible truth,
-- a substitute for future deterministic execution oracle,
-- purely free-form narrative.
+- planner_output → maker_output 的 traceability 存在于代码，但未在 HTML report 中可视化
+- normalized_bdd → executable_scenario 的链接存在于 schema，但无真实消费者验证
+- step_visibility → step_definitions 的链接基于模拟 step library，不对应真实 LME API
 
 ---
 
-## 5. Human Review Artifact
+## 七、验证架构
 
-### Role
-Represents human decisions over generated results.
+### 验证层次
 
-### Architectural responsibility
-It is the controlled human override and governance layer for the design loop.
+| 层次 | 验证内容 | 实现状态 |
+|------|---------|---------|
+| Source ingestion | 可读性、格式、anchor 唯一性 | ✅ 实现 |
+| Rule artifact | Schema、enum、required fields、traceability | ✅ 实现，CI 验证 |
+| Generation artifact | Structured output、rule references、metadata | ✅ 实现 |
+| Review artifact | Decision format、action values | ✅ 实现 |
+| Reporting artifact | Completeness、metrics 一致性 | ✅ 实现 |
 
-### Must remain
-- structured where possible,
-- decision-oriented,
-- traceable to reviewed artifacts,
-- auditable.
+### CI 验证矩阵
 
----
-
-## 6. Normalized BDD Artifact (future)
-
-### Role
-Represents a stable BDD contract independent of final rendering or execution bindings.
-
-### Architectural responsibility
-It becomes the handoff artifact between test design and execution integration.
-
-### Must remain
-- execution-agnostic,
-- traceable,
-- schema-validatable,
-- reusable across output formats.
-
-### Must be introduced only when
-- its contract is defined explicitly,
-- at least one validator exists,
-- at least one renderer or downstream consumer exists,
-- raw syntax output is no longer the only governed representation.
-
-### Must not become
-- a vague synonym for rendered Gherkin text,
-- an unvalidated middle layer between planner and execution work.
+| CI Job | 验证内容 | 当前状态 |
+|--------|---------|---------|
+| docs-governance | *.md 中无绝对路径 | ✅ 有效 |
+| artifact-governance | artifact 结构和 rule_type enum | ✅ 有效 |
+| schema-validation | JSON Schema fixtures | ✅ 有效 |
+| upstream-validation | atomic + semantic rules 完整性 | ✅ 有效 |
+| unit-tests | 78 个单元测试 | ✅ 有效（基于 stub）|
+| smoke-test | E2E 端到端冒烟 | ✅ 有效（stub，2条规则）|
+| governance-signals | 计算 governance 指标 | ⚠️ 输出数字部分为空/stub |
+| release-governance | release 文件完整性检查 | ✅ 有效（结构检查）|
 
 ---
 
-## 7. Executable Scenario Artifact (future)
+## 八、失败模型
 
-### Role
-Represents execution-ready scenarios enriched with environment, setup, data, assertions, and step bindings.
+### 失败类别
 
-### Architectural responsibility
-It bridges design artifacts to runtime integration.
+1. **Source failure** — 文档不可读、格式不支持、提取失败
+2. **Contract failure** — Schema 无效、enum 非法、trace 引用断裂
+3. **Model failure** — timeout、malformed structured output、不稳定输出
+4. **Review failure** — session snapshot 损坏（S1-T03 修复后降低概率）
+5. **Reporting failure** — 缺少必需 artifact、汇总生成失败
 
-### Must remain
-- explicit,
-- deterministic where possible,
-- test-environment aware,
-- independent from undocumented model behavior.
+### 架构规则
 
-### Must not become
-- a bucket for unresolved design ambiguity,
-- a substitute for step mapping evidence,
-- a substitute for deterministic oracle ownership.
+失败必须：可见、可分类、可归因到阶段、可恢复（在可能的情况下）、**不得隐藏为成功输出**
 
 ---
 
-## Module Boundary Model
+## 九、已知架构限制（当前不计划解决）
 
-The repo should maintain explicit boundaries between modules.
-
-## 1. Ingestion / extraction modules
-Own:
-- document reading,
-- parsing,
-- extraction support,
-- source segmentation,
-- stable source-anchor generation where applicable,
-- extraction trace metadata.
-
-Do not own:
-- downstream scenario generation policy,
-- provider-specific model logic,
-- report rendering.
-
-## 2. Rule normalization modules
-Own:
-- atomic rule shaping,
-- semantic rule shaping,
-- trace linkage,
-- schema alignment,
-- rule-type interpretation.
-
-Do not own:
-- review UI,
-- reporting,
-- provider transport details.
-
-## 3. Generation modules
-Own:
-- maker,
-- rewrite,
-- future planner,
-- future normalized BDD generation,
-- future BDD style-learning outputs,
-- future syntax-specific exporters built on normalized BDD.
-
-Do not own:
-- provider adapter internals,
-- schema registry policy,
-- long-term analytics logic,
-- canonical execution truth.
-
-## 4. Evaluation modules
-Own:
-- checker,
-- future benchmark evaluation,
-- future stability comparison.
-
-Do not own:
-- human decision workflow,
-- runtime execution pass/fail truth,
-- provider transport.
-
-## 5. Review modules
-Own:
-- review state,
-- decision storage,
-- human workflow control.
-
-Do not own:
-- rule extraction,
-- provider logic,
-- deterministic execution assertions.
-
-## 6. Reporting modules
-Own:
-- human-readable output,
-- machine-readable summaries,
-- metrics aggregation,
-- traceability views,
-- audit-style run summaries.
-
-Do not own:
-- business rules for generation,
-- provider selection,
-- schema migration policy.
-
-## 7. Provider / model strategy modules
-Own:
-- provider-specific API interaction,
-- retry handling,
-- structured output mode,
-- metadata capture,
-- model selection abstraction.
-
-Do not own:
-- scenario generation business logic,
-- report rendering,
-- review workflows.
-
-## 8. Schema and contract modules
-Own:
-- artifact structure definitions,
-- schema validation,
-- contract evolution policy support.
-
-Do not own:
-- provider invocation,
-- document parsing,
-- UI workflows.
+| 限制 | 影响范围 | 接受原因 |
+|------|---------|---------|
+| 单用户 Web UI | 不支持团队并发使用 | 当前工具定位为单用户 |
+| PDF 解析依赖文档规整度 | 复杂布局 PDF 提取质量低 | 超出当前阶段范围 |
+| Step library 基于模拟 API | step binding rate 无实际意义 | 等待 Stage 3 外部条件 |
+| Checker 是 LLM，输出概率性 | 无法保证 checker 判断一致性 | 通过 stability 测量和 oracle 部分缓解 |
+| Windows + PowerShell 工具链 | Linux/macOS 开发者无法使用 session handoff | 单人开发现状，跨平台支持非当前优先级 |
+| 无认证/授权 | Web UI 对本地网络开放 | 设计为本地工具，不面向网络部署 |
 
 ---
 
-## Deterministic vs LLM-Assisted Responsibilities
+## 十、架构评审检查清单（每次重大变更前）
 
-This is one of the most important architectural boundaries in the repo.
-
-## LLM-assisted responsibilities
-
-LLMs may assist with:
-- extraction support where explicitly permitted,
-- semantic normalization support,
-- ambiguity detection,
-- maker generation,
-- checker evaluation,
-- rewrite suggestions,
-- future planning suggestions,
-- future BDD style-pattern suggestion,
-- future step candidate suggestions.
-
-These stages are useful because they involve interpretation, synthesis, or language-rich generation.
-
-## Deterministic responsibilities
-
-Deterministic modules must own:
-- schema validation,
-- enum validation,
-- stable source-anchor integrity checks,
-- traceability checks,
-- duplicate candidate logic thresholds,
-- contract enforcement,
-- artifact metadata enforcement,
-- benchmark pass/fail accounting,
-- CI gates,
-- report assembly rules,
-- audit/run-record generation rules,
-- future execution assertions wherever feasible.
-
-## Architectural rule
-
-If a responsibility can be made deterministic without losing essential value, it should not remain purely LLM-governed.
+- [ ] 这个变更是否保留了 artifact 契约？
+- [ ] 是否改善或削弱了 traceability？
+- [ ] provider 逻辑是否保持隔离？
+- [ ] 是否模糊了模块边界？
+- [ ] 是否将确定性职责移入了纯 LLM 逻辑？
+- [ ] 是否引入了新的 LLM-driven 阶段而没有定义契约？
+- [ ] 是否将 governance signal 的数据来源标注清楚（real_api / stub / no_data）？
+- [ ] 是否与当前 roadmap 阶段一致？
+- [ ] 是否保留了 rollback 清晰度？
 
 ---
 
-## Traceability Model
-
-Traceability should exist across the pipeline.
-
-## Stable source-anchor strategy
-
-Where source segmentation permits it, the architecture should introduce a stable source anchor such as `paragraph_id` or equivalent.
-
-This anchor should:
-- be unique within governed source scope,
-- survive downstream transformations,
-- appear in rule artifacts where applicable,
-- remain available to maker/checker/reporting layers,
-- and extend into future BDD and step-integration layers.
-
-The exact field name may evolve, but the architectural requirement should remain stable.
-
-## Minimum traceability path
-
-`source document -> source section / clause -> stable source anchor (if applicable) -> atomic rule -> semantic rule -> maker output -> checker output -> human review -> report`
-
-## Future traceability path
-
-`... -> planning decision -> normalized BDD -> style profile reference -> step mapping -> executable scenario -> execution result`
-
-Traceability must support:
-- auditability,
-- debugging,
-- coverage reasoning,
-- regression analysis,
-- human review confidence.
-
----
-
-## Validation Architecture
-
-Validation should not be a single step; it should exist across layers.
-
-## Validation layers
-
-### 1. Source ingestion validation
-Checks:
-- source readability,
-- format compatibility,
-- section extraction sanity,
-- stable source-anchor uniqueness where applicable.
-
-### 2. Rule artifact validation
-Checks:
-- schema validity,
-- enum validity,
-- required field presence,
-- trace references,
-- duplicate candidate detection.
-
-### 3. Generation artifact validation
-Checks:
-- structured output validity,
-- semantic rule references,
-- stable source-anchor propagation where applicable,
-- expected field completeness,
-- metadata presence.
-
-For future planner and normalized BDD stages, generation validation should also check:
-- stage-specific contract conformance,
-- traceability continuity,
-- reviewability of outputs,
-- renderer or downstream-consumer compatibility where relevant.
-
-### 4. Review validation
-Checks:
-- decision format,
-- reviewed target identity,
-- allowed action values,
-- merge integrity in future collaboration flows.
-
-### 5. Reporting validation
-Checks:
-- artifact completeness,
-- traceability availability,
-- metrics consistency,
-- export validity,
-- governance/audit summary completeness where applicable.
-
-Validation failures should remain visible.  
-The architecture should not silently absorb broken contracts.
-
----
-
-## Benchmark Architecture
-
-Benchmarks are part of architecture, not an optional add-on.
-
-## Benchmark roles
-
-Benchmarks should validate:
-- extraction sanity,
-- semantic normalization quality,
-- maker structural validity,
-- checker consistency,
-- report generation,
-- end-to-end smoke behavior.
-
-Future benchmark roles should include:
-- planning quality,
-- normalized BDD quality,
-- BDD style-learning consistency,
-- step binding quality,
-- execution contract readiness.
-
-## Benchmark ownership
-
-Benchmarks belong to governed system quality, not to individual providers.
-
-This means benchmarks should be reusable even when the underlying model changes.
-
----
-
-## Configuration Architecture
-
-Configuration should remain layered and explicit.
-
-## Configuration layers
-
-### 1. Pipeline configuration
-Defines:
-- stage enablement,
-- artifact paths,
-- validation behavior,
-- environment mode.
-
-### 2. Model strategy configuration
-Defines:
-- provider,
-- model,
-- prompt version,
-- retries,
-- structured output settings.
-
-### 3. Benchmark configuration
-Defines:
-- datasets,
-- thresholds,
-- comparison policy.
-
-### 4. Reporting configuration
-Defines:
-- output formats,
-- summaries,
-- export behavior,
-- governance/audit summary behavior where relevant.
-
-Configuration should not be scattered across undocumented inline constants.
-
----
-
-## Minimum Governance Artifacts
-
-In addition to business artifacts, the architecture should support a minimal set of governance artifacts.
-
-Examples include:
-- benchmark outputs,
-- drift comparison outputs,
-- checker instability summaries,
-- run summaries,
-- change-impact notes,
-- audit-style execution records.
-
-The architecture does not require a full enterprise observability stack before those artifacts are justified by actual platform usage.
-
-The exact directory structure may evolve, but the architecture assumes these artifacts are repo-readable and reviewable.
-
----
-
-## Failure Model
-
-The architecture should assume failure will occur.
-
-## Failure classes
-
-### 1. Source failure
-Examples:
-- unreadable document,
-- malformed source,
-- unsupported format.
-
-### 2. Contract failure
-Examples:
-- invalid schema,
-- invalid enum,
-- broken trace reference,
-- broken source-anchor propagation.
-
-### 3. Model failure
-Examples:
-- timeout,
-- malformed structured output,
-- unstable output,
-- incomplete result.
-
-### 4. Review failure
-Examples:
-- incomplete review state,
-- conflicting review state in any future collaboration flow.
-
-### 5. Reporting failure
-Examples:
-- missing required artifacts,
-- broken summary generation,
-- export failure.
-
-## Architectural rule for failures
-
-Failures should be:
-- visible,
-- classifiable,
-- attributable to a stage,
-- recoverable where appropriate,
-- never hidden as if they were successful outputs.
-
----
-
-## Evolution Rules
-
-The architecture may evolve, but evolution must be governed.
-
-## Allowed architectural evolution
-
-The repo may evolve by:
-- adding new artifact versions,
-- adding new validation layers,
-- introducing planning artifacts,
-- introducing normalized BDD,
-- introducing BDD style-learning assets,
-- introducing step registry and mapping,
-- introducing execution contracts,
-- improving collaboration where justified,
-- improving selective governance signals and observability where justified.
-
-## Disallowed architectural drift
-
-The repo should not drift into:
-- undocumented provider coupling,
-- free-form artifact formats,
-- unclear module ownership,
-- silent contract weakening,
-- later-phase features hidden inside early-phase work,
-- syntax-first BDD pipelines that skip normalized governed artifacts once the normalized layer is introduced,
-- heavy hosted collaboration assumptions becoming implicit architecture before the repo actually needs them.
-
----
-
-## Recommended Directory Responsibilities
-
-This section is intentionally abstract so it remains valid even if the exact repo layout evolves.
-
-### `docs/`
-Owns:
-- architecture,
-- roadmap,
-- governance,
-- acceptance rules,
-- agent rules.
-
-### `schemas/` or equivalent
-Owns:
-- artifact schemas,
-- schema fixtures,
-- schema evolution helpers.
-
-### `prompts/` or equivalent
-Owns:
-- governed prompts,
-- prompt metadata,
-- versioned prompt assets.
-
-### `benchmarks/` or equivalent
-Owns:
-- benchmark datasets,
-- comparison logic,
-- benchmark configs,
-- evaluation summaries.
-
-### `artifacts/` or equivalent
-Owns:
-- generated sample outputs,
-- benchmark outputs,
-- reproducible reference flows,
-- governance/audit outputs.
-
-### `src/` or equivalent code directories
-Own:
-- pipeline logic,
-- providers,
-- validators,
-- reporting,
-- review flows,
-- generation logic.
-
----
-
-## Architectural Review Questions
-
-Use these questions before approving major changes:
-
-- Does this change preserve artifact contracts?
-- Does it improve or weaken traceability?
-- Does it preserve stable source-anchor propagation where applicable?
-- Does it keep provider logic isolated?
-- Does it blur module boundaries?
-- Does it move deterministic responsibilities into LLM-only logic?
-- Does it introduce a new LLM-driven stage without a defined contract?
-- Does it treat syntax output as canonical where a normalized artifact should own the contract?
-- Does it silently introduce later-phase capabilities?
-- Does it preserve rollback clarity?
-- Does it align with the current roadmap phase?
-
-If these questions cannot be answered clearly, the architecture impact is not yet review-ready.
-
----
-
-## Summary
-
-The architecture of this repository is centered on governed transformation of documents into structured test design artifacts.
-
-The system should continue evolving through:
-- explicit artifacts,
-- clear module boundaries,
-- deterministic validation,
-- stable source-anchor traceability,
-- repo-readable durable context,
-- LLM-assisted generation where appropriate,
-- strong traceability,
-- and phased expansion toward planning, BDD normalization, step integration, and execution readiness.
-
-Architecture clarity is essential because this repo may use multiple LLM APIs over time.  
-Without stable boundaries and contracts, model flexibility would become system instability.
+## 附录：目录职责
+
+| 目录 | 职责 |
+|------|------|
+| `docs/` | 架构、roadmap、治理、验收规则、代理规则 |
+| `schemas/` | artifact schemas、fixtures、schema 演进支持 |
+| `lme_testing/` | 核心 Python 包：pipelines、providers、oracles、signals |
+| `scripts/` | 提取脚本、治理检查脚本 |
+| `config/` | provider 配置、approved_providers、benchmark_thresholds |
+| `artifacts/` | 规则 artifacts（lme_rules_v2_2、poc_two_rules） |
+| `runs/` | pipeline 运行输出（gitignored，路径结构见 run_directory_structure.md） |
+| `reports/` | HTML 报告输出 |
+| `tests/` | 单元测试（78 个） |
+| `samples/ruby_cucumber/` | Ruby Cucumber 原型（存档，非主路径） |
+
+**`runs/` 目录结构：** 见 `docs/run_directory_structure.md`（S1-T02 产出后补充）

@@ -1,1263 +1,515 @@
-# Implementation Plan
+# LME Testing — Revised Implementation Plan
 
-## Purpose
-
-This document translates the phased roadmap into an execution-oriented implementation plan.
-
-It is intended to serve as:
-
-1. a developer-facing task breakdown,
-2. a controlled execution guide for AI coding agents,
-3. a practical bridge between roadmap goals and acceptance gates.
-
-This document does **not** replace:
-
-- `docs/roadmap.md` for strategic direction,
-- `docs/architecture.md` for system boundaries,
-- `docs/acceptance.md` for formal phase gates,
-- `docs/model_governance.md` for model and prompt control,
-- `docs/testing_governance.md` for test asset and review operations.
-
-Instead, this file explains **how to execute roadmap work in governed tasks**.
+**版本：** 2.0  
+**修订日期：** 2026-04-18  
+**对应 Roadmap：** Stage 1（真实数据接入与可信基准建立）  
+**范围说明：** 本文档只覆盖 Stage 1 的执行任务。Stage 2 任务将在 Stage 1 完成后、基于真实数据另行制定。
 
 ---
 
-## How to Use This Document
+## 如何使用本文档
 
-Each implementation task should be treated as a governed work unit.
+每个任务遵循统一结构：
 
-For every task:
+- **任务 ID** — 全局唯一，格式 `S1-Txx`
+- **目标** — 一句话说清楚做什么
+- **为什么现在做** — 说明优先级依据
+- **前置依赖** — 必须先完成的任务
+- **输入契约** — 任务开始时必须存在的输入
+- **输出契约** — 任务完成时必须产出的输出
+- **实现要点** — 关键技术决策和约束
+- **验收标准** — 可量化的完成判断
+- **自评格式** — PASS / PARTIAL / FAIL
+- **不在范围内** — 明确的边界
 
-- identify the task ID and active phase,
-- read the task goal,
-- confirm prerequisites,
-- check whether earlier phase gates or equivalent prerequisites are satisfied,
-- honor the input contract,
-- produce the expected output contract,
-- run the required validation,
-- record acceptance evidence,
-- end with a structured self-evaluation against the acceptance criteria,
-- do not expand scope beyond the task unless explicitly approved.
-
-This document is especially important when different LLM APIs or AI coding agents are used, because it defines stable execution expectations that do not depend on chat context.
+**治理规则：** 任务未达到 PASS 不得标记完成。PARTIAL 必须记录缺失项和补做计划。
 
 ---
 
-## Task Contract Template
+## 任务依赖关系
 
-Every implementation task in this file follows the same structure.
+```
+S1-T01（Schema signal 修复）  ─┐
+S1-T02（Run 路径对齐）        ─┼─→ S1-T04（全量基准运行）─→ S1-T05（状态声明重写）
+S1-T03（Session 并发安全）    ─┘
+                               ↓
+                         S1-T03b（Checker stability）─→ S1-T04 ─→ S1-T05
+```
 
-### Required fields
-
-- **Task ID**
-- **Goal**
-- **Why it matters**
-- **Prerequisites**
-- **Input contract**
-- **Output contract**
-- **Implementation notes**
-- **Validation**
-- **Acceptance evidence**
-- **Self-evaluation**
-- **Out of scope**
-
-### Governance rule
-
-If a prerequisite is missing, do not fabricate it.
-Stop, mark the dependency, and resolve the missing input first.
-
-Durable task behavior must be represented in repo-readable files:
-
-- prompts should live in governed prompt files,
-- config should live in config files,
-- schemas should live in schema files,
-- acceptance requirements should live in docs or governed policy files.
-
-Do not rely on hidden chat context as a substitute for repository contracts.
-
-## Self-Evaluation Format
-
-At the end of every substantial task implementation, produce a short self-evaluation that lists each relevant acceptance criterion and marks it as:
-
-- PASS
-- PARTIAL
-- FAIL
-
-If any criterion is FAIL, the task should not be treated as complete.
+S1-T01、S1-T02、S1-T03 可并行执行。  
+S1-T03b（Checker stability）依赖 S1-T02 的路径格式确认。  
+S1-T04 依赖 S1-T01 和 S1-T02。  
+S1-T05 在所有任务完成后执行。
 
 ---
 
-# Phase 1 - Baseline Control and Pipeline Hardening
+## S1-T01 — Schema Failure Rate 数据源修复
 
-## Objective
+**目标：** 让 `schema_failure_rate` governance signal 消费真实验证数据而非空值。
 
-Stabilize the current document-to-rule-to-BDD design pipeline so that model changes, prompt changes, and repo evolution do not silently degrade output quality.
+### 为什么现在做
 
-## Execution priority
+`_compute_schema_signals()` 的代码注释明确承认当前没有持久化数据源，导致 `schema_failure_rate` 恒为 0.0%，这是一个已知的假数据问题。这是 governance 体系可信度的基础，必须首先修复。
 
-Phase 1 work should generally proceed in this order:
+### 前置依赖
 
-1. governed rule validation,
-2. baseline CI and smoke reproducibility,
-3. source-anchor groundwork,
-4. prompt and model provenance,
-5. checker instability visibility.
+无
 
-This ordering reflects the current repo state.
-It favors control and reproducibility before adding more workflow breadth.
+### 输入契约
 
----
+- `scripts/validate_schemas.py`（现有）
+- `lme_testing/signals/__init__.py` 中的 `_compute_schema_signals()`（现有）
+- `schemas/fixtures/` 下的 valid/invalid fixture 集合（现有）
 
-## Task 1.1 - Rule Schema Validation
+### 输出契约
 
-### Goal
+**代码变更：**
+- `scripts/validate_schemas.py`：新增 `--output-json <path>` 可选参数
+  - 产出格式：
+    ```json
+    {
+      "validated_at": "2026-04-18T10:00:00Z",
+      "total_schemas": 7,
+      "total_fixtures": 12,
+      "passed": 12,
+      "failed": 0,
+      "failures": []
+    }
+    ```
+  - 不传 `--output-json` 时行为与现有完全一致（向后兼容）
 
-Introduce governed schema validation for rule-layer artifacts.
+**CI 变更：**
+- `.github/workflows/ci.yml` 的 `schema-validation` job 新增：
+  ```
+  python scripts/validate_schemas.py --output-json runs/schema_validation_latest.json
+  ```
 
-### Why it matters
+**信号读取变更：**
+- `lme_testing/signals/__init__.py` 的 `_compute_schema_signals()`：
+  - 优先读取 `runs/schema_validation_latest.json`
+  - 若文件不存在，返回 `SchemaSignals()`（空值）并在日志中标注 `data_source: no_data`
+  - 在 `GovernanceSignals.to_dict()` 中新增 `schema_signal_source` 字段：`"real_validation"` / `"no_data"`
 
-The upstream rule layer determines downstream quality.
-Invalid `atomic_rule` or `semantic_rule` inputs can silently poison maker, checker, review, and reporting.
+**文档变更：**
+- `docs/architecture.md`：Validation Architecture 小节补充"schema validation 产出持久化结果"的说明
 
-### Prerequisites
+### 实现要点
 
-- current artifact examples exist,
-- artifact fields are known,
-- baseline schema directory or equivalent location is available.
+- `--output-json` 参数使用 `argparse` 添加，`None` 时不写文件
+- 写文件前确保目录存在（`Path(output_path).parent.mkdir(parents=True, exist_ok=True)`）
+- 文件写入使用原子操作（先写 `.tmp` 再 `rename`），防止 CI 并发写入损坏
+- 不修改 schema 验证逻辑本身，只新增输出路径
 
-### Input contract
+### 验收标准
 
-- representative `atomic_rule` examples,
-- representative `semantic_rule` examples,
-- known required fields,
-- known `rule_type` values.
+- [ ] `python scripts/validate_schemas.py --output-json /tmp/test.json` 产出合法 JSON
+- [ ] CI `schema-validation` job 产出 `runs/schema_validation_latest.json`
+- [ ] `python main.py governance-signals` 后，`governance_signals.json` 中 `schema_signal_source` 为 `"real_validation"`
+- [ ] 将 `schemas/fixtures/atomic_rule_invalid.json` 故意传入验证时，`failures` 非空，`schema_failure_rate > 0`
+- [ ] `--output-json` 不传时，现有行为无变化（回归测试通过）
 
-### Output contract
+**自评：** PASS / PARTIAL / FAIL
 
-- governed schema definitions for `atomic_rule` and `semantic_rule`,
-- validation utility or validation workflow,
-- a structured validation report format,
-- valid and invalid fixtures,
-- documentation of rule validation behavior.
+### 不在范围内
 
-### Implementation notes
-
-Focus on:
-
-- required fields,
-- field types,
-- traceability fields,
-- `rule_type` enum constraints,
-- version support.
-
-Do not overfit schemas to a single temporary sample.
-
-### Validation
-
-- valid fixture passes,
-- invalid fixture fails,
-- invalid `rule_type` fails,
-- missing required field fails,
-- a structured validation report can be produced,
-- downstream maker execution is blocked when validation fails.
-
-### Acceptance evidence
-
-- schema files committed,
-- fixtures committed,
-- validation logs or tests committed,
-- sample structured validation report committed or demonstrated,
-- references added to docs.
-
-### Self-evaluation
-
-Confirm each validation requirement as PASS / PARTIAL / FAIL.
-
-### Out of scope
-
-- advanced conflict reasoning,
-- full semantic contradiction analysis,
-- execution integration.
+- 修改 schema 内容
+- 修改 fixture 内容（除非发现现有 fixture 有 bug）
+- 改变 CI 对 schema 失败的响应方式（仍然是 hard fail）
 
 ---
 
-## Task 1.2 - Baseline CI and Smoke Flow
+## S1-T02 — 全量运行数据路径对齐
 
-### Goal
+**目标：** 让 governance signals 系统能够正确读取全量 183 条规则的已有运行数据。
 
-Create a reliable baseline CI path for the current core workflow.
+### 为什么现在做
 
-### Why it matters
+全量运行数据已经存在，但 `compute_governance_signals()` 的目录扫描路径与实际输出路径不匹配，导致所有基于真实数据的 signal 失效。这是让现有工作产生价值的最快路径。
 
-Without CI, roadmap work has no durable safety net.
+### 前置依赖
 
-### Prerequisites
+无（但需要先手动定位实际运行输出目录）
 
-- minimal reproducible sample flow,
-- Task 1.1 validation commands or equivalent scripts available.
+### 输入契约
 
-### Input contract
+**第一步（人工）：** 找到全量运行的实际输出目录，确认其结构：
+```
+runs/
+  <run_type>/          # maker / checker / bdd / step-registry
+    <run_id>/          # 时间戳格式
+      maker_cases.jsonl / checker_reviews.jsonl / coverage_report.json 等
+```
 
-- smallest baseline dataset or artifact set,
-- schema validation tasks,
-- reporting generation task.
+若实际结构不同，以实际结构为准，不强行对齐代码。
 
-### Output contract
+### 输出契约
 
-CI workflow that runs at least:
+**文档产出（必须先于代码变更）：**
+- `docs/run_directory_structure.md`（新建）：
+  - 标准运行输出目录结构
+  - 每种 pipeline（maker/checker/bdd/step-registry）的输出文件清单
+  - 历史运行的实际结构（如果与标准不同，记录差异和原因）
 
-- schema validation,
-- minimal end-to-end smoke,
-- report generation smoke,
-- core unit tests for pipeline bootstrapping,
-- and can execute the end-to-end smoke path without calling a real LLM API by using a deterministic stub provider or equivalent governed test double.
+**代码变更（基于文档中确认的实际结构）：**
+- `lme_testing/signals/__init__.py`：
+  - `_compute_coverage_signals()`：确保扫描路径与实际 checker 输出路径一致
+  - `_compute_step_binding_signals()`：确保扫描路径与实际 step-registry 输出路径一致
+  - `_compute_checker_instability_signals()`：确保扫描路径与 checker_stability.py 输出路径一致
+  - 每个 `_compute_*` 函数新增 `data_source` 字段在返回值中
 
-### Implementation notes
+**验证产出：**
+- `governance_signals.json` 在修复后的 `runs_analyzed > 0`
+- `coverage_signals.total_rules` 接近 183
 
-Prefer stable fixture-based smoke coverage over large expensive runs.
+### 实现要点
 
-### Validation
+- **先写文档，后改代码**：路径结构先在 `run_directory_structure.md` 中确认，避免猜测式修改
+- 若发现历史运行结构与预期不同，在文档中记录差异，选择：a）重命名历史目录适配代码，或 b）调整代码适配历史目录——优先选 b）
+- 路径扫描逻辑应具备容错性：目录不存在时返回空信号而非 crash
+- 新增 `--runs-dir` CLI 参数到 `governance-signals` 命令，允许指定非默认的 runs 目录
 
-- CI fails on broken schema,
-- CI fails on broken smoke path,
-- CI fails on broken report generation,
-- smoke runs can be executed without making real LLM API calls.
+### 验收标准
 
-### Acceptance evidence
+- [ ] `docs/run_directory_structure.md` 存在，描述了真实的目录结构
+- [ ] `python main.py governance-signals` 输出中 `runs_analyzed > 0`
+- [ ] `coverage_signals.total_rules` 在全量运行数据可读时接近 183
+- [ ] 若全量运行数据目录不存在，`governance-signals` 不 crash，输出空信号并有明确日志
+- [ ] `python main.py governance-signals --runs-dir <path>` 支持指定目录
 
-- workflow files,
-- passing CI logs,
-- failing-case proof where useful.
+**自评：** PASS / PARTIAL / FAIL
 
-### Self-evaluation
+### 不在范围内
 
-Confirm each CI requirement as PASS / PARTIAL / FAIL.
-
-### Out of scope
-
-- expensive full-dataset CI,
-- production deployment pipeline.
-
----
-
-## Task 1.3 - Structured Source Anchor Groundwork
-
-### Goal
-
-Introduce a stable source-level traceability key, such as a paragraph-level identifier or equivalent governed source anchor, that can flow through upstream and downstream artifacts.
-
-### Why it matters
-
-Traceability becomes actionable when artifacts can point to a stable source anchor rather than only broad source references.
-
-### Prerequisites
-
-- source parsing supports section or paragraph segmentation, or can be extended incrementally,
-- trace fields exist or can be extended safely.
-
-### Input contract
-
-- source document segmentation output,
-- existing traceability model,
-- current rule artifact shape.
-
-### Output contract
-
-A traceability mechanism that carries a stable source anchor into:
-
-- rule artifacts,
-- maker outputs where applicable,
-- checker outputs where applicable,
-- reports,
-- future BDD or step-related outputs.
-
-### Implementation notes
-
-For Phase 1, prefer additive metadata over disruptive redesign.
-The exact field name may evolve, but the concept must remain stable and documented.
-
-### Validation
-
-- IDs are unique within governed scope,
-- upstream artifacts retain the ID,
-- downstream artifacts that already consume trace data preserve or surface the ID where practical,
-- reports or machine-readable exports can surface or sort by it.
-
-### Acceptance evidence
-
-- artifact examples,
-- uniqueness checks,
-- docs updated.
-
-### Self-evaluation
-
-Confirm each traceability requirement as PASS / PARTIAL / FAIL.
-
-### Out of scope
-
-- full graph-based provenance service,
-- strict enforcement across every downstream artifact before migration support exists.
+- 重新运行全量 pipeline（这是 S1-T04 的工作）
+- 修改 runs 目录的命名约定（保持向后兼容）
 
 ---
 
-## Task 1.4 - Prompt and Model Version Metadata
+## S1-T03 — Session Snapshot 原子写入
 
-### Goal
+**目标：** 修复 review_session.py 的 session snapshot 写入，防止快速连续操作导致数据损坏。
 
-Ensure generated artifacts record model and prompt provenance.
+### 为什么现在做
 
-### Why it matters
+已知缺陷：Web UI 的 Save 操作直接覆盖写入 JSON 文件，无并发保护。虽然当前是单用户场景，但快速点击 Save 可能产生部分写入。这是低成本、低风险的基础数据完整性修复。
 
-Without provenance, behavior drift becomes difficult to diagnose and controlled rollback becomes weak.
+### 前置依赖
 
-### Prerequisites
+无
 
-- provider abstraction exists or is identifiable,
-- governed prompt version policy exists or can be introduced.
+### 输入契约
 
-### Input contract
+- `lme_testing/review_session.py` 中所有写入 session snapshot 的路径：
+  - `save_bdd_edits()` → `human_bdd_edits_latest.json`
+  - `save_scripts_edits()` → `human_scripts_edits_latest.json`
+  - session state 持久化
 
-- model configuration source,
-- prompt ID and version source,
-- pipeline version source.
+### 输出契约
 
-### Output contract
+**代码变更：**
+- `lme_testing/storage.py` 新增 `atomic_write_json(path, data)` 工具函数：
+  ```python
+  def atomic_write_json(path: Path, data: dict) -> None:
+      """写入 JSON 文件，使用 tmp + rename 保证原子性。"""
+      tmp_path = path.with_suffix('.tmp')
+      tmp_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
+      tmp_path.replace(path)  # os.replace，原子操作
+  ```
+- `review_session.py` 中所有 session snapshot 写入替换为 `atomic_write_json()`
 
-Maker, checker, and rewrite artifacts include:
+**文档变更：**
+- `docs/architecture.md` Review modules 小节新增设计约束：
+  > "Session snapshot 使用原子写入（tmp + rename）。系统设计为单用户使用，不支持多用户并发访问。"
 
-- provider name,
-- model name,
-- model version if available,
-- prompt ID,
-- prompt version,
-- run timestamp,
-- source artifact hash where applicable,
-- pipeline version.
+### 实现要点
 
-### Implementation notes
+- `os.replace()` / `Path.replace()` 在 POSIX 和 Windows 上均为原子操作（同一文件系统内）
+- `tmp_path` 与目标路径在同一目录，确保同一文件系统
+- 不引入文件锁（过度设计），原子写入对单用户场景足够
+- 写入失败（如磁盘满）应抛出异常而非静默失败
 
-Do not scatter metadata logic across business modules.
-Keep metadata generation centralized where possible.
+### 验收标准
 
-### Validation
+- [ ] `storage.py` 中存在 `atomic_write_json()` 函数
+- [ ] `review_session.py` 中没有直接的 `json.dump()` / `.write_text()` 写入 snapshot 文件
+- [ ] 模拟快速连续 POST `/api/bdd/save`（5 次）后 snapshot 文件合法（`json.loads()` 不抛出异常）
+- [ ] `docs/architecture.md` 明确声明单用户设计约束
+- [ ] 现有 review session 功能回归测试通过
 
-- generated artifacts contain required metadata,
-- metadata is stable across repeated runs when inputs are unchanged except timestamp,
-- tests confirm metadata presence,
-- unknown or unsupported configured model names fail clearly before a live LLM call.
+**自评：** PASS / PARTIAL / FAIL
 
-### Acceptance evidence
+### 不在范围内
 
-- sample generated artifacts,
-- metadata tests,
-- docs updated.
-
-### Self-evaluation
-
-Confirm each acceptance condition as PASS / PARTIAL / FAIL.
-
-### Out of scope
-
-- full model benchmarking,
-- rollout automation.
+- 多用户并发支持
+- 数据库存储（过度设计）
+- 文件锁机制（对单用户场景过度）
 
 ---
 
-## Task 1.5 - Checker Stability Visibility
+## S1-T03b — Checker 真实稳定性测量
 
-### Goal
+**目标：** 用真实 MiniMax API 测量 checker 在相同输入上的重复一致性，替换当前基于 stub 的假数据。
 
-Make checker instability visible instead of implicit.
+### 为什么现在做
 
-### Why it matters
+当前 `checker_instability = 0%` 基于 StubProvider（确定性）测量，完全不代表真实 LLM 行为。这个数字是整个 checker governance 体系的核心信任基础，必须用真实数据重建。
 
-Checker results may appear authoritative even when they are unstable.
+### 前置依赖
 
-### Prerequisites
+- S1-T02 完成（确认 stability_report 的标准输出路径）
+- MiniMax API key 可用
 
-- baseline sample set exists,
-- checker can be invoked repeatedly with controlled inputs,
-- baseline execution cost is small enough for repeated sampling.
+### 输入契约
 
-### Input contract
+- `logs-from-backup-run/maker_cases.jsonl`（已有的 5 个 maker case）
+- `artifacts/poc_two_rules/semantic_rules.json`（对应的 semantic rules）
+- `config/llm_profiles.minimax.json`（MiniMax 真实配置）
+- `scripts/checker_stability.py`（现有脚本）
 
-- stable baseline input set,
-- checker output comparison method,
-- reporting or logging path that can surface instability.
+### 输出契约
 
-### Output contract
+**运行产出：**
+- `runs/stability_real/run_a/checker_reviews.jsonl`
+- `runs/stability_real/run_b/checker_reviews.jsonl`（相同输入，独立运行）
+- `runs/stability_real/stability_report.json`：
+  ```json
+  {
+    "data_source": "real_api",
+    "model": "MiniMax-M2.7",
+    "prompt_version": "...",
+    "total_cases": 5,
+    "stable_cases": N,
+    "unstable_cases": N,
+    "instability_rate": 0.XX,
+    "unstable_case_ids": [...]
+  }
+  ```
 
-A repeatable workflow that:
+**文档更新：**
+- `docs/acceptance.md` Phase 1 Gate 6 Evidence 更新：
+  - 旧：`checker instability: 0% (stub-only runs are deterministic)`
+  - 新：`checker instability: X% (real MiniMax-M2.7, poc_two_rules, 2 runs, 2026-04-xx)`
+- 若 `instability_rate > 0.05`：`docs/model_governance.md` 新增 MiniMax 稳定性实测记录，包括不稳定 case 分析
 
-- runs checker multiple times on the same baseline set,
-- compares results,
-- marks unstable outcomes,
-- exposes this signal in logs or reports.
+**Governance signal 更新：**
+- `governance_signals.json` 中 `checker_instability_rate` 来自真实 stability_report
 
-### Implementation notes
+### 实现要点
 
-Start with a small controlled baseline before expanding to broader statistical measurement.
-Do not require double-running the full corpus by default.
+- 两次运行必须使用完全相同的：输入文件、prompt version、model、temperature
+- 两次运行间隔 ≥ 5 分钟，避免模型缓存干扰
+- `stability_report.json` 必须新增 `data_source: "real_api"` 字段（区分 stub 运行）
+- 若两次运行结果完全相同（instability=0%），在报告中保留原始输出供审查，不直接声称"稳定"
 
-### Validation
+### 验收标准
 
-- repeated runs produce comparison data,
-- differences are visible,
-- unstable cases can be identified,
-- the workflow remains practical for the chosen baseline set.
+- [ ] 两次 checker 运行使用真实 MiniMax API（日志中有真实 HTTP 调用记录）
+- [ ] `stability_report.json` 包含 `data_source: "real_api"`
+- [ ] `docs/acceptance.md` Phase 1 Gate 6 Evidence 更新为真实数字
+- [ ] `governance_signals.json` 的 `checker_instability_rate` 来自真实 stability_report
+- [ ] 若 instability > 5%：`docs/model_governance.md` 有分析记录
 
-### Acceptance evidence
+**自评：** PASS / PARTIAL / FAIL
 
-- comparison output examples,
-- task documentation,
-- report or log samples.
+### 不在范围内
 
-### Self-evaluation
-
-Confirm each stability requirement as PASS / PARTIAL / FAIL.
-
-### Out of scope
-
-- full confidence engine,
-- automated adjudication of instability.
-
----
-
-# Phase 2 - Planned Test Design and Normalized BDD Platform
-
-## Objective
-
-Expand from stable design artifacts into reusable planning, normalized BDD generation, and controlled team-pilot workflows.
-
-## Execution rule
-
-Phase 2 must not introduce a new LLM-driven stage unless the stage has:
-
-- a defined artifact contract,
-- schema or equivalent validation logic,
-- traceability expectations,
-- reviewable outputs.
-
-This rule is especially important for planner outputs and normalized BDD artifacts.
+- 基于稳定性测量结果修改 prompt（这是 Stage 2 的工作）
+- 修改 checker instability 阈值（先收集数据，再决定）
+- 对全量 183 条规则做稳定性测量（成本过高，poc baseline 足够）
 
 ---
 
-## Task 2.1 - Multi-Document Ingestion and Source-Aware Rule Path
+## S1-T04 — 全量规则集质量基准建立
 
-### Goal
+**目标：** 建立第一个基于真实数据的、有文档记录的全量质量基准，成为后续所有质量提升的参照点。
 
-Support multiple document classes with explicit ingestion expectations and preserve a governed path from source documents into rule-layer artifacts.
+### 为什么现在做
 
-### Why it matters
+这是 Stage 1 最核心的任务。在此之前，系统的真实能力边界是未知的。这个基准将回答："当前系统对 LME 全量匹配规则的测试设计能力到底是什么水平？"
 
-Enterprise testing cannot depend on a single document shape, and Phase 2 expansion is only useful if traceability survives the transition from documents into `atomic_rule` and `semantic_rule` artifacts.
+### 前置依赖
 
-### Prerequisites
+- S1-T01 完成（schema signal 有真实数据）
+- S1-T02 完成（路径结构明确）
+- S1-T03b 完成（了解 checker 真实稳定性，评估 baseline 可信度）
 
-- Phase 1 validation and traceability foundations,
-- document classes chosen for initial support.
+### 输入契约
 
-### Input contract
+- `artifacts/lme_rules_v2_2/semantic_rules.json`（183 条规则）
+- `config/llm_profiles.minimax.json`（MiniMax 真实配置）
+- `docs/run_directory_structure.md`（S1-T02 产出，确认路径格式）
 
-For each chosen document class:
+### 输出契约
 
-- representative samples,
-- parsing assumptions,
-- rule extraction expectations,
-- known failure modes.
+**运行产出（使用标准路径）：**
+```
+runs/baseline_full/
+  maker/
+    <run_id>/
+      maker_cases.jsonl
+      summary.json
+  checker/
+    <run_id>/
+      checker_reviews.jsonl
+      coverage_report.json
+      summary.json
+```
 
-### Output contract
+**报告产出：**
+- `reports/baseline_full_<date>.html`
 
-Document-class-aware ingestion support with:
+**关键文档（必须产出）：**
+- `docs/releases/BASELINE-183-RULES.md`，内容包括：
+  - 运行日期、模型版本、prompt version
+  - `coverage_percent`（真实数字，不管是否好看）
+  - 各 rule_type 的覆盖率分布
+  - 人工随机抽查记录（≥ 10 条规则，逐条评估 maker 输出质量）
+  - **已知问题列表**（quality 低的规则类型、常见失败模式）
+  - 与 poc_two_rules baseline 的对比
 
-- documented parsing strategy,
-- documented extraction constraints,
-- sample source segmentation outputs,
-- source-aware rule extraction outputs,
-- validation notes.
+### 实现要点
 
-### Implementation notes
+**运行策略（避免一次性全量失败）：**
+```bash
+# 分批运行，支持断点续传
+python main.py maker \
+  --input artifacts/lme_rules_v2_2/semantic_rules.json \
+  --output-dir runs/baseline_full/maker \
+  --batch-size 8 \
+  --resume-from <existing_jsonl_if_any>
 
-Start with a small number of classes.
-Do not claim generality too early.
+python main.py checker \
+  --rules artifacts/lme_rules_v2_2/semantic_rules.json \
+  --cases runs/baseline_full/maker/<run_id>/maker_cases.jsonl \
+  --output-dir runs/baseline_full/checker \
+  --batch-size 8
+```
 
-### Validation
+**人工抽查方法：**
+- 随机选取 10 条规则（覆盖不同 rule_type）
+- 对每条规则：阅读 semantic rule → 阅读 maker 生成的 scenarios → 主观评估"这个场景对规则的覆盖是否合理"
+- 评级：Good / Acceptable / Poor
+- 记录 Poor 的原因
 
-- multiple document classes process successfully,
-- each class has documented failure modes,
-- outputs remain traceable and schema-valid,
-- source anchors survive into governed rule artifacts where applicable.
+**质量结果处理原则：**
+- coverage < 60%：明确记录，分析失败模式，**不调整阈值掩盖问题**
+- coverage 60-80%：记录并分析，在 Stage 2 决定是否做 prompt 调优
+- coverage > 80%：记录，与 poc_two_rules 对比是否有显著差距
 
-### Acceptance evidence
+### 验收标准
 
-- sample documents,
-- sample outputs,
-- class-specific notes,
-- tests or fixtures.
+- [ ] `coverage_report.json` 包含 ≥ 180 条规则的状态（允许少量提取失败）
+- [ ] `governance_signals.json` 中 `coverage_signals.total_rules ≥ 180`
+- [ ] `docs/releases/BASELINE-183-RULES.md` 存在，包含所有必需章节
+- [ ] 人工抽查 ≥ 10 条规则，评估记录在 `BASELINE-183-RULES.md` 中
+- [ ] `reports/baseline_full_<date>.html` 可在浏览器正常打开
+- [ ] 不论 coverage 数字是否好看，文档如实记录（不掩盖问题）
 
-### Self-evaluation
+**自评：** PASS / PARTIAL / FAIL
 
-Confirm each ingestion requirement as PASS / PARTIAL / FAIL.
+### 不在范围内
 
-### Out of scope
-
-- unlimited file-type support,
-- OCR-heavy universal ingestion.
-
----
-
-## Task 2.2 - Planning Layer
-
-### Goal
-
-Add a planner stage between semantic rules and scenario generation.
-
-### Why it matters
-
-Planning introduces explicit test intent rather than generating scenarios directly from rules without intermediate reasoning structure.
-
-### Prerequisites
-
-- semantic rules are stable,
-- planner output schema can be defined before planner rollout,
-- traceability from planner outputs to semantic rules is modelled.
-
-### Input contract
-
-- semantic rules,
-- rule metadata,
-- risk and priority heuristics where available.
-
-### Output contract
-
-Versioned planner artifacts describing:
-
-- test objective,
-- risk level,
-- coverage intent,
-- scenario family,
-- dependency notes,
-- recommended validation strategy.
-
-### Implementation notes
-
-Planner outputs should remain structured and reviewable.
-Do not let planner become a free-form narrative layer.
-
-### Validation
-
-- planner artifacts validate,
-- planner artifacts trace to semantic rules,
-- planner outputs can be reviewed independently,
-- downstream generation can consume them.
-
-### Acceptance evidence
-
-- planner schema,
-- planner samples,
-- integration tests to downstream generation.
-
-### Self-evaluation
-
-Confirm each planning requirement as PASS / PARTIAL / FAIL.
-
-### Out of scope
-
-- full autonomous test management,
-- execution orchestration.
+- 基于结果调整 prompt（Stage 2）
+- 对全量规则做稳定性双次运行（成本过高）
+- 将本次结果作为"最终质量声明"（这只是第一个基准，会迭代）
 
 ---
 
-## Task 2.3 - Normalized BDD Contract
+## S1-T05 — 项目状态声明重写
 
-### Goal
+**目标：** 用有数据支撑的、诚实的状态描述替换所有误导性"Complete"声明。
 
-Introduce a stable BDD representation independent of final output syntax.
+### 为什么现在做
 
-### Why it matters
+这是 Stage 1 的收尾任务，也是对外诚实沟通的基础。在有真实数字之前不写，有了之后必须写。
 
-BDD must become a governed artifact, not only a presentation format.
-Without a normalized contract, `.feature` output becomes a fragile syntax-level dependency.
+### 前置依赖
 
-### Prerequisites
+所有 S1-T01 至 S1-T04 完成
 
-- planning outputs or stable generation inputs exist,
-- BDD output patterns are understood,
-- schema for normalized BDD can be defined before it becomes the default path.
+### 输入契约
 
-### Input contract
+- S1-T01 产出的真实 schema failure rate
+- S1-T02 产出的真实 runs_analyzed
+- S1-T03b 产出的真实 checker instability rate
+- S1-T04 产出的真实 coverage_percent 和人工抽查结论
 
-- planner or semantic inputs,
-- current BDD output examples,
-- style expectations.
+### 输出契约
 
-### Output contract
+**`README.md` Project Status 小节重写：**
+```markdown
+## Project Status
 
-A normalized BDD artifact contract with:
+**框架实现：** ✅ 完成（maker / checker / BDD / oracle / governance signals）
 
-- schema,
-- traceability,
-- scenario structure,
-- style metadata where needed.
+**验证状态：**
 
-### Implementation notes
+| 维度 | 状态 | 数据 |
+|------|------|------|
+| Schema 契约验证 | ✅ 通过 | schema_failure_rate: X% |
+| POC 端到端（2条规则）| ✅ 通过 | coverage: 100% |
+| 全量规则集质量基准 | ✅ 已建立 | coverage: X%，详见 BASELINE-183-RULES.md |
+| Checker 稳定性 | ✅ 已测量 | instability: X%（真实 MiniMax API）|
+| 真实执行环境接入 | ⏳ 待外部条件 | 需要 LME VM 访问权限 |
+| 多用户协作 | ❌ 非当前阶段 | 设计为单用户工具 |
+```
 
-The normalized BDD artifact should be reusable across future renderers and step-integration logic.
-Do not treat raw Gherkin text as the only governed representation once this task is introduced.
+**`TODO.md` 重写：** 区分"代码实现 ✅"和"真实验证 ✅/🔄"
 
-### Validation
+**`docs/acceptance.md` 每个 gate 补充 `Verification Type` 字段：**
+- `code_implementation` — 代码写出来了
+- `stub_verified` — 用 stub 验证通过
+- `real_data_verified` — 用真实 API 和真实规模验证通过
 
-- valid BDD artifacts pass schema,
-- invalid ones fail,
-- at least one renderer or exporter consumes the normalized representation.
+### 验收标准
 
-### Acceptance evidence
+- [ ] `README.md` 中不存在"All Phases Complete"表述
+- [ ] `README.md` Project Status 中所有数字有对应的数据来源文件
+- [ ] `TODO.md` 中清晰区分代码完成 vs 验证完成
+- [ ] `docs/acceptance.md` 每个 gate 有 `Verification Type` 标注
+- [ ] 没有任何文档声称"100% coverage"而不注明"基于 X 条规则"
 
-- schema,
-- fixtures,
-- renderer or export proof,
-- docs updated.
-
-### Self-evaluation
-
-Confirm each BDD contract requirement as PASS / PARTIAL / FAIL.
-
-### Out of scope
-
-- full execution binding,
-- automatic step generation as a required baseline.
+**自评：** PASS / PARTIAL / FAIL
 
 ---
 
-## Task 2.4 - BDD Style Learning
+## Stage 1 完成检查清单
 
-### Goal
+在宣告 Stage 1 完成之前，确认所有项目：
 
-Learn reusable style patterns from existing BDD assets without hardcoding everything manually.
+### 必须完成（blocking）
 
-### Why it matters
+- [ ] S1-T01：`schema_failure_rate` 有真实数据
+- [ ] S1-T02：`runs_analyzed > 0`，`total_rules ≥ 180`
+- [ ] S1-T03：Session snapshot 使用原子写入
+- [ ] S1-T03b：`checker_instability_rate` 有真实 API 数据
+- [ ] S1-T04：`BASELINE-183-RULES.md` 存在，有人工抽查记录
+- [ ] S1-T05：README 状态声明有数据支撑
 
-Teams often already have conventions that should be preserved.
+### 建议完成（non-blocking）
 
-### Prerequisites
+- [ ] `docs/run_directory_structure.md` 存在且准确
+- [ ] CI governance-signals job 输出真实数字（非 stub）
+- [ ] 所有 governance signal 有 `data_source` 字段标注
 
-- existing `.feature` examples or equivalent BDD assets,
-- normalized BDD contract direction established.
+### Stage 1 不需要完成的事
 
-### Input contract
-
-- representative feature files,
-- style attributes to observe,
-- extraction procedure for style features.
-
-### Output contract
-
-A governed style artifact, such as a style profile or style guide, that can inform generation without becoming an opaque hidden dependency.
-
-### Implementation notes
-
-Style-learning outputs should be inspectable and versioned.
-They should not be hidden inside prompts only.
-
-### Validation
-
-- extracted style patterns are reviewable,
-- generation can reference them,
-- results remain within normalized BDD contract.
-
-### Acceptance evidence
-
-- style profile artifacts,
-- review notes,
-- examples before and after style adoption.
-
-### Self-evaluation
-
-Confirm each style-learning requirement as PASS / PARTIAL / FAIL.
-
-### Out of scope
-
-- unrestricted stylistic self-optimization.
+- ❌ 提升 coverage 数字（Stage 2）
+- ❌ 改进 prompt（Stage 2，且需要基于 Stage 1 数据决定）
+- ❌ 接入真实 LME API（Stage 3）
+- ❌ 新增 oracle（Stage 2，基于 Stage 1 失败模式分析后决定）
 
 ---
 
-## Task 2.5 - Step Registry Visibility
+## 附录：被暂缓的 Stage 2 任务占位符
 
-### Goal
+以下任务在 Stage 1 完成后，基于真实数据重新制定计划：
 
-Introduce early visibility into step-definition reuse needs without treating full execution binding as a Phase 2 requirement.
+| 任务 ID | 方向 | 触发条件 |
+|---------|------|---------|
+| S2-T01 | Maker prompt 质量提升 | Stage 1 coverage < 80% 或抽查 Poor 率 > 30% |
+| S2-T02 | Checker 稳定性改进 | Stage 1 instability > 10% |
+| S2-T03 | Oracle 实测验证 | Stage 1 识别出高频确定性规则类型 |
+| S2-T04 | 全量规则 BDD 生成验证 | Stage 1 基准建立后的 BDD 质量评估 |
 
-### Why it matters
-
-Teams need to know whether generated BDD is likely to reuse existing execution assets before Phase 3 mapping and execution-readiness work begins.
-
-### Prerequisites
-
-- normalized BDD artifacts exist,
-- representative step assets or step conventions are available.
-
-### Input contract
-
-- normalized BDD scenarios,
-- sample step assets or step definitions,
-- early matching assumptions.
-
-### Output contract
-
-Lightweight step-visibility outputs showing:
-
-- candidate reusable steps,
-- obvious gaps,
-- implementation-needed markers,
-- early mapping notes for later Phase 3 work.
-
-### Implementation notes
-
-Keep this phase lightweight and reviewable.
-Do not claim full exact-match or parameterized-match coverage yet.
-
-### Validation
-
-- step visibility outputs are reproducible,
-- gaps are visible,
-- downstream teams can inspect the results.
-
-### Acceptance evidence
-
-- sample visibility artifacts,
-- matching notes,
-- docs updated.
-
-### Self-evaluation
-
-Confirm each step-visibility requirement as PASS / PARTIAL / FAIL.
-
-### Out of scope
-
-- full step registry,
-- full binding engine,
-- automatic step implementation.
-
----
-
-## Task 2.6 - Quality Dashboards and Drift Views
-
-### Goal
-
-Enhance reporting so teams can see stability, drift, and traceability patterns.
-
-### Why it matters
-
-Governed workflows need visibility, not just final pass or fail summaries.
-
-### Prerequisites
-
-- stable reporting layer,
-- traceability data,
-- checker stability signal.
-
-### Input contract
-
-- current reports,
-- benchmark history or repeated run history,
-- traceability fields.
-
-### Output contract
-
-Reporting extensions that can show, at minimum:
-
-- rule-type coverage view,
-- unstable checker decisions,
-- run-to-run drift,
-- traceability drill-down,
-- machine-readable export.
-
-### Implementation notes
-
-Prefer traceability and governance value over decorative visualization.
-
-### Validation
-
-- reports render correctly,
-- exports are usable,
-- drift signals are visible.
-
-### Acceptance evidence
-
-- report samples,
-- export samples,
-- screenshots if needed,
-- generation tests.
-
-### Self-evaluation
-
-Confirm each reporting requirement as PASS / PARTIAL / FAIL.
-
-### Out of scope
-
-- heavy BI platform integration.
-
----
-
-# Phase 3 - Execution Readiness and Selective Enterprise Controls
-
-## Objective
-
-Extend from design and planning artifacts into execution integration, deterministic validation for high-value rule classes, and release-grade governance controls.
-
----
-
-## Task 3.1 - Step Definition Registry
-
-### Goal
-
-Build a governed registry of existing step definitions for reuse and integration.
-
-### Why it matters
-
-Enterprise adoption depends on connecting generated BDD to real executable assets.
-
-### Prerequisites
-
-- normalized BDD contract exists,
-- representative step definition libraries are available.
-
-### Input contract
-
-- step definition source set,
-- parsing assumptions,
-- output registry schema.
-
-### Output contract
-
-A governed step registry that supports:
-
-- step signature inventory,
-- ownership or source mapping,
-- parameter awareness where possible,
-- reuse-oriented lookup.
-
-### Implementation notes
-
-The registry should help identify reuse opportunities before generating new steps.
-
-### Validation
-
-- registry is generated reproducibly,
-- representative steps are captured,
-- lookup works for sample BDD outputs.
-
-### Acceptance evidence
-
-- registry artifact,
-- parser tests,
-- integration examples.
-
-### Self-evaluation
-
-Confirm each registry requirement as PASS / PARTIAL / FAIL.
-
-### Out of scope
-
-- automatic execution of all step bindings.
-
----
-
-## Task 3.2 - Step Mapping and Gap Analysis
-
-### Goal
-
-Map normalized BDD steps to existing step definitions and expose gaps.
-
-### Why it matters
-
-Teams need to know what is reusable and what still needs implementation.
-
-### Prerequisites
-
-- Task 3.1 complete,
-- normalized BDD artifacts available.
-
-### Input contract
-
-- normalized BDD scenarios,
-- step registry,
-- matching rules.
-
-### Output contract
-
-Mapping results showing:
-
-- exact matches,
-- parameterized matches where supported,
-- unmatched steps,
-- candidate suggestions,
-- gap summary.
-
-### Implementation notes
-
-Unmatched steps should be explicit and reviewable.
-Do not bury them in free-form logs.
-
-### Validation
-
-- mapping results are reproducible,
-- unmatched steps are visible,
-- reuse is measurable.
-
-### Acceptance evidence
-
-- mapping samples,
-- diff or gap reports,
-- matching tests.
-
-### Self-evaluation
-
-Confirm each mapping requirement as PASS / PARTIAL / FAIL.
-
-### Out of scope
-
-- automatic step implementation.
-
----
-
-## Task 3.3 - Executable Scenario Contract
-
-### Goal
-
-Introduce an execution-ready artifact that extends normalized BDD into a runtime integration contract.
-
-### Why it matters
-
-Design artifacts and executable artifacts should not be conflated.
-
-### Prerequisites
-
-- normalized BDD exists,
-- step mapping exists,
-- execution concerns have been modeled.
-
-### Input contract
-
-- normalized BDD artifacts,
-- step mappings,
-- environment and setup expectations,
-- assertion references.
-
-### Output contract
-
-An execution-ready scenario artifact that may include:
-
-- environment requirements,
-- input data requirements,
-- setup hooks,
-- cleanup hooks,
-- deterministic assertion references,
-- step bindings.
-
-### Implementation notes
-
-Keep this contract explicit and bounded.
-Do not let it become a vague future execution bucket.
-
-### Validation
-
-- contract validates,
-- required execution metadata exists,
-- export is consistent.
-
-### Acceptance evidence
-
-- schema or contract definition,
-- sample artifacts,
-- validation tests.
-
-### Self-evaluation
-
-Confirm each execution-contract requirement as PASS / PARTIAL / FAIL.
-
-### Out of scope
-
-- full distributed execution engine.
-
----
-
-## Task 3.4 - Deterministic Oracle Layer
-
-### Goal
-
-Move core runtime truth into deterministic assertions wherever possible for high-value structured rule classes.
-
-### Why it matters
-
-Execution correctness should not depend purely on LLM judgment.
-
-### Prerequisites
-
-- execution-ready contract exists,
-- structured rule categories identified.
-
-### Input contract
-
-- rule categories,
-- expected observable behaviors,
-- assertion scope.
-
-### Output contract
-
-Deterministic validation modules for core structured categories, such as:
-
-- field validation,
-- state validation,
-- deadline and window checks,
-- calculation checks,
-- sequence checks,
-- pass or fail accounting.
-
-### Implementation notes
-
-Start with the most structured and highest-value categories first.
-Do not build a generic framework before domain-critical cases justify it.
-
-### Validation
-
-- assertions are test-covered,
-- deterministic outputs are reproducible,
-- integration with execution-ready artifacts is clear.
-
-### Acceptance evidence
-
-- oracle modules,
-- tests,
-- sample scenario validations.
-
-### Self-evaluation
-
-Confirm each deterministic-oracle requirement as PASS / PARTIAL / FAIL.
-
-### Out of scope
-
-- full autonomous judgment of ambiguous cases.
-
----
-
-## Task 3.5 - Selective Governance Signals
-
-### Goal
-
-Track the minimum operational signals needed for governed release and platform review.
-
-### Why it matters
-
-The platform needs enough observability for controlled operation, but not every enterprise-style metric is justified immediately.
-
-### Prerequisites
-
-- traceability and reporting exist,
-- checker stability visibility exists,
-- release review workflow exists.
-
-### Input contract
-
-- benchmark history,
-- artifact quality metrics,
-- checker stability metrics,
-- mapping or reuse metrics where applicable.
-
-### Output contract
-
-A governed metrics and review package that can surface signals such as:
-
-- schema failure rate,
-- checker instability rate,
-- coverage trend,
-- step binding success rate where applicable.
-
-### Implementation notes
-
-Keep metrics explicit, reviewable, and tied to real decisions.
-Avoid introducing a heavy observability program before the platform needs it.
-
-### Validation
-
-- metrics can be produced reproducibly,
-- reports remain reviewable,
-- release discussions can rely on the signals.
-
-### Acceptance evidence
-
-- metric definitions,
-- report samples,
-- docs updated.
-
-### Self-evaluation
-
-Confirm each governance-signal requirement as PASS / PARTIAL / FAIL.
-
-### Out of scope
-
-- full enterprise observability stack,
-- product-scale operations dashboards by default.
-
----
-
-## Task 3.6 - Quality Gate and Regression Governance
-
-### Goal
-
-Formalize release-ready gating for model behavior, artifact quality, and integration stability.
-
-### Why it matters
-
-As the platform grows, changes must be promoted through governed quality signals rather than intuition.
-
-### Prerequisites
-
-- benchmark infrastructure exists,
-- traceability and reporting exist,
-- model governance is enforced.
-
-### Input contract
-
-- benchmark history,
-- artifact quality metrics,
-- checker stability metrics,
-- mapping and reuse metrics where applicable.
-
-### Output contract
-
-A governed quality-gate process that can block promotion when:
-
-- schema validity drops,
-- checker instability rises,
-- benchmark thresholds fail,
-- regression patterns appear,
-- integration quality degrades.
-
-### Implementation notes
-
-Keep thresholds explicit and reviewable.
-
-### Validation
-
-- failing thresholds block promotion,
-- successful runs produce reviewable evidence,
-- rollback path remains documented.
-
-### Acceptance evidence
-
-- gate configuration,
-- blocked-run examples,
-- promotion examples,
-- docs updated.
-
-### Self-evaluation
-
-Confirm each quality-gate requirement as PASS / PARTIAL / FAIL.
-
-### Out of scope
-
-- fully autonomous release approval.
-
----
-
-## Optional Exploration Tasks (Do Not Treat as Core Path)
-
-These tasks may be useful later, but they are not core requirements for the main platform path.
-
-### Optional A - Review Package Exchange
-
-Possible future direction once local review workflows are stable enough that cross-session and cross-reviewer exchange solves a real problem.
-
-### Optional B - Hosted Review and Audit Service
-
-Possible future direction if the repo eventually justifies deployable multi-user review and audit workflows.
-
-### Optional C - Auto Step Definition Generation
-
-Possible future direction once step registry and gap analysis are mature.
-
-### Optional D - Prompt Optimization Assistant
-
-Possible future direction once enough benchmark history exists to justify governed optimization.
-
-### Optional E - Domain Packages and Specialization Layers
-
-Possible future direction once the base platform is stable and multiple target domains require specialization.
-
-These optional tasks should not displace core governance, traceability, and execution-readiness work.
-
-# Phase Gate Awareness
-
-Implementation work should respect formal phase gates where they exist.
-
-Before starting work in a later phase:
-
-- check whether the prior phase gate has been signed off,
-- if a required gate record is missing, flag it,
-- do not quietly treat later-phase work as normal completion when earlier phase criteria are still open.
-
-This does not forbid exploratory work, but it does forbid presenting governed later-phase work as fully complete when prerequisite phase gates remain unsigned.
-
-# Implementation Review Checklist
-
-Before merging any implementation task, confirm:
-
-- task ID is identified,
-- prerequisites were satisfied,
-- earlier phase gates or equivalent prerequisites were checked,
-- input contract was honored,
-- output contract was produced,
-- validation was run,
-- acceptance evidence exists,
-- a structured self-evaluation was produced,
-- out-of-scope boundaries were respected,
-- docs were updated where required.
-
-If any of these are unclear, the task is not implementation-ready.
-
----
-
-# AI Agent Execution Rules
-
-Any AI coding agent following this plan must obey the following:
-
-## 1. Never fabricate missing prerequisites
-
-If an input contract depends on a file, schema, benchmark, artifact, or earlier phase gate that does not exist, stop and surface the missing dependency.
-
-## 2. Do not silently widen scope
-
-Stay within the current task and phase unless a human explicitly expands scope.
-
-## 3. Do not replace contracts with chat context
-
-All durable behavior must be captured in repo-readable files, not hidden in conversation state.
-
-## 4. Prefer deterministic validation when available
-
-If a contract can be validated deterministically, do not rely only on model judgment.
-
-## 5. Keep outputs reviewable
-
-Generated outputs, configs, schemas, and summaries must remain understandable by human reviewers.
-
-## 6. End with explicit completion status
-
-For substantial work, provide a short self-evaluation with PASS, PARTIAL, or FAIL per relevant acceptance item.
-
----
-
-# Summary
-
-This implementation plan turns the strategic roadmap into governed execution tasks.
-
-It preserves the governance-first approach of the repo while adding task-level execution structure that is especially useful for:
-
-- developers,
-- reviewers,
-- and AI coding agents working across different LLM APIs.
-
-The key principle is simple:
-
-**strategic direction belongs in the roadmap, system boundaries belong in architecture, governance belongs in policy docs, and execution detail belongs here.**
+**Stage 2 的具体任务不在本文档中制定。** 在 Stage 1 的真实数字出来之前，任何 Stage 2 计划都是基于未知的猜测。

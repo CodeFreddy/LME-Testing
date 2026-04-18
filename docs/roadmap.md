@@ -1,646 +1,255 @@
-# Enterprise AI Testing Upgrade Roadmap
+# LME Testing — Revised Roadmap
 
-## Purpose
-
-This document defines the phased upgrade plan for this repository.
-
-It is not a feature wish list and it is not a product vision deck.
-It is a governed execution contract for how this repo should evolve under probabilistic LLM behavior.
-
-The roadmap is written primarily for:
-
-1. AI coding agents modifying the repo,
-2. tech leads and reviewers governing repo evolution,
-3. developers implementing roadmap tasks.
-
-It is written secondarily for testers and other contributors who need to understand the platform direction.
+**版本：** 2.0  
+**修订日期：** 2026-04-18  
+**修订原因：** 原 roadmap 基于理想演进时间线编写，实际情况是 AI 代理在 48 小时内完成了框架实现但跳过了真实规模验证。本文档基于 repo 实际状态重新制定演进路径。
 
 ---
 
-## Current Starting Point
+## 一、诚实的现状声明
 
-The current system is a document-driven test design prototype with a usable design loop:
+在阅读本 roadmap 之前，需要理解当前 repo 的真实状态：
 
-`source docs -> extraction scripts -> atomic_rules.json -> semantic_rules.json -> maker -> checker -> review-session -> rewrite -> checker -> report`
+| 维度 | 实际状态 |
+|------|---------|
+| 框架代码 | ✅ 完整实现（maker / checker / BDD / oracle / governance signals） |
+| Schema 契约 | ✅ 7 套 JSON Schema，CI 验证通过 |
+| 小规模 POC | ✅ 2 条规则端到端跑通 |
+| **全量规则质量基准** | **🔄 数据存在但 governance 系统无法读取** |
+| **Checker 真实稳定性** | **❓ 未知，当前 0% 基于 stub** |
+| **Governance signals** | **⚠️ schema failure rate 和 instability 信号数据为空** |
+| 真实 LME API 接入 | ⏳ 无访问权限，ETA 未知 |
+| 多用户协作 | ❌ 非当前阶段目标 |
 
-Today, the framework already supports:
-
-- rule extraction into `atomic_rule` and `semantic_rule` artifacts,
-- BDD-style scenario generation through `maker`,
-- scenario quality and coverage assessment through `checker`,
-- human approval / rewrite / reject decisions through a local review session,
-- final HTML reporting.
-
-Current weaknesses that must be addressed before expansion:
-
-- upstream rule extraction governance is not yet a first-class validation layer,
-- model and prompt stability governance are not explicit enough,
-- stable source-anchor traceability is not yet consistently enforced,
-- review remains local and single-user oriented,
-- the repository still appears early-stage and requires stronger engineering controls.
-
-The immediate risk is not lack of downstream intelligence.
-The immediate risk is uncontrolled upstream quality, weak reproducibility, and insufficiently governed model-driven behavior.
+**这不是失败，这是一个诚实的原型。** 框架设计是有价值的资产，但"All Phases Complete"的表述已不适用，本文档以此为起点重新规划。
 
 ---
 
-## What This Roadmap Is and Is Not
+## 二、核心原则（与原 roadmap 保持一致）
 
-This roadmap is:
+以下原则经过实践验证，继续沿用：
 
-- a phase-based execution contract,
-- a prioritization tool for controlled repo evolution,
-- a boundary document for AI agent work,
-- a guide for what should be stabilized before scope expands.
+1. **Governance-contract-first** — LLM 输出必须被 schema、prompt 版本、benchmark 控制
+2. **Deterministic before LLM** — 能确定性验证的，不依赖 LLM 判断
+3. **Upstream quality first** — 上游规则质量决定下游一切
+4. **Artifacts are first-class** — 结构化产物优于自由文本
+5. **Human review is a control layer** — 人工审核是架构的一部分，不是可选功能
 
-This roadmap is not:
+新增原则（基于本次实践教训）：
 
-- a commitment to build every attractive future capability now,
-- a hosted product plan,
-- a requirement to introduce enterprise workflow layers before the repo is ready,
-- a replacement for `docs/implementation_plan.md`, `docs/architecture.md`, or `docs/acceptance.md`.
-
-Exploratory work may happen outside the current phase.
-It must not be presented as completed governed capability until the relevant phase contracts and acceptance gates are satisfied.
+6. **Real data before governance claims** — governance 指标必须有真实数据支撑，不接受 stub 数据作为治理证据
+7. **Honest capability boundary** — 系统能力边界必须明确声明，不夸大"完成"范围
 
 ---
 
-## Core Methodology
+## 三、Phase 重新定义
 
-These principles apply to all phases of the roadmap.
+### 当前实际所处阶段
 
-### 1. Governance-contract-first
+```
+原 roadmap 定义的阶段：Phase 1 → Phase 2 → Phase 3
+实际情况：框架代码覆盖 Phase 1-3，但验证深度仅到 Phase 1 POC 水平
+```
 
-LLM outputs must be governed, not trusted.
+**本 roadmap 将演进路径重新定义为 4 个阶段：**
 
-All meaningful LLM-driven artifacts should be controlled through:
-
-- explicit schemas,
-- versioned prompts,
-- artifact metadata,
-- benchmark baselines,
-- reviewable change records,
-- rollback-safe configuration.
-
-### 2. Deterministic responsibilities before agentic expansion
-
-The repo should first strengthen deterministic control layers before expanding LLM-driven workflow stages.
-
-Deterministic modules should own:
-
-- schema validation,
-- enum and field validation,
-- duplicate detection thresholds,
-- traceability checks,
-- coverage accounting,
-- release gates,
-- execution assertions where possible.
-
-LLMs may assist with:
-
-- rule normalization,
-- ambiguity detection,
-- planning drafts,
-- BDD generation suggestions,
-- rewrite proposals.
-
-### 3. Upstream quality dominates downstream value
-
-No downstream maker, checker, review, or reporting logic can compensate for invalid or weak upstream rule artifacts.
-
-For the current repo stage, the first priority is to make rule-layer artifacts more valid, traceable, and reproducible before adding heavier downstream capabilities.
-
-### 4. Repo-readable execution context
-
-Durable workflow behavior must be reconstructable from repo-readable assets rather than chat state.
-
-That means the repo should contain enough stable context in:
-
-- docs,
-- schemas,
-- prompts,
-- configs,
-- benchmark sets,
-- task contracts,
-- acceptance criteria.
-
-### 5. Phase discipline over scope creep
-
-Each phase must define scope and non-scope.
-
-Later-phase ideas may be explored, but they must not quietly enter the repo as if they were already part of the current governed baseline.
-
-### 6. Human review remains a control layer
-
-Human review is part of the current architecture, not an optional UX enhancement.
-
-Automation may accelerate generation and validation, but it must not bypass required human decision points where governance still depends on reviewer judgment.
+```
+Stage 0（当前）：框架已建，地基待验
+Stage 1（接下来）：真实数据接入，建立可信基准
+Stage 2（中期）：规模化质量提升
+Stage 3（长期，有外部依赖）：真实执行环境接入
+```
 
 ---
 
-## Cross-Model Governance Requirements
+## Stage 0 — 框架实现完成（已完成，存档）
 
-These requirements apply regardless of which LLM API is used.
+**时间：** 2026-04-13 至 2026-04-14（AI 代理实现）  
+**状态：** ✅ 代码层面完成
 
-### 1. Provider abstraction
+**已实现的内容（代码存在）：**
+- 完整 maker → checker → review → report 流水线
+- BDD 规范化生成（normalized BDD schema）
+- Planner 阶段（semantic rules → test objectives）
+- Step registry（步骤定义可见性）
+- 8 个 deterministic oracle 模块
+- Governance signals 框架（4 类信号）
+- Web review UI（localhost:8765）
+- CI 流水线（6 个 job）
+- 6 套治理文档
 
-The provider layer must expose a stable model strategy contract including:
-
-- provider name,
-- model name,
-- model version if available,
-- prompt version,
-- temperature or decoding settings,
-- timeout and retry settings.
-
-All governed artifacts produced by maker, checker, rewrite, and future planner modules should record this metadata.
-
-### 2. Prompt versioning
-
-Every production prompt should have:
-
-- a stable prompt ID,
-- semantic version,
-- owner,
-- change log,
-- linked benchmark set.
-
-### 3. Regression baseline
-
-The repo should formalize a small baseline suite, starting from the existing `poc_two_rules` style sample flow.
-
-Baseline categories should include:
-
-- extraction sanity,
-- maker structural validity,
-- checker consistency,
-- report generation,
-- end-to-end smoke.
-
-### 4. Model compatibility policy
-
-A new model or provider should only be adopted if it passes:
-
-- schema conformance,
-- benchmark threshold,
-- baseline checker stability threshold where applicable,
-- artifact diff review.
-
-### 5. Rollback policy
-
-A new model or prompt version must be reversible without changing business logic or artifact schemas.
-
-### 6. Repo-readable execution context
-
-Durable workflow behavior must be reconstructable from repo-readable prompts, configs, schemas, benchmark sets, and implementation task definitions rather than chat state alone.
+**存在的已知问题（不再掩盖）：**
+- governance signals 中 2/4 信号无真实数据
+- checker stability 基于 stub 测量，不代表真实 LLM 行为
+- step library 基于模拟 API，不对应真实 LME 系统
+- session snapshot 无并发保护
+- 全量 183 条规则运行数据未对齐到 governance 系统
 
 ---
 
-## Current Priority Order
+## Stage 1 — 真实数据接入与可信基准建立
 
-The current recommended execution order for the repo is:
+**时间预估：** 2-4 周  
+**目标：** 让 governance 系统消费真实数据，建立第一个可信的质量基准
 
-1. govern upstream rule artifacts,
-2. make baseline runs reproducible in CI,
-3. make model and prompt behavior traceable,
-4. expose checker instability on a small baseline set,
-5. only then expand upstream ingestion and downstream BDD normalization.
+**不在 Stage 1 范围内：**
+- 新功能开发
+- 多用户协作
+- 真实 LME API 接入
+- Oracle 框架扩展
 
-This ordering reflects the current maturity of the repo.
-It is intentionally biased toward control, validation, and reproducibility before workflow expansion.
+### Gate 1.1 — Governance 数据源修复
 
----
+**目标：** schema failure rate 和 checker instability 信号有真实数据支撑
 
-## Phase 1 - Baseline Control and Pipeline Hardening (0-3 Months)
+交付物：
+- `validate_schemas.py --output-json` 参数，产出持久化验证结果
+- `_compute_schema_signals()` 读取真实验证结果而非推断
+- CI schema-validation job 写入 `runs/schema_validation_latest.json`
 
-### Stage Goal
+验收：故意引入 invalid fixture 时 `schema_failure_rate > 0`
 
-Stabilize the current design pipeline so that different model APIs can be used without silently degrading artifact quality.
+### Gate 1.2 — 全量运行数据路径对齐
 
-### Why this phase matches the current repo
+**目标：** 全量 183 条规则的已有运行结果可被 governance 读取
 
-The repo already has a working maker-checker-review-report loop.
-What it lacks is stronger control over upstream rule quality, traceability, and reproducible validation.
+交付物：
+- `docs/run_directory_structure.md`：标准运行输出路径文档
+- `compute_governance_signals()` 扫描逻辑与实际输出路径对齐
+- `governance_signals.json` 中 `coverage_signals.total_rules ≈ 183`
 
-This phase therefore focuses on control surfaces, not new workflow breadth.
+验收：`runs_analyzed > 0`，`total_rules` 接近 183
 
-### In Scope
+### Gate 1.3 — Checker 真实稳定性测量
 
-- rule-layer schema formalization,
-- upstream validation and quality gates,
-- baseline CI and smoke reproducibility,
-- stable source-anchor groundwork,
-- prompt and artifact metadata,
-- checker stability visibility on a small baseline set,
-- repo docs and rules for AI agent execution.
+**目标：** 用真实 MiniMax API 测量 checker 在同一批 case 上的重复一致性
 
-### Out of Scope
+交付物：
+- 真实双次 checker 运行（poc_two_rules baseline）
+- `stability_report.json` 包含真实 instability_rate
+- `docs/acceptance.md` Phase 1 Gate 6 的 Evidence 更新为真实数字
+- 若 instability > 5%：`docs/model_governance.md` 新增实测记录和分析
 
-- multi-user hosted review platform,
-- execution engine,
-- step definition integration,
-- advanced planning intelligence,
-- full enterprise workflow orchestration,
-- persona-specific output modes as a roadmap priority.
+验收：stability_report 被 governance signals 系统正确读取
 
-### Key Deliverables
+### Gate 1.4 — 全量规则集质量基准
 
-#### A. Formal schema layer
+**目标：** 建立第一个有文档记录的全量基准运行
 
-Add versioned JSON Schemas for:
+交付物：
+- `runs/baseline_full/` 下的完整 maker + checker 输出
+- `reports/baseline_full.html` 可视化报告
+- `docs/releases/BASELINE-183-RULES.md`：基准运行记录，包含 coverage %、人工抽查结论、已知低质量规则类型
 
-- `atomic_rule`,
-- `semantic_rule`,
-- maker output,
-- checker output,
-- human review output.
+验收：
+- `coverage_report.json` 包含 183 条规则状态
+- 人工随机抽查 ≥ 10 条规则，质量评估记录在案
+- coverage < 80% 时，失败模式分类记录（不掩盖）
 
-#### B. Upstream validation pipeline
+### Gate 1.5 — 项目状态声明重写
 
-Insert a formal validation stage so the rule path becomes:
+**目标：** 消除误导性"All Phases Complete"声明
 
-`docs -> extraction scripts -> atomic_rules.json -> schema validation -> duplicate candidate detection -> rule_type enum validation -> semantic_rules.json`
+交付物：
+- `README.md` Project Status 小节反映真实状态
+- `TODO.md` 区分"代码实现完成"vs"真实验证完成"
+- `docs/acceptance.md` 每个 gate 标注验证类型
 
-This should be introduced incrementally where necessary so existing working paths are not broken without migration support.
-
-#### C. Baseline CI and reproducible smoke flow
-
-Add CI to run:
-
-- end-to-end smoke on a minimal baseline,
-- schema validation tests,
-- reporting smoke test,
-- core unit tests for pipeline and review session bootstrapping.
-
-#### D. Stable source-anchor groundwork
-
-Introduce and propagate a stable source anchor such as `paragraph_id` or equivalent.
-
-For the current phase, this may begin as additive metadata in extraction and rule artifacts before becoming a stricter downstream requirement everywhere.
-
-#### E. Prompt and artifact metadata
-
-Every generated governed artifact should include:
-
-- prompt version,
-- model ID,
-- provider,
-- run timestamp,
-- source artifact hash where applicable,
-- pipeline version.
-
-#### F. Checker stability signal on baseline set
-
-Run checker twice on the same small baseline set and flag inconsistent conclusions.
-
-This is a baseline sampling control, not a requirement to double-run the full corpus by default.
-
-#### G. Repo docs and agent operating rules
-
-Ensure the repo has and uses the minimum governance documents needed for controlled implementation:
-
-- `docs/roadmap.md`,
-- `docs/implementation_plan.md`,
-- `docs/acceptance.md`,
-- `docs/model_governance.md`,
-- `docs/agent_guidelines.md`.
-
-### Acceptance Criteria
-
-Phase 1 is accepted only if:
-
-- all core rule artifacts are schema-validated in CI,
-- invalid `rule_type` values fail the pipeline,
-- baseline smoke runs are reproducible in CI,
-- every maker and checker artifact records model and prompt metadata,
-- checker instability can be surfaced on the baseline set,
-- stable source anchors exist where applicable in governed upstream artifacts,
-- roadmap and governance docs are present and usable in the repo.
-
-### Success Metric
-
-The system becomes trustworthy enough for repeated internal development and controlled model change, even if it is not yet enterprise-ready.
+**Stage 1 Exit：** 所有 Gate 1.1-1.5 完成，governance signals 有真实数据支撑
 
 ---
 
-## Phase 2 - Planned Test Design and Normalized BDD Artifacts (3-9 Months)
+## Stage 2 — 规模化质量提升
 
-### Stage Goal
+**前置条件：** Stage 1 全部完成  
+**时间预估：** 4-8 周（取决于 Stage 1 发现的问题数量）  
+**目标：** 基于真实质量数字，有针对性地提升系统能力
 
-Upgrade from a stable design prototype into an AI-assisted test planning and BDD generation platform that can handle multiple document categories while keeping intermediate artifacts governed and reviewable.
+**此阶段的工作内容取决于 Stage 1 的发现。** 本 roadmap 只定义框架，具体任务在 Stage 1 完成后更新。
 
-### Why this phase matches the current repo
+### 可能的方向（待 Stage 1 数据确认后选择）
 
-After Phase 1, the repo should have stronger schema control, metadata, and baseline validation.
-That is the minimum foundation needed before introducing new LLM-assisted stages such as planning and normalized BDD generation.
+**方向 A：Prompt 质量提升**（如果 maker 生成质量低）
+- 基于失败模式分析改进 MAKER_SYSTEM_PROMPT
+- 遵循 `docs/model_governance.md` 的 prompt 变更流程
+- 需要 benchmark 证据支撑 prompt 变更
 
-This phase should add stable intermediate contracts, not just more generation steps.
+**方向 B：Checker 稳定性改进**（如果 instability > 10%）
+- 分析不稳定的 case 类型
+- 改进 CHECKER_SYSTEM_PROMPT 的判断一致性
+- 考虑对高频不稳定规则类型引入更多 deterministic oracle 替代
 
-### In Scope
+**方向 C：Oracle 框架实测**（如果某些规则类型适合确定性验证）
+- 选择 2-3 个 oracle 在真实规则场景上运行
+- 测量 oracle 与 LLM checker 判断的一致性
+- 决定是否扩展 oracle 覆盖范围
 
-- multi-document ingestion,
-- stronger traceability from source to generated artifacts,
-- test planning as a governed intermediate stage,
-- normalized BDD contract,
-- BDD style learning,
-- export interfaces for downstream execution teams,
-- limited review collaboration only if it remains lightweight and file-based.
-
-### Out of Scope
-
-- full runtime execution of all generated scenarios,
-- autonomous end-to-end execution against all systems,
-- hosted multi-user governance platform,
-- full enterprise RBAC,
-- broad product-style collaboration features as default roadmap commitments.
-
-### Key Deliverables
-
-#### A. Multi-document ingestion framework
-
-Support defined source classes, for example:
-
-- rulebooks,
-- product specs,
-- API docs,
-- business workflow docs,
-- compliance or policy docs,
-- release notes and change documents.
-
-Each document class must define:
-
-- parsing strategy,
-- extraction constraints,
-- expected rule patterns,
-- known failure modes.
-
-#### B. Source-aware rule extraction and synthesis
-
-Expand the governed path from source documents into:
-
-- source-aware `atomic_rule` artifacts,
-- source-aware `semantic_rule` artifacts,
-- preserved source anchors and source references.
-
-This phase should strengthen the path from raw document structure into existing rule-layer artifacts without weakening current schema discipline.
-
-#### C. Test planning layer
-
-Introduce a planner stage between `semantic_rule` and BDD generation.
-
-New flow:
-
-`semantic_rules -> planning -> test_objectives -> scenario families -> BDD generation`
-
-The planner should produce:
-
-- priority,
-- risk level,
-- coverage intent,
-- scenario family,
-- dependency notes,
-- recommended validation strategy.
-
-Planner outputs must be versioned, schema-defined, and reviewable before planner-driven generation is treated as governed baseline behavior.
-
-#### D. Normalized BDD contract layer
-
-Define a normalized BDD representation independent of final output syntax.
-
-This becomes the canonical intermediate artifact before Gherkin export or later step integration.
-
-Normalized BDD should be introduced only with an explicit schema and validation approach.
-
-#### E. BDD style learning
-
-Learn and version team BDD style conventions from existing assets so generated BDD aligns with reusable project practice.
-
-#### F. Gherkin export and downstream handoff
-
-Export normalized BDD into `.feature` files or equivalent downstream artifacts without making raw syntax the only governed representation.
-
-#### G. Step registry visibility
-
-Introduce early visibility into step-definition reuse needs through:
-
-- step inventory awareness,
-- mapping preparation,
-- gap surfacing,
-- implementation-needed markers.
-
-This should stop short of full execution binding logic in this phase.
-
-#### H. Quality and traceability reporting
-
-Enhance reports with:
-
-- rule type coverage heatmap,
-- unstable checker decisions on the benchmark set,
-- baseline drift versus previous runs,
-- document class breakdown,
-- traceability drill-down,
-- JSON or CSV export where useful.
-
-### Acceptance Criteria
-
-Phase 2 is accepted only if:
-
-- multiple document classes are supported with explicit parsing rules,
-- planner outputs are versioned and schema-validated,
-- normalized BDD artifacts exist as governed intermediate outputs,
-- generated BDD artifacts are traceable to governed upstream artifacts,
-- reporting can show baseline diffs and unstable judgments where applicable,
-- model change regression remains enforced before adoption.
-
-### Success Metric
-
-The system becomes usable for controlled team pilots in document-driven test planning and BDD generation without losing reviewability or contract clarity.
+**不在 Stage 2 范围内（无论 Stage 1 结果如何）：**
+- BDD style learning（无真实样本）
+- Multi-user portal
+- 真实 LME API 接入（外部依赖）
 
 ---
 
-## Phase 3 - Execution Readiness and Selective Enterprise Controls (9-18 Months)
+## Stage 3 — 真实执行环境接入
 
-### Stage Goal
+**前置条件：** Stage 2 完成 + 获得 LME 内部 VM 访问权限  
+**时间预估：** 未知（取决于外部依赖）  
+**目标：** 将 step definitions 从模拟实现替换为真实 LME API 调用
 
-Extend from design and planning artifacts into execution integration, deterministic assertions for high-value rule classes, and selective enterprise-grade governance controls that are justified by actual platform maturity.
+**此阶段完全依赖外部条件（LME VM 访问权限），在条件具备前不制定详细计划。**
 
-### Why this phase matches the current repo
+需要完成的核心工作：
+- 用真实 LME API 替换 `samples/ruby_cucumber/lib/lme_*.rb` 中的模拟实现
+- 重建 `lme_testing/step_library.py` 基于真实 API 模式
+- 重新测量 step binding rate（目前 35.4% 基于模拟）
+- 在真实环境中执行至少部分 BDD 场景并验证结果
 
-Execution integration only becomes valuable once rule artifacts, planning outputs, normalized BDD, and traceability are stable enough to bind to execution assets.
-
-This phase should focus on execution readiness and high-value controls, not on turning the repo into a hosted product by default.
-
-### In Scope
-
-- step definition registry and mapping,
-- execution-ready scenario contract,
-- deterministic oracle layer for domain-critical assertions,
-- release governance,
-- selective operational metrics that support governed operation,
-- controlled rollout across model providers.
-
-### Out of Scope
-
-- unrestricted autonomous test execution without approval gates,
-- fully free-form agentic code generation without schema and review controls,
-- full hosted review product as a required roadmap outcome,
-- broad multi-tenant platform commitments that are not yet justified by repo maturity.
-
-### Key Deliverables
-
-#### A. Step definition integration layer
-
-Create a mapping layer between normalized BDD steps and existing step definitions.
-
-This should support:
-
-- exact step match,
-- parameterized step match,
-- candidate step suggestion,
-- unmatched step reporting,
-- reuse score,
-- ownership per step library.
-
-#### B. Execution readiness contract
-
-Introduce an `ExecutableScenario` representation that extends BDD with:
-
-- environment requirements,
-- input data requirements,
-- setup hooks,
-- expected deterministic assertions,
-- cleanup hooks,
-- linked step definitions.
-
-#### C. Deterministic oracle framework
-
-Move execution truth away from LLM judgment wherever possible for high-value structured rule categories.
-
-Deterministic modules should own:
-
-- field validation,
-- state validation,
-- calculation validation,
-- deadline and window checks,
-- event sequence verification,
-- pass or fail accounting.
-
-This should be scoped to domain-critical rule classes rather than treated as an abstract universal framework first.
-
-#### D. Selective governance and observability
-
-Track the minimum operational signals needed for governed operation, such as:
-
-- schema failure rate,
-- checker instability rate,
-- coverage trend,
-- step binding success rate where applicable.
-
-Additional enterprise observability should be introduced only when justified by actual platform usage.
-
-#### E. Release governance
-
-Formalize:
-
-- release tags,
-- compatibility matrix,
-- benchmark gates,
-- migration notes,
-- approved provider list.
-
-### Acceptance Criteria
-
-Phase 3 is accepted only if:
-
-- normalized BDD can be bound to existing step definitions with measurable reuse,
-- unmatched steps are surfaced automatically,
-- execution-ready scenarios can be exported consistently,
-- deterministic assertions exist for at least the core structured rule categories that matter most,
-- provider rollout requires benchmark pass and rollback path,
-- operational metrics are available for governed release and platform review.
-
-### Success Metric
-
-The system becomes execution-ready and governance-mature enough to support enterprise-style usage without depending on uncontrolled LLM judgment.
+**Stage 3 的"执行就绪"才是 Phase 3 Gate 2 真正意义上的完成。**
 
 ---
 
-## AI Agent Contribution Rules
+## 四、永久冻结项（不在任何阶段规划中）
 
-Any AI coding agent working on this roadmap must follow these repository-level rules.
-
-### 1. Do not bypass schemas
-
-No artifact format change is allowed without:
-
-- schema update,
-- migration note,
-- acceptance update,
-- test update.
-
-### 2. Do not couple business logic to a specific model
-
-All provider-specific behavior must remain behind provider or strategy interfaces.
-
-### 3. Do not replace structured outputs with free-form text
-
-If a module currently emits JSON, it must remain structured unless the contract is formally changed.
-
-### 4. Do not expand scope across phases
-
-Phase 1 work must not quietly add Phase 2 or Phase 3 scope unless explicitly approved.
-
-### 5. Every meaningful feature must ship with a testable acceptance outcome
-
-No roadmap item is complete without a testable acceptance condition.
+| 项目 | 冻结原因 |
+|------|---------|
+| BDD style learning | 无真实 BDD 样本可学习，自循环优化无意义 |
+| Multi-user hosted review platform | 超出当前工具定位，单用户路径本身未完全稳定 |
+| Autonomous end-to-end execution without approval gates | 与架构原则"human review is a control layer"冲突 |
+| 用 AI 代理快速通过 acceptance gate | 本次教训，不重复 |
 
 ---
 
-## Documentation Operating Model
+## 五、当前能力边界声明（诚实版）
 
-To reduce overlap and drift, documents in this repo should keep stable responsibilities.
+### 当前可以做的
+- 从格式规整的 PDF/TXT 提取规则并生成 atomic/semantic rules
+- 用 LLM maker 为 semantic rules 生成 BDD 测试场景
+- 用 LLM checker 评估场景质量（稳定性待测量）
+- 生成 HTML 可视化审核报告
+- 本地 Web UI 进行人工审核、BDD 编辑、重写触发
+- 通过 JSON Schema 验证 artifact 契约
+- 用 StubProvider 进行无 API 费用的 CI 回归测试
 
-### `docs/roadmap.md`
+### 有条件可以做的
+- 全量 183 条规则的 maker/checker 运行（已有代码，质量待验证）
+- 确定性 oracle 验证（8 个 oracle 存在，真实场景验证待完成）
+- Governance signals 监控（框架存在，数据源修复后可用）
 
-Contains phase goals, scope boundaries, non-scope, deliverable classes, and phase gates.
-
-### `docs/implementation_plan.md`
-
-Contains execution-oriented task breakdowns with input and output contracts, prerequisites, and validation expectations.
-
-### `docs/architecture.md`
-
-Defines:
-
-- pipeline stages,
-- artifact contracts,
-- module boundaries,
-- deterministic versus LLM-assisted responsibilities.
-
-### `docs/acceptance.md`
-
-Lists formal phase-based acceptance criteria, required evidence, and release gates.
-
-### `docs/model_governance.md`
-
-Defines:
-
-- provider abstraction,
-- model onboarding rules,
-- prompt versioning,
-- baseline regression,
-- rollout and rollback policy.
-
-### `docs/agent_guidelines.md`
-
-Defines how AI coding agents are allowed to modify the repo.
-
-### Document addition rule
-
-New docs should only be added when a concern has a stable lifecycle and cannot be kept clear within the existing governance boundaries.
+### 当前不能做的
+- 在真实 LME 生产环境中执行测试
+- 多用户并发审核
+- 自动执行生成的测试场景
+- 在复杂布局 PDF 上可靠提取规则
 
 ---
 
-## Repo Summary Paragraph
+## 六、AI 代理操作规则（基于本次经验更新）
 
-This project should evolve in three controlled stages. Phase 1 should harden the current document-to-rule-to-BDD design pipeline with schemas, CI, source-anchor groundwork, model metadata, and baseline checker stability visibility. Phase 2 should add source-aware ingestion, governed planning outputs, normalized BDD artifacts, and stronger traceability so teams can pilot document-driven test design safely. Phase 3 should connect governed design artifacts to step-definition-aware execution readiness, deterministic assertions for high-value rule classes, and selective enterprise-grade release controls. Because multiple LLM APIs may be used, every stage requires schema contracts, versioned prompts, benchmark gates, repo-readable execution context, and rollback-safe model governance.
+在原 `AGENTS.md` 基础上新增：
+
+1. **不得以"acceptance gate 脚本通过"代替"功能在真实数据上验证"**
+2. **不得将 stub 运行的 governance signal 作为真实质量证据**
+3. **不得在 acceptance.md 中标注 gate 完成，除非有真实数据支撑的 Evidence**
+4. **所有 governance signal 必须标注数据来源：`stub` / `real_api` / `no_data`**
+5. **roadmap phase 完成声明需要人工确认，不由 AI 代理自行宣告**

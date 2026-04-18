@@ -1,133 +1,168 @@
-# Roadmap TODO — All Phases Complete
+# LME Testing — TODO
 
-## Phase 1 Completion (2026/04/13)
-
-- [x] Artifact Schema Gate
-- [x] Upstream Validation Pipeline Gate
-- [x] Baseline CI Gate
-- [x] Model and Prompt Metadata Gate
-- [x] Stable Source Anchor Gate
-- [x] Checker Stability Gate
-- [x] Documentation Gate
-
-## Phase 2 Gates (COMPLETE 2026/04/13)
-
-- [x] **Gate 1: Multi-Document Ingestion** — Support multiple document classes with source-aware extraction
-- [x] **Gate 2: Planning Layer** — Planner stage between semantic_rules and BDD generation
-- [x] **Gate 3: Normalized BDD Contract** — Schema-validated intermediate BDD representation
-- [x] **Gate 4: Traceability Gate** — Full source-to-BDD traceability in artifacts and reports
-- [x] **Gate 5: Step Visibility Gate** — Surface reusable steps and gaps without execution binding
-- [x] **Gate 6: Quality and Drift Reporting** — Reports showing baseline drift, unstable judgments
-- [x] **Gate 7: Model Governance Enforcement Gate** — Benchmark checks before model/prompt adoption
-
-## Phase 3 Post-Completion Items (ALL DONE 2026/04/17)
-
-- [x] **Web Portal BDD Stage** — BDD tab displays normalized BDD per approved scenario with editable Given/When/Then steps; saves to `human_bdd_edits_latest.json` in session snapshot
-- [x] **Web Portal Scripts Stage** — Scripts tab displays step registry visibility with match quality badges (exact/parameterized/candidate/unmatched); saves edits to session snapshot
-- [x] **Stage Progression UI** — 4-stage progress bar (Scenario Review → BDD Edit → Scripts → Finalize) with gate logic enforcing tab unlock order
-
-## Phase 3 Gates (COMPLETE 2026/04/14)
-
-- [x] **Gate 1: Step Definition Integration** — 3-tier matching, reuse scores, ownership
-- [x] **Gate 2: Execution Readiness** — ExecutableScenario schema with environment/input/hooks/assertions
-- [x] **Gate 3: Deterministic Oracle** — Oracle modules for structured rule categories
-- [x] **Gate 4: Governance Signals** — Schema failure rate, instability, binding success
-- [x] **Gate 5: Release Governance** — Release tags, compatibility matrix, benchmark gates
-- [x] **Gate 6: Phase 3 Exit** — All above
+**修订日期：** 2026-04-18  
+**说明：** 本文档区分三种完成状态：代码实现完成 / Stub 验证完成 / 真实数据验证完成。历史版本将"代码实现完成"等同于"全部完成"，本文档修正这一问题。
 
 ---
 
-## BDD Generation Stage (COMPLETE 2026/04/17)
+## 状态图例
 
-### Status: POC Complete
-Generated feature files and Python step definitions from LME Matching Rules.
+| 标记 | 含义 |
+|------|------|
+| ✅ Code | 代码实现完成 |
+| ✅ Stub | Stub/POC 验证通过（2条规则） |
+| ✅ Real | 真实数据验证完成 |
+| 🔄 In Progress | 进行中 |
+| ⏳ Blocked | 等待外部条件 |
+| ❌ Not Started | 未开始 |
+| 🧊 Frozen | 暂缓，等待前置条件 |
 
-### Remaining Backlog Items
+---
 
-#### High Priority:
-- [ ] Human Review Workflow — Implement stage where humans can edit BDD and save changes with full audit trail
-- [ ] Connect Real LME API — Replace simulated patterns with real API client implementations
-- [ ] Add Existing Templates to TEMPLATE_REGISTRY — Add real `LME::Client`, `LME::API`, `LME::PostTrade` patterns from internal VM
+## Stage 1 — 真实数据接入（当前阶段）
 
-#### Medium Priority:
-- [ ] Review and Refine Prompt — Tune `BDD_SYSTEM_PROMPT` for better step patterns specific to LME systems
-- [ ] Evolvable Dynamic Code Generation Architecture — design patterns for making sample/prototype codes to be dynamic and evolvable
+### S1-T01：Schema Failure Rate 数据源修复
 
-## Unit Tests for Uncovered Modules (DONE 2026/04/18)
+- [ ] `validate_schemas.py` 新增 `--output-json` 参数
+- [ ] CI schema-validation job 写入 `runs/schema_validation_latest.json`
+- [ ] `_compute_schema_signals()` 读取真实验证文件
+- [ ] `GovernanceSignals.to_dict()` 新增 `schema_signal_source` 字段
+- [ ] 验证：故意引入 invalid fixture 时 `schema_failure_rate > 0`
 
-Added unit tests for modules lacking coverage, targeting uncovered branches in `governance_checks.py`, `bdd_export.py`, `reporting.py`, and `storage.py`:
+**当前状态：** ❌ Not Started
 
-- `tests/test_governance_checks.py`: tests for `check_artifact_metadata_in_runs()`, `check_source_anchor_traceability()`, `check_governance_docs_exist()`, `check_phase_completion()` — 10 tests
-- `tests/test_bdd_export.py`: tests for `generate_step_definition()`, `render_steps_from_normalized_bdd()`, `render_feature_file()`, `render_gherkin_from_normalized_bdd()` — 6 tests
-- `tests/test_reporting.py`: tests for `generate_readable_summary()`, `generate_csv_report()` — 6 tests
-- `tests/test_storage.py`: tests for `load_jsonl()`, `load_json()`, `write_jsonl()` — 4 tests
+### S1-T02：全量运行数据路径对齐
 
-Total: 26 new unit tests, all passing.
+- [ ] 手动定位全量 183 条规则的实际运行输出目录
+- [ ] 创建 `docs/run_directory_structure.md`
+- [ ] 修复 `compute_governance_signals()` 扫描路径
+- [ ] 新增 `--runs-dir` 参数到 `governance-signals` 命令
+- [ ] 验证：`runs_analyzed > 0`，`total_rules ≈ 183`
 
-## End-to-End POC Verification (2026/04/17)
+**当前状态：** ❌ Not Started
 
-Successfully ran full 2-rule end-to-end POC:
+### S1-T03：Session Snapshot 原子写入
 
-1. **Maker** → 2 rules → 5 scenarios (qwen3.5-plus, ~2 min)
-2. **Checker** → 5 reviews (MiniMax-M2.5, ~1 min)
-3. **Report** → `runs/report.html`, `maker_readable.html`, `checker_readable.html`, `report.csv`
-4. **BDD** → `normalized_bdd.jsonl` + `.feature` files + Ruby step definitions
-5. **BDD Export** → template-based `.feature` files and step definitions (no LLM)
-6. **Step Registry** → gap analysis linking normalized BDD to step visibility
-7. **Review Session** → web UI at `http://127.0.0.1:8765` with Scenario Review, BDD, Scripts, Finalize tabs
+- [ ] `storage.py` 新增 `atomic_write_json()` 函数
+- [ ] `review_session.py` 所有 snapshot 写入替换为 `atomic_write_json()`
+- [ ] `docs/architecture.md` 声明单用户设计约束
+- [ ] 验证：快速连续 Save 后 snapshot 文件不损坏
 
-**Bugs Fixed During POC:**
-- `review_session.py` line ~1130: `issueOptionMap` function definition corrupted into orphan statement — restored as proper function
-- `review_session.py` line ~1129: `saveScriptsEdits` async function missing closing `}` — added brace
-- `step_registry.py`: `StepEntry` dataclass lacked match metadata fields; `compute_step_matches` never annotated inventory entries; `render_step_visibility_report` never wrote per-step details — all fixed to surface step-level data in Scripts tab
+**当前状态：** ❌ Not Started
 
-## Formal Schema Validation Wired (DONE 2026/04/18)
+### S1-T03b：Checker 真实稳定性测量
 
-Extraction scripts and CI now enforce JSON Schema validation by default:
+- [ ] 用真实 MiniMax API 对 poc_two_rules 运行 checker 两次
+- [ ] 产出 `runs/stability_real/stability_report.json`（含 `data_source: "real_api"`）
+- [ ] 更新 `docs/acceptance.md` Phase 1 Gate 6 Evidence 为真实数字
+- [ ] 更新 `governance_signals.json` checker instability 数据源
+- [ ] 若 instability > 5%：`docs/model_governance.md` 新增分析记录
 
-- `extract_matching_rules.py`: `--skip-validate` flag added (validation is now default); renamed from `--validate`
-- `generate_semantic_rules.py`: same `--skip-validate` inversion
-- `validate_rules.py`: now accepts `--semantic-rules` to validate `semantic_rules.json` alongside `atomic_rules.json`; `upstream-validation` CI job passes both
-- `schemas/fixtures/atomic_rule_invalid.json`: expanded to 8 cases (added rule_id pattern, start_page/end_page type errors)
-- `schemas/fixtures/semantic_rule_invalid.json`: expanded to 10 cases (added semantic_rule_id pattern, pages type, atomic_rule_ids empty, priority enum, empty evidence quote)
-- `tests/test_schemas.py`: added targeted tests for edge cases
+**当前状态：** ❌ Not Started
 
-## Scripts Tab Edit Workflow (DONE 2026/04/18)
+### S1-T04：全量规则集质量基准建立
 
-Scripts tab now supports full edit → save → downstream wiring:
+- [ ] 全量 183 条规则 maker 运行（分批，`--batch-size 8`）
+- [ ] 全量 checker 运行
+- [ ] 生成 `reports/baseline_full_<date>.html`
+- [ ] 人工随机抽查 ≥ 10 条规则，评估 maker 输出质量
+- [ ] 创建 `docs/releases/BASELINE-183-RULES.md`（含所有必需章节）
+- [ ] `governance_signals.json` 中 `coverage_signals.total_rules ≥ 180`
 
-- `saveScriptsEdits` JS function collects step text from textareas (both regular and gap steps) and POSTs to `/api/scripts/save`
-- `save_scripts_edits` Python method persists `human_scripts_edits_latest.json` in session snapshot and records the path in session state
-- `--human-scripts-edits` flag added to `bdd` and `rewrite` CLI subcommands; rewrite jobs automatically pick up the latest saved edits from state
-- `apply_human_step_edits()` updates `step_text`, `step_pattern`, and `code` in normalized BDD results; gap steps are appended as new entries
-- `generate_step_definition(human_edited=True)` uses Python `STEP_LIBRARY` for real code; falls back to `_generate_python_implementation()` for Python implementations, not `pending` stubs
-- `map_step_to_template` gains multi-strategy matching: exact substring, parameterized prefix, and token-overlap with `require_exact` safety flag
+**当前状态：** ❌ Not Started
 
-## Python Step Definitions Migration (COMPLETE 2026/04/18)
+### S1-T05：项目状态声明重写
 
-Switching from Ruby Cucumber to Python step definitions as the global rule:
+- [ ] `README.md` Project Status 小节用真实数字重写
+- [ ] `TODO.md`（本文档）区分代码完成 vs 验证完成
+- [ ] `docs/acceptance.md` 每个 gate 新增 `Verification Type` 标注
+- [ ] 消除所有没有数据支撑的"100%"和"Complete"声明
 
-- `lme_testing/step_library.py` (NEW): centralized Python step registry with `@step` decorator and `STEP_LIBRARY` dict; 50 entries covering all actual MiniMax BDD output patterns plus translated Ruby library entries; uses Python `LME.Client`, `LME.API`, `LME.PostTrade` patterns
-- `lme_testing/step_registry.py`: `extract_steps_from_python_step_defs()` reads Python step defs; imports `STEP_LIBRARY` directly from `step_library.py` for `step_library.py` file, regex-parses `@given/@when/@then` decorated files; CLI auto-detects `.py` vs `.rb`
-- `lme_testing/bdd_export.py`: `generate_step_definition()` uses `STEP_LIBRARY` for canonical implementations; `render_steps_from_normalized_bdd()` overrides LLM-generated code with library versions when available; `_generate_python_implementation()` emits Python `def` functions; output is `features/step_definitions/steps.py`
-- `lme_testing/prompts.py`: `BDD_PROMPT_VERSION` incremented to `"3.0"`; `BDD_SYSTEM_PROMPT` updated to request Python code; example schema shows Python `@when/def` syntax
-- `lme_testing/step_library.py`: `_build_decorated_code()` now properly indents function body by 4 spaces (critical bug fix — unindented body caused Python syntax errors)
-- Ruby `samples/ruby_cucumber/` preserved as archive (not deleted)
+**当前状态：** 🔄 In Progress（本文档是 S1-T05 的一部分）
 
-## Governance Signals CI Wiring (DONE 2026/04/18)
+---
 
-`governance-signals` CLI wired into CI:
-- `.github/workflows/ci.yml`: added `governance-signals` job (needs: smoke-test) that runs `python main.py governance-signals --output runs/governance_signals.json`
-- `release-governance` job now `needs: governance-signals` so it runs after signals are computed
-- `check_release_governance.py` now sees a current `governance_signals.json` and passes all 5 checks
+## Stage 0 — 框架实现（已完成，存档）
 
-## Report UX Improvements (DONE 2026/04/18)
+以下为 AI 代理在 2026-04-13/14 完成的代码实现。代码层面完成，验证深度如注。
 
-HTML report (`generate_html_report()` in `reporting.py`):
+### Phase 1 实现（✅ Code，✅ Stub，部分 ✅ Real 待确认）
 
-- **Rule ID jump**: clicking a rule ID in "Rule 级覆盖判定" uses native browser anchor navigation to jump to the sub-header row in "场景审核明细" with blue highlight on matching data rows
-- **`link.hash` fix**: changed from `getAttribute('href')` (returned full URL) to `link.hash` (returns `#rule-detail-XXX` fragment) for correct rule ID extraction
-- **Color-coded case-type pills**: inline chips in sub-header rows and coverage table columns — gray=Required, green=Present, blue=Accepted, red-strikethrough=Missing
-- **Clickable coverage metrics**: clicking Fully Covered / Partially Covered / Uncovered / Not Applicable in "运行摘要" filters the "Rule 级覆盖判定" table with active highlight state
-- **Rule 级覆盖判定 filters**: Coverage Status + Rule Type dropdowns with "X / Y 条规则" count and clear button
-- **`WindowsPath` empty name guard**: `apply_human_step_edits()` and `run_rewrite_pipeline` now guard against empty/invalid `human_scripts_edits_path` values (`Path("")` or `Path(".")`)
+- [x] ✅ Code ✅ Stub　Artifact Schema Gate — 7 套 JSON Schema
+- [x] ✅ Code ✅ Stub　Upstream Validation Pipeline Gate — validate_rules.py
+- [x] ✅ Code ✅ Stub　Baseline CI Gate — 6 个 CI job
+- [x] ✅ Code ✅ Stub　Model and Prompt Metadata Gate — prompt/pipeline 版本记录
+- [x] ✅ Code ✅ Stub　Stable Source Anchor Gate — paragraph_id 字段
+- [x] ✅ Code ⚠️ Stub-only　Checker Stability Gate — stability_report 基于 stub（S1-T03b 修复）
+- [x] ✅ Code ✅ Real　Documentation Gate — 6 套治理文档
+
+### Phase 2 实现（✅ Code，✅ Stub）
+
+- [x] ✅ Code ✅ Stub　Multi-Document Ingestion — DocumentClass enum + keyword matching（**注意：这是简化实现，不是完整文档解析框架**）
+- [x] ✅ Code ✅ Stub　Planning Layer — planner_output schema + run_planner_pipeline
+- [x] ✅ Code ✅ Stub　Normalized BDD Contract — normalized_bdd.schema.json + BDD pipeline
+- [x] ✅ Code ✅ Stub　Traceability Gate — paragraph_ids 贯穿全流水线
+- [x] ✅ Code ✅ Stub　Step Visibility Gate — step_registry.py（**注意：step library 基于模拟 API**）
+- [x] ✅ Code ✅ Stub　Quality and Drift Reporting Gate — generate_trend_report.py
+- [x] ✅ Code ✅ Stub　Model Governance Enforcement Gate — check_model_governance.py
+
+### Phase 3 实现（✅ Code，✅ Stub，**执行层面未验证**）
+
+- [x] ✅ Code ✅ Stub　Step Definition Integration — 3-tier matching（**step lib 基于模拟**）
+- [x] ✅ Code ✅ Stub　Execution Readiness — executable_scenario.schema.json（**无真实消费者**）
+- [x] ✅ Code ✅ Stub　Deterministic Oracle — 8 个 oracle 模块（**未在真实规则场景验证**）
+- [x] ✅ Code ⚠️ Stub-only　Governance Signals — signals 框架（**2/4 信号无真实数据**）
+- [x] ✅ Code ✅ Stub　Release Governance — approved_providers.json + compatibility_matrix（**benchmark 证据基于 stub**）
+
+### 近期 Bug 修复（2026-04-17/18，✅ Code）
+
+- [x] ✅ Code　review_session.py：issueOptionMap 孤立语句修复
+- [x] ✅ Code　review_session.py：saveScriptsEdits 缺失 `}` 修复
+- [x] ✅ Code　step_registry.py：StepEntry match metadata 字段补全
+- [x] ✅ Code　step_library.py：`_build_decorated_code()` 函数体缩进修复
+- [x] ✅ Code　bdd_export.py：Python step definitions 迁移（从 Ruby）
+- [x] ✅ Code　governance-signals CI job 接入
+- [x] ✅ Code　report UX：Rule ID 跳转、覆盖率 pill、dropdown 过滤器
+
+---
+
+## Stage 2 — 规模化质量提升（冻结，待 Stage 1 数据）
+
+以下任务在 Stage 1 全部完成后，基于真实数字决定是否执行和如何执行。
+
+- 🧊 Maker prompt 质量提升（触发条件：coverage < 80% 或人工抽查 Poor 率 > 30%）
+- 🧊 Checker 稳定性改进（触发条件：instability > 10%）
+- 🧊 Oracle 框架实测验证（触发条件：识别出高频确定性规则类型）
+- 🧊 全量规则 BDD 生成质量评估
+- 🧊 BDD style learning（**永久低优先级：无真实 BDD 样本可学习**）
+
+---
+
+## Stage 3 — 真实执行环境（阻塞于外部依赖）
+
+- ⏳ 获得 LME 内部 VM 访问权限（ETA：未知）
+- ⏳ 用真实 LME API 替换 `samples/ruby_cucumber/lib/lme_*.rb`
+- ⏳ 重建 `lme_testing/step_library.py`（基于真实 API 模式）
+- ⏳ 重新测量 step binding rate（当前 35.4% 基于模拟）
+- ⏳ 在真实环境中执行 BDD 场景并验证
+
+---
+
+## 永久搁置（不在任何阶段规划中）
+
+- ❌ BDD style learning（无真实样本，自循环优化无意义）
+- ❌ Multi-user hosted review platform（超出工具定位）
+- ❌ Autonomous execution without approval gates（违反架构原则）
+- ❌ 用 AI 代理快速通过 acceptance gate（本次教训）
+
+---
+
+## Darcy 的个人任务（原 TODO_Darcy.md，更新状态）
+
+- [x] ✅ Code　创建 Ruby Cucumber prototype（`samples/ruby_cucumber/`）
+- [x] ✅ Code　BDD tab：显示 normalized BDD，支持 Given/When/Then 编辑
+- [x] ✅ Code　Scripts tab：显示 step registry visibility（display 完成）
+- [ ] ❌ Scripts tab 完整 edit workflow（save → downstream wiring）→ 降级到 S1-T03 后
+- [ ] ⏳ 真实 LME API 接入（Stage 3，依赖 VM 权限）
+- [ ] 🧊 TEMPLATE_REGISTRY 补充真实 LME API 模式（Stage 3 前置）
+- [ ] 🧊 如何让 prototype 代码动态演进的设计（待架构讨论）
