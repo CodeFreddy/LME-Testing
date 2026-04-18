@@ -84,3 +84,12 @@ Switching from Ruby Cucumber to Python step definitions as the global rule:
 - `lme_testing/prompts.py`: `BDD_PROMPT_VERSION` incremented to `"3.0"`; `BDD_SYSTEM_PROMPT` updated to request Python code; example schema shows Python `@when/def` syntax
 - `lme_testing/step_library.py`: `_build_decorated_code()` now properly indents function body by 4 spaces (critical bug fix — unindented body caused Python syntax errors)
 - Ruby `samples/ruby_cucumber/` preserved as archive (not deleted)
+
+## Governance Signals CI Wiring (DONE 2026/04/18)
+
+`governance-signals` CLI wired into CI:
+- `.github/workflows/ci.yml`: added `governance-signals` job (needs: smoke-test) that runs `python main.py governance-signals --output runs/governance_signals.json`
+- `release-governance` job now `needs: governance-signals` so it runs after signals are computed
+- `check_release_governance.py` now sees a current `governance_signals.json` and passes all 5 checks
+
+Current signals (from latest run): 50% coverage, 25% binding rate (2 exact + 0 parameterized + 15 candidates vs 68 unique patterns). Step binding low because step-registry matches against Ruby step defs — Python migration should improve this.
