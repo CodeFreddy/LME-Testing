@@ -75,6 +75,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install dependencies
+        run: pip install jsonschema
+
       - name: Run unit tests
         run: python -m unittest discover -v
 
@@ -102,8 +105,18 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install dependencies
+        run: pip install jsonschema
+
       - name: Compute governance signals
         run: python main.py governance-signals --output runs/governance_signals.json
+
+      - name: Upload governance signals
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-signals
+          path: runs/governance_signals.json
+          retention-days: 1
 
   release-governance:
     name: Release Governance
@@ -115,6 +128,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
+      - name: Download governance signals
+        uses: actions/download-artifact@v4
+        with:
+          name: governance-signals
+          path: runs/
 
       - name: Run release governance checks
         run: python scripts/check_release_governance.py

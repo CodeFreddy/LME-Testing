@@ -3,7 +3,12 @@
     "allow": [
       "Bash(python:*)",
       "Bash(PYTHONPATH=. python .github/workflows/smoke_test.py)",
-      "Bash(echo \"EXIT:$?\")"
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(pip install:*)",
+      "Bash(powershell:*)",
+      "Bash(ls -d 'C:\\\\Codes\\\\GenAI\\\\LME-Testing'/*/)",
+      "Bash(ls -d 'C:\\\\Codes\\\\GenAI\\\\LME-Testing\\\\LME-Testing-master'/*/)",
+      "Bash(xargs cat:*)"
     ]
   }
 }

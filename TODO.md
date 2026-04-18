@@ -35,6 +35,35 @@
 - [x] **Gate 5: Release Governance** — Release tags, compatibility matrix, benchmark gates
 - [x] **Gate 6: Phase 3 Exit** — All above
 
+---
+
+## BDD Generation Stage (COMPLETE 2026/04/17)
+
+### Status: POC Complete
+Generated feature files and Python step definitions from LME Matching Rules.
+
+### Remaining Backlog Items
+
+#### High Priority:
+- [ ] Human Review Workflow — Implement stage where humans can edit BDD and save changes with full audit trail
+- [ ] Connect Real LME API — Replace simulated patterns with real API client implementations
+- [ ] Add Existing Templates to TEMPLATE_REGISTRY — Add real `LME::Client`, `LME::API`, `LME::PostTrade` patterns from internal VM
+
+#### Medium Priority:
+- [ ] Review and Refine Prompt — Tune `BDD_SYSTEM_PROMPT` for better step patterns specific to LME systems
+- [ ] Evolvable Dynamic Code Generation Architecture — design patterns for making sample/prototype codes to be dynamic and evolvable
+
+## Unit Tests for Uncovered Modules (DONE 2026/04/18)
+
+Added unit tests for modules lacking coverage, targeting uncovered branches in `governance_checks.py`, `bdd_export.py`, `reporting.py`, and `storage.py`:
+
+- `tests/test_governance_checks.py`: tests for `check_artifact_metadata_in_runs()`, `check_source_anchor_traceability()`, `check_governance_docs_exist()`, `check_phase_completion()` — 10 tests
+- `tests/test_bdd_export.py`: tests for `generate_step_definition()`, `render_steps_from_normalized_bdd()`, `render_feature_file()`, `render_gherkin_from_normalized_bdd()` — 6 tests
+- `tests/test_reporting.py`: tests for `generate_readable_summary()`, `generate_csv_report()` — 6 tests
+- `tests/test_storage.py`: tests for `load_jsonl()`, `load_json()`, `write_jsonl()` — 4 tests
+
+Total: 26 new unit tests, all passing.
+
 ## End-to-End POC Verification (2026/04/17)
 
 Successfully ran full 2-rule end-to-end POC:
