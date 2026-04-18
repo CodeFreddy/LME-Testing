@@ -25,6 +25,7 @@ from lme_testing.config import ProjectConfig, ProviderConfig, RoleDefaults
 from lme_testing.pipelines import RULE_TYPE_CASE_REQUIREMENTS, run_checker_pipeline, run_maker_pipeline
 from lme_testing.reporting import generate_html_report
 from lme_testing.storage import load_json, load_jsonl
+from lme_testing.signals import compute_governance_signals, write_signals_report
 
 
 WORK = Path(tempfile.mkdtemp(prefix="lme_smoke_"))
@@ -294,6 +295,12 @@ def run_smoke():
             f"FAIL: Checker produced {len(checker_reviews)} reviews, expected {expected_scenario_count}"
         )
         passed = False
+
+    # --- Governance Signals ---
+    # Compute governance signals from the smoke test's run artifacts so the
+    # release-governance job always has a current signal (even if no real runs exist).
+    signals = compute_governance_signals(WORK / "runs")
+    write_signals_report(signals, WORK / "runs" / "governance_signals.json")
 
     if passed:
         print(

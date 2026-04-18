@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-18 12:32:21 UTC`
+- `2026-04-18 12:58:29 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `fix: smoke-test writes governance_signals.json before temp dir cleanup`
 - `feat: wire governance-signals CI artifact and add unit tests for uncovered modules`
 - `feat: enhance release governance and add unit tests for uncovered modules`
 - `fix: review_session stage_gates init, path carry-forward, CSV route`
 - `docs: update README, demo_for_boss.md, TODO.md with report UX and portal features`
-- `fix: report UX 鈥?rule ID jump, color pills, filters, WindowsPath guard`
 
 ---
 
