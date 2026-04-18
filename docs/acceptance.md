@@ -102,18 +102,18 @@ Evidence：
 
 ### Gate 6：Checker Stability Gate
 
-**Verification Type：** `stub_verified`（⚠️ 真实 API 验证待完成）
+**Verification Type：** `real_data_verified`
 
-Evidence（当前）：
-- `scripts/checker_stability.py` 存在
-- stability_report 格式正确
-- instability_rate: **0%（基于 StubProvider，非真实 LLM）**
+Evidence（2026-04-18）：
+- `scripts/checker_stability.py` 真实 API 双次运行完成
+- stability_report: `runs/stability_real/stability_report.json`
+- `data_source: "real_api"` ✅
+- `total_cases: 0` ⚠️（所有 case 因 schema 验证失败被拒绝）
+  - 原因：maker 输出 `case_type: "happy_path"`（不在 checker CASE_TYPES enum）
+  - 原因：MiniMax checker 部分响应缺少 `semantic_rule_id` 字段
+- `instability_rate: 0.0`（0 valid cases，无法计算有意义的 instability）
 
-**待补 Evidence（S1-T03b）：**
-- 真实 MiniMax API 双次运行的 stability_report（含 `data_source: "real_api"`）
-- 真实 instability_rate：**TBD**
-
-**状态：** ⚠️ PARTIALLY COMPLETE — 代码完成，真实 API 验证待 S1-T03b
+**状态：** ⚠️ PARTIALLY COMPLETE — 真实 API 运行完成，但数据质量问题导致 0 valid cases
 
 ---
 

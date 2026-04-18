@@ -4,12 +4,17 @@
 Runs the checker pipeline twice on the same baseline input and produces a
 machine-readable stability report identifying inconsistent verdicts across runs.
 
-This satisfies Phase 1 acceptance gate #6: Checker Stability Visibility.
-
 Usage:
+    # Stub run (fast, no API cost)
     python scripts/checker_stability.py --cases runs/maker/<run_id>/maker_cases.jsonl
                                         --rules artifacts/poc_two_rules/semantic_rules.json
                                         --output runs/checker-stability/<run_id>/stability_report.json
+
+    # Real API run (MiniMax)
+    python scripts/checker_stability.py --cases runs/maker/<run_id>/maker_cases.jsonl
+                                        --rules artifacts/poc_two_rules/semantic_rules.json
+                                        --output runs/stability_real/
+                                        --config config/llm_profiles.minimax.json
 
 Exit codes:
     0 = stability check complete (unstable cases reported in output)
@@ -23,13 +28,13 @@ import json
 import shutil
 import sys
 import tempfile
+import time
 from pathlib import Path
-from unittest.mock import patch
 
 # Ensure lme_testing is importable
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from lme_testing.config import ProjectConfig, ProviderConfig, RoleDefaults
+from lme_testing.config import ProjectConfig, ProviderConfig, RoleDefaults, load_project_config
 from lme_testing.pipelines import run_checker_pipeline
 from lme_testing.storage import load_json, load_jsonl, write_json
 
@@ -229,28 +234,36 @@ def run_stability_check(
     semantic_rules_path: Path,
     maker_cases_path: Path,
     output_path: Path,
+    config,
+    data_source: str = "stub",
 ) -> dict:
-    """Run checker twice on same input and compare results."""
+    """Run checker twice on same input and compare results.
+
+    Args:
+        semantic_rules_path: Path to semantic_rules.json
+        maker_cases_path: Path to maker_cases.jsonl
+        output_path: Output directory for the stability report
+        config: ProjectConfig (stub or real)
+        data_source: "stub" or "real_api" — written to stability_report.json
+    """
     output_path = Path(output_path)
     output_path.mkdir(parents=True, exist_ok=True)
 
-    semantic_rules = load_json(semantic_rules_path)
     maker_records = load_jsonl(maker_cases_path)
 
-    stub_responses = build_stub_responses(maker_records)
-
-    def make_stub_provider(cfg):
-        return StubResponse(stub_responses)
-
-    config = make_stub_config()
-    temp_dir = Path(tempfile.mkdtemp(prefix="lme_stability_"))
-    run_a_dir = temp_dir / "run_a"
-    run_b_dir = temp_dir / "run_b"
-    # Ensure output dirs exist before passing to pipeline
+    run_a_dir = output_path / "run_a"
+    run_b_dir = output_path / "run_b"
     run_a_dir.mkdir(parents=True, exist_ok=True)
     run_b_dir.mkdir(parents=True, exist_ok=True)
 
-    try:
+    if data_source == "stub":
+        from unittest.mock import patch
+
+        stub_responses = build_stub_responses(maker_records)
+
+        def make_stub_provider(cfg):
+            return StubResponse(stub_responses)
+
         # Run A
         with patch("lme_testing.pipelines.build_provider", make_stub_provider):
             summary_a = run_checker_pipeline(
@@ -265,10 +278,9 @@ def run_stability_check(
 
         # Run B with fresh stub
         stub_responses_b = build_stub_responses(maker_records)
-        stub_provider_b = StubResponse(stub_responses_b)
 
         def make_stub_provider_b(cfg):
-            return stub_provider_b
+            return StubResponse(stub_responses_b)
 
         with patch("lme_testing.pipelines.build_provider", make_stub_provider_b):
             summary_b = run_checker_pipeline(
@@ -280,34 +292,58 @@ def run_stability_check(
                 batch_size=1,
                 resume_from=None,
             )
+    else:
+        # Real API run — no patching, run B after 5-minute gap to avoid cache effects
+        print(f"[{data_source}] Running checker (run A)...")
+        summary_a = run_checker_pipeline(
+            config=config,
+            semantic_rules_path=semantic_rules_path,
+            maker_cases_path=maker_cases_path,
+            output_dir=run_a_dir,
+            limit=None,
+            batch_size=1,
+            resume_from=None,
+        )
 
-        # Read results while temp dir still exists
-        results_path_a = Path(summary_a["results_path"])
-        results_path_b = Path(summary_b["results_path"])
-        reviews_a = load_jsonl(results_path_a)
-        reviews_b = load_jsonl(results_path_b)
-        comparison = _compare_reviews(reviews_a, reviews_b)
+        print(f"[{data_source}] Run A complete. Waiting 5 minutes before run B...")
+        time.sleep(300)  # 5-minute gap to reduce cache correlation
 
-        stability_report = {
-            "semantic_rules_path": str(semantic_rules_path),
-            "maker_cases_path": str(maker_cases_path),
-            "run_a_summary": {
-                "run_id": summary_a["run_id"],
-                "results_path": summary_a["results_path"],
-                "review_count": len(reviews_a),
-            },
-            "run_b_summary": {
-                "run_id": summary_b["run_id"],
-                "results_path": summary_b["results_path"],
-                "review_count": len(reviews_b),
-            },
-            "comparison": comparison,
-        }
+        print(f"[{data_source}] Running checker (run B)...")
+        summary_b = run_checker_pipeline(
+            config=config,
+            semantic_rules_path=semantic_rules_path,
+            maker_cases_path=maker_cases_path,
+            output_dir=run_b_dir,
+            limit=None,
+            batch_size=1,
+            resume_from=None,
+        )
 
-        write_json(output_path / "stability_report.json", stability_report)
+    # Read results
+    results_path_a = Path(summary_a["results_path"])
+    results_path_b = Path(summary_b["results_path"])
+    reviews_a = load_jsonl(results_path_a)
+    reviews_b = load_jsonl(results_path_b)
+    comparison = _compare_reviews(reviews_a, reviews_b)
 
-    finally:
-        shutil.rmtree(temp_dir, ignore_errors=True)
+    stability_report = {
+        "data_source": data_source,
+        "semantic_rules_path": str(semantic_rules_path),
+        "maker_cases_path": str(maker_cases_path),
+        "run_a_summary": {
+            "run_id": summary_a["run_id"],
+            "results_path": summary_a["results_path"],
+            "review_count": len(reviews_a),
+        },
+        "run_b_summary": {
+            "run_id": summary_b["run_id"],
+            "results_path": summary_b["results_path"],
+            "review_count": len(reviews_b),
+        },
+        "comparison": comparison,
+    }
+
+    write_json(output_path / "stability_report.json", stability_report)
 
     # Write human-readable summary to stdout
     print(f"Stable: {comparison['stable_count']}")
@@ -348,6 +384,11 @@ def main() -> int:
         required=True,
         help="Output directory for stability report.",
     )
+    parser.add_argument(
+        "--config",
+        default=None,
+        help="Path to LLM config file. If provided, uses real API (maker+checker roles must be configured). If omitted, uses stub provider.",
+    )
     args = parser.parse_args()
 
     rules_path = Path(args.rules)
@@ -361,8 +402,16 @@ def main() -> int:
         print(f"ERROR: cases file not found: {cases_path}")
         return 1
 
+    if args.config:
+        config = load_project_config(Path(args.config))
+        data_source = "real_api"
+        print(f"Using real API config: {args.config}")
+    else:
+        config = make_stub_config()
+        data_source = "stub"
+
     try:
-        run_stability_check(rules_path, cases_path, output_path)
+        run_stability_check(rules_path, cases_path, output_path, config, data_source=data_source)
         return 0
     except Exception as e:
         print(f"ERROR: stability check failed: {e}")
