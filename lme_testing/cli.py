@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from .config import load_project_config
+from .storage import ensure_dir, timestamp_slug
 from .schemas import init_schema_config_dir
 from .pipelines import run_bdd_pipeline, run_checker_pipeline, run_maker_pipeline, run_planner_pipeline, run_rewrite_pipeline
 from .bdd_export import run_bdd_export
@@ -280,8 +281,9 @@ def main() -> int:
     elif args.command == "step-registry":
         normalized_bdd_path = Path(args.bdd_cases)
         output_dir = Path(args.output_dir)
-        output_dir.mkdir(parents=True, exist_ok=True)
-        output_path = output_dir / "step_visibility.json"
+        run_id = timestamp_slug()
+        run_dir = ensure_dir(output_dir / run_id)
+        output_path = run_dir / "step_visibility.json"
 
         bdd_inventory = extract_steps_from_normalized_bdd(normalized_bdd_path)
 
@@ -298,6 +300,7 @@ def main() -> int:
         render_step_visibility_report(bdd_inventory, report, output_path)
 
         result = {
+            "run_id": run_id,
             "output_path": str(output_path),
             "total_steps": bdd_inventory.total_steps,
             "unique_bdd_patterns": report.unique_bdd_patterns,
