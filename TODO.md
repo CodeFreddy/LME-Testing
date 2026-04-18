@@ -71,6 +71,16 @@ Scripts tab now supports full edit → save → downstream wiring:
 - `save_scripts_edits` Python method persists `human_scripts_edits_latest.json` in session snapshot and records the path in session state
 - `--human-scripts-edits` flag added to `bdd` and `rewrite` CLI subcommands; rewrite jobs automatically pick up the latest saved edits from state
 - `apply_human_step_edits()` updates `step_text`, `step_pattern`, and `code` in normalized BDD results; gap steps are appended as new entries
-- `TEMPLATE_REGISTRY` expanded with 16 real Ruby implementations learned from `samples/ruby_cucumber/` (terminology validation, price validation contact, trade resubmission, venue-specific, matching rules adoption)
-- `generate_step_definition(human_edited=True)` prefers template matches and falls back to `_generate_implementation()` for real code, not `pending` stubs
+- `generate_step_definition(human_edited=True)` uses Python `STEP_LIBRARY` for real code; falls back to `_generate_python_implementation()` for Python implementations, not `pending` stubs
 - `map_step_to_template` gains multi-strategy matching: exact substring, parameterized prefix, and token-overlap with `require_exact` safety flag
+
+## Python Step Definitions Migration (COMPLETE 2026/04/18)
+
+Switching from Ruby Cucumber to Python step definitions as the global rule:
+
+- `lme_testing/step_library.py` (NEW): centralized Python step registry with `@step` decorator and `STEP_LIBRARY` dict; 50 entries covering all actual MiniMax BDD output patterns plus translated Ruby library entries; uses Python `LME.Client`, `LME.API`, `LME.PostTrade` patterns
+- `lme_testing/step_registry.py`: `extract_steps_from_python_step_defs()` reads Python step defs; imports `STEP_LIBRARY` directly from `step_library.py` for `step_library.py` file, regex-parses `@given/@when/@then` decorated files; CLI auto-detects `.py` vs `.rb`
+- `lme_testing/bdd_export.py`: `generate_step_definition()` uses `STEP_LIBRARY` for canonical implementations; `render_steps_from_normalized_bdd()` overrides LLM-generated code with library versions when available; `_generate_python_implementation()` emits Python `def` functions; output is `features/step_definitions/steps.py`
+- `lme_testing/prompts.py`: `BDD_PROMPT_VERSION` incremented to `"3.0"`; `BDD_SYSTEM_PROMPT` updated to request Python code; example schema shows Python `@when/def` syntax
+- `lme_testing/step_library.py`: `_build_decorated_code()` now properly indents function body by 4 spaces (critical bug fix — unindented body caused Python syntax errors)
+- Ruby `samples/ruby_cucumber/` preserved as archive (not deleted)

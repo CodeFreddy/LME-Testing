@@ -653,6 +653,100 @@ def extract_steps_from_step_defs(
     return inventory
 
 
+PYTHON_STEP_DEF_RE = re.compile(
+    "@(given|when|then)\\(['\"](.+?)['\"]\\)"
+    "\\s*def\\s+(\\w+)\\s*\\([^)]*\\)\\s*:\\s*\\n((?:[ \\t]+.+\\n)*)",
+    re.DOTALL | re.IGNORECASE,
+)
+
+
+def extract_steps_from_python_step_defs(
+    step_defs_file: Path,
+    library_name: str = "",
+) -> StepInventory:
+    """Extract step patterns from a Python step definitions file.
+
+    Two modes:
+    1. If the file is ``lme_testing/step_library.py``, imports STEP_LIBRARY
+       directly (which uses @step decorators with StepType enum).
+    2. Otherwise, parses @given/@when/@then decorator patterns via regex.
+
+    The step_text is the key for exact matching; step_pattern is derived
+    via extract_pattern() for parameterized matching.
+    """
+    inventory = StepInventory()
+    if not step_defs_file.exists():
+        return inventory
+
+    if not library_name:
+        library_name = step_defs_file.stem.replace("_steps", "").replace("-", "_")
+
+    # Mode 1: Import STEP_LIBRARY directly from lme_testing.step_library.
+    # This handles @step-decorated files (like step_library.py itself).
+    if step_defs_file.name == "step_library.py":
+        try:
+            from lme_testing.step_library import STEP_LIBRARY as _sl
+            for _step_text, _entry in _sl.items():
+                entry = StepEntry(
+                    step_type=_entry.step_type,
+                    step_text=_entry.step_text,
+                    step_pattern=_entry.step_pattern,
+                    code=_entry.code,
+                    library_step_text=_entry.step_text,
+                    library_name=library_name,
+                    match_type="",
+                    confidence=0.0,
+                    source_scenario_ids=[],
+                    suggestions=[],
+                )
+                if _entry.step_type == "given":
+                    inventory.given_steps.append(entry)
+                elif _entry.step_type == "when":
+                    inventory.when_steps.append(entry)
+                elif _entry.step_type == "then":
+                    inventory.then_steps.append(entry)
+            inventory.library_name = library_name
+            return inventory
+        except Exception:
+            pass  # fall through to regex parsing
+
+    # Mode 2: Parse @given/@when/@then decorated Python files
+    from .step_library import extract_pattern
+
+    text = step_defs_file.read_text(encoding="utf-8")
+
+    for match in PYTHON_STEP_DEF_RE.finditer(text):
+        keyword = match.group(1).lower()
+        step_text = match.group(2)
+        function_name = match.group(3)
+        code_body = match.group(4).rstrip()
+
+        step_pattern = extract_pattern(step_text)
+
+        entry = StepEntry(
+            step_type=keyword,
+            step_text=step_text,
+            step_pattern=step_pattern,
+            code=code_body,
+            library_step_text=step_text,
+            library_name=library_name,
+            match_type="",
+            confidence=0.0,
+            source_scenario_ids=[],
+            suggestions=[],
+        )
+
+        if keyword == "given":
+            inventory.given_steps.append(entry)
+        elif keyword == "when":
+            inventory.when_steps.append(entry)
+        elif keyword == "then":
+            inventory.then_steps.append(entry)
+
+    inventory.library_name = library_name
+    return inventory
+
+
 # ---------------------------------------------------------------------------
 # Report rendering
 # ---------------------------------------------------------------------------

@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-18 05:02:08 UTC`
+- `2026-04-18 05:57:50 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `feat: complete Python step definitions migration`
 - `fix: update session_handoff.ps1 template to reflect current repo state`
 - `docs: update TODO and session_handoff 鈥?Scripts tab edit workflow done`
 - `feat: wire Scripts tab edits into step definition generation`
 - `docs: update TODO 鈥?step-registry output path fixed`
-- `fix: step-registry output uses run_id subfolder like other pipelines`
 
 ---
 
@@ -86,8 +86,10 @@ Recent completed work:
 
 - Formal schema validation wired into extraction scripts and CI (Phase 1 infrastructure-complete)
 - Scripts tab edit workflow: textarea-based step editing, save to `human_scripts_edits_latest.json`, wired into bdd/rewrite CLI subcommands and review-session rewrite jobs
-- TEMPLATE_REGISTRY expanded with 16 real Ruby implementations (terminology validation, price validation contact, trade resubmission, venue-specific, matching rules adoption) learned from `samples/ruby_cucumber/`
-- Step definition generation now emits real code instead of pending stubs for human-edited steps
+- Step definition generation migrated from Ruby to Python: `lme_testing/step_library.py` has 50 Python step entries with `@step` decorator; `generate_step_definition()` uses Python `STEP_LIBRARY` for real implementations
+- BDD prompt updated to `version 3.0`: requests Python code in `code` field; example shows `@when/def` syntax
+- `lme_testing/step_registry.py` can parse Python step defs via direct `STEP_LIBRARY` import or regex; CLI auto-detects `.py` vs `.rb`
+- Ruby `samples/ruby_cucumber/` preserved as archive/reference
 
 ---
 
@@ -115,11 +117,13 @@ powershell -ExecutionPolicy Bypass -File scripts/setup_git_hooks.ps1
 
 ## Recommended Next Step
 
-All Phase 1/2/3 acceptance gates are complete. Remaining natural next steps:
+All Phase 1/2/3 acceptance gates are complete. Recent work completed E2E POC with real MiniMax API (maker 鈫?checker 鈫?bdd 鈫?step-registry 鈫?report, all succeeded).
 
-1. **Run end-to-end POC with real LLM API**: The pipeline has been validated with mock/stub providers; running with real API keys end-to-end would confirm the full flow works in production conditions
-2. **Ruby step definition library integration**: Connect generated `matching_rules_steps.rb` to a real LME test backend or implement proper test doubles
-3. **Governance signals CI job**: The `governance-signals` CLI exists but may not be wired into CI; wire it to compute signals (schema failure rate, checker instability, coverage, step binding rate) on every run
+Remaining work:
+
+1. **Step-registry Python matching**: Verify `extract_steps_from_python_step_defs()` correctly imports `STEP_LIBRARY` and produces exact/parameterized matches; the BDD LLM now emits Python code (v3.0 prompt) which should improve match rates against the Python library
+2. **Python step library alignment**: Verify that BDD-generated step texts align with `step_library.py` entry keys so match rates improve from 0 exact/parameterized to high coverage
+3. **Governance signals CI job**: Wire `governance-signals` CLI into CI to compute signals on every run
 
 ---
 

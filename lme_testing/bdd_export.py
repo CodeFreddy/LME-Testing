@@ -422,7 +422,11 @@ def generate_step_definition(
     feature_name: str,
     human_edited: bool = False,
 ) -> str:
-    """Generate Ruby step definition code for a given step.
+    """Generate Python step definition code for a given step.
+
+    Uses STEP_LIBRARY (from step_library.py) as the primary source of canonical
+    implementations. Falls back to _generate_python_implementation for steps
+    not in the library.
 
     Args:
         step: The Gherkin step text (e.g., "member submits an order").
@@ -432,150 +436,197 @@ def generate_step_definition(
         human_edited: If True, prefer template matches even when not exact.
                       Used when a human has manually reviewed and customized the step.
     """
-    # Try to use template (use exact matching for human-edited to avoid wrong templates)
+    from .step_library import STEP_LIBRARY
+
+    step_lower = step.lower()
+
+    # 1. Exact lookup in STEP_LIBRARY
+    if step in STEP_LIBRARY:
+        return STEP_LIBRARY[step].render()
+
+    # 2. Try map_step_to_template (legacy Ruby templates — convert to Python stub)
     template_code = map_step_to_template(step, step_type, require_exact=not human_edited)
     if template_code:
-        return template_code
+        # Convert Ruby template to Python equivalent (use library entry if available)
+        # Ruby: Given(/^...$/) do ... end  →  Python: @given("...")\ndef step():
+        #     ...
+        # For now, generate a Python stub with the same logic
+        pass  # falls through to implementation generator
 
-    # Generate generic step definition with pattern extracted from step text
+    # 3. Generate from implementation heuristics
     pattern = extract_step_pattern(step)
-    step_text = step.capitalize()
+    generated = _generate_python_implementation(step, step_type, pattern, step)
+    if generated:
+        return generated
 
-    # When human-edited but no template matched, generate a real implementation
-    # rather than a pending stub — the human's step text is specific enough
-    # to warrant real code.
-    if human_edited:
-        code = _generate_implementation(step, step_type, pattern, step_text)
-        if code:
-            return code
-
-    keyword_map = {"given": "Given", "when": "When", "then": "Then"}
-    keyword = keyword_map.get(step_type, "Given")
-    return f'''{keyword}(/^{pattern}$/) do
-  # Human-edited step — review and implement: {step_text}
-  pending "Step not fully implemented: {step}"
-end'''
+    # 4. Fall back to Python pending stub
+    safe_name = re.sub(r"[^\w]", "_", step_lower)[:50].strip("_")
+    keyword = step_type.lower()
+    return f'''@{keyword}("{_escape_py_str(step)}")
+def {safe_name or "unnamed_step"}():
+    # TODO: implement step: {step}
+    pass'''
 
 
-def _generate_implementation(step: str, step_type: str, pattern: str, step_text: str) -> str | None:
-    """Attempt to generate a non-trivial Ruby implementation based on step text analysis.
+def _escape_py_str(text: str) -> str:
+    """Escape a string for use in a Python single-quoted literal."""
+    return text.replace("\\", "\\\\").replace("'", "\\'")
 
-    Returns None if no meaningful implementation can be generated from the step text.
+
+def _generate_python_implementation(step: str, step_type: str, pattern: str, step_text: str) -> str | None:
+    """Attempt to generate a Python step implementation based on step text analysis.
+
+    Returns None if no meaningful implementation can be generated.
+    All generated code uses Python syntax with LME.Client, LME.API, LME.PostTrade.
     """
     step_lower = step.lower()
-    keyword_map = {"given": "Given", "when": "When", "then": "Then"}
-    keyword = keyword_map.get(step_type, "Given")
+    keyword = step_type.lower()
 
-    # Detect common LME step semantics from text patterns
+    def py(code: str) -> str:
+        return f'@{keyword}("{_escape_py_str(step_text)}")\ndef {code}'
+
     if step_type == "given":
         if "session" in step_lower or "login" in step_lower or "member" in step_lower:
-            return f'''Given(/^{pattern}$/) do
-  @session = LME::Client.login(
-    username: ENV['LME_USERNAME'] || 'test_trader',
-    password: ENV['LME_PASSWORD'] || 'test_pass'
-  )
-end'''
+            return py(f'''step_member_session():
+    session = LME.Client.login(
+        username=ENV.get('LME_USERNAME', 'test_trader'),
+        password=ENV.get('LME_PASSWORD', 'test_pass'),
+    )
+    return session''')
         if "environment" in step_lower and "active" in step_lower:
-            return f'''Given(/^{pattern}$/) do
-  @env = LME::Client.environment
-  expect(@env.status).to eq('active')
-end'''
+            return py('''step_environment_active():
+    env = LME.Client.environment
+    assert env.status == 'active' ''')
         if "trade" in step_lower or "submission" in step_lower:
-            return f'''Given(/^{pattern}$/) do
-  @trade_params = {{ price: '999999', metal: 'ALU', quantity: 25 }}
-  @trade_submission = LME::API.submit_trade(@trade_params)
-end'''
+            return py('''step_trade_submission():
+    trade_params = {
+        'price': '999999',
+        'metal': 'ALU',
+        'quantity': 25,
+    }
+    trade_submission = LME.API.submit_trade(trade_params)''')
         if "document" in step_lower or "terminology" in step_lower or "terms" in step_lower:
-            return f'''Given(/^{pattern}$/) do
-  @document = LME::API.create_document(broker: @broker, terms: :capitalised)
-end'''
+            return py('''step_document_terminology():
+    document = LME.API.create_document(broker=broker, terms='capitalised')''')
         if "exchange" in step_lower and "matching rules" in step_lower:
-            return f'''Given(/^{pattern}$/) do
-  @rules = LME::PostTrade.define_matching_rules(version: '1.0')
-end'''
+            return py('''step_exchange_defines_rules():
+    rules = LME.PostTrade.define_matching_rules(version='1.0')''')
+        if "deadline" in step_lower:
+            return py('''step_deadline_exists():
+    deadline = LME.PostTrade.get_deadline(request_type='post_trade_correction')
+    assert deadline is not None''')
 
     elif step_type == "when":
         if "contact" in step_lower and "exchange" in step_lower:
-            return f'''When(/^{pattern}$/) do
-  @contact_response = LME::PostTrade.contact_exchange(
-    reason: @response&.rejection_reason || @validation_result&.rejection_reason
-  )
-end'''
+            return py('''step_contacts_exchange():
+    contact_response = LME.PostTrade.contact_exchange(
+        reason=validation_result.rejection_reason,
+        member=session.member_id,
+    )
+    return contact_response''')
         if "api" in step_lower and "get" in step_lower:
-            return f'''When(/^{pattern}$/) do
-  @response = LME::API.get(endpoint, @session.token)
-end'''
+            return py('''step_api_get():
+    response = LME.API.get(endpoint, session.token)
+    return response''')
         if "api" in step_lower and "post" in step_lower:
-            return f'''When(/^{pattern}$/) do
-  @response = LME::API.post(endpoint, @session.token, JSON.parse(payload))
-end'''
+            return py('''step_api_post():
+    import json
+    response = LME.API.post(endpoint, session.token, json.loads(payload))
+    return response''')
         if "submit" in step_lower or "submits" in step_lower:
-            return f'''When(/^{pattern}$/) do
-  @response = @session.submit_order(@order_params)
-end'''
+            return py('''step_submit_order():
+    response = session.submit_order(order_params)
+    return response''')
         if "trade" in step_lower and ("agreement" in step_lower or "occur" in step_lower):
-            return f'''When(/^{pattern}$/) do
-  @trade_agreement = LME::PostTrade.create_agreement
-end'''
+            return py('''step_trade_agreement():
+    trade_agreement = LME.PostTrade.create_agreement()
+    return trade_agreement''')
         if "rules" in step_lower and "adoption" in step_lower:
-            return f'''When(/^{pattern}$/) do
-  @adoption_status = LME::PostTrade.submit_adoption(@rules)
-end'''
+            return py('''step_rules_adoption():
+    adoption_status = LME.PostTrade.submit_adoption(rules)
+    return adoption_status''')
         if "re-submit" in step_lower or "resubmit" in step_lower:
-            return f'''When(/^{pattern}$/) do
-  @resubmission_response = LME::API.resubmit_trade(
-    @trade_submission.id, original_form: @trade_params
-  )
-end'''
+            return py('''step_resubmit_trade():
+    resubmission_response = LME.API.resubmit_trade(
+        trade_submission.id,
+        original_form=trade_params,
+    )
+    return resubmission_response''')
+        if "request" in step_lower and "deadline" in step_lower:
+            # Try to extract minute count from step text
+            m = re.search(r"(\d+)\s+minutes?", step_lower)
+            minutes = m.group(1) if m else "15"
+            return py(f'''step_request_before_deadline():
+    deadline_ts = deadline.get('timestamp')
+    submitted_at = deadline_ts - ({minutes} * 60)
+    response = LME.API.submit_request(
+        request_type='post_trade_correction',
+        submitted_at=submitted_at,
+        session=session,
+    )''')
 
     elif step_type == "then":
-        if "price validation" in step_lower:
-            return f'''Then(/^{pattern}$/) do
-  expect(@trade_agreement.price_validation_required).to be(true)
-end'''
+        if "price validation" in step_lower and "subject" in step_lower:
+            return py('''step_price_validation_subject():
+    assert trade_agreement.price_validation_required is True''')
         if ("compliance" in step_lower or "compliant" in step_lower) and "not" not in step_lower:
-            return f'''Then(/^{pattern}$/) do
-  expect(@contact_response).not_to be_nil
-  expect(@contact_response.status).to eq('RECORDED')
-  compliance = LME::PostTrade.get_compliance_status(@validation_result.rejection_reason)
-  expect(compliance).to eq('COMPLIANT')
-end'''
+            return py('''step_compliance_recorded():
+    assert contact_response is not None
+    assert contact_response.status == 'RECORDED'
+    compliance = LME.PostTrade.get_compliance_status(validation_result.rejection_reason)
+    assert compliance == 'COMPLIANT' ''')
         if "non-compliance" in step_lower or ("not" in step_lower and "compliant" in step_lower):
-            return f'''Then(/^{pattern}$/) do
-  expect(@contact_response).to be_nil
-  compliance = LME::PostTrade.get_compliance_status('trade_without_contact')
-  expect(compliance).to eq('NON_COMPLIANT')
-end'''
+            return py('''step_non_compliance():
+    assert contact_response is None
+    compliance = LME.PostTrade.get_compliance_status('trade_without_contact')
+    assert compliance == 'NON_COMPLIANT' ''')
         if "obligation" in step_lower and "fulfilled" in step_lower:
-            return f'''Then(/^{pattern}$/) do
-  expect(@validation_result.status).to eq('fulfilled')
-end'''
+            return py('''step_obligation_fulfilled():
+    assert validation_result.status == 'fulfilled' ''')
         if "obligation" in step_lower and ("not" in step_lower or "rejected" in step_lower):
-            return f'''Then(/^{pattern}$/) do
-  expect(@validation_result.status).to eq('rejected')
-end'''
+            return py('''step_obligation_not_fulfilled():
+    assert validation_result.status == 'rejected' ''')
         if "terminology" in step_lower or ("terms" in step_lower and "rulebook" in step_lower):
-            return f'''Then(/^{pattern}$/) do
-  expect(@validation_result.compliant).to be(true)
-  expect(@validation_result.source).to eq('LME Rulebook')
-end'''
+            return py('''step_terminology_rulebook():
+    assert validation_result.compliant is True
+    assert validation_result.source == 'LME Rulebook' ''')
         if "deviation" in step_lower:
-            return f'''Then(/^{pattern}$/) do
-  expect(@validation_result.compliant).to be(false)
-  expect(@validation_result.errors).to include('TERM_DEVIATION')
-end'''
+            return py('''step_deviation_detected():
+    assert validation_result.compliant is False
+    assert 'TERM_DEVIATION' in validation_result.errors ''')
         if "re-submission" in step_lower or "resubmit" in step_lower:
-            return f'''Then(/^{pattern}$/) do
-  expect(@resubmission_response.status).to eq('PERMITTED')
-end'''
+            return py('''step_resubmission_permitted():
+    assert resubmission_response.status == 'PERMITTED' ''')
+        if "accepted" in step_lower and "request" in step_lower:
+            return py('''step_request_accepted():
+    assert response.status == 'accepted' ''')
+        if "rejected" in step_lower and "late" in step_lower:
+            return py('''step_request_rejected_late():
+    assert response.status == 'rejected'
+    assert response.rejection_reason == 'late_submission' ''')
+        if "deadline" in step_lower and ("pass" in step_lower or "success" in step_lower):
+            return py('''step_deadline_pass():
+    result = LME.API.get_deadline_validation(response.request_id)
+    assert result in ('pass', 'PASS', True) ''')
+        if "deadline" in step_lower and ("fail" in step_lower or "failure" in step_lower):
+            return py('''step_deadline_fail():
+    result = LME.API.get_deadline_validation(response.request_id)
+    assert result in ('fail', 'FAIL', False) ''')
+        if "recorded" in step_lower and "timestamp" in step_lower:
+            return py('''step_timestamp_recorded():
+    submitted_at = response.submitted_at
+    deadline_ts = deadline.get('timestamp')
+    assert submitted_at <= deadline_ts - (15 * 60) ''')
+        if "recorded" in step_lower and ("late" in step_lower or "submission" in step_lower):
+            return py('''step_late_submission_recorded():
+    outcome = LME.PostTrade.get_submission_outcome('late_submission')
+    assert outcome is not None ''')
         if "api" in step_lower and "successful" in step_lower:
-            return f'''Then(/^{pattern}$/) do
-  expect(@response.status).to be_between(200, 299)
-end'''
+            return py('''step_api_success():
+    assert 200 <= response.status < 300 ''')
         if "api" in step_lower and "contains" in step_lower:
-            return f'''Then(/^{pattern}$/) do
-  expect(@response.body).to have_key(field)
-end'''
+            return py('''step_api_contains():
+    assert field in response.body ''')
 
     return None
 
@@ -847,7 +898,7 @@ def apply_human_step_edits(
         if template_code:
             code = template_code
         else:
-            generated = _generate_implementation(step_text, step_type, step_pattern, step_text.capitalize())
+            generated = _generate_python_implementation(step_text, step_type, step_pattern, step_text.capitalize())
             code = generated or ""
 
         if is_gap:
@@ -886,14 +937,16 @@ def render_steps_from_normalized_bdd(
     output_dir: Path,
     human_scripts_edits_path: Path | None = None,
 ) -> Path:
-    """Render Ruby Cucumber step definitions from normalized BDD output.
+    """Render Python step definitions from normalized BDD output.
 
     Consumes normalized BDD results (produced by run_bdd_pipeline) and
-    renders them into Ruby step definition files.
+    renders them into Python step definition files.
 
     If ``human_scripts_edits_path`` is provided, applies human step edits
     (from the Scripts tab) before rendering — this ensures edited and gap
-    steps get proper Ruby implementations rather than pending stubs.
+    steps get proper Python implementations rather than pending stubs.
+
+    Output: ``features/step_definitions/steps.py``
     """
     if human_scripts_edits_path:
         bdd_results = apply_human_step_edits(bdd_results, human_scripts_edits_path)
@@ -901,7 +954,7 @@ def render_steps_from_normalized_bdd(
     steps_dir = output_dir / "features" / "step_definitions"
     steps_dir.mkdir(parents=True, exist_ok=True)
 
-    filepath = steps_dir / "matching_rules_steps.rb"
+    filepath = steps_dir / "steps.py"
 
     all_lines: list[str] = []
     seen_patterns: set[str] = set()
@@ -909,6 +962,10 @@ def render_steps_from_normalized_bdd(
     all_lines.append("# frozen_string_literal: true")
     all_lines.append("# Step definitions - Generated from LME BDD Pipeline (Normalized BDD)")
     all_lines.append("# WARNING: Auto-generated - DO NOT EDIT MANUALLY")
+    all_lines.append("#")
+    all_lines.append("# This file uses pytest-bdd / behave-style Python step decorators.")
+    all_lines.append("# For framework integration, ensure LME.Client, LME.API, LME.PostTrade")
+    all_lines.append("# are available in the test environment.")
     all_lines.append("")
 
     for item in bdd_results:
@@ -928,15 +985,23 @@ def render_steps_from_normalized_bdd(
                     continue
                 seen_patterns.add(step_pattern)
 
-                if code:
-                    all_lines.append(code)
-                    all_lines.append("")
+                # Prefer STEP_LIBRARY canonical implementations when available
+                from lme_testing.step_library import STEP_LIBRARY
+                if step_text in STEP_LIBRARY:
+                    code = STEP_LIBRARY[step_text].render()
+                elif code:
+                    pass  # Use LLM-generated code as-is
                 elif human_edited:
                     # Human-edited steps with no stored code: generate from templates
                     generated = generate_step_definition(
                         step_text, step_type, idx, feature_name, human_edited=True
                     )
-                    all_lines.append(generated)
+                    code = generated
+                else:
+                    code = ""
+
+                if code:
+                    all_lines.append(code)
                     all_lines.append("")
 
     content = "\n".join(all_lines)
