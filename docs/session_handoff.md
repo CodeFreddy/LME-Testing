@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-18 04:55:06 UTC`
+- `2026-04-18 05:02:08 UTC`
 
 ---
 
@@ -48,69 +48,66 @@ Current branch:
 
 Recent commit subjects:
 
+- `fix: update session_handoff.ps1 template to reflect current repo state`
 - `docs: update TODO and session_handoff 鈥?Scripts tab edit workflow done`
 - `feat: wire Scripts tab edits into step definition generation`
 - `docs: update TODO 鈥?step-registry output path fixed`
 - `fix: step-registry output uses run_id subfolder like other pipelines`
-- `docs: update session_handoff and TODO to reflect completed schema work`
 
 ---
 
 ## Current Repo State
 
-The docs system has been aligned around a governance-contract-first approach.
+All three roadmap phases are complete. The system is a document-driven AI test design prototype with a full governed pipeline:
 
-Key outcomes:
+`source docs -> extraction -> atomic_rules -> semantic_rules -> maker -> checker -> BDD -> step-registry -> review-session -> rewrite -> report`
 
-- the roadmap, implementation plan, acceptance, architecture, model governance, testing governance, prompt lifecycle, and agent guidance docs are aligned
-- `step_integration_plan.md` is clearly treated as a future bridge, not a current baseline shortcut
-- extraction and rule-model docs were rewritten to match the current phase boundaries
-- `AGENTS.md` exists as a repo entry file for AI coding agents
+Key capabilities delivered:
 
-The repo now has two separate governance checks:
+- Formal schema validation (atomic_rule, semantic_rule, maker, checker, human review artifacts)
+- JSON Schema validation wired into extraction scripts and CI (`--skip-validate` to disable)
+- Normalized BDD intermediate representation with schema validation
+- Step registry visibility (exact/parameterized/candidate/unmatched match classification)
+- Scripts tab edit workflow: step text edits saved to `human_scripts_edits_latest.json` and wired into bdd/rewrite pipelines
+- TEMPLATE_REGISTRY with 16 real Ruby step implementations (not pending stubs)
+- Phase 1/2/3 acceptance gates all marked complete in `docs/acceptance.md`
+
+Governance checks available:
 
 - `python scripts/check_docs_governance.py`
 - `python scripts/check_artifact_governance.py`
-
-These are wired into CI as separate jobs:
-
-- `Docs Governance`
-- `Artifact Governance`
+- `python scripts/validate_rules.py` (upstream validation in CI)
 
 ---
 
 ## What Was Just Done
 
-This repo recently established:
+Recent completed work:
 
-- aligned governance docs and entry docs
-- split docs governance and artifact governance checks
-- CI wiring for both governance checks
-- a reference-material boundary policy
-- a handoff file intended to make cross-machine continuation easier
+- Formal schema validation wired into extraction scripts and CI (Phase 1 infrastructure-complete)
+- Scripts tab edit workflow: textarea-based step editing, save to `human_scripts_edits_latest.json`, wired into bdd/rewrite CLI subcommands and review-session rewrite jobs
+- TEMPLATE_REGISTRY expanded with 16 real Ruby implementations (terminology validation, price validation contact, trade resubmission, venue-specific, matching rules adoption) learned from `samples/ruby_cucumber/`
+- Step definition generation now emits real code instead of pending stubs for human-edited steps
 
 ---
 
 ## Current Baseline Commands
 
-Run these before or after substantial changes:
-
 ```powershell
+# Governance checks
 python scripts/check_docs_governance.py
 python scripts/check_artifact_governance.py
-```
 
-If `python` is not available on `PATH`, use the local Python executable path for the same commands.
+# Unit tests
+python -m unittest tests.test_pipelines -v
+python -m unittest tests.test_schemas -v
 
-Unit test for governance checks:
+# Full POC (requires config with real API keys)
+python main.py maker --input artifacts/lme_rules_v2_2/semantic_rules.json --output-dir runs/maker --config config/llm_profiles.example.json
+python main.py checker --rules artifacts/lme_rules_v2_2/semantic_rules.json --cases runs/maker/<run_id>/maker_cases.jsonl --output-dir runs/checker --config config/llm_profiles.example.json
+python main.py bdd --cases runs/maker/<run_id>/maker_cases.jsonl --output-dir runs/bdd --human-scripts-edits runs/review_sessions/<session_id>/iterations/<iter>/scripts/human_scripts_edits_latest.json
 
-```powershell
-python -m unittest tests.test_docs_governance -v
-```
-
-To enable automatic handoff refresh on commit in a fresh clone:
-
-```powershell
+# Enable auto-refresh on commit
 powershell -ExecutionPolicy Bypass -File scripts/setup_git_hooks.ps1
 ```
 
@@ -118,22 +115,11 @@ powershell -ExecutionPolicy Bypass -File scripts/setup_git_hooks.ps1
 
 ## Recommended Next Step
 
-The best next step is to move from lightweight artifact governance checks to formal artifact contracts.
+All Phase 1/2/3 acceptance gates are complete. Remaining natural next steps:
 
-Recommended implementation order:
-
-1. add formal schema files for `atomic_rule` and `semantic_rule`
-2. wire schema validation into extraction scripts
-3. connect schema validation into CI
-4. add a few negative tests for malformed artifacts
-
-Suggested target files or areas:
-
-- `schemas/atomic_rule.schema.json`
-- `schemas/semantic_rule.schema.json`
-- `scripts/extract_matching_rules.py`
-- `scripts/generate_semantic_rules.py`
-- tests for invalid artifact shapes
+1. **Run end-to-end POC with real LLM API**: The pipeline has been validated with mock/stub providers; running with real API keys end-to-end would confirm the full flow works in production conditions
+2. **Ruby step definition library integration**: Connect generated `matching_rules_steps.rb` to a real LME test backend or implement proper test doubles
+3. **Governance signals CI job**: The `governance-signals` CLI exists but may not be wired into CI; wire it to compute signals (schema failure rate, checker instability, coverage, step binding rate) on every run
 
 ---
 
