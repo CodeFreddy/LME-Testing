@@ -93,3 +93,11 @@ Switching from Ruby Cucumber to Python step definitions as the global rule:
 - `check_release_governance.py` now sees a current `governance_signals.json` and passes all 5 checks
 
 Current signals (from latest run): 50% coverage, 25% binding rate (2 exact + 0 parameterized + 15 candidates vs 68 unique patterns). Step binding low because step-registry matches against Ruby step defs — Python migration should improve this.
+
+## Step-Registry Python Matching Fix (DONE 2026/04/18)
+
+Fixed two bugs preventing step-registry from matching BDD steps against Python STEP_LIBRARY:
+1. `StepEntry` dataclass was missing `library_name` field — Mode 1 import in `extract_steps_from_python_step_defs` failed silently (TypeError on `library_name=`)
+2. `_build_library_index()` was indexing library by `step_pattern` (contains `(?:a|an|the)` placeholders) instead of `step_text` (literal, matches BDD step_text exactly)
+
+After fix: 20/20 BDD steps matched (100% exact), 0 unmatched, vs previously 0 exact/parameterized matches.

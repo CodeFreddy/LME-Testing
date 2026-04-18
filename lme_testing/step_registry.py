@@ -40,6 +40,7 @@ class StepEntry:
     # Match metadata (populated by compute_step_matches)
     match_type: str = ""  # "exact" | "parameterized" | "candidate" | "unmatched"
     library_step_text: str = ""
+    library_name: str = ""  # owner library identifier
     confidence: float = 0.0
     suggestions: list[dict] = field(default_factory=list)
 
@@ -232,10 +233,17 @@ def _cosine_similarity(tokens1: list[str], tokens2: list[str], idf_vals: dict[st
 
 
 def _build_library_index(inventory: StepInventory) -> dict[str, StepEntry]:
-    """Build normalized-pattern → StepEntry index from library inventory."""
+    """Build normalized-pattern → StepEntry index from library inventory.
+
+    Uses step_text (not step_pattern) for the index key so that BDD steps
+    with literal stopwords (a/an/the) match library entries whose step_pattern
+    contains (?:a|an|the) placeholders.
+
+    Parameterized matching uses step_pattern via _build_library_group_index.
+    """
     index: dict[str, StepEntry] = {}
     for step in inventory.all_steps():
-        norm = _normalize_pattern(step.step_pattern)
+        norm = _normalize_pattern(step.step_text)
         if norm not in index:
             index[norm] = step
     return index
