@@ -47,7 +47,7 @@ jobs:
         run: pip install jsonschema
 
       - name: Run schema validation
-        run: python scripts/validate_schemas.py
+        run: python scripts/validate_schemas.py --output-json runs/schema_validation_latest.json
 
   upstream-validation:
     name: Upstream Rule Validation

@@ -204,7 +204,7 @@ semantic_rules.json
 
 | 信号 | 当前数据来源 | 可信度 | 修复任务 |
 |------|------------|--------|---------|
-| schema_failure_rate | 无（从 coverage report 推断）| ⚠️ 假数据 | S1-T01 |
+| schema_failure_rate | `runs/schema_validation_latest.json` (from CI schema-validation job) | ✅ 真实数据 | S1-T01 |
 | checker_instability_rate | StubProvider 运行 | ⚠️ 不代表真实 LLM | S1-T03b |
 | coverage_percent | 全量运行数据（路径未对齐）| 🔄 待对齐 | S1-T02 |
 | step_binding_success_rate | 模拟 step library | ⚠️ 不代表真实 LME | Stage 3 |
@@ -282,7 +282,7 @@ source document
 |--------|---------|---------|
 | docs-governance | *.md 中无绝对路径 | ✅ 有效 |
 | artifact-governance | artifact 结构和 rule_type enum | ✅ 有效 |
-| schema-validation | JSON Schema fixtures | ✅ 有效 |
+| schema-validation | JSON Schema fixtures + persistent output to `runs/schema_validation_latest.json` | ✅ 有效 |
 | upstream-validation | atomic + semantic rules 完整性 | ✅ 有效 |
 | unit-tests | 78 个单元测试 | ✅ 有效（基于 stub）|
 | smoke-test | E2E 端到端冒烟 | ✅ 有效（stub，2条规则）|

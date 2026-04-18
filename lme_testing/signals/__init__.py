@@ -99,6 +99,7 @@ class GovernanceSignals:
     computed_at: str = ""  # ISO-8601
     repo_root: str = ""
     schema_signals: SchemaSignals = field(default_factory=SchemaSignals)
+    schema_signal_source: str = "no_data"  # "real_validation" | "no_data"
     checker_instability_signals: CheckerInstabilitySignals = field(default_factory=CheckerInstabilitySignals)
     coverage_signals: CoverageSignals = field(default_factory=CoverageSignals)
     step_binding_signals: StepBindingSignals = field(default_factory=StepBindingSignals)
@@ -111,6 +112,7 @@ class GovernanceSignals:
             "repo_root": self.repo_root,
             "signals_version": self.signals_version,
             "runs_analyzed": self.runs_analyzed,
+            "schema_signal_source": self.schema_signal_source,
             "schema_failure_rate": self.schema_signals.failure_rate,
             "schema_signals": {
                 "total_validations": self.schema_signals.total_validations,
@@ -160,33 +162,39 @@ class GovernanceSignals:
 # ---------------------------------------------------------------------------
 
 
-def _compute_schema_signals(runs_dir: Path) -> SchemaSignals:
-    """Compute schema failure rate from schema validation runs."""
+def _compute_schema_signals(runs_dir: Path) -> tuple[SchemaSignals, str]:
+    """Compute schema failure rate from schema validation runs.
+
+    Returns:
+        Tuple of (SchemaSignals, data_source) where data_source is
+        'real_validation' or 'no_data'.
+    """
     signals = SchemaSignals()
-    validation_reports: list[Path] = []
+    data_source = "no_data"
 
-    if not runs_dir.exists():
-        return signals
+    schema_validation_path = runs_dir / "schema_validation_latest.json"
+    if schema_validation_path.exists():
+        try:
+            report = load_json(schema_validation_path)
+            signals.total_validations = report.get("total_schemas", 0)
+            signals.total_artifacts_validated = report.get("total_fixtures", 0)
+            signals.invalid_artifacts = report.get("failed", 0)
+            if signals.total_artifacts_validated > 0:
+                signals.failure_rate = round(
+                    signals.invalid_artifacts / signals.total_artifacts_validated, 4
+                )
+            failures = report.get("failures", [])
+            for f in failures[:20]:
+                signals.recent_failures.append({
+                    "artifact": f.get("path", ""),
+                    "entry": f.get("entry", ""),
+                    "error": f.get("message", ""),
+                })
+            data_source = "real_validation"
+        except Exception:
+            pass
 
-    # Look for schema validation artifacts in runs
-    for run_dir in runs_dir.iterdir():
-        if not run_dir.is_dir():
-            continue
-        # Check for coverage reports which include validation info
-        coverage_path = run_dir / "coverage_report.json"
-        if coverage_path.exists():
-            validation_reports.append(coverage_path)
-
-    # Also check top-level validate_schemas outputs if they exist
-    # For now, we derive schema health from pipeline summary if available
-    # The real schema failure rate comes from validate_schemas.py runs
-    # Since those don't produce persistent artifacts by default, we
-    # compute from any available checker/coverage artifacts
-    signals.total_validations = len(validation_reports)
-    signals.total_artifacts_validated = 0
-    signals.invalid_artifacts = 0
-
-    return signals
+    return signals, data_source
 
 
 def _compute_checker_instability_signals(runs_dir: Path) -> CheckerInstabilitySignals:
@@ -358,10 +366,12 @@ def compute_governance_signals(repo_root: Path) -> GovernanceSignals:
     runs_dir = repo_root / "runs"
     now = datetime.now().isoformat(timespec="seconds") + "Z"
 
+    schema_signals, schema_source = _compute_schema_signals(runs_dir)
     signals = GovernanceSignals(
         computed_at=now,
         repo_root=str(repo_root),
-        schema_signals=_compute_schema_signals(runs_dir),
+        schema_signals=schema_signals,
+        schema_signal_source=schema_source,
         checker_instability_signals=_compute_checker_instability_signals(runs_dir),
         coverage_signals=_compute_coverage_signals(runs_dir),
         step_binding_signals=_compute_step_binding_signals(runs_dir),
