@@ -16,7 +16,7 @@ CHECKER_PROMPT_VERSION = "1.0"
 
 # Increment BDD_PROMPT_VERSION when BDD_SYSTEM_PROMPT or
 # build_bdd_user_prompt changes in a way that affects output quality.
-BDD_PROMPT_VERSION = "2.0"
+BDD_PROMPT_VERSION = "3.0"
 
 # Increment PLANNER_PROMPT_VERSION when PLANNER_SYSTEM_PROMPT or
 # build_planner_user_prompt changes in a way that affects output quality.
@@ -128,7 +128,7 @@ Hard requirements:
 - step_pattern is the regex-extracted pattern for step binding (copy step_text as-is for simple patterns).
 - Use tags derived from case_type and priority (e.g., @positive, @high).
 - Do not invent additional steps beyond what is in the input.
-- step_definitions code should use LME::Client, LME::API, LME::PostTrade patterns.
+- step_definitions code should use Python with LME.Client, LME.API, LME.PostTrade patterns.
 - Return structured JSON only.
 """
 
@@ -169,21 +169,21 @@ def build_bdd_user_prompt(batch: list[dict]) -> str:
                         {
                             "step_text": "a registered_intermediating_broker submits a document containing capitalised terms",
                             "step_pattern": "a registered_intermediating_broker submits a document containing capitalised terms",
-                            "code": "Given(/^a registered_intermediating_broker submits a document containing capitalised terms$/) do\n  @broker = LME::Client.login(role: :intermediating_broker)\n  @document = LME::API.create_document(terms: :capitalised)\nend"
+                            "code": "@given(\"a registered_intermediating_broker submits a document containing capitalised terms\")\ndef step_broker_submits_document():\n    broker = LME.Client.registered_intermediary\n    document = LME.API.create_document(broker=broker, terms='capitalised')"
                         }
                     ],
                     "when": [
                         {
                             "step_text": "the system processes the document terminology",
                             "step_pattern": "the system processes the document terminology",
-                            "code": "When(/^the system processes the document terminology$/) do\n  @response = LME::API.process_terminology(@document)\nend"
+                            "code": "@when(\"the system processes the document terminology\")\ndef step_system_processes_terminology():\n    response = LME.API.process_terminology(document)"
                         }
                     ],
                     "then": [
                         {
                             "step_text": "the terms are assigned the meaning ascribed in the LME Rulebook",
                             "step_pattern": "the terms are assigned the meaning ascribed in the LME Rulebook",
-                            "code": "Then(/^the terms are assigned the meaning ascribed in the LME Rulebook$/) do\n  expect(@response.meaning_source).to eq('LME_Rulebook')\nend"
+                            "code": "@then(\"the terms are assigned the meaning ascribed in the LME Rulebook\")\ndef step_terms_assigned_rulebook():\n    assert response.meaning_source == 'LME_Rulebook'"
                         }
                     ]
                 }

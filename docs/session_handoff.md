@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-18 05:57:50 UTC`
+- `2026-04-18 05:58:38 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `fix: add human-scripts-edits CLI flags and BDD prompt version bump`
 - `feat: complete Python step definitions migration`
 - `fix: update session_handoff.ps1 template to reflect current repo state`
 - `docs: update TODO and session_handoff 鈥?Scripts tab edit workflow done`
 - `feat: wire Scripts tab edits into step definition generation`
-- `docs: update TODO 鈥?step-registry output path fixed`
 
 ---
 

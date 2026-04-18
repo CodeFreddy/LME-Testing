@@ -10,7 +10,7 @@ from .schemas import init_schema_config_dir
 from .pipelines import run_bdd_pipeline, run_checker_pipeline, run_maker_pipeline, run_planner_pipeline, run_rewrite_pipeline
 from .bdd_export import run_bdd_export
 from .reporting import generate_html_report
-from .step_registry import extract_steps_from_normalized_bdd, extract_steps_from_step_defs, compute_step_gaps, compute_step_matches, render_step_visibility_report, StepInventory, MatchReport
+from .step_registry import extract_steps_from_normalized_bdd, extract_steps_from_python_step_defs, extract_steps_from_step_defs, compute_step_gaps, compute_step_matches, render_step_visibility_report, StepInventory, MatchReport
 from .signals import compute_governance_signals, write_signals_report
 from .human_review import generate_human_review_page
 from .logging_utils import configure_logging
@@ -302,7 +302,11 @@ def main() -> int:
 
         library_inventory = StepInventory()
         if args.step_defs:
-            library_inventory = extract_steps_from_step_defs(Path(args.step_defs))
+            step_defs_path = Path(args.step_defs)
+            if step_defs_path.suffix == ".py":
+                library_inventory = extract_steps_from_python_step_defs(step_defs_path)
+            else:
+                library_inventory = extract_steps_from_step_defs(step_defs_path)
 
         report = compute_step_matches(
             bdd_inventory,
