@@ -15,6 +15,7 @@
 | Checker real instability | ✅ Measured | 9.5% instability (exceeds 5% threshold) |
 | Schema signal real data | ✅ Complete | `failure_rate = 0.0`, real_validation source |
 | Governance signals coverage path | ✅ Complete | 23 runs scanned, 180 rules |
+| Stage M (master merge) | ✅ Complete | SM-T01~SM-T05 all done, 2026-04-19 |
 | Stage 2 Direction A prompt | ✅ Complete | Maker prompt v1.2 (improved boundary/exception guidance) |
 | Real LME API execution | ⏳ Blocked | Stage 3, LME VM access needed |
 
@@ -26,12 +27,15 @@
 | `stub_verified` | StubProvider or POC (≤2 rules) verified |
 | `real_data_verified` | Real LLM API + real-scale data verified |
 
-### Current Stage: Stage 2 — Quality Improvement
+### Current Stage: Stage M Complete → Stage 2 Direction A (Quality Improvement)
+
+**Stage M (master branch merge)** completed 2026-04-19: UTC timestamps, workflow interrupt handling, retry config, vendor archive all merged.
 
 Stage 1 (real data access) is complete. Stage 2 Direction A (quality improvement) is underway:
 - **Maker prompt v1.2**: Strengthened boundary/exception/prohibition guidance based on coverage analysis
 - **Benchmark**: v1.2 confirmed no regression on poc_two_rules (100% coverage)
-- **Next**: Full 183-rule re-run with v1.2 to measure coverage improvement
+- **Full 183-rule re-run**: Pending — blocked by MiniMax API reliability issues (60-71% instability observed)
+- **S2-T01 (maker quality)**: Blocked pending API reliability resolution
 
 See `docs/roadmap.md` and `TODO.md` for Stage 2 details.
 
