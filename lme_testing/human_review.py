@@ -39,7 +39,6 @@ def generate_human_review_page(
                 "case_id": case_id,
                 "semantic_rule_id": semantic_rule_id,
                 "review_decision": "pending",
-                "block_recommendation_review": "pending_review" if checker_blocking else "not_applicable",
                 "human_comment": "",
                 "issue_types": [],
             }
@@ -138,19 +137,11 @@ def _issue_type_rows_html(seed: dict, issue_type_options: list[dict]) -> str:
 
 def _render_review_controls(seed: dict, issue_type_options: list[dict]) -> str:
     case_id = html.escape(seed["case_id"])
-    block_review = seed["block_recommendation_review"]
     return (
         f'<div><label>Decision<br/><select data-field="review_decision" data-case-id="{case_id}">'
         '<option value="pending" selected>pending</option>'
         '<option value="approve">approve</option>'
         '<option value="rewrite">rewrite</option>'
-        '<option value="reject">reject</option>'
-        '</select></label></div>'
-        f'<div><label>Block Recommendation Review<br/><select data-field="block_recommendation_review" data-case-id="{case_id}">'
-        f'<option value="not_applicable"{" selected" if block_review == "not_applicable" else ""}>not_applicable</option>'
-        f'<option value="pending_review"{" selected" if block_review == "pending_review" else ""}>pending_review</option>'
-        '<option value="confirmed">confirmed</option>'
-        '<option value="dismissed">dismissed</option>'
         '</select></label></div>'
         f'<div><label>Issue Types</label><details class="issue-picker"><summary class="issue-summary" data-issue-summary="{case_id}">{html.escape(_issue_summary(seed, issue_type_options))}</summary><table class="issue-table"><thead><tr><th>Select</th><th>Label</th><th>Code</th><th>Description</th></tr></thead><tbody>{_issue_type_rows_html(seed, issue_type_options)}</tbody></table></details></div>'
         f'<div><label>Comment<br/><textarea data-field="human_comment" data-case-id="{case_id}" rows="4" cols="36"></textarea></label></div>'
@@ -205,11 +196,9 @@ def _render_page(rows: str, seed_json: str, total_cases: int, checker_blocked: i
   <div class="card">
     <h2>Field Guide</h2>
     <ul>
-      <li><strong>Decision</strong>: final human action. If it is not <code>pending</code>, the system executes this action.</li>
-      <li><strong>Block Recommendation Review</strong>: human review of the checker blocking recommendation. It is used for audit only and does not override <code>Decision</code>.</li>
+      <li><strong>Decision</strong>: final human action. <code>approve</code> passes the case; <code>rewrite</code> sends it back to maker. Divergence vs. checker is captured in the audit trail.</li>
       <li><strong>Issue Types</strong>: open the panel and select one or more checkboxes. These tags are used for stats and targeted rewrite guidance.</li>
     </ul>
-    <div class="warning">If <code>Decision</code> is already set to <code>approve</code>, <code>rewrite</code>, or <code>reject</code>, the system follows that decision even if <code>Block Recommendation Review</code> is still <code>pending_review</code>.</div>
   </div>
   <div class="card">
     <h2>Issue Type Reference</h2>
@@ -319,11 +308,11 @@ document.getElementById('loadInput').addEventListener('change', async (event) =>
   const text = await file.text();
   const payload = JSON.parse(text);
   for (const item of (payload.reviews || [])) {{
-    const normalized = {{
-      ...item,
-      review_decision: item.review_decision === 'approved' ? 'approve' : item.review_decision === 'needs_rewrite' ? 'rewrite' : item.review_decision === 'rejected' ? 'reject' : item.review_decision,
-      block_recommendation_review: item.block_recommendation_review || (item.human_block_decision === 'not_requested' ? 'not_applicable' : item.human_block_decision === 'pending' ? 'pending_review' : item.human_block_decision === 'confirmed' ? 'confirmed' : item.human_block_decision ? 'dismissed' : 'not_applicable')
-    }};
+    const legacyDecisionMap = {{ approved: 'approve', needs_rewrite: 'rewrite', rejected: 'rewrite', reject: 'rewrite' }};
+    const rawDecision = item.review_decision;
+    const normalizedDecision = legacyDecisionMap[rawDecision] || rawDecision;
+    const {{ block_recommendation_review, human_block_decision, ...rest }} = item;
+    const normalized = {{ ...rest, review_decision: normalizedDecision }};
     reviewMap.set(normalized.case_id, normalized);
     for (const el of document.querySelectorAll(`[data-case-id="${{normalized.case_id}}"]`)) {{
       const field = el.dataset.field;

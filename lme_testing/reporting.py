@@ -14,12 +14,14 @@ def _status_options(values: list[str]) -> str:
     return ''.join(options)
 
 
-def _nav_links_html(active: str) -> str:
-    links = [
+def _nav_links_html(active: str, audit_trail_url: str | None = None) -> str:
+    links: list[tuple[str, str, str]] = [
         ("report", "report.html", "Summary Report"),
         ("maker", "maker_readable.html", "Maker Readable"),
         ("checker", "checker_readable.html", "Checker Readable"),
     ]
+    if audit_trail_url:
+        links.append(("audit_trail", audit_trail_url, "Audit Trail"))
     items = []
     for key, href, label in links:
         css_class = "nav-link active" if key == active else "nav-link"
@@ -27,7 +29,7 @@ def _nav_links_html(active: str) -> str:
     return '<div class="nav">' + ''.join(items) + '</div>'
 
 
-def _render_page(title: str, body: str, extra_script: str = "", active_nav: str = "report") -> str:
+def _render_page(title: str, body: str, extra_script: str = "", active_nav: str = "report", audit_trail_url: str | None = None) -> str:
     return f"""
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -62,7 +64,7 @@ def _render_page(title: str, body: str, extra_script: str = "", active_nav: str 
   </style>
 </head>
 <body>
-{_nav_links_html(active_nav)}
+{_nav_links_html(active_nav, audit_trail_url)}
 {body}
 <script>
 {extra_script}
@@ -134,6 +136,30 @@ def _render_rule_coverage_rows(status_by_rule: dict[str, dict]) -> str:
     return ''.join(rows)
 
 
+def _build_report_metrics(
+    maker_cases: list[dict],
+    checker_reviews: list[dict],
+    maker_summary: dict,
+    checker_summary: dict,
+    coverage_report: dict,
+) -> dict[str, int | float]:
+    # Use current merged data files as the report source of truth so rewrite summaries
+    # do not zero-out counts when their schema differs from first-pass maker summaries.
+    maker_rule_count = len(maker_cases)
+    maker_scenario_count = sum(len(item.get("scenarios", [])) for item in maker_cases)
+    checker_review_count = len(checker_reviews)
+    return {
+        "maker_rule_count": maker_rule_count or maker_summary.get("merged_rule_count", maker_summary.get("processed_rule_count", 0)),
+        "maker_scenario_count": maker_scenario_count or maker_summary.get("scenario_count", maker_summary.get("rewritten_scenario_count", 0)),
+        "checker_review_count": checker_review_count or checker_summary.get("merged_review_count", checker_summary.get("review_count", 0)),
+        "fully_covered": coverage_report.get("fully_covered", 0),
+        "partially_covered": coverage_report.get("partially_covered", 0),
+        "uncovered": coverage_report.get("uncovered", 0),
+        "checker_block_count": coverage_report.get("checker_block_count", 0),
+        "coverage_percent": coverage_report.get("coverage_percent", 0),
+    }
+
+
 def generate_html_report(
     maker_cases_path: Path,
     checker_reviews_path: Path,
@@ -141,12 +167,20 @@ def generate_html_report(
     checker_summary_path: Path,
     coverage_report_path: Path,
     output_html_path: Path,
+    audit_trail_path: Path | None = None,
 ) -> dict:
     maker_cases = load_jsonl(maker_cases_path)
     checker_reviews = load_jsonl(checker_reviews_path)
     maker_summary = load_json(maker_summary_path)
     checker_summary = load_json(checker_summary_path)
     coverage_report = load_json(coverage_report_path)
+    metrics = _build_report_metrics(
+        maker_cases=maker_cases,
+        checker_reviews=checker_reviews,
+        maker_summary=maker_summary,
+        checker_summary=checker_summary,
+        coverage_report=coverage_report,
+    )
 
     reviews_by_case = {item['case_id']: item for item in checker_reviews}
 
@@ -231,16 +265,14 @@ applyFilters();
   <div class="card">
     <h2>运行摘要</h2>
     <div class="grid">
-      <div class="metric"><strong>Maker Rule 数</strong><br/>{maker_summary.get('merged_rule_count', maker_summary.get('processed_rule_count', 0))}</div>
-      <div class="metric"><strong>Maker Scenario 数</strong><br/>{maker_summary.get('scenario_count', 0)}</div>
-      <div class="metric"><strong>Checker Review 数</strong><br/>{checker_summary.get('merged_review_count', checker_summary.get('review_count', 0))}</div>
-      <div class="metric"><strong>Fully Covered</strong><br/>{coverage_report.get('fully_covered', 0)}</div>
-      <div class="metric"><strong>Partially Covered</strong><br/>{coverage_report.get('partially_covered', 0)}</div>
-      <div class="metric"><strong>Uncovered</strong><br/>{coverage_report.get('uncovered', 0)}</div>
-      <div class="metric"><strong>Checker Blocking</strong><br/>{coverage_report.get('checker_block_count', 0)}</div>
-      <div class="metric"><strong>Human Confirmed Block</strong><br/>{coverage_report.get('human_confirmed_block_count', 0)}</div>
-      <div class="metric"><strong>Block Override Rate</strong><br/>{coverage_report.get('block_override_rate', 0)}%</div>
-      <div class="metric"><strong>覆盖率</strong><br/>{coverage_report.get('coverage_percent', 0)}%</div>
+      <div class="metric"><strong>Maker Rule 数</strong><br/>{metrics['maker_rule_count']}</div>
+      <div class="metric"><strong>Maker Scenario 数</strong><br/>{metrics['maker_scenario_count']}</div>
+      <div class="metric"><strong>Checker Review 数</strong><br/>{metrics['checker_review_count']}</div>
+      <div class="metric"><strong>Fully Covered</strong><br/>{metrics['fully_covered']}</div>
+      <div class="metric"><strong>Partially Covered</strong><br/>{metrics['partially_covered']}</div>
+      <div class="metric"><strong>Uncovered</strong><br/>{metrics['uncovered']}</div>
+      <div class="metric"><strong>Checker Blocking</strong><br/>{metrics['checker_block_count']}</div>
+      <div class="metric"><strong>覆盖率</strong><br/>{metrics['coverage_percent']}%</div>
     </div>
   </div>
   <div class="card">
@@ -343,9 +375,16 @@ applyFilters();
     maker_html_path = output_html_path.with_name('maker_readable.html')
     checker_html_path = output_html_path.with_name('checker_readable.html')
 
-    _write_text(output_html_path, _render_page('Maker Checker Report', combined_body, filter_script, active_nav='report'))
-    _write_text(maker_html_path, _render_page('Maker Readable Report', maker_body, active_nav='maker'))
-    _write_text(checker_html_path, _render_page('Checker Readable Report', checker_body, active_nav='checker'))
+    audit_url: str | None = None
+    if audit_trail_path and audit_trail_path.exists():
+        try:
+            audit_url = audit_trail_path.relative_to(output_html_path.parent).as_posix()
+        except ValueError:
+            audit_url = audit_trail_path.as_uri()
+
+    _write_text(output_html_path, _render_page('Maker Checker Report', combined_body, filter_script, active_nav='report', audit_trail_url=audit_url))
+    _write_text(maker_html_path, _render_page('Maker Readable Report', maker_body, active_nav='maker', audit_trail_url=audit_url))
+    _write_text(checker_html_path, _render_page('Checker Readable Report', checker_body, active_nav='checker', audit_trail_url=audit_url))
 
     return {
         'output_html': str(output_html_path),
@@ -383,7 +422,6 @@ def _render_checker_detail(review: dict) -> str:
         f'<div class="kv"><span class="label">Blocking Category</span>: {html.escape(str(review.get("checker_blocking_category", review.get("blocking_category", ""))))}</div>'
         f'<div class="kv"><span class="label">Blocking Reason</span>: {html.escape(str(review.get("checker_blocking_reason", review.get("blocking_reason", ""))))}</div>'
         f'<div class="kv"><span class="label">Checker Confidence</span>: {html.escape(str(review.get("checker_confidence", "")))}</div>'
-        f'<div class="kv"><span class="label">Block Recommendation Review</span>: {html.escape(str(review.get("block_recommendation_review", "")))}</div>'
         f'<div class="kv"><span class="label">Human Comment</span>: {html.escape(str(review.get("human_comment", "")))}</div>'
         f'<div class="kv"><span class="label">Scores</span><pre>{html.escape(json.dumps(review.get("scores", {}), ensure_ascii=False, indent=2))}</pre></div>'
         f'<div class="kv"><span class="label">Coverage Reason</span>: {html.escape(str(review.get("coverage_assessment", {}).get("reason", "")))}</div>'

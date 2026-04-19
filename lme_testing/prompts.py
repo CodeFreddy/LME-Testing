@@ -81,9 +81,9 @@ REWRITE_SYSTEM_PROMPT = """You are the maker revision model for an LME test desi
 You revise maker-generated test cases using checker feedback and human review feedback.
 Hard requirements:
 - For every input semantic rule, return exactly one revised result object.
-- Regenerate the full scenario set for that semantic rule, not just a partial patch.
-- The revised scenario set must cover every required_case_type exactly once.
+- Output ONLY the cases listed in target_case_ids; do NOT regenerate cases that are not targeted.
 - Fix the issues raised by checker findings and human review comments when they are grounded in the supplied rule and evidence.
+- When human feedback conflicts with checker findings, human takes precedence.
 - Preserve fidelity to the semantic rule and evidence; do not invent business behavior.
 - Return JSON only.
 """
@@ -103,6 +103,7 @@ Hard requirements:
 - Treat blocking as a recommendation, not as a final human decision.
 - If maker evidence is weak, say so explicitly in findings.
 - Return structured JSON only.
+- You do not receive human review feedback and must evaluate each case independently, based solely on the semantic rule, case content, and evidence.
 """
 
 
@@ -135,31 +136,33 @@ def build_maker_user_prompt(batch: list[dict]) -> str:
     )
 
 
-# 构建 rewrite 提示词，让 maker 基于 checker 和人工反馈重写整条 rule 的完整场景组。
+# 构建 case 级 rewrite 提示词，按结构化章节组织，每 rule 只重写 target_case_ids 指定的 case。
 def build_rewrite_user_prompt(batch: list[dict]) -> str:
-    expected_ids = [item["semantic_rule"]["semantic_rule_id"] for item in batch]
-    expected_requirement_map = {
-        item["semantic_rule"]["semantic_rule_id"]: item["semantic_rule"].get("source", {}).get("atomic_rule_ids", [])
-        for item in batch
-    }
-    expected_case_type_map = {
-        item["semantic_rule"]["semantic_rule_id"]: item["semantic_rule"].get("required_case_types", [])
-        for item in batch
-    }
     schema = _maker_result_schema_example()
-    return (
-        "Revise the maker outputs for the following semantic rules.\n"
-        "You must return exactly one revised result per semantic_rule_id.\n"
-        f"Expected semantic_rule_id list: {json.dumps(expected_ids, ensure_ascii=False)}\n"
-        f"Expected requirement_ids map: {json.dumps(expected_requirement_map, ensure_ascii=False)}\n"
-        f"Expected required_case_types map: {json.dumps(expected_case_type_map, ensure_ascii=False)}\n"
-        "For each semantic rule, regenerate the complete scenario set so that every required_case_type is present exactly once.\n"
-        "Use checker findings and human feedback to fix the previous draft, but do not invent unsupported rule behavior.\n"
-        "Return JSON matching this schema shape:\n"
-        f"{json.dumps(schema, ensure_ascii=False, indent=2)}\n"
-        "Input rewrite batch:\n"
-        f"{json.dumps(batch, ensure_ascii=False, indent=2)}"
-    )
+    parts: list[str] = [
+        "Revise the maker outputs for the following semantic rules.",
+        "For each rule, output a revised result whose scenarios array contains ONLY the target cases listed under target_case_ids.",
+        "Do NOT output cases whose scenario_id is not in target_case_ids.",
+        "Preserve scenario_id exactly; update given/when/then/evidence/assumptions/case_type as needed.",
+        "If human feedback conflicts with checker, follow the human.",
+        f"Return JSON matching this schema shape:\n{json.dumps(schema, ensure_ascii=False, indent=2)}",
+        "",
+    ]
+    for item in batch:
+        rule = item["semantic_rule"]
+        rule_id = rule.get("semantic_rule_id", "")
+        target_case_ids = item.get("rewrite_target_case_ids", [])
+        current_maker_record = item.get("current_maker_record", {})
+        checker_reviews = item.get("checker_reviews", [])
+        human_reviews = item.get("human_reviews", [])
+        parts.append(f"=== Rule: {rule_id} ===")
+        parts.append(f"\n## Semantic rule\n{json.dumps(rule, ensure_ascii=False, indent=2)}")
+        parts.append(f"\n## Cases you generated last iteration (full set for this rule)\n{json.dumps(current_maker_record, ensure_ascii=False, indent=2)}")
+        parts.append(f"\n## Cases the human asked you to rewrite\ntarget_case_ids: {json.dumps(target_case_ids, ensure_ascii=False)}")
+        parts.append(f"\n## Checker findings for target cases\n{json.dumps(checker_reviews, ensure_ascii=False, indent=2)}")
+        parts.append(f"\n## Human reviewer feedback for target cases (authoritative; > checker)\n{json.dumps(human_reviews, ensure_ascii=False, indent=2)}")
+        parts.append("")
+    return "\n".join(parts)
 
 
 # 构建 checker 提示词，要求逐 case 输出结构化审核结果和 blocking 建议。
