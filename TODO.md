@@ -200,8 +200,9 @@
 - [x] ✅ Code　Ruby Cucumber prototype 创建
 - [x] ✅ Code　BDD tab：显示 normalized BDD，支持 Given/When/Then 编辑
 - [x] ✅ Code　Scripts tab：步骤可见性显示
-- [ ] SM-T03　workflow_session.py 中断处理（cherry-pick）
-- [ ] S1-T02　定位全量运行数据目录（人工操作）
-- [ ] S1-T04　全量基准运行（需 API 调用）
-- [ ] S2-B1　audit_trail.py 实现（Stage 2）
+- [x] ✅ SM-T03　workflow_session.py 中断处理（cherry-pick from master）
+- [x] ✅ S1-T02　定位全量运行数据目录
+- [x] ✅ S1-T04　全量基准运行（72.78%，已文档化）
+- [x] ✅ S2-B1　audit_trail.py 实现
 - [ ] ⏳ 真实 LME API 接入（Stage 3，待 VM 权限）
+- [ ] S2-A　Maker prompt v1.2 全量重跑（benchmark validated，需 API 预算）

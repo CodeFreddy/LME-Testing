@@ -11,10 +11,11 @@
 | Framework implementation | ✅ Complete | Code in `lme_testing/`, `schemas/`, `pipelines.py` |
 | Schema contracts (7 schemas) | ✅ Complete | CI `schema-validation` job passes |
 | POC E2E (2 rules) | ✅ Complete | `poc_two_rules` E2E verified |
-| Full 183-rule quality baseline | 🔄 In Progress | Stage 1 S1-T04 |
-| Checker real instability | 🔄 Unknown | Currently 0% from StubProvider; S1-T03b needed |
-| Schema signal real data | ✅ Complete | S1.1 done, `failure_rate` computed |
-| Governance signals coverage path | ✅ Complete | S1.2 done, 21 runs, 180 rules |
+| Full 183-rule quality baseline | ✅ Complete | 72.78% coverage (131/180), BASELINE-183-RULES.md |
+| Checker real instability | ✅ Measured | 9.5% instability (exceeds 5% threshold) |
+| Schema signal real data | ✅ Complete | `failure_rate = 0.0`, real_validation source |
+| Governance signals coverage path | ✅ Complete | 23 runs scanned, 180 rules |
+| Stage 2 Direction A prompt | ✅ Complete | Maker prompt v1.2 (improved boundary/exception guidance) |
 | Real LME API execution | ⏳ Blocked | Stage 3, LME VM access needed |
 
 ### Verification Type Key
@@ -25,11 +26,14 @@
 | `stub_verified` | StubProvider or POC (≤2 rules) verified |
 | `real_data_verified` | Real LLM API + real-scale data verified |
 
-> **Honest statement:** "All Phases Complete" claims from 2026-04-14 were based on code completion only. The v2.0 docs (2026-04-18) correct this — see `docs/roadmap.md` Section一 for full current-state table.
+### Current Stage: Stage 2 — Quality Improvement
 
-### Current Stage: Stage 1 — Real Data Access
+Stage 1 (real data access) is complete. Stage 2 Direction A (quality improvement) is underway:
+- **Maker prompt v1.2**: Strengthened boundary/exception/prohibition guidance based on coverage analysis
+- **Benchmark**: v1.2 confirmed no regression on poc_two_rules (100% coverage)
+- **Next**: Full 183-rule re-run with v1.2 to measure coverage improvement
 
-See `docs/roadmap.md` for Stage 0/1/2/3 definition. Stage 1 tasks S1-T01 through S1-T05 are in `docs/implementation_plan.md`.
+See `docs/roadmap.md` and `TODO.md` for Stage 2 details.
 
 ---
 
@@ -288,16 +292,16 @@ result = evaluate_assertion(
 
 ### Governance Signals
 
-Governance signals require real data to be meaningful. Current signal sources:
+Governance signals are computed from run artifacts and updated on each run.
 
 | Signal | Value | Data Source |
 |--------|-------|-------------|
-| `schema_failure_rate` | — | No persistent data (S1-T01 fix pending) |
-| `checker_instability` | 0% | StubProvider (not real LLM) |
-| `coverage_percent` | — | Full-run data not yet readable (S1-T02 fix pending) |
-| `step_binding_rate` | 35.4% | Simulated step library, not real LME API |
+| `schema_failure_rate` | 0.0 | `runs/schema_validation_latest.json` (370 fixtures) |
+| `checker_instability` | 9.5% | `runs/checker-stability/20260418T231915+0800-v3/` (63 comparable cases) |
+| `coverage_percent` | 72.78% (latest v12 benchmark: 100%) | `runs/checker_v1.1_full/` (180 rules); v12 benchmark latest by UTC time |
+| `step_binding_rate` | 35.4% | Simulated step library, not real LME API (Stage 3) |
 
-Real numbers will be available after Stage 1 tasks complete.
+> **Note:** Latest coverage is determined by actual UTC wall-clock time (`_parse_timestamp()` in `signals/__init__.py`), not string sort. Benchmark runs with UTC (`Z`) timestamps sort correctly above local-offset (`+0800`) runs.
 
 ### Release Governance
 
