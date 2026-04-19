@@ -1,8 +1,8 @@
 # LME-Testing — AI Test Generation Demo
 
 **For:** Yu Zheng
-**Date:** 2026/04/14
-**Status:** All phases complete ✅
+**Date:** 2026/04/19
+**Status:** Stage M complete · Stage 2 in progress (S2-T01 blocked by API reliability)
 
 ***
 
@@ -18,9 +18,9 @@ Writing test cases from a dense financial rulebook is slow, error-prone, and inc
 flowchart TD
     A["📄 Rule Document<br/>(PDF/MD)"] --> B["extract_matching_rules.py<br/>183 clauses → atomic_rules.json"]
     B --> C["generate_semantic_rules.py<br/>structured rules + evidence"]
-    C --> D["Maker: Qwen<br/>generates BDD scenarios"]
+    C --> D["Maker: qwen3.5-plus<br/>generates BDD scenarios"]
     D --> E["maker_cases.jsonl<br/>TC-SR-MR-003-01-positive-01<br/>case_type enum · evidence · page#"]
-    E --> F["Checker: MiniMax<br/>quality scores + coverage"]
+    E --> F["Checker: MiniMax-M2.5<br/>quality scores + coverage"]
     E --> G["BDD Pipeline<br/>normalized BDD → Gherkin"]
     F --> H["checker_reviews.jsonl<br/>4-dim scores · blocking flag"]
     H --> I["Human Review UI<br/>approve · rewrite · reject"]
@@ -56,7 +56,7 @@ flowchart TD
     E --> F["lme_testing/pipelines.py<br/>run_maker_pipeline()"]
     F --> G["schemas/maker_output.schema.json<br/>Schema: TC-SR-MR-003-01-positive-01<br/>case_type enum (8 values), evidence+page"]
 
-    G --> H1["lme_testing/prompts.py<br/>MAKER_SYSTEM_PROMPT v1.0"]
+    G --> H1["lme_testing/prompts.py<br/>MAKER_SYSTEM_PROMPT v1.2"]
     G --> H2["lme_testing/pipelines.py<br/>run_checker_pipeline()"]
     H2 --> I["schemas/checker_output.schema.json<br/>Schema: scores (4-dim),<br/>case_type_accepted, coverage_relevance"]
 
@@ -194,10 +194,10 @@ reuse_score: 35.4%
 > New: automated metrics from run artifacts — `schema_failure_rate`, `checker_instability_rate`, `coverage_percent`, `step_binding_rate`.
 
 ```
-schema_failure_rate:    0.0%
-checker_instability:    0.0%
-coverage_percent:     100.0%
-step_binding_rate:    35.4%
+schema_failure_rate:    0.0%   (370 fixtures, 0 failures)
+checker_instability:    9.5%  (63 comparable cases — exceeds 5% threshold)
+coverage_percent:     72.78% (131/180 rules fully covered)
+step_binding_rate:    35.4%  (simulated step library, not real LME API)
 ```
 
 **Code:** [`lme_testing/signals/compute_governance_signals()`](../lme_testing/signals/__init__.py); [`scripts/check_model_governance.py`](../scripts/check_model_governance.py); [`lme_testing/cli.py`](../lme_testing/cli.py) `governance-signals` CLI command.
@@ -250,7 +250,7 @@ This is what the AI "understands" before generating tests.
 
 ## Step 2 — Maker Generates Test Cases (Output)
 
-The **Maker** model (Qwen) reads the rule and produces BDD scenarios:
+The **Maker** model (qwen3.5-plus) reads the rule and produces BDD scenarios:
 
 ```json
 {
@@ -285,7 +285,7 @@ The **Maker** model (Qwen) reads the rule and produces BDD scenarios:
 
 ## Step 3 — Checker Reviews Quality (Output)
 
-The **Checker** model (MiniMax) independently evaluates each scenario:
+The **Checker** model (MiniMax-M2.5) independently evaluates each scenario:
 
 ```json
 {
@@ -296,13 +296,14 @@ The **Checker** model (MiniMax) independently evaluates each scenario:
   "scores": {
     "evidence_consistency": 5,
     "requirement_coverage": 5,
-    "test_design_quality": 5
+    "test_design_quality": 5,
+    "non_hallucination": 5
   },
   "coverage_assessment": {"status": "covered"}
 }
 ```
 
-Scores are 1–5. All 3 dimensions scored **5/5** here. No blocking findings.
+Scores are 1–5. All 4 dimensions scored **5/5** here. No blocking findings.
 
 Checker also produces a **Coverage Report** per rule type:
 
@@ -384,7 +385,7 @@ The April 1st action items assigned to the AI agent:
 | # | Task                                         | Status                                                                                         |
 | - | -------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | 1 | Based on test cases, generate BDD            | ✅ Done — `bdd` pipeline produces `normalized_bdd.jsonl` + Gherkin export                       |
-| 2 | Review & improve test case generation prompt | ✅ Done — Maker prompt v1.0 with hard requirements on evidence, case\_type enum, no duplication |
+| 2 | Review & improve test case generation prompt | ✅ Done — Maker prompt v1.2 with hard requirements on evidence, case\_type enum, no duplication |
 | 3 | After BDD, generate Scripts                  | ✅ Done — Step definitions auto-generated from normalized BDD                                   |
 | 4 | Show BDD in web portal with human edit       | ✅ Done — BDD tab with editable Given/When/Then; Scripts tab with match quality badges         |
 
@@ -429,7 +430,7 @@ Hard requirements in the prompt:
 - **Do not invent additional steps** beyond what is in the input
 - Step definition code must use `LME::Client`, `LME::API`, `LME::PostTrade` patterns
 
-**Code:** [`lme_testing/prompts.py`](../lme_testing/prompts.py) `BDD_SYSTEM_PROMPT` v2.0 + [`lme_testing/pipelines.py`](../lme_testing/pipelines.py) `run_bdd_pipeline()`
+**Code:** [`lme_testing/prompts.py`](../lme_testing/prompts.py) `BDD_SYSTEM_PROMPT` + [`lme_testing/pipelines.py`](../lme_testing/pipelines.py) `run_bdd_pipeline()`
 
 ***
 
@@ -669,14 +670,14 @@ flowchart TD
 
 ## Full Run Stats (POC: 2 rules)
 
-| Stage             | Duration | Scenarios Generated     |
-| ----------------- | -------- | ----------------------- |
-| Maker (Qwen)      | \~2 min  | 5 scenarios             |
-| Checker (MiniMax) | \~1 min  | 5 reviews               |
-| BDD export        | <1 sec   | 2 `.feature` files      |
-| Step registry     | <1 sec   | 21 unique step patterns |
+| Stage                  | Duration | Scenarios Generated     |
+| ---------------------- | -------- | ----------------------- |
+| Maker (qwen3.5-plus)   | \~2 min  | 5 scenarios             |
+| Checker (MiniMax-M2.5) | \~1 min  | 5 reviews               |
+| BDD export             | <1 sec   | 2 `.feature` files      |
+| Step registry          | <1 sec   | 21 unique step patterns |
 
-**183 rules** (full corpus) estimated: Maker \~3 hrs, Checker \~2 hrs (with `batch_size=4` this drops significantly).
+**183 rules** (full corpus) measured: Maker **\~45 min**, Checker **\~30 min** (batch\_size=8, real API). 72.78% coverage (131/180 rules fully covered).
 
 ***
 
