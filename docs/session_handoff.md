@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-19 15:20:26 UTC`
+- `2026-04-19 15:23:03 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `docs: add baseline HTML report to evidence, remove reports/`
 - `docs: add evidence/ archive and update .gitignore`
 - `docs: update README/session_handoff to reflect Stage M completion`
 - `docs: update README/TODO/session_handoff to current state`
 - `docs: refresh session_handoff timestamp`
-- `fix(signals): parse timestamps to UTC for correct coverage "latest" ordering`
 
 ---
 

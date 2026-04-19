@@ -29,6 +29,7 @@ Preserved run artifacts that document key results. These are snapshots of eviden
 - `maker_summary.json` — maker run summary (322 scenarios generated)
 - `checker_summary.json` — checker run summary
 - `coverage_report.json` — 72.78% coverage (131/180 fully covered)
+- `baseline_full_20260418.html` — full HTML report (1.2MB, human-verified)
 
 **Key findings:** 72.78% coverage on 180 rules (131 fully covered). 12 rules randomly sampled and human-verified. Full results in `docs/releases/BASELINE-183-RULES.md`.
 
