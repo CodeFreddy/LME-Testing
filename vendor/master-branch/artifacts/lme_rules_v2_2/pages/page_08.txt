@@ -1,0 +1,10 @@
+- Basis the Closing Price (“B”) Code – where the pricing basis for the near leg of a Carry is the Closing Price for the relevant Prompt Date and the other leg(s) is priced relative to the first leg plus or minus an agreed premium or discount. This code should only be used in conjunction with the inter-office venue.
+- Yesterday’s Settlement Price (“YS”) Code – where the price is the previous Business Day’s relevant Settlement Price.
+- Valuation Price (“V”) Code – where the price is the previous Business Day’s relevant Closing Price. This code should only be used in conjunction with the inter-office venue.
+- Mean Cash (“MC”) Code – where the price is the mean of the bid/offer spread for the relevant Cash prompt based on the Official Price.
+- Mean 3 Month (“M3”) Code – where the price is the mean of the bid/offer spread for the relevant 3 Month prompt based on the Official Price.
+18. In all cases where a short price code has been used, and once the relevant absolute value has been made available, the Matching System will substitute the correct price for each code, and calculate absolute values for all leg(s) containing a price differential. For short price codes YS and V, the substitution of the absolute price will occur automatically upon submission.
+## Trade Submission Deadlines
+19. Regulation 3.5 of Part 3, of the Rules sets out the deadlines for matching Contracts.
+20. Where Client Contracts have been agreed after 19:50 London time with respect to LME Base Contracts (i.e. 10 minutes prior to the close of the Matching System), then the registration of these transactions must be completed by 08:30 London time on the following Business Day including those transactions arranged by RIBs.
+21. Regulation 3.5.1(d) of Part 3 of the Rules states that business Executed in the Ring must be submitted within 10 minutes of the close of the Ring trading period in which the Agreed Trade was Executed. Where Agreed Trades have been agreed, either in the Ring or in the inter-office market, using either the Official, Mean or Closing Price as the basis for the trade price, then the relevant Ring

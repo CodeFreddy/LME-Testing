@@ -1,0 +1,21 @@
+# Python virtual environments
+.venv/
+__pycache__/
+*.pyc
+
+# Local agent / editor state
+.codex/
+.vscode/
+.idea/
+
+# Runtime outputs
+runs/
+reports/
+.tmp_test/
+
+# Environment files
+.env
+
+# OS / misc
+Thumbs.db
+.DS_Store

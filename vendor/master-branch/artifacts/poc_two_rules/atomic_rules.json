@@ -1,0 +1,26 @@
+[
+  {
+    "rule_id": "MR-003-01",
+    "clause_id": "MR-003",
+    "clause_number": "3",
+    "section": "General Information",
+    "start_page": 2,
+    "end_page": 2,
+    "rule_type": "obligation",
+    "testability": "testable",
+    "split_basis": "sentence",
+    "raw_text": "Where an order or trade fails the price validation check, Members are required to contact the Exchange to explain the rationale as to the price of the rejected order or trade."
+  },
+  {
+    "rule_id": "MR-004-02",
+    "clause_id": "MR-004",
+    "clause_number": "4",
+    "section": "General Information",
+    "start_page": 3,
+    "end_page": 3,
+    "rule_type": "deadline",
+    "testability": "testable",
+    "split_basis": "sentence",
+    "raw_text": "Requests must be made to LME Post-Trade Operations no later than 15 minutes prior to the relevant deadline(email: posttradeoperations@lme.com"
+  }
+]
