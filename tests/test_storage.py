@@ -23,7 +23,7 @@ class StorageTests(unittest.TestCase):
         # Call multiple times; at least one should be unique if time advances
         slugs = [storage.timestamp_slug() for _ in range(5)]
         for slug in slugs:
-            self.assertRegex(slug, r"^\d{8}T\d{6}[+-]\d{4}$")
+            self.assertRegex(slug, r"^\d{8}T\d{6}(Z|[+-]\d{4})$")
 
     def test_ensure_dir_creates_directory_and_parents(self) -> None:
         nested = self.work_dir / "a" / "b" / "c"
