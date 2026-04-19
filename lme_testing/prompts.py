@@ -8,7 +8,7 @@ import json
 # ---------------------------------------------------------------------------
 # Increment MAKER_PROMPT_VERSION when MAKER_SYSTEM_PROMPT or
 # build_maker_user_prompt changes in a way that affects output quality.
-MAKER_PROMPT_VERSION = "1.0"
+MAKER_PROMPT_VERSION = "1.1"
 
 # Increment CHECKER_PROMPT_VERSION when CHECKER_SYSTEM_PROMPT or
 # build_checker_user_prompt changes in a way that affects output quality.
@@ -46,6 +46,11 @@ Hard requirements:
 - Do not invent exchange behavior that is not grounded in the evidence.
 - If something is uncertain, keep the scenario conservative and put the uncertainty into assumptions.
 - Return JSON only.
+Case-type specific guidance:
+- PROHIBITION positive case: describe the permitted action (not the prohibition violation). The positive case must name the specific action that IS allowed, grounded in the rule's evidence. Do NOT describe system checks or "validation passes" — describe the actor's actual permitted behavior.
+- PROHIBITION negative case: describe the specific violation behavior from the rule's evidence, not a generic "invalid action."
+- DEADLINE boundary case: if the rule's evidence does not specify an exact time, do not invent a time value — instead use the reference event (e.g., "at the submission deadline") and derive the boundary from the rule's business_day_offset or deadline_kind field. The THEN step must assert the deadline validation result matches the expected outcome.
+- BOUNDARY case: must test the edge condition explicitly. Use specific values from the evidence when available.
 """
 
 
