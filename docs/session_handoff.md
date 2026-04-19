@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-19 12:49:51 UTC`
+- `2026-04-19 12:53:26 UTC`
 
 ---
 
@@ -22,10 +22,10 @@ Before making substantial changes, read these files in order:
 1. `AGENTS.md`
 2. `README.md`
 3. `docs/index.md`
-4. `docs/roadmap.md`
-5. `docs/implementation_plan.md`
+4. `docs/roadmap.md` (v3.0 鈥?Stage M is current priority)
+5. `docs/implementation_plan.md` (v3.0)
 6. `docs/acceptance.md`
-7. `docs/architecture.md`
+7. `docs/architecture.md` (v3.0)
 
 If the task touches model or prompt behavior, also read:
 
@@ -48,28 +48,46 @@ Current branch:
 
 Recent commit subjects:
 
+- `scripts: update session_handoff template with current state`
 - `docs: reconcile S2-T02 findings into v3.0 docs`
 - `fix(checker): error surfacing + retry logic for API stability`
 - `docs: unfreeze Stage 2 with S2-T01-T04 task breakdown`
 - `feat(maker): prompt v1.1 鈥?rule-type-specific case guidance`
-- `feat(S1-T04): full 183-rule baseline run 鈥?73.3% coverage, spot check, release doc`
+
+---
+
+## What Was Just Done
+
+Recent completed work:
+
+- **S2-T02 checker stability measurement** (v1鈫抳4 iterations, 2026-04-19)
+  - v1/v2: Silent truncation 鈥?pipeline misreported completion with 14/64 of 322 cases processed
+  - v3 fix: Error surfacing (`batches_processed`/`failed_batch_num`) in `pipelines.py`; 60% instability (10 comparable cases)
+  - v4 fix: Retry logic (`providers.py`, max_retries=3, exponential backoff); Run A improved 63鈫?21 batches (+92%)
+  - v4 outcome: Run B process hung at batch 98; full stability_report not produced
+  - **Conclusion: API network unreliability blocks full 322-case measurement; instability directionally >> 10% threshold**
+  - Artifacts: `runs/checker-stability/20260418T231915+0800-v4/`
+  - S2-T01 (maker prompt quality) blocked pending API reliability
+
+- **Code fixes committed:**
+  - `pipelines.py`: error surfacing with remaining count on exception
+  - `providers.py`: retry loop for transient errors (SSL EOF, connection reset, HTTP 5xx)
+
+- **docs/ v3.0 restructure:** roadmap.md, architecture.md, implementation_plan.md, TODO.md v3.0 all updated. Stage M (master branch merge) is current top priority.
 
 ---
 
 ## Current Repo State
 
-All three roadmap phases are complete. The system is a document-driven AI test design prototype with a full governed pipeline:
+Stage M (master branch merge) is the current priority per v3.0 docs. All Stage 1 work (v2.0) is complete.
 
-`source docs -> extraction -> atomic_rules -> semantic_rules -> maker -> checker -> BDD -> step-registry -> review-session -> rewrite -> report`
+Key repo state:
 
-Key capabilities delivered:
-
-- Formal schema validation (atomic_rule, semantic_rule, maker, checker, human review artifacts)
-- JSON Schema validation wired into extraction scripts and CI (`--skip-validate` to disable)
-- Normalized BDD intermediate representation with schema validation
-- Step registry visibility (exact/parameterized/candidate/unmatched match classification)
-- Scripts tab edit workflow: step text edits saved to `human_scripts_edits_latest.json` and wired into bdd/rewrite pipelines
-- TEMPLATE_REGISTRY with 16 real Ruby step implementations (not pending stubs)
+- `pipelines.py` + `providers.py`: error surfacing and retry logic implemented
+- TODO.md v3.0: Stage M (SM-T01~SM-T05) defined as current top priority
+- S2-T02 findings reconciled into docs: 60-71% instability directionally concerning, API unreliability blocks full measurement
+- `docs/MERGE_STRATEGY.md` exists 鈥?master branch analyzed, 4 cherry-pick candidates identified
+- `vendor/master-branch/` directory exists (Stage M SM-T01 archive target)
 - Phase 1/2/3 acceptance gates all marked complete in `docs/acceptance.md`
 
 Governance checks available:
@@ -80,50 +98,17 @@ Governance checks available:
 
 ---
 
-## What Was Just Done
-
-Recent completed work:
-
-- Formal schema validation wired into extraction scripts and CI (Phase 1 infrastructure-complete)
-- Scripts tab edit workflow: textarea-based step editing, save to `human_scripts_edits_latest.json`, wired into bdd/rewrite CLI subcommands and review-session rewrite jobs
-- Step definition generation migrated from Ruby to Python: `lme_testing/step_library.py` has 50 Python step entries with `@step` decorator; `generate_step_definition()` uses Python `STEP_LIBRARY` for real implementations
-- BDD prompt updated to `version 3.0`: requests Python code in `code` field; example shows `@when/def` syntax
-- `lme_testing/step_registry.py` can parse Python step defs via direct `STEP_LIBRARY` import or regex; CLI auto-detects `.py` vs `.rb`
-- Ruby `samples/ruby_cucumber/` preserved as archive/reference
-
----
-
-## Current Baseline Commands
-
-```powershell
-# Governance checks
-python scripts/check_docs_governance.py
-python scripts/check_artifact_governance.py
-
-# Unit tests
-python -m unittest tests.test_pipelines -v
-python -m unittest tests.test_schemas -v
-
-# Full POC (requires config with real API keys)
-python main.py maker --input artifacts/lme_rules_v2_2/semantic_rules.json --output-dir runs/maker --config config/llm_profiles.example.json
-python main.py checker --rules artifacts/lme_rules_v2_2/semantic_rules.json --cases runs/maker/<run_id>/maker_cases.jsonl --output-dir runs/checker --config config/llm_profiles.example.json
-python main.py bdd --cases runs/maker/<run_id>/maker_cases.jsonl --output-dir runs/bdd --human-scripts-edits runs/review_sessions/<session_id>/iterations/<iter>/scripts/human_scripts_edits_latest.json
-
-# Enable auto-refresh on commit
-powershell -ExecutionPolicy Bypass -File scripts/setup_git_hooks.ps1
-```
-
----
-
 ## Recommended Next Step
 
-All Phase 1/2/3 acceptance gates are complete. Recent work completed E2E POC with real MiniMax API (maker 鈫?checker 鈫?bdd 鈫?step-registry 鈫?report, all succeeded).
+**Stage M is the current priority.** Execute SM-T01 through SM-T05:
 
-Remaining work:
+1. **SM-T01**: vendor/ archive 鈥?create `vendor/master-branch/`, extract master zip, write `vendor/master-branch/README.md`
+2. **SM-T02**: UTC timestamp cherry-pick 鈥?`storage.py:timestamp_slug()` 鈫?`datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")`
+3. **SM-T03**: KeyboardInterrupt handling cherry-pick 鈥?`workflow_session.py` + `pipelines.py` provider_out parameter
+4. **SM-T04**: Retry config cherry-pick (optional) 鈥?`config.py RoleDefaults` with `max_retries`/`retry_backoff_seconds`
+5. **SM-T05**: Merge docs archive 鈥?update vendor README with done status, confirm CI smoke test passes
 
-1. **Step-registry Python matching**: Verify `extract_steps_from_python_step_defs()` correctly imports `STEP_LIBRARY` and produces exact/parameterized matches; the BDD LLM now emits Python code (v3.0 prompt) which should improve match rates against the Python library
-2. **Python step library alignment**: Verify that BDD-generated step texts align with `step_library.py` entry keys so match rates improve from 0 exact/parameterized to high coverage
-3. **Governance signals CI job**: Wire `governance-signals` CLI into CI to compute signals on every run
+**S2-T02 status**: Error surfacing + retry logic committed. Full 322-case instability measurement blocked by MiniMax API reliability. S2-T01 (maker prompt quality) remains blocked.
 
 ---
 
@@ -135,13 +120,14 @@ Remaining work:
 - Do not reintroduce absolute local paths in Markdown files.
 - Do not mix future enterprise or platform assumptions into current baseline work unless explicitly requested.
 - Every commit should refresh `docs/session_handoff.md`; if hooks are unavailable, run the update script manually before committing.
+- Merge by understanding, not by overwriting 鈥?per docs/roadmap.md v3.0 principle #8.
 
 ---
 
 ## Reference Material
 
-If comparison context is needed, see:
-
-- `docs/references/Claude-roadmap-compare.md`
+- `docs/roadmap.md` 鈥?current Stage M priorities
+- `docs/MERGE_STRATEGY.md` 鈥?master branch analysis and cherry-pick plan
+- `docs/references/Claude-roadmap-compare.md` 鈥?historical comparison
 
 Treat reference files as non-normative unless their content is promoted into the official docs.
