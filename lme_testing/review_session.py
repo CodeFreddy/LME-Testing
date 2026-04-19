@@ -13,6 +13,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, quote, urlparse
 
+from .audit_trail import build_audit_trail
+from .case_compare import build_case_compare
 from .config import ProjectConfig
 from .human_review import _render_case_detail
 from .pipelines import _case_map_from_maker_records, run_checker_pipeline, run_rewrite_pipeline
@@ -28,6 +30,7 @@ class ReviewJobStatus:
     job_id: str
     status: str
     iteration: int
+    phase: str = "queued"
     saved_review_path: str | None = None
     latest_review_path: str | None = None
     error: str | None = None
@@ -184,6 +187,15 @@ class ReviewSessionManager:
         state["status"] = "finalized"
         final_dir = ensure_dir(self.session_dir / "final")
         final_manifest = final_dir / "final_session_manifest.json"
+
+        audit_trail_html = self.session_dir / "audit_trail.html"
+        try:
+            build_audit_trail(self.session_dir, audit_trail_html)
+            state["audit_trail_path"] = str(audit_trail_html)
+        except Exception:
+            logger.exception("build_audit_trail failed; continuing without audit trail.")
+            audit_trail_html = None
+
         write_json(final_manifest, state)
         self._save_manifest(state)
         final_report_path = Path(state.get("current_report_path") or "")
@@ -199,6 +211,20 @@ class ReviewSessionManager:
             "final_checker_path": str(final_checker_path) if final_checker_path else None,
             "final_checker_url": self.report_route_url("checker") if final_checker_path else None,
             "final_manifest_path": str(final_manifest),
+            "audit_trail_path": str(audit_trail_html) if audit_trail_html else None,
+        }
+
+    def rebuild_audit_trail(self) -> dict[str, Any]:
+        """Rebuild audit_trail.html against the current iteration set (ad-hoc, not only at finalize)."""
+        audit_path = self.session_dir / "audit_trail.html"
+        result = build_audit_trail(self.session_dir, audit_path)
+        state = self._load_state()
+        state["audit_trail_path"] = str(audit_path)
+        self._save_manifest(state)
+        return {
+            "audit_trail_path": str(audit_path),
+            "audit_trail_url": self._file_url(audit_path),
+            "divergent_count": result.get("divergent_count", 0),
         }
 
     def job_status(self, job_id: str) -> dict[str, Any]:
@@ -209,15 +235,22 @@ class ReviewSessionManager:
         return {
             "job_id": status.job_id,
             "status": status.status,
+            "phase": status.phase,
             "iteration": status.iteration,
             "saved_review_path": status.saved_review_path,
             "latest_review_path": status.latest_review_path,
             "error": status.error,
             "result": status.result,
         }
+    def _set_phase(self, job_id: str, phase: str) -> None:
+        with self._lock:
+            if job_id in self._jobs:
+                self._jobs[job_id].phase = phase
+
     def _run_job(self, job_id: str, iteration: int, human_reviews_path: Path) -> None:
         with self._lock:
             self._jobs[job_id].status = "running"
+            self._jobs[job_id].phase = "rewrite"
         logger.info("Review-session job started. session_id=%s job_id=%s iteration=%s human_reviews=%s", self.session_id, job_id, iteration, human_reviews_path)
         try:
             state = self._load_state()
@@ -236,6 +269,8 @@ class ReviewSessionManager:
                 limit=None,
                 batch_size=self.rewrite_batch_size,
             )
+            self._set_phase(job_id, "checker")
+            rewritten_case_ids: set[str] = set(rewrite_summary.get("rewritten_case_ids", []))
             checker_summary = run_checker_pipeline(
                 config=self.config,
                 semantic_rules_path=self.rules_path,
@@ -244,7 +279,30 @@ class ReviewSessionManager:
                 limit=None,
                 batch_size=self.checker_batch_size,
                 resume_from=None,
+                only_case_ids=rewritten_case_ids if rewritten_case_ids else None,
+                previous_reviews_path=Path(state["current_checker_reviews_path"]) if rewritten_case_ids else None,
             )
+            self._set_phase(job_id, "report")
+
+            next_iteration = iteration + 1
+
+            compare_path: Path | None = None
+            if rewritten_case_ids:
+                prev_cases_path = Path(state["current_maker_cases_path"])
+                compare_out = self._iteration_dir(iteration) / f"compare_iter_{iteration:03d}_vs_{next_iteration:03d}.html"
+                try:
+                    build_case_compare(
+                        prev_cases_path=prev_cases_path,
+                        next_cases_path=Path(rewrite_summary["merged_cases_path"]),
+                        rewritten_case_ids=rewritten_case_ids,
+                        iteration_prev=iteration,
+                        iteration_next=next_iteration,
+                        output_html_path=compare_out,
+                        display_iteration=iteration,
+                    )
+                    compare_path = compare_out
+                except Exception:
+                    logger.exception("build_case_compare failed; continuing without compare file.")
 
             state["history"].append(
                 {
@@ -253,13 +311,13 @@ class ReviewSessionManager:
                     "rewrite_summary_path": str(Path(rewrite_summary["output_dir"]) / "summary.json"),
                     "checker_summary_path": str(Path(checker_summary["output_dir"]) / "summary.json"),
                     "coverage_report_path": checker_summary["coverage_report_path"],
+                    "compare_path": str(compare_path) if compare_path else None,
                 }
             )
             state["iterations"][str(iteration)]["rewrite_summary_path"] = str(Path(rewrite_summary["output_dir"]) / "summary.json")
             state["iterations"][str(iteration)]["checker_summary_path"] = str(Path(checker_summary["output_dir"]) / "summary.json")
             state["iterations"][str(iteration)]["coverage_report_path"] = checker_summary["coverage_report_path"]
 
-            next_iteration = iteration + 1
             self._ensure_iteration_dirs(next_iteration)
             next_state = {
                 "iteration": next_iteration,
@@ -298,34 +356,43 @@ class ReviewSessionManager:
                     "checker_reviews": self._file_url(Path(checker_summary["results_path"])),
                     "coverage_report": self._file_url(Path(checker_summary["coverage_report_path"])),
                     "report_html": self._file_url(report_path),
+                    "compare_html": self._file_url(compare_path) if compare_path else None,
                 },
             }
+            logger.info(
+                "Review-session outputs. session_id=%s iteration=%s rewritten_cases=%s merged_cases=%s checker_reviews=%s coverage_report=%s report_html=%s compare_html=%s",
+                self.session_id,
+                iteration,
+                rewrite_summary.get("rewritten_cases_path"),
+                rewrite_summary.get("merged_cases_path"),
+                checker_summary.get("results_path"),
+                checker_summary.get("coverage_report_path"),
+                str(report_path),
+                str(compare_path) if compare_path else None,
+            )
             with self._lock:
                 self._jobs[job_id].status = "succeeded"
+                self._jobs[job_id].phase = "done"
                 self._jobs[job_id].result = result
         except Exception as exc:  # pragma: no cover
             logger.exception("Review-session job failed. session_id=%s job_id=%s iteration=%s", self.session_id, job_id, iteration)
             with self._lock:
                 self._jobs[job_id].status = "failed"
+                self._jobs[job_id].phase = "failed"
                 self._jobs[job_id].error = f"{exc}\n{traceback.format_exc()}"
 
     def _seed_reviews(self, state: dict[str, Any]) -> list[dict]:
         maker_records = load_jsonl(Path(state["current_maker_cases_path"]))
-        checker_reviews = load_jsonl(Path(state["current_checker_reviews_path"]))
-        reviews_by_case = {item["case_id"]: item for item in checker_reviews}
         seeded: list[dict] = []
         for maker_record in maker_records:
             semantic_rule_id = maker_record.get("semantic_rule_id", "")
             for scenario in maker_record.get("scenarios", []):
                 case_id = scenario.get("scenario_id", "")
-                checker = reviews_by_case.get(case_id, {})
-                checker_blocking = checker.get("checker_blocking") is True or checker.get("is_blocking") is True
                 seeded.append(
                     {
                         "case_id": case_id,
                         "semantic_rule_id": semantic_rule_id,
                         "review_decision": "pending",
-                        "block_recommendation_review": "pending_review" if checker_blocking else "not_applicable",
                         "human_comment": "",
                         "issue_types": [],
                     }
@@ -461,6 +528,9 @@ def _build_handler(manager: ReviewSessionManager):
                 if parsed.path == "/api/history":
                     self._send_json({"history": manager.session_payload().get("history", [])})
                     return
+                if parsed.path == "/api/audit_trail":
+                    self._send_json(manager.rebuild_audit_trail())
+                    return
                 if parsed.path == "/report.html":
                     self._send_file(str(manager.current_report_file("report")), repo_root)
                     return
@@ -582,14 +652,19 @@ def _render_review_session_shell() -> str:
     .issue-table th, .issue-table td { border: 1px solid #e2e8f0; padding: 6px 8px; font-size: 12px; }
     .issue-table th { background: #f1f5f9; }
     .muted { color: #64748b; font-size: 12px; }
-    .warning { color: #92400e; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 8px 10px; margin-top: 8px; }
     .status-running { color: #92400e; }
     .status-succeeded { color: #166534; }
     .status-failed { color: #991b1b; }
     .status-finalized { color: #1d4ed8; }
     button { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; cursor: pointer; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
     ul { margin: 8px 0 0 18px; }
-    pre { white-space: pre-wrap; word-break: break-word; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; font-size: 12px; }
+    .progress-wrap { margin-top: 8px; background: #e2e8f0; border-radius: 8px; height: 18px; overflow: hidden; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, #3b82f6, #6366f1); width: 0%; transition: width 0.4s ease; }
+    .progress-label { font-size: 12px; color: #334155; margin-top: 4px; }
+    .history-row { padding: 6px 0; border-bottom: 1px dashed #e2e8f0; }
+    .history-row:last-child { border-bottom: none; }
+    .history-row a { margin-left: 10px; }
   </style>
 </head>
 <body>
@@ -598,11 +673,9 @@ def _render_review_session_shell() -> str:
   <div class="card">
     <h2>字段说明</h2>
     <ul>
-      <li><strong>Decision</strong>: 人工最终动作。只要不是 <code>pending</code>，系统就按这个动作执行。<code>approve</code> 表示放行，<code>rewrite</code> 表示回流给 maker 重写，<code>reject</code> 表示人工拒绝当前 case。</li>
-      <li><strong>Block Recommendation Review</strong>: 人工对 checker blocking 建议的裁定，只用于审计和统计，不决定最终执行动作。</li>
-      <li><strong>Issue Types</strong>: 人工问题标签，可多选。用于后续统计与 maker 定向重写。</li>
+      <li><strong>Decision</strong>: 人工最终动作。<code>approve</code> 放行，<code>rewrite</code> 回流给 maker 重写。人工与 checker 判断的分歧会自动记录到 Audit Trail，不需要再手动打二次标签。</li>
+      <li><strong>Issue Types</strong>: 人工问题标签，可多选，供 maker 定向重写与统计使用。</li>
     </ul>
-    <div class="warning">当前版本中，只有 <code>Decision = rewrite</code> 才会触发 maker 回流。每次提交成功后，会话会自动切换到最新一轮结果继续审核。</div>
   </div>
   <div class="card">
     <div class="toolbar">
@@ -611,9 +684,10 @@ def _render_review_session_shell() -> str:
       <label>Checker Blocking <select id="blockingFilter"><option value="">全部</option><option value="true">true</option><option value="false">false</option></select></label>
       <button id="saveBtn">保存草稿</button>
       <button id="submitBtn">提交并执行回流</button>
+      <button id="auditBtn">查看 Audit Trail</button>
       <button id="finalizeBtn">Finalize</button>
     </div>
-    <div class="muted">页面会自动把 human reviews 落到 session 目录，并在提交后串行执行 rewrite、checker、report。</div>
+    <div class="muted">页面会把 human reviews 落到 session 目录，并在提交后串行执行 rewrite、checker、report。</div>
   </div>
   <div class="card" id="resultCard" style="display:none"></div>
   <div class="card"><h2>History</h2><div id="historyCard" class="muted">暂无历史</div></div>
@@ -641,6 +715,8 @@ def _render_review_session_shell() -> str:
 let sessionPayload = null;
 let reviewMap = new Map();
 let pollTimer = null;
+const PHASE_PROGRESS = { queued: 5, rewrite: 20, checker: 55, report: 90, done: 100, failed: 100 };
+const PHASE_LABEL = { queued: '已排队', rewrite: '正在重写 cases', checker: '正在 checker 复检', report: '正在生成报告', done: '完成', failed: '失败' };
 function escapeHtml(value) { return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'); }
 function issueOptionMap() { return new Map((sessionPayload.issue_type_options || []).map(item => [item.code, item])); }
 function issueSummaryText(review) { const selected = review.issue_types || []; if (!selected.length) return 'None selected'; const map = issueOptionMap(); return selected.map(code => map.get(code)?.label || code).join(', '); }
@@ -653,8 +729,8 @@ function issueTableHtml(review) { return (sessionPayload.issue_type_options || [
     </tr>
   `).join(''); }
 function reviewControls(review) {
-  const caseId = escapeHtml(review.case_id); const blockReview = review.block_recommendation_review;
-  return `<div><label>Decision<br/><select data-field="review_decision" data-case-id="${caseId}"><option value="pending" ${review.review_decision === 'pending' ? 'selected' : ''}>pending</option><option value="approve" ${review.review_decision === 'approve' ? 'selected' : ''}>approve</option><option value="rewrite" ${review.review_decision === 'rewrite' ? 'selected' : ''}>rewrite</option><option value="reject" ${review.review_decision === 'reject' ? 'selected' : ''}>reject</option></select></label></div><div><label>Block Recommendation Review<br/><select data-field="block_recommendation_review" data-case-id="${caseId}"><option value="not_applicable" ${blockReview === 'not_applicable' ? 'selected' : ''}>not_applicable</option><option value="pending_review" ${blockReview === 'pending_review' ? 'selected' : ''}>pending_review</option><option value="confirmed" ${blockReview === 'confirmed' ? 'selected' : ''}>confirmed</option><option value="dismissed" ${blockReview === 'dismissed' ? 'selected' : ''}>dismissed</option></select></label></div><div><label>Issue Types</label><details class="issue-picker"><summary class="issue-summary" data-issue-summary="${caseId}">${escapeHtml(issueSummaryText(review))}</summary><table class="issue-table"><thead><tr><th>Select</th><th>Label</th><th>Code</th><th>Description</th></tr></thead><tbody>${issueTableHtml(review)}</tbody></table></details></div><div><label>Comment<br/><textarea data-field="human_comment" data-case-id="${caseId}" rows="4"></textarea></label></div>`;
+  const caseId = escapeHtml(review.case_id);
+  return `<div><label>Decision<br/><select data-field="review_decision" data-case-id="${caseId}"><option value="pending" ${review.review_decision === 'pending' ? 'selected' : ''}>pending</option><option value="approve" ${review.review_decision === 'approve' ? 'selected' : ''}>approve</option><option value="rewrite" ${review.review_decision === 'rewrite' ? 'selected' : ''}>rewrite</option></select></label></div><div><label>Issue Types</label><details class="issue-picker"><summary class="issue-summary" data-issue-summary="${caseId}">${escapeHtml(issueSummaryText(review))}</summary><table class="issue-table"><thead><tr><th>Select</th><th>Label</th><th>Code</th><th>Description</th></tr></thead><tbody>${issueTableHtml(review)}</tbody></table></details></div><div><label>Comment<br/><textarea data-field="human_comment" data-case-id="${caseId}" rows="4"></textarea></label></div>`;
 }
 function renderRows() {
   document.getElementById('reviewRows').innerHTML = sessionPayload.table_rows.map(row => { const review = reviewMap.get(row.case_id); return `<tr data-overall="${escapeHtml(row.overall)}" data-coverage="${escapeHtml(row.coverage)}" data-blocking="${String(row.checker_blocking)}"><td>${escapeHtml(row.semantic_rule_id)}</td><td>${escapeHtml(row.case_id)}</td><td>${escapeHtml(row.feature)}</td><td>${escapeHtml(row.case_type)}</td><td>${escapeHtml(row.overall)}</td><td>${escapeHtml(row.coverage)}</td><td>${escapeHtml(String(row.checker_blocking))}</td><td>${escapeHtml(row.blocking_category)}</td><td>${escapeHtml(row.blocking_reason)}</td><td><details><summary>展开</summary>${row.detail_html}</details></td><td>${reviewControls(review)}</td></tr>`; }).join('');
@@ -678,14 +754,69 @@ function applyFilters() { const overall = document.getElementById('overallFilter
 async function postJson(url, payload) { const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload || {}) }); const data = await response.json(); if (!response.ok) throw new Error(data.error || JSON.stringify(data)); return data; }
 function currentPayload() { return { metadata: sessionPayload.metadata, reviews: Array.from(reviewMap.values()) }; }
 function renderResult(title, bodyHtml, cssClass='') { const card = document.getElementById('resultCard'); card.style.display = ''; card.innerHTML = `<h2 class="${cssClass}">${escapeHtml(title)}</h2>${bodyHtml}`; }
-function renderHistory() { const items = sessionPayload.history || []; document.getElementById('historyCard').innerHTML = items.length ? items.map(item => `<div><strong>Iteration ${item.iteration}</strong>: checker=${escapeHtml(item.checker_summary_path || '')}</div>`).join('') : '暂无历史'; }
-function resultLinksHtml(links) { return Object.entries(links || {}).map(([key, href]) => `<div><a href="${href}" target="_blank">${escapeHtml(key)}</a></div>`).join(''); }
-async function saveDraft() { const result = await postJson('/api/reviews/save', currentPayload()); renderResult('保存成功', `<div><strong>Iteration</strong>: ${result.iteration}</div><div><strong>Snapshot</strong>: ${escapeHtml(result.saved_review_path)}</div><div><strong>Latest</strong>: ${escapeHtml(result.latest_review_path)}</div>`); }
-async function refreshSession() { const response = await fetch('/api/session'); sessionPayload = await response.json(); reviewMap = new Map(sessionPayload.reviews.map(item => [item.case_id, item])); document.getElementById('summaryCard').innerHTML = `<div class="grid"><div class="metric"><strong>Session ID</strong><br/>${escapeHtml(sessionPayload.session_id)}</div><div class="metric"><strong>Status</strong><br/>${escapeHtml(sessionPayload.session_status)}</div><div class="metric"><strong>Current Iteration</strong><br/>${escapeHtml(String(sessionPayload.current_iteration))}</div></div><div class="muted">Latest review path: ${escapeHtml(sessionPayload.metadata.latest_review_path || '')}</div><div class="muted">Current report path: ${escapeHtml(sessionPayload.metadata.current_report_path || '')}</div>`; renderRows(); renderHistory(); applyFilters(); }
-async function pollJob(jobId) { const response = await fetch(`/api/status/${jobId}`); const payload = await response.json(); if (payload.status === 'queued' || payload.status === 'running') { renderResult('后台执行中', `<div class="status-running">状态: ${escapeHtml(payload.status)}</div>`, 'status-running'); pollTimer = setTimeout(() => pollJob(jobId), 2000); return; } if (payload.status === 'failed') { renderResult('执行失败', `<pre>${escapeHtml(payload.error || '')}</pre>`, 'status-failed'); return; } const result = payload.result || {}; await refreshSession(); renderResult('执行成功', `<div class="status-succeeded">状态: ${escapeHtml(payload.status)}</div><div><strong>Next Iteration</strong>: ${escapeHtml(String(result.next_iteration || ''))}</div><pre>${escapeHtml(JSON.stringify({ rewrite_summary: result.rewrite_summary, checker_summary: result.checker_summary, report_summary: result.report_summary }, null, 2))}</pre><div>${resultLinksHtml(result.links)}</div>`, 'status-succeeded'); }
-async function submitAndRun() { if (pollTimer) clearTimeout(pollTimer); const result = await postJson('/api/submit', currentPayload()); renderResult('已提交', `<div>Job ID: ${escapeHtml(result.job_id)}</div><div>Latest: ${escapeHtml(result.latest_review_path)}</div>`); pollJob(result.job_id); }
-async function finalizeSession() { const result = await postJson('/api/finalize', {}); if (result.final_report_url) { window.location.href = result.final_report_url; return; } await refreshSession(); renderResult('Session Finalized', `<div class="status-finalized">??: ${escapeHtml(result.status)}</div><div><strong>Final Report</strong>: ${escapeHtml(result.final_report_path || "")}</div><div>${resultLinksHtml({ report_html: result.final_report_url, maker_html: result.final_maker_url, checker_html: result.final_checker_url })}</div>`, 'status-finalized'); }
-async function bootstrap() { await refreshSession(); document.getElementById('overallFilter').addEventListener('change', applyFilters); document.getElementById('coverageFilter').addEventListener('change', applyFilters); document.getElementById('blockingFilter').addEventListener('change', applyFilters); document.getElementById('saveBtn').addEventListener('click', saveDraft); document.getElementById('submitBtn').addEventListener('click', submitAndRun); document.getElementById('finalizeBtn').addEventListener('click', finalizeSession); }
+function hideResult() { const card = document.getElementById('resultCard'); card.style.display = 'none'; card.innerHTML = ''; }
+function renderProgress(percent, label) {
+  const safe = Math.max(0, Math.min(100, percent));
+  const body = `<div class="progress-wrap"><div class="progress-bar" style="width:${safe}%"></div></div><div class="progress-label">${escapeHtml(label)} · ${safe}%</div>`;
+  renderResult('后台执行中', body, 'status-running');
+}
+function compareLinkHtml(item) {
+  if (!item.compare_path) return '';
+  const url = `/files?path=${encodeURIComponent(item.compare_path)}`;
+  return `<a href="${url}" target="_blank">Compare</a>`;
+}
+function renderHistory() {
+  const items = sessionPayload.history || [];
+  const container = document.getElementById('historyCard');
+  if (!items.length) { container.textContent = '暂无历史'; return; }
+  container.innerHTML = items.map(item => `<div class="history-row"><strong>Iteration ${escapeHtml(String(item.iteration))}</strong>${compareLinkHtml(item)}</div>`).join('');
+}
+async function saveDraft() { const result = await postJson('/api/reviews/save', currentPayload()); renderResult('保存成功', `<div>Iteration ${escapeHtml(String(result.iteration))} 草稿已保存</div>`); }
+async function refreshSession() { const response = await fetch('/api/session'); sessionPayload = await response.json(); reviewMap = new Map(sessionPayload.reviews.map(item => [item.case_id, item])); document.getElementById('summaryCard').innerHTML = `<div class="grid"><div class="metric"><strong>Session ID</strong><br/>${escapeHtml(sessionPayload.session_id)}</div><div class="metric"><strong>Status</strong><br/>${escapeHtml(sessionPayload.session_status)}</div><div class="metric"><strong>Current Iteration</strong><br/>${escapeHtml(String(sessionPayload.current_iteration))}</div></div>`; renderRows(); renderHistory(); applyFilters(); }
+async function pollJob(jobId) {
+  const response = await fetch(`/api/status/${jobId}`);
+  const payload = await response.json();
+  const phase = payload.phase || payload.status || 'queued';
+  if (payload.status === 'queued' || payload.status === 'running') {
+    renderProgress(PHASE_PROGRESS[phase] ?? 10, PHASE_LABEL[phase] || phase);
+    pollTimer = setTimeout(() => pollJob(jobId), 2000);
+    return;
+  }
+  if (payload.status === 'failed') {
+    renderResult('执行失败', `<div class="status-failed">已记录到后台日志，请查看服务端日志获取详情。</div>`, 'status-failed');
+    return;
+  }
+  renderProgress(100, PHASE_LABEL.done);
+  await refreshSession();
+  setTimeout(hideResult, 800);
+}
+async function submitAndRun() {
+  if (pollTimer) clearTimeout(pollTimer);
+  renderProgress(0, '提交中');
+  const result = await postJson('/api/submit', currentPayload());
+  pollJob(result.job_id);
+}
+async function openAuditTrail() {
+  const resp = await fetch('/api/audit_trail');
+  const data = await resp.json();
+  if (data.audit_trail_url) window.open(data.audit_trail_url, '_blank');
+}
+async function finalizeSession() {
+  const result = await postJson('/api/finalize', {});
+  if (result.final_report_url) { window.location.href = result.final_report_url; return; }
+  await refreshSession();
+  renderResult('Session Finalized', `<div class="status-finalized">已进入 finalized 状态。</div>`, 'status-finalized');
+}
+async function bootstrap() {
+  await refreshSession();
+  document.getElementById('overallFilter').addEventListener('change', applyFilters);
+  document.getElementById('coverageFilter').addEventListener('change', applyFilters);
+  document.getElementById('blockingFilter').addEventListener('change', applyFilters);
+  document.getElementById('saveBtn').addEventListener('click', saveDraft);
+  document.getElementById('submitBtn').addEventListener('click', submitAndRun);
+  document.getElementById('auditBtn').addEventListener('click', openAuditTrail);
+  document.getElementById('finalizeBtn').addEventListener('click', finalizeSession);
+}
 bootstrap();
 </script>
 </body>

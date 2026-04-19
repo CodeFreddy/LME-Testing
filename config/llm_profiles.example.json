@@ -1,11 +1,11 @@
 {
   "output_root": "runs",
   "providers": {
-    "maker_qwen": {
+    "maker_glm": {
       "type": "openai_compatible",
       "api_format": "openai_chat_completions",
       "base_url": "https://coding.dashscope.aliyuncs.com/v1",
-      "model": "qwen3.5-plus",
+      "model": "glm-5",
       "api_key_env": "MAKER_API_KEY",
       "timeout_seconds": 300,
       "max_retries": 3,
@@ -27,7 +27,7 @@
     }
   },
   "roles": {
-    "maker": "maker_qwen",
+    "maker": "maker_glm",
     "checker": "checker_minimax"
   },
   "maker_defaults": {

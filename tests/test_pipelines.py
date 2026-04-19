@@ -7,8 +7,10 @@ from pathlib import Path
 from unittest.mock import patch
 
 from lme_testing.config import ProjectConfig, ProviderConfig, RoleDefaults
+from lme_testing.case_compare import build_case_compare
 from lme_testing.human_review import generate_human_review_page
 from lme_testing.pipelines import run_checker_pipeline, run_maker_pipeline, run_rewrite_pipeline
+from lme_testing.reporting import generate_html_report
 
 
 WORK_TMP = Path('.tmp_test')
@@ -326,6 +328,244 @@ class PipelineTests(unittest.TestCase):
         untouched_record = next(item for item in merged_records if item["semantic_rule_id"] == "SR-MR-002-01")
         self.assertEqual(rewritten_record["feature"], "Feature A rewritten")
         self.assertEqual(untouched_record["feature"], "Feature B")
+
+    def test_generate_html_report_uses_case_files_for_metrics_with_rewrite_summary(self) -> None:
+        maker_cases_path = WORK_TMP / "maker_cases.jsonl"
+        checker_reviews_path = WORK_TMP / "checker_reviews.jsonl"
+        maker_summary_path = WORK_TMP / "rewrite_summary.json"
+        checker_summary_path = WORK_TMP / "checker_summary.json"
+        coverage_report_path = WORK_TMP / "coverage_report.json"
+        output_html = WORK_TMP / "report.html"
+
+        maker_records = [
+            {
+                "semantic_rule_id": "SR-1",
+                "feature": "Feature 1",
+                "requirement_ids": ["AR-1"],
+                "scenarios": [
+                    {"scenario_id": "TC-1", "case_type": "positive", "title": "t1", "intent": "i1", "priority": "high", "given": [], "when": [], "then": [], "assumptions": [], "evidence": []},
+                    {"scenario_id": "TC-2", "case_type": "negative", "title": "t2", "intent": "i2", "priority": "high", "given": [], "when": [], "then": [], "assumptions": [], "evidence": []},
+                ],
+            },
+            {
+                "semantic_rule_id": "SR-2",
+                "feature": "Feature 2",
+                "requirement_ids": ["AR-2"],
+                "scenarios": [
+                    {"scenario_id": "TC-3", "case_type": "positive", "title": "t3", "intent": "i3", "priority": "high", "given": [], "when": [], "then": [], "assumptions": [], "evidence": []},
+                    {"scenario_id": "TC-4", "case_type": "boundary", "title": "t4", "intent": "i4", "priority": "high", "given": [], "when": [], "then": [], "assumptions": [], "evidence": []},
+                    {"scenario_id": "TC-5", "case_type": "negative", "title": "t5", "intent": "i5", "priority": "high", "given": [], "when": [], "then": [], "assumptions": [], "evidence": []},
+                ],
+            },
+        ]
+        checker_reviews = [
+            {"case_id": f"TC-{i}", "semantic_rule_id": "SR-1" if i <= 2 else "SR-2", "overall_status": "pass", "coverage_assessment": {"status": "covered", "reason": "ok", "missing_aspects": []}, "scores": {}, "findings": []}
+            for i in range(1, 6)
+        ]
+        rewrite_summary = {
+            "run_id": "rw1",
+            "role": "maker_rewrite",
+            "target_rule_count": 1,
+            "rewritten_rule_count": 1,
+            "rewritten_scenario_count": 2,
+        }
+        checker_summary = {"run_id": "ck1", "review_count": 99}
+        coverage_report = {
+            "fully_covered": 2,
+            "partially_covered": 0,
+            "uncovered": 0,
+            "checker_block_count": 0,
+            "coverage_percent": 100.0,
+            "status_by_rule": {},
+        }
+
+        maker_cases_path.write_text("\n".join(json.dumps(item, ensure_ascii=False) for item in maker_records) + "\n", encoding="utf-8")
+        checker_reviews_path.write_text("\n".join(json.dumps(item, ensure_ascii=False) for item in checker_reviews) + "\n", encoding="utf-8")
+        maker_summary_path.write_text(json.dumps(rewrite_summary, ensure_ascii=False), encoding="utf-8")
+        checker_summary_path.write_text(json.dumps(checker_summary, ensure_ascii=False), encoding="utf-8")
+        coverage_report_path.write_text(json.dumps(coverage_report, ensure_ascii=False), encoding="utf-8")
+
+        generate_html_report(
+            maker_cases_path=maker_cases_path,
+            checker_reviews_path=checker_reviews_path,
+            maker_summary_path=maker_summary_path,
+            checker_summary_path=checker_summary_path,
+            coverage_report_path=coverage_report_path,
+            output_html_path=output_html,
+        )
+
+        html_text = output_html.read_text(encoding="utf-8")
+        self.assertIn("Maker Rule 数</strong><br/>2", html_text)
+        self.assertIn("Maker Scenario 数</strong><br/>5", html_text)
+        self.assertIn("Checker Review 数</strong><br/>5", html_text)
+        self.assertIn("Fully Covered</strong><br/>2", html_text)
+        self.assertIn("覆盖率</strong><br/>100.0%", html_text)
+
+    def test_generate_html_report_keeps_standard_maker_metrics(self) -> None:
+        maker_cases_path = WORK_TMP / "maker_cases_standard.jsonl"
+        checker_reviews_path = WORK_TMP / "checker_reviews_standard.jsonl"
+        maker_summary_path = WORK_TMP / "maker_summary.json"
+        checker_summary_path = WORK_TMP / "checker_summary_standard.json"
+        coverage_report_path = WORK_TMP / "coverage_report_standard.json"
+        output_html = WORK_TMP / "report_standard.html"
+
+        maker_records = [
+            {
+                "semantic_rule_id": "SR-1",
+                "feature": "Feature 1",
+                "requirement_ids": ["AR-1"],
+                "scenarios": [
+                    {"scenario_id": "TC-1", "case_type": "positive", "title": "t1", "intent": "i1", "priority": "high", "given": [], "when": [], "then": [], "assumptions": [], "evidence": []},
+                ],
+            }
+        ]
+        checker_reviews = [
+            {"case_id": "TC-1", "semantic_rule_id": "SR-1", "overall_status": "pass", "coverage_assessment": {"status": "covered", "reason": "ok", "missing_aspects": []}, "scores": {}, "findings": []}
+        ]
+        maker_summary = {"run_id": "mk1", "processed_rule_count": 1, "scenario_count": 1}
+        checker_summary = {"run_id": "ck2", "review_count": 1}
+        coverage_report = {
+            "fully_covered": 1,
+            "partially_covered": 0,
+            "uncovered": 0,
+            "checker_block_count": 0,
+            "coverage_percent": 100.0,
+            "status_by_rule": {},
+        }
+
+        maker_cases_path.write_text("\n".join(json.dumps(item, ensure_ascii=False) for item in maker_records) + "\n", encoding="utf-8")
+        checker_reviews_path.write_text("\n".join(json.dumps(item, ensure_ascii=False) for item in checker_reviews) + "\n", encoding="utf-8")
+        maker_summary_path.write_text(json.dumps(maker_summary, ensure_ascii=False), encoding="utf-8")
+        checker_summary_path.write_text(json.dumps(checker_summary, ensure_ascii=False), encoding="utf-8")
+        coverage_report_path.write_text(json.dumps(coverage_report, ensure_ascii=False), encoding="utf-8")
+
+        generate_html_report(
+            maker_cases_path=maker_cases_path,
+            checker_reviews_path=checker_reviews_path,
+            maker_summary_path=maker_summary_path,
+            checker_summary_path=checker_summary_path,
+            coverage_report_path=coverage_report_path,
+            output_html_path=output_html,
+        )
+
+        html_text = output_html.read_text(encoding="utf-8")
+        self.assertIn("Maker Rule 数</strong><br/>1", html_text)
+        self.assertIn("Maker Scenario 数</strong><br/>1", html_text)
+        self.assertIn("Checker Review 数</strong><br/>1", html_text)
+
+    def test_generate_html_report_uses_coverage_report_for_partial_uncovered_and_blocking(self) -> None:
+        maker_cases_path = WORK_TMP / "maker_cases_coverage.jsonl"
+        checker_reviews_path = WORK_TMP / "checker_reviews_coverage.jsonl"
+        maker_summary_path = WORK_TMP / "maker_summary_coverage.json"
+        checker_summary_path = WORK_TMP / "checker_summary_coverage.json"
+        coverage_report_path = WORK_TMP / "coverage_report_metrics.json"
+        output_html = WORK_TMP / "report_coverage.html"
+
+        maker_cases_path.write_text(
+            json.dumps(
+                {
+                    "semantic_rule_id": "SR-1",
+                    "feature": "Feature 1",
+                    "requirement_ids": ["AR-1"],
+                    "scenarios": [
+                        {"scenario_id": "TC-1", "case_type": "positive", "title": "t1", "intent": "i1", "priority": "high", "given": [], "when": [], "then": [], "assumptions": [], "evidence": []},
+                    ],
+                },
+                ensure_ascii=False,
+            ) + "\n",
+            encoding="utf-8",
+        )
+        checker_reviews_path.write_text(
+            json.dumps(
+                {
+                    "case_id": "TC-1",
+                    "semantic_rule_id": "SR-1",
+                    "overall_status": "fail",
+                    "coverage_assessment": {"status": "partial", "reason": "needs work", "missing_aspects": []},
+                    "checker_blocking": False,
+                    "scores": {},
+                    "findings": [],
+                },
+                ensure_ascii=False,
+            ) + "\n",
+            encoding="utf-8",
+        )
+        maker_summary_path.write_text(json.dumps({"run_id": "mk3", "processed_rule_count": 88, "scenario_count": 77}, ensure_ascii=False), encoding="utf-8")
+        checker_summary_path.write_text(json.dumps({"run_id": "ck3", "review_count": 66}, ensure_ascii=False), encoding="utf-8")
+        coverage_report_path.write_text(
+            json.dumps(
+                {
+                    "fully_covered": 1,
+                    "partially_covered": 3,
+                    "uncovered": 4,
+                    "checker_block_count": 2,
+                    "coverage_percent": 12.5,
+                    "status_by_rule": {},
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+
+        generate_html_report(
+            maker_cases_path=maker_cases_path,
+            checker_reviews_path=checker_reviews_path,
+            maker_summary_path=maker_summary_path,
+            checker_summary_path=checker_summary_path,
+            coverage_report_path=coverage_report_path,
+            output_html_path=output_html,
+        )
+
+        html_text = output_html.read_text(encoding="utf-8")
+        self.assertIn("Partially Covered</strong><br/>3", html_text)
+        self.assertIn("Uncovered</strong><br/>4", html_text)
+        self.assertIn("Checker Blocking</strong><br/>2", html_text)
+
+    def test_build_case_compare_can_align_iteration_labels_with_history(self) -> None:
+        prev_cases_path = WORK_TMP / "compare_prev.jsonl"
+        next_cases_path = WORK_TMP / "compare_next.jsonl"
+        output_html = WORK_TMP / "compare.html"
+
+        prev_cases_path.write_text(
+            json.dumps(
+                {
+                    "semantic_rule_id": "SR-1",
+                    "scenarios": [
+                        {"scenario_id": "TC-1", "given": ["before"], "when": [], "then": [], "assumptions": [], "evidence": [], "case_type": "positive"},
+                    ],
+                },
+                ensure_ascii=False,
+            ) + "\n",
+            encoding="utf-8",
+        )
+        next_cases_path.write_text(
+            json.dumps(
+                {
+                    "semantic_rule_id": "SR-1",
+                    "scenarios": [
+                        {"scenario_id": "TC-1", "given": ["after"], "when": [], "then": [], "assumptions": [], "evidence": [], "case_type": "positive"},
+                    ],
+                },
+                ensure_ascii=False,
+            ) + "\n",
+            encoding="utf-8",
+        )
+
+        result = build_case_compare(
+            prev_cases_path=prev_cases_path,
+            next_cases_path=next_cases_path,
+            rewritten_case_ids={"TC-1"},
+            iteration_prev=0,
+            iteration_next=1,
+            output_html_path=output_html,
+            display_iteration=0,
+        )
+
+        html_text = output_html.read_text(encoding="utf-8")
+        self.assertEqual(result["display_iteration"], 0)
+        self.assertIn("Case Compare: Iteration 000", html_text)
+        self.assertIn("Iteration 0 (before)", html_text)
+        self.assertIn("Iteration 0 (after)", html_text)
 
 
 if __name__ == "__main__":

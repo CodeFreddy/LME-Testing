@@ -31,8 +31,7 @@ BLOCKING_CATEGORIES = {
     "schema_or_traceability_break",
     "unspecified_block",
 }
-BLOCK_RECOMMENDATION_REVIEWS = {"not_applicable", "pending_review", "confirmed", "dismissed"}
-HUMAN_REVIEW_DECISIONS = {"pending", "approve", "rewrite", "reject"}
+HUMAN_REVIEW_DECISIONS = {"pending", "approve", "rewrite"}
 ISSUE_TYPE_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "human_review_options.json"
 
 
@@ -63,7 +62,8 @@ def allowed_issue_type_codes() -> set[str]:
     return {item["code"] for item in load_issue_type_options()}
 
 
-# 兼容旧版 human review JSON，便于历史测试数据继续导入。
+# 兼容旧版 human review JSON。老字段 block_recommendation_review/human_block_decision 整体丢弃；
+# 老 decision 值 approved/needs_rewrite/rejected 归一到新三态，且 reject → rewrite。
 def normalize_human_review_item(item: dict) -> dict:
     normalized = dict(item)
 
@@ -71,28 +71,14 @@ def normalize_human_review_item(item: dict) -> dict:
     legacy_review_map = {
         "approved": "approve",
         "needs_rewrite": "rewrite",
-        "rejected": "reject",
+        "rejected": "rewrite",
+        "reject": "rewrite",
     }
     if review_decision in legacy_review_map:
         normalized["review_decision"] = legacy_review_map[review_decision]
 
-    if "block_recommendation_review" not in normalized:
-        legacy_block = normalized.get("human_block_decision")
-        legacy_block_map = {
-            "not_requested": "not_applicable",
-            "pending": "pending_review",
-            "confirmed": "confirmed",
-            "downgraded": "dismissed",
-            "overridden": "dismissed",
-        }
-        if legacy_block in legacy_block_map:
-            normalized["block_recommendation_review"] = legacy_block_map[legacy_block]
-        elif normalized.get("checker_blocking") is True:
-            normalized["block_recommendation_review"] = "pending_review"
-        else:
-            normalized["block_recommendation_review"] = "not_applicable"
-
     normalized.pop("human_block_decision", None)
+    normalized.pop("block_recommendation_review", None)
     return normalized
 
 
@@ -308,8 +294,6 @@ def validate_human_review_payload(payload: dict, expected_case_map: dict[str, st
             raise SchemaError("Each human review item must include semantic_rule_id.")
         if item.get("review_decision") not in HUMAN_REVIEW_DECISIONS:
             raise SchemaError("Invalid human review_decision value.")
-        if item.get("block_recommendation_review") not in BLOCK_RECOMMENDATION_REVIEWS:
-            raise SchemaError("Invalid block_recommendation_review value.")
         if not isinstance(item.get("human_comment", ""), str):
             raise SchemaError("human_comment must be string.")
         issue_types = item.get("issue_types", [])
