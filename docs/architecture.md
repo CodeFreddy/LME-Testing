@@ -110,14 +110,14 @@ semantic_rules.json
 | `lme_testing/providers.py` | LLM API 调用，StubProvider | Main | ✅ 442行 |
 | `lme_testing/prompts.py` | 所有系统 prompt 和版本号 | Main | ✅ 310行，带版本控制 |
 | `lme_testing/review_session.py` | Web UI 服务，所有 API 路由 | Main | ✅ 1251行，含 BDD tabs |
-| `lme_testing/workflow_session.py` | 全流程编排 | Main+Cherry-pick | 🔄 SM-T03 加中断处理 |
-| `lme_testing/storage.py` | 文件 I/O 工具 | Main+Cherry-pick | 🔄 SM-T02 改 UTC 时间戳 |
+| `lme_testing/workflow_session.py` | 全流程编排 | Main+Cherry-pick | ✅ SM-T03 加中断处理 |
+| `lme_testing/storage.py` | 文件 I/O 工具 | Main+Cherry-pick | ✅ SM-T02 UTC 时间戳 |
 | `lme_testing/bdd_export.py` | BDD 产物导出（.feature, step defs）| Main | ✅ |
 | `lme_testing/step_registry.py` | Step 可见性注册与匹配 | Main | ✅（step lib 基于模拟）|
 | `lme_testing/step_library.py` | Step 定义库（模拟 LME API）| Main | ⚠️ 模拟实现 |
 | `lme_testing/human_review.py` | Human review HTML 渲染 | Main | ✅ |
 | `lme_testing/schemas.py` | Schema 验证工具 | Main | ✅ |
-| `lme_testing/config.py` | 配置加载与类型定义 | Main+Cherry-pick | 🔄 SM-T04 加重试配置 |
+| `lme_testing/config.py` | 配置加载与类型定义 | Main+Cherry-pick | ✅ SM-T04 重试配置 |
 | `lme_testing/signals/__init__.py` | Governance signals 计算 | Main | ⚠️ 2/4 信号数据为空 |
 | `lme_testing/oracles/` | 8 个确定性验证模块 | Main | ✅（未在真实场景验证）|
 | `lme_testing/audit_trail.py` | 审计跟踪 HTML 生成 | **待实现（S2-B1）**| ❌ |
@@ -193,7 +193,7 @@ semantic_rules.json
 
 ---
 
-## 七、目录结构（含 vendor/）
+## 七、目录结构
 
 | 目录 | 职责 |
 |------|------|
@@ -204,17 +204,9 @@ semantic_rules.json
 | `artifacts/` | 规则 artifacts（183条）|
 | `docs/` | 架构、roadmap、治理、验收文档 |
 | `tests/` | 15 个测试文件（78 个测试）|
-| `samples/ruby_cucumber/` | Ruby Cucumber 原型（存档）|
-| `logs-from-backup-run/` | POC 运行日志（存档）|
+| `evidence/` | 关键运行证据（versioned）：stability、baseline、governance signals |
 | `runs/` | pipeline 运行输出（gitignored）|
-| `reports/` | HTML 报告输出 |
-| `screenshot/` | 界面截图 |
-| `vendor/master-branch/` | **新增（SM-T01）**：同事 master 分支快照，存档用 |
-
-**`vendor/master-branch/` 约束：**
-- 不参与任何 `import` 路径
-- 不包含在 pytest 测试扫描范围内（`pyproject.toml` 或 `pytest.ini` 中 exclude）
-- cherry-pick 完成后可删除，也可保留作历史参考
+| `samples/ruby_cucumber/` | Ruby Cucumber 原型（存档）|
 
 ---
 
@@ -256,7 +248,6 @@ charset = utf-8
 | Checker 是 LLM，概率性 | 判断不保证一致性 | 通过 stability 测量缓解 |
 | audit_trail/case_compare 待实现 | 缺少审计视图 | Stage 2 任务 |
 | Windows PowerShell 工具链 | 跨平台受限 | 单人开发现状 |
-| vendor/ 目录引入 | 增加 repo 体积 | cherry-pick 完成后可清理 |
 
 ---
 
@@ -271,5 +262,4 @@ charset = utf-8
 - [ ] Governance signals 数据来源是否标注（real_api/stub/no_data）？
 - [ ] `atomic_write_json()` 是否保留？
 - [ ] CI smoke test 是否通过？
-- [ ] vendor/ 目录是否被 pytest exclude？
 - [ ] 是否与当前 roadmap 阶段一致？

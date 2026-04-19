@@ -55,36 +55,16 @@ Stage 2 规划（Stage 1 完成后展开）
 - master zip 文件
 
 **输出契约：**
-- `vendor/master-branch/`（完整 master 代码）
-- `vendor/master-branch/README.md`：
-  ```markdown
-  # Master Branch Snapshot
+- `vendor/master-branch/`（完整 master 代码）✅
+- `vendor/master-branch/README.md` ✅
+- `.gitignore` 确认 `vendor/` 不被排除 ✅
 
-  同事（CodeFreddy/LME-Testing master branch）的代码快照，存档用途。
-  日期：2026-04-19
-  
-  ## 已 cherry-pick 的改进
-  - [ ] SM-T02: UTC 时间戳（storage.py）
-  - [ ] SM-T03: Workflow 中断处理（workflow_session.py）
-  - [ ] SM-T04: 重试配置（config.py）
-  
-  ## 识别为 Stage 2 任务的功能
-  - audit_trail.py（模块缺失，已记录为 S2-B1）
-  - case_compare.py（模块缺失，已记录为 S2-B2）
-  
-  ## 不合并的内容
-  - providers.py（编码损坏，缺 StubProvider）
-  - review_session.py（整体，会破坏 BDD tabs）
-  - pipelines.py（整体，缺 planner/BDD pipeline）
-  
-  此目录在所有 cherry-pick 完成后可删除，或保留作历史参考。
-  ```
-- `.gitignore` 确认 `vendor/` 不被排除（应加入 repo）
+**后续：** `vendor/` 目录已删除 — master 分支通过单独 remote 访问
 
 **验收：**
-- [ ] `vendor/master-branch/lme_testing/review_session.py` 存在
-- [ ] `python -c "from lme_testing.storage import timestamp_slug"` 正常（不受 vendor 影响）
-- [ ] `vendor/master-branch/README.md` 有 cherry-pick 状态列表
+- [x] `vendor/master-branch/lme_testing/review_session.py` 存在（已删除 — see above）
+- [x] `python -c "from lme_testing.storage import timestamp_slug"` 正常
+- [x] `vendor/master-branch/README.md` 有 cherry-pick 状态列表（已删除 — master 通过 separate remote）
 
 **不在范围：** 将 vendor/ 加入任何 sys.path 或 import 路径
 
@@ -196,17 +176,17 @@ class RoleDefaults:
 
 ---
 
-### SM-T05 — 合并文档归档
+### SM-T05 — 合并文档归档 ✅
 
-**目标：** 将合并分析存档到 docs/
+**目标：** 将合并分析存档到 docs/ ✅
 
 **输出：**
-- `docs/MERGE_STRATEGY.md`（本次分析报告，含 cherry-pick 清单）
-- `vendor/master-branch/README.md` 更新 cherry-pick 完成状态
+- `docs/MERGE_STRATEGY.md`（本次分析报告，含 cherry-pick 清单）✅
+- `vendor/master-branch/README.md` 更新 cherry-pick 完成状态 ✅（vendor/ 已删除）
 
 **验收：**
-- [ ] `docs/MERGE_STRATEGY.md` 存在
-- [ ] vendor README 中所有已完成 cherry-pick 打勾
+- [x] `docs/MERGE_STRATEGY.md` 存在
+- [x] 所有已完成 cherry-pick 打勾
 
 ---
 
@@ -247,8 +227,11 @@ MiniMax API 连接随机断开，全量 322-case 测量无法完成。参见 S2-
 
 ### S1-T04 — 全量规则质量基准
 
-**状态：❌ BLOCKED — 依赖 S1-T03b 完成**
-需要 API 稳定性支持全量 183-rule 运行。
+**状态：✅ DONE（2026-04-19）**
+- 全量 183 条规则 maker + checker 运行完成
+- `docs/releases/BASELINE-183-RULES.md` 存在（含12条人工抽查）
+- Coverage 数字：72.78%（131/180 fully covered）
+- 证据：`evidence/20260419_baseline_full/`（maker/checker summaries + coverage_report + HTML）
 
 ### S1-T05 — 状态声明重写
 

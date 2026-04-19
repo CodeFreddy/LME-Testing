@@ -24,11 +24,12 @@
 
 **完成日期：** 2026-04-19
 
-### SM-T01：Vendor 存档
-- [x] 创建 `vendor/master-branch/` 目录
-- [x] 解压 master zip 到 `vendor/master-branch/`
-- [x] 创建 `vendor/master-branch/README.md`（cherry-pick 状态列表）
-- [x] 确认 vendor/ 被 git 追踪（不在 .gitignore 中）
+### SM-T01：Vendor 存档 ✅
+- [x] 创建 `vendor/master-branch/` 目录 ✅
+- [x] 解压 master zip 到 `vendor/master-branch/` ✅
+- [x] 创建 `vendor/master-branch/README.md`（cherry-pick 状态列表）✅
+- [x] 确认 vendor/ 被 git 追踪（不在 .gitignore 中）✅
+- [x] **后续：** `vendor/` 目录已删除（2026-04-19）— master 通过单独 remote 访问
 
 **状态：** ✅ COMPLETE
 
@@ -57,8 +58,8 @@
 **状态：** 🧊 Frozen（标记为可选；功能已在 main 中实现）
 
 ### SM-T05：合并文档归档
-- [x] `docs/archives/MERGE_STRATEGY.md` 存在（已从 `docs/` 移至 archives）
-- [x] `vendor/master-branch/README.md` 更新完成状态
+- [x] `docs/archives/MERGE_STRATEGY.md` 存在（已从 `docs/` 移至 archives）✅
+- [x] `vendor/master-branch/README.md` 更新完成状态 ✅（vendor/ 已删除）
 
 **状态：** ✅ COMPLETE
 

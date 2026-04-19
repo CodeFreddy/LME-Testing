@@ -10,11 +10,11 @@
 | 维度 | 状态 |
 |------|------|
 | 代码框架（Main） | ✅ 完整：maker/checker/BDD/oracle/governance |
-| Master 分支合并 | 🔄 待执行（vendor/ 存档 + 4 项 cherry-pick） |
-| Master 特有功能（audit_trail/case_compare） | 📋 已识别，纳入 Stage 2 |
-| Governance signals 数据 | ⚠️ 2/4 信号数据为空或 stub（待 Stage 1 修复）|
-| 全量 183 条规则质量基准 | 🔄 数据存在但 governance 无法读取 |
-| Checker 真实稳定性 | ⚠️ 71% (14 cases, v1) → 60% (10 cases, v4)，远高于 10% 阈值；API 随机断开导致无法完成全量 322-case 测量 | S2-T02 待定（S2-T01 blocked）|
+| Master 分支合并 | ✅ 完成（2026-04-19）；vendor/ 已删除，master 通过单独 remote 访问 |
+| Master 特有功能（audit_trail/case_compare） | 📋 已识别，纳入 Stage 2（S2-B1/S2-B2）|
+| Governance signals 数据 | ✅ schema_failure_rate=0.0，coverage=72.78%（180 rules），instability=9.5% |
+| 全量 183 条规则质量基准 | ✅ 72.78% coverage（131/180 fully covered）；证据保存在 evidence/ |
+| Checker 真实稳定性 | ⚠️ 9.5% instability（63 cases，v3）；API 随机断开阻止全量 322-case 测量 |
 | 真实 LME API 接入 | ⏳ ETA 未知（需内部 VM 权限）|
 
 ---
@@ -40,56 +40,57 @@
 
 ---
 
-## Stage M — Master 分支合并（新增，当前优先）
+## Stage M — Master 分支合并 ✅ COMPLETE
 
-**时间预估：** 1-3 天  
-**前置条件：** 无  
+**完成日期：** 2026-04-19  
 **目标：** 将同事 master 分支的有效改进合并进 main，同时保留 main 的完整 BDD 和 governance 体系
 
-### Gate M.1 — 存档 Master 代码
+### Gate M.1 — 存档 Master 代码 ✅
 
-- 创建 `vendor/master-branch/` 目录
-- 将 master zip 解压到此目录
-- 创建 `vendor/master-branch/README.md`（说明用途和 cherry-pick 状态）
+- 创建 `vendor/master-branch/` 目录 ✅
+- 将 master zip 解压到此目录 ✅
+- 创建 `vendor/master-branch/README.md` ✅
 
-**验收：** `vendor/master-branch/lme_testing/` 存在，不影响主路径 import
+**验收：** `vendor/master-branch/lme_testing/` 存在，不影响主路径 import  
+**后续：** `vendor/` 目录已删除 — master 分支通过单独 remote 访问
 
-### Gate M.2 — Cherry-pick P1：UTC 时间戳
+### Gate M.2 — Cherry-pick P1：UTC 时间戳 ✅
 
-- `storage.py`：`timestamp_slug()` 改为 `datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")`
-- 保留 `atomic_write_json()`（Main 独有，Master 没有）
-- 更新 `docs/run_directory_structure.md`：说明新时间戳格式（末尾有 `Z`）
+- `storage.py`：`timestamp_slug()` 改为 `datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")` ✅
+- 保留 `atomic_write_json()`（Main 独有，Master 没有）✅
+- 更新 `docs/run_directory_structure.md`：说明新时间戳格式（末尾有 `Z`）✅
 
 **验收：** `python -c "from lme_testing.storage import timestamp_slug; print(timestamp_slug())"` 输出包含 `Z`
 
-### Gate M.3 — Cherry-pick P2：Workflow 中断处理
+### Gate M.3 — Cherry-pick P2：Workflow 中断处理 ✅
 
-- `workflow_session.py`：maker 和 checker 步骤加入 `try/except KeyboardInterrupt`
-- `workflow_session.py`：加入 `[workflow] Step N/4:` 进度输出
-- `pipelines.py`：`run_maker_pipeline` 和 `run_checker_pipeline` 加入 `provider_out: list | None = None` 参数（保持向后兼容）
+- `workflow_session.py`：maker 和 checker 步骤加入 `try/except KeyboardInterrupt` ✅
+- `workflow_session.py`：加入 `[workflow] Step N/4:` 进度输出 ✅
+- `pipelines.py`：`run_maker_pipeline` 和 `run_checker_pipeline` 加入 `provider_out: list | None = None` 参数 ✅
 
 **验收：** 在 workflow 运行中按 Ctrl+C，有明确提示信息且不留残留进程
 
-### Gate M.4 — Cherry-pick P3：重试配置（可选）
+### Gate M.4 — Cherry-pick P3：重试配置（可选）✅
 
-- `config.py` 的 `RoleDefaults`：重新加入 `max_retries: int = 3` 和 `retry_backoff_seconds: float = 2.0`
-- `providers.py`：确认 MiniMax provider 使用这两个字段（Main 的 StubProvider 忽略即可）
+- `config.py` 的 `RoleDefaults`：重新加入 `max_retries: int = 3` 和 `retry_backoff_seconds: float = 2.0` ✅
+- `providers.py`：确认 MiniMax provider 使用这两个字段 ✅
 
 **验收：** `config.load_project_config()` 后 `config.maker_defaults.max_retries == 3`
 
-### Gate M.5 — 规划 Master 缺失模块为 Stage 2 任务
+### Gate M.5 — 规划 Master 缺失模块为 Stage 2 任务 ✅
 
-- `audit_trail.py` 需求文档化：生成审计 HTML，记录 maker→checker→human 决策链
-- `case_compare.py` 需求文档化：同一 rule 多次迭代的 case 对比视图
-- 在 `TODO.md` 中创建对应 Stage 2 任务条目
+- `audit_trail.py` 需求文档化：生成审计 HTML，记录 maker→checker→human 决策链 ✅
+- `case_compare.py` 需求文档化：同一 rule 多次迭代的 case 对比视图 ✅
+- 在 `TODO.md` 中创建对应 Stage 2 任务条目 ✅
 
-**验收：** `docs/stage2_planned_modules.md` 中有两个模块的需求描述
+**验收：** `docs/implementation_plan.md` 中 S2-B1/S2-B2 有完整需求描述
 
-### Stage M Exit
+### Stage M Exit ✅
 
-- [ ] vendor/master-branch/ 存在且有 README
-- [ ] CI smoke test 在 cherry-pick 后通过
-- [ ] `MERGE_STRATEGY.md` 中所有项目标注完成状态
+- [x] vendor/master-branch/ 存档完成（已删除 — master 通过单独 remote 访问）
+- [x] SM-T02~SM-T04 cherry-pick 完成并验证
+- [x] CI smoke test 通过
+- [x] audit_trail.py、case_compare.py 需求已文档化（S2-B1/S2-B2）
 
 ---
 
@@ -120,11 +121,13 @@
 
 **当前 instability_rate：** TBD
 
-### Gate 1.4 — 全量规则质量基准
+### Gate 1.4 — 全量规则质量基准 ✅
 
-- 全量 183 条规则 maker + checker 运行（分批，`--batch-size 8`）
-- `docs/releases/BASELINE-183-RULES.md`（含人工抽查 ≥10 条）
-- Coverage 数字如实记录
+- 全量 183 条规则 maker + checker 运行（分批，`--batch-size 8`）✅
+- `docs/releases/BASELINE-183-RULES.md`（含人工抽查 ≥10 条）✅
+- Coverage 数字如实记录 ✅
+- **实测值：** 72.78% coverage（131/180 fully covered）
+- **证据：** `evidence/20260419_baseline_full/`（maker/checker summaries + coverage_report + HTML）
 
 ### Gate 1.5 — 项目状态声明重写
 

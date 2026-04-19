@@ -271,8 +271,8 @@ artifacts/
 
 tests/                    # 78 unit tests
 docs/                     # Full documentation
-runs/                     # Pipeline run outputs
-reports/                  # HTML report outputs
+evidence/                 # Preserved run artifacts (versioned)
+runs/                     # Pipeline run outputs (gitignored)
 ```
 
 ---
@@ -300,9 +300,9 @@ Governance signals are computed from run artifacts and updated on each run.
 
 | Signal | Value | Data Source |
 |--------|-------|-------------|
-| `schema_failure_rate` | 0.0 | `runs/schema_validation_latest.json` (370 fixtures) |
-| `checker_instability` | 9.5% | `runs/checker-stability/20260418T231915+0800-v3/` (63 comparable cases) |
-| `coverage_percent` | 72.78% (latest v12 benchmark: 100%) | `runs/checker_v1.1_full/` (180 rules); v12 benchmark latest by UTC time |
+| `schema_failure_rate` | 0.0 | `evidence/schema_validation_latest.json` (370 fixtures) |
+| `checker_instability` | 9.5% | `evidence/20260419_stability_v4/` (63 comparable cases) |
+| `coverage_percent` | 72.78% | `evidence/20260419_baseline_full/` (180 rules) |
 | `step_binding_rate` | 35.4% | Simulated step library, not real LME API (Stage 3) |
 
 > **Note:** Latest coverage is determined by actual UTC wall-clock time (`_parse_timestamp()` in `signals/__init__.py`), not string sort. Benchmark runs with UTC (`Z`) timestamps sort correctly above local-offset (`+0800`) runs.
