@@ -63,17 +63,18 @@ runs/
 
 ---
 
-## Current Local State (2026-04-18)
+## Current Local State (2026-04-19)
 
-All existing runs in this repo's `runs/` are from `poc_two_rules` (2 rules):
+Governance signals analysis (computed `runs_analyzed=21`, `total_rules=180`):
 
-| Run Type | Count | Rule Count | Latest Run ID |
-|----------|-------|------------|---------------|
-| maker | ~15 | 2 | 20260418T161845+0800 |
-| checker | ~6 | 2 | 20260418T161845+0800 |
-| bdd | ~5 | 2 | — |
+| Run Type | Count | Rule Count | Coverage % |
+|----------|-------|------------|------------|
+| maker | ~30 | 183 | — |
+| checker | ~20 | 183 | 72.78% |
+| bdd | ~5 | 183 | — |
+| review_sessions | multiple | 183 | — |
 
-Full 183-rule runs are **not present** in the local `runs/` directory. They may exist elsewhere on disk or in CI artifacts.
+Full 183-rule runs are present in `runs/maker_v1.1_full/` and `runs/baseline_full/`.
 
 ---
 

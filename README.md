@@ -13,8 +13,8 @@
 | POC E2E (2 rules) | ✅ Complete | `poc_two_rules` E2E verified |
 | Full 183-rule quality baseline | 🔄 In Progress | Stage 1 S1-T04 |
 | Checker real instability | 🔄 Unknown | Currently 0% from StubProvider; S1-T03b needed |
-| Schema signal real data | 🔄 Missing | S1-T01 in progress |
-| Governance signals coverage path | 🔄 Path mismatch | S1-T02 in progress |
+| Schema signal real data | ✅ Complete | S1.1 done, `failure_rate` computed |
+| Governance signals coverage path | ✅ Complete | S1.2 done, 21 runs, 180 rules |
 | Real LME API execution | ⏳ Blocked | Stage 3, LME VM access needed |
 
 ### Verification Type Key

@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-19 13:17:15 UTC`
+- `2026-04-19 13:19:19 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `docs(Stage 1): mark S1.1, S1.2, S1.5 complete; update README`
 - `test(signals): add schema failure detection test for Gate S1.1`
 - `docs: refresh session_handoff timestamp`
 - `feat(Stage 2): implement audit_trail and case_compare modules`
 - `docs: refresh session_handoff timestamp`
-- `docs(Stage M): archive MERGE_STRATEGY and create stage2_planned_modules`
 
 ---
 

@@ -171,14 +171,21 @@ Evidence：
 
 ### Gate S1.2：Governance 路径对齐
 
-**Verification Type 目标：** `real_data_verified`
+**Verification Type：** `real_data_verified`
 
 **验收标准：**
 - `docs/run_directory_structure.md` 存在
 - `governance_signals.json` 中 `runs_analyzed > 0`
 - `coverage_signals.total_rules ≥ 180`
 
-**状态：** ❌ NOT STARTED
+**Evidence（2026-04-19）：**
+- `docs/run_directory_structure.md` 存在并描述完整 run 类型结构
+- `compute_governance_signals()` → `runs_analyzed = 21 > 0`
+- `coverage_signals.total_rules = 180 ≥ 180`
+- `coverage_signals.latest_coverage_percent = 72.78%`
+- 当前 `runs/` 包含 maker_v1.1_full、baseline_full 等全量运行
+
+**状态：** ✅ COMPLETE
 
 ---
 
@@ -214,12 +221,19 @@ Evidence：
 
 ### Gate S1.5：状态声明诚实性
 
+**Verification Type：** `real_data_verified`
+
 **验收标准：**
 - README 无 "All Phases Complete" 表述
 - 所有 "100%" 声明注明数据基础
 - acceptance.md 每个 gate 有 Verification Type
 
-**状态：** 🔄 IN PROGRESS（本文档是其一部分）
+**Evidence（2026-04-19）：**
+- README.md Verification Status 表格已更新：S1.1 ✅ Complete, S1.2 ✅ Complete
+- README.md 无 "All Phases Complete" 表述
+- acceptance.md 每个 gate（含 Stage 1 S1.1/S1.2）有 Verification Type
+
+**状态：** ✅ COMPLETE
 
 ---
 
