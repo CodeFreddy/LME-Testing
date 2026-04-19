@@ -216,17 +216,25 @@ class RoleDefaults:
 
 ### S1-T01 — Schema Signal 数据源修复
 
-与 v2.0 一致。**新增：** SM-T02（UTC 时间戳）完成后，确认 `runs/schema_validation_latest.json` 的目录名格式与新时间戳格式一致。
+**状态：✅ DONE（2026-04-19）**
+- `validate_schemas.py --output-json` 正常工作
+- `runs/schema_validation_latest.json` 存在（370 fixtures，0 failures）
+- `compute_governance_signals()` → `schema_signal_source: "real_validation"`
+- `test_schema_failure_rate_detects_invalid_fixtures` 测试通过
 
 ### S1-T02 — 全量运行数据路径对齐
 
-与 v2.0 一致。**新增关注点：** 历史运行目录可能混合了旧格式（本地时间）和新格式（UTC），`docs/run_directory_structure.md` 需要同时记录两种格式的区分方法。
+**状态：✅ DONE（2026-04-19）**
+- `docs/run_directory_structure.md` 存在并更新
+- `runs_analyzed = 21 > 0`，`total_rules = 180 ≥ 180`
+- `coverage_signals.latest_coverage_percent = 72.78%`
 
 ### S1-T03 — Session Snapshot 原子写入
 
-**状态更新：** Main 已有 `atomic_write_json()`（SM-T02 保留）。S1-T03 的主要工作是确认 `review_session.py` 中所有 snapshot 写入都已使用 `atomic_write_json()`。
+**状态：🔄 IN PROGRESS**
+Main 已有 `atomic_write_json()`（SM-T02 保留）。需要确认 `review_session.py` 中所有 snapshot 写入路径（reviews、bdd、scripts）都已使用 `atomic_write_json`。
 
-检查点（来自之前分析，Main 已部分完成）：
+检查点：
 ```
 diff: review_session.py line 138-139
 < write_json(snapshot_path, normalized)
@@ -235,19 +243,23 @@ diff: review_session.py line 138-139
 > atomic_write_json(snapshot_path, normalized)
 > atomic_write_json(latest_path, normalized)
 ```
-Main 已在 reviews save 路径使用 atomic_write。验证其余写入路径（bdd/save、scripts/save）也已使用。
 
 ### S1-T03b — Checker 真实稳定性
 
-与 v2.0 一致。
+**状态：❌ BLOCKED — API 可靠性不足**
+MiniMax API 连接随机断开，全量 322-case 测量无法完成。参见 S2-T02 findings（v4 retry 改善但未解决）。
 
 ### S1-T04 — 全量规则质量基准
 
-与 v2.0 一致。**新增：** 基准运行使用 SM-T02 后的 UTC 时间戳格式。
+**状态：❌ BLOCKED — 依赖 S1-T03b 完成**
+需要 API 稳定性支持全量 183-rule 运行。
 
 ### S1-T05 — 状态声明重写
 
-与 v2.0 一致。**新增：** README 增加 Master 分支合并状态说明。
+**状态：✅ DONE（2026-04-19）**
+- README.md Verification Status 表格已更新（S1.1 ✅, S1.2 ✅）
+- README.md 无 "All Phases Complete" 表述
+- acceptance.md S1.1/S1.2/S1.5 均标记 COMPLETE
 
 ---
 
