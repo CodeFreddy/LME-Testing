@@ -16,8 +16,9 @@ Usage:
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 from ..storage import load_json, load_jsonl
@@ -162,6 +163,34 @@ class GovernanceSignals:
 # ---------------------------------------------------------------------------
 
 
+_TIMESTAMP_RE = re.compile(r"^(\d{8})T(\d{6})([\+\-]\d{4}|Z)$")
+
+
+def _parse_timestamp(ts: str) -> datetime:
+    """Parse a timestamp slug like '20260419T144225Z' or '20260419T092854+0800'.
+
+    Returns a timezone-aware UTC datetime. '+0800' means local = UTC+8, so
+    UTC = local - 8h. '-0500' means local = UTC-5, so UTC = local + 5h.
+    """
+    m = _TIMESTAMP_RE.match(ts)
+    if not m:
+        # Fallback: return epoch so unknown-format timestamps sort last
+        return datetime(1970, 1, 1, tzinfo=timezone.utc)
+    date_str, time_str, tz_str = m.group(1), m.group(2), m.group(3)
+    year, month, day = int(date_str[0:4]), int(date_str[4:6]), int(date_str[6:8])
+    hour, minute, second = int(time_str[0:2]), int(time_str[2:4]), int(time_str[4:6])
+    if tz_str == "Z":
+        return datetime(year, month, day, hour, minute, second, tzinfo=timezone.utc)
+    sign = 1 if tz_str[0] == "+" else -1
+    tz_hours = int(tz_str[1:3])
+    tz_minutes = int(tz_str[3:5])
+    tz_offset = timedelta(hours=tz_hours, minutes=tz_minutes)
+    # Treat naive local time as being in the given timezone, then convert to UTC
+    local_tz = timezone(timedelta(hours=sign * tz_hours, minutes=sign * tz_minutes))
+    local = datetime(year, month, day, hour, minute, second, tzinfo=local_tz)
+    return local.astimezone(timezone.utc)
+
+
 def _compute_schema_signals(runs_dir: Path) -> tuple[SchemaSignals, str]:
     """Compute schema failure rate from schema validation runs.
 
@@ -264,8 +293,9 @@ def _compute_coverage_signals(runs_dir: Path) -> CoverageSignals:
     if not coverage_reports:
         return signals
 
-    # Sort by run name (timestamp-like) descending to get latest
-    coverage_reports.sort(key=lambda x: x[0], reverse=True)
+    # Sort by actual UTC time descending to get latest.
+    # Handles both "20260419T144225Z" (UTC) and "20260419T092854+0800" (local offset) formats.
+    coverage_reports.sort(key=lambda x: _parse_timestamp(x[0]), reverse=True)
     latest_name, latest_path = coverage_reports[0]
 
     try:
