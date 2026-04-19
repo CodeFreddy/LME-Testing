@@ -162,14 +162,60 @@ Evidence（2026-04-18）：
 
 ---
 
-## Stage 2 — 规模化质量提升（冻结，待 Stage 1 数据）
+## Stage 2 — 规模化质量提升
 
 以下任务在 Stage 1 全部完成后，基于真实数字决定是否执行和如何执行。
 
-- 🧊 Maker prompt 质量提升（触发条件：coverage < 80% 或人工抽查 Poor 率 > 30%）
-- 🧊 Checker 稳定性改进（触发条件：instability > 10%）
-- 🧊 Oracle 框架实测验证（触发条件：识别出高频确定性规则类型）
-- 🧊 全量规则 BDD 生成质量评估
+### S2-T01：Maker prompt 质量提升（已评估）
+
+**触发条件满足：** coverage = 72.78% < 80%
+
+**评估结论（2026-04-19）：**
+- Prompt v1.1: targeted run 13/16 improved, 0 regressed
+- Full 180-rule run: 73.3% → 72.8%（flat，API 非确定性噪声抵消了提升）
+- 问题规律：
+  - prohibition positive case：规则无明确 permitted action 时无法生成 direct 场景
+  - deadline boundary case：证据不具体时生成 vague 边界场景
+  - SR-MR-064-A-1：证据截断，maker 生成 hallucination 风险高
+- **结论：** Prompt v1.1 有效果，但 API 非确定性使全量验证不可靠
+  - 下一步：先测 checker instability（ instability 高则 maker 改进无意义）
+  - 或固定 checker prompt 版本后再测 maker
+
+**当前状态：** ⚠️ 待决策 — 依赖 S2-T02 instability 测量结果
+
+### S2-T02：Checker 稳定性改进（未开始）
+
+**触发条件：** instability > 10%
+
+**当前数据：** POC 2-rule instability = 0%（StubProvider，无意义）
+**全量 instability：** 尚未测量
+
+- [ ] 对 v1.1 full run 产物做双次 checker 稳定性测量
+- [ ] 测量 instability rate 是否 > 10%
+- [ ] 若 instability 高：分析不稳定 case 的模式
+- [ ] 若 instability 低：确认 maker prompt 改进的价值可被稳定测量
+
+**当前状态：** ❌ Not Started
+
+### S2-T03：Oracle 框架实测验证（未开始）
+
+**触发条件：** 识别出高频确定性规则类型
+
+- [ ] 从 v1.1 full run 抽出 checker 判定为 direct + covered 的 cases
+- [ ] 对每条 semantic rule 分类：deterministic oracle 可覆盖 vs 需要 LLM 判断
+- [ ] 识别高频 deterministic 规则类型（data_constraint、enum_definition？）
+- [ ] 实测 oracle 在真实场景中的覆盖率
+
+**当前状态：** ❌ Not Started
+
+### S2-T04：全量规则 BDD 生成质量评估（未开始）
+
+- [ ] 运行 BDD pipeline（maker → bdd → bdd-export → step-registry）
+- [ ] 测量 step binding rate with Python step library
+- [ ] 与 POC baseline（35.4%）对比
+
+**当前状态：** ❌ Not Started
+
 - 🧊 BDD style learning（**永久低优先级：无真实 BDD 样本可学习**）
 
 ---
