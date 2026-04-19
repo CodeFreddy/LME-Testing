@@ -1,7 +1,7 @@
-# LME Testing — TODO
+# LME Testing — TODO v3.0
 
-**修订日期：** 2026-04-18  
-**说明：** 本文档区分三种完成状态：代码实现完成 / Stub 验证完成 / 真实数据验证完成。历史版本将"代码实现完成"等同于"全部完成"，本文档修正这一问题。
+**修订日期：** 2026-04-19  
+**说明：** 整合 master 分支合并分析，新增 Stage M 任务。
 
 ---
 
@@ -10,320 +10,189 @@
 | 标记 | 含义 |
 |------|------|
 | ✅ Code | 代码实现完成 |
-| ✅ Stub | Stub/POC 验证通过（2条规则） |
+| ✅ Stub | Stub/POC 验证（2条规则）|
 | ✅ Real | 真实数据验证完成 |
 | 🔄 In Progress | 进行中 |
 | ⏳ Blocked | 等待外部条件 |
 | ❌ Not Started | 未开始 |
-| 🧊 Frozen | 暂缓，等待前置条件 |
+| 🧊 Frozen | 暂缓 |
+| 🍒 Cherry-pick | 来自 master 分支的改进 |
 
 ---
 
-## Stage 1 — 真实数据接入（当前阶段）
+## Stage M — Master 分支合并（当前最高优先级）
 
-### S1-T01：Schema Failure Rate 数据源修复
+### SM-T01：Vendor 存档
+- [ ] 创建 `vendor/master-branch/` 目录
+- [ ] 解压 master zip 到 `vendor/master-branch/`
+- [ ] 创建 `vendor/master-branch/README.md`（cherry-pick 状态列表）
+- [ ] 确认 vendor/ 被 git 追踪（不在 .gitignore 中）
 
-**当前状态：** ✅ Code ✅ Real
+**状态：** ❌ Not Started
 
-Evidence（2026-04-18）：
-- `validate_schemas.py --output-json` 写入 `runs/schema_validation_latest.json`
-- `_compute_schema_signals()` 读取真实验证文件，`schema_signal_source: "real_validation"`
-- CI schema-validation job 已更新
-- 正常 run → `failure_rate=0.0`，`total_artifacts_validated=370`；invalid fixture → `failure_rate=0.0213`（8/376）✅
+### SM-T02：UTC 时间戳 🍒（来自 master/storage.py）
+- [ ] `storage.py`：`timestamp_slug()` 改为 `datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")`
+- [ ] 保留 `atomic_write_json()`（Main 独有）
+- [ ] `docs/run_directory_structure.md`：补充新时间戳格式说明
+- [ ] CI unit test 通过（test_storage.py）
 
-- [x] `validate_schemas.py` 新增 `--output-json` 参数
-- [x] CI schema-validation job 写入 `runs/schema_validation_latest.json`
-- [x] `_compute_schema_signals()` 读取真实验证文件
-- [x] `GovernanceSignals.to_dict()` 新增 `schema_signal_source` 字段
-- [x] 验证：故意引入 invalid fixture 时 `schema_failure_rate > 0`
+**状态：** ❌ Not Started
+
+### SM-T03：Workflow 中断处理 🍒（来自 master/workflow_session.py）
+- [ ] `workflow_session.py`：`run_workflow()` 返回类型改为 `| None`
+- [ ] maker 步骤加入 `try/except KeyboardInterrupt` + `provider.shutdown()`
+- [ ] checker 步骤加入 `try/except KeyboardInterrupt` + `provider.shutdown()`
+- [ ] 加入 `[workflow] Step N/4:` 进度输出
+- [ ] `pipelines.py`：`run_maker_pipeline` 和 `run_checker_pipeline` 加入 `provider_out: list | None = None`
+- [ ] `cli.py`：处理 `run_workflow()` 返回 `None` 的情况
+- [ ] smoke test 通过
+
+**状态：** ❌ Not Started
+
+### SM-T04：重试配置 🍒（来自 master/config.py）（可选）
+- [ ] `config.py` 的 `RoleDefaults`：加入 `max_retries: int = 3`
+- [ ] `config.py` 的 `RoleDefaults`：加入 `retry_backoff_seconds: float = 2.0`
+- [ ] `providers.py` MiniMax provider 使用这两个字段
+
+**状态：** 🧊 Frozen（Stage 1 发现频繁 API 失败时再做）
+
+### SM-T05：合并文档归档
+- [ ] `docs/MERGE_STRATEGY.md` 存在
+- [ ] `vendor/master-branch/README.md` 更新完成状态
+
+**状态：** ❌ Not Started
+
+---
+
+## Master 中识别的缺失模块（纳入 Stage 2）
+
+| 模块 | Master 状态 | Main 状态 | 计划 |
+|------|------------|---------|------|
+| `lme_testing/audit_trail.py` | 引用但不存在（broken import）| 不存在 | S2-B1 |
+| `lme_testing/case_compare.py` | 引用但不存在（broken import）| 不存在 | S2-B2 |
+
+---
+
+## Stage 1 — 真实数据接入（Stage M 完成后）
+
+### S1-T01：Schema Signal 数据源修复
+- [ ] `validate_schemas.py --output-json` 参数
+- [ ] CI schema-validation job 写入 `runs/schema_validation_latest.json`
+- [ ] `_compute_schema_signals()` 读取真实文件
+- [ ] `schema_signal_source: "real_validation"` 字段
+- [ ] 验证：invalid fixture → `schema_failure_rate > 0`
+
+**状态：** ❌ Not Started
 
 ### S1-T02：全量运行数据路径对齐
+- [ ] 手动定位全量 183 条规则的实际运行输出目录
+- [ ] 创建/更新 `docs/run_directory_structure.md`（含新旧时间戳格式区分）
+- [ ] `compute_governance_signals()` 扫描路径修复
+- [ ] 新增 `--runs-dir` 参数
+- [ ] 验证：`runs_analyzed > 0`，`total_rules ≥ 180`
 
-**当前状态：** ✅ Code ✅ Real
+**状态：** ❌ Not Started
 
-Evidence（2026-04-18）：
-- `docs/run_directory_structure.md` 已创建（103行）
-- `governance-signals` 新增 `--runs-dir` 参数
-- `compute_governance_signals(repo_root, runs_dir=None)` 接受可选 runs_dir 覆盖
-- 验证待 S1-T04 完成后全量运行
+### S1-T03：Session Snapshot 原子写入确认
+- [ ] 确认 `review_session.py` 中所有 snapshot 写入使用 `atomic_write_json()`
+  - `/api/reviews/save` 路径 ✅（已确认 Main 已完成）
+  - `/api/bdd/save` 路径（需检查）
+  - `/api/scripts/save` 路径（需检查）
+- [ ] `docs/architecture.md` 声明单用户设计约束
 
-- [x] 创建 `docs/run_directory_structure.md`
-- [x] 新增 `--runs-dir` 参数到 `governance-signals` 命令
-- [x] 修复 `compute_governance_signals()` 扫描路径
-- [x] 验证：`runs_analyzed > 0`，`total_rules ≈ 183`（依赖 S1-T04）
-
-### S1-T03：Session Snapshot 原子写入
-
-**当前状态：** ✅ Code ✅ Real
-
-Evidence（2026-04-18）：
-- `storage.py` 新增 `atomic_write_json()`（tmp+rename 跨平台）
-- `review_session.py` 全部 6 处 snapshot 写入已替换为 `atomic_write_json()`
-- `architecture.md` 声明单用户设计约束
-
-- [x] `storage.py` 新增 `atomic_write_json()` 函数
-- [x] `review_session.py` 所有 snapshot 写入替换为 `atomic_write_json()`
-- [x] `docs/architecture.md` 声明单用户设计约束
-- [x] 验证：快速连续 Save 后 snapshot 文件不损坏
+**状态：** 🔄 部分完成（reviews/save 已用 atomic_write，其余需确认）
 
 ### S1-T03b：Checker 真实稳定性测量
+- [ ] poc_two_rules 双次真实 MiniMax API checker 运行
+- [ ] `runs/stability_real/stability_report.json`（含 `data_source: "real_api"`）
+- [ ] `docs/acceptance.md` Phase 1 Gate 6 更新为真实数字
+- [ ] 若 instability > 5%：`docs/model_governance.md` 分析记录
 
-**当前状态：** ✅ Code ✅ Real
+**当前值：** TBD  
+**状态：** ❌ Not Started
 
-Evidence（2026-04-18）：
-- `checker_stability.py --config` 支持真实 LLM 配置，双次运行间隔 5 分钟
-- `runs/stability_real/stability_report.json` 产出（含 `data_source: "real_api"`）
-- `acceptance.md` Gate 6 已更新为 real_data_verified（instability=0%，0 valid cases）
-- instability=0% 因 maker/case_type 不符合 checker CASE_TYPES enum + checker 缺 semantic_rule_id
+### S1-T04：全量规则质量基准
+- [ ] 全量 183 条规则 maker 运行（分批 `--batch-size 8`）
+- [ ] 全量 checker 运行
+- [ ] `reports/baseline_full_<date>.html`
+- [ ] 人工随机抽查 ≥ 10 条规则
+- [ ] `docs/releases/BASELINE-183-RULES.md`
+- [ ] `coverage_signals.total_rules ≥ 180`
 
-- [x] 用真实 MiniMax API 对 poc_two_rules 运行 checker 两次
-- [x] 产出 `runs/stability_real/stability_report.json`（含 `data_source: "real_api"`）
-- [x] 更新 `docs/acceptance.md` Phase 1 Gate 6 Evidence 为真实数字
-- [x] 更新 `governance_signals.json` checker instability 数据源
-- [x] 若 instability > 5%：`docs/model_governance.md` 新增分析记录（当前 0%，免）
-
-### S1-T04：全量规则集质量基准建立
-
-**当前状态：** ✅ Code ✅ Real
-
-Evidence（2026-04-18）：
-- 180/183 规则成功 maker（322 scenarios），2 cases checker JSON error
-- coverage_report: `total_requirements=180, fully_covered=132, partially_covered=13, uncovered=3, not_applicable=34`
-- coverage_percent: 73.3%
-- HTML report: `reports/baseline_full_20260418.html`
-- 12 条规则人工抽查：3 HIGH QUALITY, 2 ACCEPTABLE, 3 POOR/UNKNOWN, 4 N/A
-- `docs/releases/BASELINE-183-RULES.md` 已创建（spot check + known issues）
-- governance signals 待更新
-
-- [x] 全量 183 条规则 maker 运行（分批，`--batch-size 8`）→ 180 规则 322 scenarios
-- [x] 全量 checker 运行（320/322 cases，2 JSON error）
-- [x] 生成 `reports/baseline_full_<date>.html`
-- [x] 人工随机抽查 ≥ 10 条规则 → 12 条记录在 BASELINE-183-RULES.md
-- [x] 创建 `docs/releases/BASELINE-183-RULES.md`
-- [x] `coverage_signals.total_rules ≥ 180`（实际 180）
+**当前 coverage（全量）：** TBD  
+**状态：** ❌ Not Started
 
 ### S1-T05：项目状态声明重写
+- [ ] README Project Status 用真实数字重写（含 Stage M 合并状态）
+- [ ] 消除所有无数据支撑的"100%"和"Complete"声明
+- [ ] `docs/acceptance.md` 每个 gate 有 Verification Type
 
-**当前状态：** ✅ Complete
-
-Evidence（2026-04-18）：
-- README.md Project Status 已重写（commit a648137），诚实 verification table
-- acceptance.md v2.0 每 gate 有 Verification Type 列
-- TODO.md 本次更新：区分 ✅ Code / ✅ Stub / ✅ Real 三态
-
-- [x] `README.md` Project Status 小节用真实数字重写
-- [x] `TODO.md`（本文档）区分代码完成 vs 验证完成
-- [x] `docs/acceptance.md` 每个 gate 新增 `Verification Type` 标注
-- [x] 消除所有没有数据支撑的"100%"和"Complete"声明
+**状态：** 🔄 In Progress
 
 ---
 
-## Stage 0 — 框架实现（已完成，存档）
+## Stage 0（历史存档）— 框架实现
 
-以下为 AI 代理在 2026-04-13/14 完成的代码实现。代码层面完成，验证深度如注。
+所有 Phase 1-3 代码实现完成（2026-04-13/14）。状态同 v2.0 TODO，不重复列举。
 
-### Phase 1 实现（✅ Code，✅ Stub，部分 ✅ Real 待确认）
+**关键差异（相较 v2.0 增加的说明）：**
 
-- [x] ✅ Code ✅ Stub　Artifact Schema Gate — 7 套 JSON Schema
-- [x] ✅ Code ✅ Stub　Upstream Validation Pipeline Gate — validate_rules.py
-- [x] ✅ Code ✅ Stub　Baseline CI Gate — 6 个 CI job
-- [x] ✅ Code ✅ Stub　Model and Prompt Metadata Gate — prompt/pipeline 版本记录
-- [x] ✅ Code ✅ Stub　Stable Source Anchor Gate — paragraph_id 字段
-- [x] ✅ Code ✅ Real　Checker Stability Gate — real API 双次运行完成，0 valid cases 待修复（S1-T03b）
-- [x] ✅ Code ✅ Real　Documentation Gate — 6 套治理文档
-
-### Phase 2 实现（✅ Code，✅ Stub）
-
-- [x] ✅ Code ✅ Stub　Multi-Document Ingestion — DocumentClass enum + keyword matching（**注意：这是简化实现，不是完整文档解析框架**）
-- [x] ✅ Code ✅ Stub　Planning Layer — planner_output schema + run_planner_pipeline
-- [x] ✅ Code ✅ Stub　Normalized BDD Contract — normalized_bdd.schema.json + BDD pipeline
-- [x] ✅ Code ✅ Stub　Traceability Gate — paragraph_ids 贯穿全流水线
-- [x] ✅ Code ✅ Stub　Step Visibility Gate — step_registry.py（**注意：step library 基于模拟 API**）
-- [x] ✅ Code ✅ Stub　Quality and Drift Reporting Gate — generate_trend_report.py
-- [x] ✅ Code ✅ Stub　Model Governance Enforcement Gate — check_model_governance.py
-
-### Phase 3 实现（✅ Code，✅ Stub，**执行层面未验证**）
-
-- [x] ✅ Code ✅ Stub　Step Definition Integration — 3-tier matching（**step lib 基于模拟**）
-- [x] ✅ Code ✅ Stub　Execution Readiness — executable_scenario.schema.json（**无真实消费者**）
-- [x] ✅ Code ✅ Stub　Deterministic Oracle — 8 个 oracle 模块（**未在真实规则场景验证**）
-- [x] ✅ Code ⚠️ Stub-only　Governance Signals — signals 框架（**2/4 信号无真实数据**）
-- [x] ✅ Code ✅ Stub　Release Governance — approved_providers.json + compatibility_matrix（**benchmark 证据基于 stub**）
-
-### 近期 Bug 修复（2026-04-17/18，✅ Code）
-
-- [x] ✅ Code　review_session.py：issueOptionMap 孤立语句修复
-- [x] ✅ Code　review_session.py：saveScriptsEdits 缺失 `}` 修复
-- [x] ✅ Code　step_registry.py：StepEntry match metadata 字段补全
-- [x] ✅ Code　step_library.py：`_build_decorated_code()` 函数体缩进修复
-- [x] ✅ Code　bdd_export.py：Python step definitions 迁移（从 Ruby）
-- [x] ✅ Code　governance-signals CI job 接入
-- [x] ✅ Code　report UX：Rule ID 跳转、覆盖率 pill、dropdown 过滤器
+| 模块 | Main 状态 | Master 状态 | 说明 |
+|------|---------|----------|------|
+| `review_session.py` | ✅ Code（BDD tabs，1251行）| 部分实现（824行，broken imports）| Main 更完整 |
+| `providers.py` | ✅ Code（StubProvider，442行）| 旧版（135行，编码损坏）| Main 更完整 |
+| `pipelines.py` | ✅ Code（planner+BDD，910行）| 旧版（639行，无 planner/BDD）| Main 更完整 |
+| `workflow_session.py` | ✅ Code（无中断处理）| 有中断处理（更好）| 通过 SM-T03 合并 |
+| `storage.py` | ✅ Code（本地时间）| UTC 时间（更好）| 通过 SM-T02 合并 |
+| `audit_trail.py` | 不存在 | 引用但不存在（broken）| S2-B1 实现 |
+| `case_compare.py` | 不存在 | 引用但不存在（broken）| S2-B2 实现 |
 
 ---
 
-## Stage 2 — 规模化质量提升
+## Stage 2（冻结，待 Stage 1 数据）
 
-以下任务在 Stage 1 全部完成后，基于真实数字决定是否执行和如何执行。
+### S2-B1：audit_trail.py 实现（来自 master 概念）
+- 🧊 `lme_testing/audit_trail.py`：`build_audit_trail(session_dir, output_path)` 实现
+- 🧊 `review_session.py`：确认 `/api/audit_trail` 路由在 Main 版本中存在
+- 🧊 在 `finalize()` 时自动调用
 
-### S2-T01：Maker prompt 质量提升（已评估）
+**状态：** 🧊 Frozen（Stage 1 完成后）
 
-**触发条件满足：** coverage = 72.78% < 80%
+### S2-B2：case_compare.py 实现（来自 master 概念）
+- 🧊 `lme_testing/case_compare.py`：`build_case_compare(session_dir, iter_a, iter_b, output_path)` 实现
+- 🧊 在 rewrite 完成后触发
 
-**评估结论（2026-04-19）：**
-- Prompt v1.1: targeted run 13/16 improved, 0 regressed
-- Full 180-rule run: 73.3% → 72.8%（flat，API 非确定性噪声抵消了提升）
-- 问题规律：
-  - prohibition positive case：规则无明确 permitted action 时无法生成 direct 场景
-  - deadline boundary case：证据不具体时生成 vague 边界场景
-  - SR-MR-064-A-1：证据截断，maker 生成 hallucination 风险高
-- **结论：** Prompt v1.1 有效果，但 API 非确定性使全量验证不可靠
-  - 下一步：先测 checker instability（ instability 高则 maker 改进无意义）
-  - 或固定 checker prompt 版本后再测 maker
+**状态：** 🧊 Frozen（S2-B1 完成后）
 
-**当前状态：** ⚠️ 待决策 — 依赖 S2-T02 instability 测量结果
+### S2-A 系列：质量提升（取决于 Stage 1 数据）
+- 🧊 Maker prompt 调优（触发：coverage < 80%）
+- ⚠️ **Checker 稳定性实测（已执行，结果 directionally concerning）**
+  - 测量：v1-v4 四次迭代，14-121 cases 处理，71%→60% instability，远高于 10% 阈值
+  - Error surfacing + retry logic 均已实现（pipelines.py/providers.py）
+  - **结论：API 随机断开导致无法完成全量 322-case 测量；instability 方向令人担忧但数据不可靠**
+  - S2-T01（maker 改进）blocked until API 可靠性问题解决
+- 🧊 Oracle 实测验证（触发：识别出高频确定性规则类型）
 
-### S2-T02：Checker 稳定性改进（已测量，结果复杂）
-
-**触发条件：** instability > 10%
-
-**当前数据：** POC 2-rule instability = 0%（StubProvider，无意义）
-**全量 instability：** 2026-04-19 测量完成
-
-**S2-T02 Results — Checker Stability Measurement（2026-04-19）**
-
-⚠️ **WARNING: Measurement is compromised. Both runs stopped early.**
-
-- Full dataset: 322 scenarios (180 rules)
-- Run A：15 API calls → 14 reviews written → stopped silently（SR-MR-001 ~ SR-MR-004.03）
-- Run B：65 API calls → 64 reviews written → stopped silently（SR-MR-001 ~ SR-MR-004.09）
-- `remaining_after_resume: 0` in both summaries — pipeline believed it completed normally
-- 50 cases（SR-MR-004.03-boundary 之后）从未被 checker 处理
-
-**Instability（14 comparable cases，Run A vs Run B）：**
-
-| Metric | Value |
-|--------|-------|
-| Stable | 4 (29%) |
-| Unstable | 10 (71%) |
-| **Instability rate** | **71%**（>> 10% threshold）|
-
-**Meaningful divergences（score delta ≥ 2）：**
-
-| Case | Field | Run A | Run B | Delta |
-|------|-------|-------|-------|-------|
-| TC-SR-MR-001-01-negative-01 | coverage_relevance | direct | indirect | — |
-| TC-SR-MR-001-01-negative-01 | evidence_consistency | 5 | 2 | **3** |
-| TC-SR-MR-001-01-negative-01 | requirement_coverage | 4 | 2 | **2** |
-| TC-SR-MR-001-01-negative-01 | coverage_assessment.status | covered | partial | — |
-| TC-SR-MR-003-03-positive-01 | coverage_relevance | direct | indirect | — |
-| TC-SR-MR-003-03-positive-01 | evidence_consistency | 5 | 3 | **2** |
-| TC-SR-MR-003-03-positive-01 | coverage_assessment.status | covered | partial | — |
-
-**Pattern：** Run B systematically rates same case 更低（degraded evidence_consistency + coverage_relevance），非随机噪声，指向 LLM 对证据充分性判断的不确定性。
-
-**Root cause：** 与 S1-T03b 相同 — checker pipeline 静默截断（API 错误未 surfacing 为失败），两次运行均未处理完全部 322 cases。需先修复截断问题才能做可靠的全量 instability 测量。
-
-**Artifact：** `runs/checker-stability/20260418T231915+0800/stability_report.json`
-
-- [x] 对 v1.1 full run 产物做双次 checker 稳定性测量（14/322 cases comparable）
-- [x] 测量 instability rate 是否 > 10%（71% >> 10%）
-- [x] 分析不稳定 case 的模式（score delta 1 普遍，3 cases 有意义分歧）
-- [x] 修复 checker pipeline 静默截断问题（API 错误未 surfacing）— `pipelines.py` 添加 `batches_processed`/`failed_batch_num` 追踪 + 错误日志
-- [x] v3 重测：error surfacing fix 生效，但 API 本身可靠性仍是瓶颈
-- [x] 添加 retry logic（`providers.py`，max_retries=3，transient errors 指数退避重试）
-- [x] v4 重测：retry 使 Run A 吞吐 63→121 cases（+92%），但 API 随机断开仍导致 Run B 进程中断
-
-**v3 重测结果（2026-04-19，fix 后）：**
-
-| | Run A | Run B |
-|---|---|---|
-| 处理完 batch 数 | 63/322 | 10/322 |
-| 失败 exception | `Remote end closed connection` (batch 64) | `timeout after 300s` (batch 11) |
-| 报告剩余 cases | 259 | 312 |
-| comparable cases | 10 | 10 |
-
-**Instability（10 comparable cases）：**
-
-| Metric | Value |
-|--------|-------|
-| Stable | 4 (40%) |
-| Unstable | 6 (60%) |
-| **Instability rate** | **60%**（>> 10% threshold）|
-
-**Unstable cases（score delta）：**
-
-| Case | Field | Run A | Run B | Delta |
-|------|-------|-------|-------|-------|
-| TC-SR-MR-001-02-positive-01 | test_design_quality | 5 | 3 | **2** |
-| 其他 5 cases | 各 score 字段 | — | — | delta=1（噪声级）|
-
-**Pattern shift：** v3 中 Run B 不再系统性地 rating 更低，instability 主要是 delta=1 的噪声。delta≥2 的 meaningful divergence 降至 1 case。
-
-**结论：** Error surfacing fix + retry logic 均已生效。v4 retry 使 Run A 从 63→121 cases，但 API 仍会在 97~121 cases 后随机断开/超时。全量 322-case instability measurement 需要 API 层可靠性提升，超出代码 fix 范畴。
-
-**v4 重测结果（2026-04-19，retry fix 后）：**
-
-| | Run A | Run B |
-|---|---|---|
-| 处理完 batch 数 | 121/322 | 97/322 |
-| 失败 exception | `Remote end closed connection` (batch 122) | 进程中断（batch 98 后卡住） |
-| 报告剩余 cases | 201 | — |
-| comparable cases | — | — |
-| stability_report | 未产出（Run B 进程中断） | — |
-
-**结论：** Retry 逻辑使 Run A 吞吐提升 92%（63→121），但 API 随机断开问题依然存在。全量 instability 测量需 API 稳定性支持，当前超出代码层可解决范围。
-
-**当前状态：** ⚠️ Error surfacing + retry fix 完成。API 可靠性导致仍无法完成全量 322-case 测量。S2-T01 仍 blocked。
-
-### S2-T03：Oracle 框架实测验证（未开始）
-
-**触发条件：** 识别出高频确定性规则类型
-
-- [ ] 从 v1.1 full run 抽出 checker 判定为 direct + covered 的 cases
-- [ ] 对每条 semantic rule 分类：deterministic oracle 可覆盖 vs 需要 LLM 判断
-- [ ] 识别高频 deterministic 规则类型（data_constraint、enum_definition？）
-- [ ] 实测 oracle 在真实场景中的覆盖率
-
-**当前状态：** ❌ Not Started
-
-### S2-T04：全量规则 BDD 生成质量评估（未开始）
-
-- [ ] 运行 BDD pipeline（maker → bdd → bdd-export → step-registry）
-- [ ] 测量 step binding rate with Python step library
-- [ ] 与 POC baseline（35.4%）对比
-
-**当前状态：** ❌ Not Started
-
-- 🧊 BDD style learning（**永久低优先级：无真实 BDD 样本可学习**）
+**状态：** ⚠️ Partial — error surfacing + retry fix 完成；全量 measurement 仍 blocked by API
 
 ---
 
-## Stage 3 — 真实执行环境（阻塞于外部依赖）
+## Stage 3（阻塞于外部）
 
-- ⏳ 获得 LME 内部 VM 访问权限（ETA：未知）
-- ⏳ 用真实 LME API 替换 `samples/ruby_cucumber/lib/lme_*.rb`
-- ⏳ 重建 `lme_testing/step_library.py`（基于真实 API 模式）
-- ⏳ 重新测量 step binding rate（当前 35.4% 基于模拟）
-- ⏳ 在真实环境中执行 BDD 场景并验证
-
----
-
-## 永久搁置（不在任何阶段规划中）
-
-- ❌ BDD style learning（无真实样本，自循环优化无意义）
-- ❌ Multi-user hosted review platform（超出工具定位）
-- ❌ Autonomous execution without approval gates（违反架构原则）
-- ❌ 用 AI 代理快速通过 acceptance gate（本次教训）
+- ⏳ LME VM 访问权限（ETA：未知）
+- ⏳ 真实 LME API 替换模拟实现
+- ⏳ Step library 重建（真实 API 模式）
+- ⏳ Step binding rate 重新测量
 
 ---
 
-## Darcy 的个人任务（原 TODO_Darcy.md，更新状态）
+## Darcy 个人任务（更新）
 
-- [x] ✅ Code　创建 Ruby Cucumber prototype（`samples/ruby_cucumber/`）
+- [x] ✅ Code　Ruby Cucumber prototype 创建
 - [x] ✅ Code　BDD tab：显示 normalized BDD，支持 Given/When/Then 编辑
-- [x] ✅ Code　Scripts tab：显示 step registry visibility（display 完成）
-- [ ] ❌ Scripts tab 完整 edit workflow（save → downstream wiring）→ 降级到 S1-T03 后
-- [ ] ⏳ 真实 LME API 接入（Stage 3，依赖 VM 权限）
-- [ ] 🧊 TEMPLATE_REGISTRY 补充真实 LME API 模式（Stage 3 前置）
-- [ ] 🧊 如何让 prototype 代码动态演进的设计（待架构讨论）
+- [x] ✅ Code　Scripts tab：步骤可见性显示
+- [ ] SM-T03　workflow_session.py 中断处理（cherry-pick）
+- [ ] S1-T02　定位全量运行数据目录（人工操作）
+- [ ] S1-T04　全量基准运行（需 API 调用）
+- [ ] S2-B1　audit_trail.py 实现（Stage 2）
+- [ ] ⏳ 真实 LME API 接入（Stage 3，待 VM 权限）

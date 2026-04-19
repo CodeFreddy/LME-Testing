@@ -1,50 +1,42 @@
-# LME Testing — Revised Architecture
+# LME Testing — Architecture v3.0
 
-**版本：** 2.0  
-**修订日期：** 2026-04-18  
-**修订原因：** 补充实际验证状态说明，修正若干模块边界描述，新增已知限制和设计约束章节。
+**修订日期：** 2026-04-19  
+**变更说明：** 整合 master 分支合并分析。新增多人协作架构约束、vendor/ 目录职责、待实现模块规划（audit_trail、case_compare）。
 
 ---
 
-## 一、系统定位（诚实版）
+## 一、系统定位
 
-LME Testing 是一个**文档驱动的 AI 辅助测试设计工具**，面向单一领域（LME 匹配规则）的本地单用户使用场景。
+LME Testing 是一个**文档驱动的 AI 辅助测试设计工具**，面向单一领域（LME 匹配规则），当前为本地单用户使用。
 
 ### 当前是什么
-
-- 将 LME 规则文档转化为结构化 BDD 测试场景的流水线工具
-- 提供人工审核、重写、报告的完整本地工作流
-- 有完整 schema 契约和 CI 验证的框架
+- 将 LME 规则文档转化为结构化 BDD 测试场景的 AI 流水线
+- 提供人工审核、重写、BDD 编辑、报告的完整本地工作流
+- 有完整 schema 契约和 CI 验证的 governance 框架
+- 多人协作的代码库（main + master 分支合并中）
 
 ### 当前不是什么
-
-- **不是**通用测试生成平台（针对 LME 领域优化）
-- **不是**多用户协作平台（明确的单用户设计）
-- **不是**测试执行引擎（生成测试设计产物，不执行）
-- **不是**已在生产规模验证的系统（全量 183 条规则质量基准尚未建立）
-
----
-
-## 二、架构原则
-
-以下原则经过实践验证，继续有效：
-
-1. **Artifacts are first-class contracts** — 结构化产物优于自由文本，所有 LLM 输出必须经 Schema 验证
-2. **Upstream quality first** — 上游规则质量决定下游一切；无效的 atomic_rule 会污染整个流水线
-3. **Deterministic before LLM** — 能确定性验证的（schema check、enum check、字段验证），不依赖 LLM 判断
-4. **Human review is a control layer** — 人工审核是架构的必要组成，不是可选功能
-5. **Durable context is repo-readable** — 所有可复现行为的控制资产（prompts、schemas、configs）必须在 repo 中
-
-新增原则（基于实践教训）：
-
-6. **Real data before governance claims** — governance 指标必须标注数据来源（`real_api` / `stub` / `no_data`），不用 stub 数据支撑治理声明
-7. **Honest capability boundary** — 系统能力边界以最近一次真实验证为准，不外推
+- **不是**通用测试生成平台
+- **不是**多用户协作平台（明确单用户设计）
+- **不是**测试执行引擎（生成设计产物，不执行）
+- **不是**已在生产规模验证的系统
 
 ---
 
-## 三、当前流水线
+## 二、架构原则（v3.0 新增第 8 条）
 
-### 核心流水线（代码完整，POC 验证通过）
+1. Artifacts are first-class contracts
+2. Upstream quality first
+3. Deterministic before LLM
+4. Human review is a control layer
+5. Durable context is repo-readable
+6. Real data before governance claims
+7. Honest capability boundary
+8. **Merge by understanding, not by overwriting** — 多人协作时，分支合并基于逐文件分析，不盲目覆盖；破损的 import 记录为新任务，不直接合并进主路径
+
+---
+
+## 三、当前流水线（Main 版本，包含 BDD 层）
 
 ```
 Source Documents (PDF/TXT)
@@ -56,31 +48,34 @@ Source Documents (PDF/TXT)
 [generate_semantic_rules.py]
         │  semantic_rules.json
         ▼
-[validate_rules.py] ──────── schema validation (blocking)
+[validate_rules.py] ─────────── schema validation (blocking)
+        │
+        ├──── [Planner: LLM] ── planner_results.jsonl（可选）
         │
         ▼
-[Maker: LLM-assisted]  ◄─── MAKER_SYSTEM_PROMPT (versioned)
+[Maker: LLM] ◄──────────────── MAKER_SYSTEM_PROMPT v1.1
         │  maker_cases.jsonl
         ▼
-[BDD Pipeline] ────────────  normalized_bdd.jsonl
+[BDD Pipeline: LLM] ◄────────── BDD_SYSTEM_PROMPT v3.0
+        │  normalized_bdd.jsonl
+        ▼
+[BDD Export] ────────────────── .feature files + step_definitions.py
         │
         ▼
-[BDD Export] ──────────────  .feature files + step_definitions.py
+[Step Registry] ─────────────── step_visibility.json（35.4% binding，模拟 API）
         │
-        ▼
-[Step Registry] ───────────  step_visibility.json
-        │
-        ├─────────────────────────────────────┐
-        ▼                                     ▼
-[Checker: LLM-assisted]              [Human Review]
-        │  checker_reviews.jsonl             │  approve / rewrite / reject
-        │  coverage_report.json             │
-        └──────────────┬──────────────────────┘
-                       ▼
+        ├──────────────────────────────────────┐
+        ▼                                      ▼
+[Checker: LLM] ◄──────────────        [Human Review UI]
+        │  checker_reviews.jsonl        localhost:8765
+        │  coverage_report.json         /api/reviews/save
+        │                               /api/bdd（BDD tab）
+        └──────────────┬────────────────/api/scripts（Scripts tab）
+                       ▼               /api/stage（stage gates）
               [Rewrite if needed]
                        │
                        ▼
-              [HTML Report Generation]
+              [HTML Report + CSV]
                        │
                        ▼
               [Governance Signals]
@@ -98,255 +93,183 @@ semantic_rules.json
 [Maker: enriched input]
 ```
 
----
-
-## 四、模块边界
-
-### 4.1 Ingestion / Extraction 模块
-
-**拥有：** 文档读取、解析、规则候选提取、source anchor 生成  
-**不拥有：** 场景生成策略、provider 逻辑、报告渲染
-
-**已知限制：**
-- PDF 解析依赖 `pdfminer` / 标准库，对复杂布局 PDF（表格、多栏、图形）解析质量有限
-- 多文档类型支持当前实现为 `DocumentClass` enum + keyword matching，不是真正的结构感知解析框架
-- 这是设计上的简化，不是 bug，但不应对外声称"支持任意文档类型"
-
-### 4.2 Rule Normalization 模块
-
-**拥有：** atomic rule 生成、semantic rule 生成、trace 链接、schema 对齐、rule_type 解释  
-**不拥有：** review UI、报告、provider 传输细节
-
-**已知限制：**
-- `infer_rule_type()` 基于关键词推断，对模糊表述的规则可能分类错误
-- duplicate detection 是基于文本相似度的启发式方法，不是语义去重
-
-### 4.3 Generation 模块（Maker / Planner / BDD）
-
-**拥有：** maker 生成、rewrite、planner、normalized BDD 生成、BDD export  
-**不拥有：** provider adapter 内部逻辑、schema 注册策略、长期分析逻辑
-
-**已知限制：**
-- Maker 输出质量依赖 LLM，概率性。真实质量基准待 S1-T04 建立
-- Planner 阶段增加 API 调用成本，当前未量化其对最终 maker 质量的贡献
-- BDD style learning 暂缓：无真实 BDD 样本，自循环优化无意义
-
-### 4.4 Evaluation 模块（Checker）
-
-**拥有：** checker 评估、benchmark 比较、stability 比较  
-**不拥有：** 人工决策工作流、runtime 执行 pass/fail 真值、provider 传输
-
-**已知限制（关键）：**
-- Checker 本身是 LLM，其输出概率性，不是确定性真值
-- 当前 `checker_instability_rate = 0%` 基于 StubProvider，**不代表真实 LLM 行为**
-- 真实 MiniMax instability 率在 S1-T03b 完成后才能知晓
-
-### 4.5 Review 模块
-
-**拥有：** review 状态、决策存储、人工工作流控制（approve/rewrite/reject）、session snapshot  
-**不拥有：** 规则提取、provider 逻辑、确定性执行断言
-
-**设计约束（明确）：**
-- **单用户设计**：Web UI 运行在 localhost:8765，无认证，无多用户并发支持
-- Session snapshot 使用原子写入（tmp + rename），防止快速连续保存损坏文件
-- 不支持跨 session 共享状态
-
-### 4.6 Reporting 模块
-
-**拥有：** HTML 报告生成、CSV 导出、coverage 聚合、traceability 视图、audit-style 运行摘要  
-**不拥有：** 业务规则生成逻辑、provider 选择、schema 迁移策略
-
-### 4.7 Provider / Model Strategy 模块
-
-**拥有：** provider-specific API 调用、retry、structured output、metadata capture  
-**不拥有：** 场景生成业务逻辑、报告渲染、review 工作流
-
-**当前支持的 Provider：**
-
-| Provider | Tier | 验证状态 | 适用 Role |
-|----------|------|---------|-----------|
-| stub | 1 | ✅ CI/Smoke | maker/checker/planner |
-| minimax/MiniMax-M2.7 | 1 | ✅ POC（2条规则），全量质量待测 | maker/checker/planner |
-| qwen/qwen3.5-plus | 2 | ⚠️ Experimental | maker only |
-
-**注意：** compatibility_matrix.json 中标注的 "all phases compatible" 是基于代码兼容性，不代表输出质量已验证。
-
-### 4.8 Schema / Contract 模块
-
-**拥有：** artifact 结构定义、schema 验证、契约演进支持  
-**不拥有：** provider 调用、文档解析、UI 工作流
-
-**当前 Schema 清单（7套，CI 验证）：**
-- `atomic_rule.schema.json`
-- `semantic_rule.schema.json`
-- `maker_output.schema.json`
-- `checker_output.schema.json`
-- `planner_output.schema.json`
-- `normalized_bdd.schema.json`
-- `executable_scenario.schema.json`
-
-### 4.9 Oracle 模块
-
-**拥有：** 8 个确定性断言模块（field_validation、state_validation、calculation_validation、deadline_check、event_sequence、pass_fail_accounting、null_check、compliance_check）  
-**不拥有：** LLM 判断逻辑、场景生成
-
-**已知限制：**
-- 8 个 oracle 存在且有单元测试，但**尚未在真实 LME 规则场景上运行验证**
-- `@register_oracle` 自动注册机制是提前设计的框架抽象，在真实场景验证之前不应扩展
-- Oracle 适用规则类型（哪些 LME 规则适合确定性验证）待 S1-T04 基准建立后识别
-
-### 4.10 Governance Signals 模块
-
-**拥有：** 4 类信号计算（schema / instability / coverage / step binding）、JSON 输出  
-**不拥有：** 实时监控、告警、持久化数据库
-
-**当前信号数据来源状态：**
-
-| 信号 | 当前数据来源 | 可信度 | 修复任务 |
-|------|------------|--------|---------|
-| schema_failure_rate | `runs/schema_validation_latest.json` (from CI schema-validation job) | ✅ 真实数据 | S1-T01 |
-| checker_instability_rate | StubProvider 运行 | ⚠️ 不代表真实 LLM | S1-T03b |
-| coverage_percent | `runs/checker/<run_id>/coverage_report.json` via `--runs-dir` | 🔄 全量数据待写入 | S1-T02 + S1-T04 |
-| step_binding_success_rate | 模拟 step library | ⚠️ 不代表真实 LME | Stage 3 |
-
----
-
-## 五、Artifact 契约
-
-### Artifact 生命周期
-
-```
-Source → atomic_rule → semantic_rule → [planner_output] → maker_output
-       → normalized_bdd → [executable_scenario] → checker_output
-       → human_review → report
+待实现（Stage 2）：
+[audit_trail.html] ◄──────────── audit_trail.py（来自 master 概念）
+[case_compare.html] ◄─────────── case_compare.py（来自 master 概念）
 ```
 
-### 关键 Artifact 属性
+---
 
-每个 governed artifact 必须包含：
-- `provider`, `model`, `prompt_version`, `run_timestamp`, `pipeline_version`
+## 四、模块目录（Main 完整版）
 
-每个 rule-level artifact 必须包含：
-- `paragraph_id`（stable source anchor）
-- `rule_type`（controlled enum）
-- `source.atomic_rule_ids`（traceability）
+### 主要模块
 
-### Artifact 修改规则
+| 模块 | 职责 | 来源 | 状态 |
+|------|------|------|------|
+| `lme_testing/pipelines.py` | maker/checker/planner/BDD 流水线 | Main | ✅ 910行 |
+| `lme_testing/providers.py` | LLM API 调用，StubProvider | Main | ✅ 442行 |
+| `lme_testing/prompts.py` | 所有系统 prompt 和版本号 | Main | ✅ 310行，带版本控制 |
+| `lme_testing/review_session.py` | Web UI 服务，所有 API 路由 | Main | ✅ 1251行，含 BDD tabs |
+| `lme_testing/workflow_session.py` | 全流程编排 | Main+Cherry-pick | 🔄 SM-T03 加中断处理 |
+| `lme_testing/storage.py` | 文件 I/O 工具 | Main+Cherry-pick | 🔄 SM-T02 改 UTC 时间戳 |
+| `lme_testing/bdd_export.py` | BDD 产物导出（.feature, step defs）| Main | ✅ |
+| `lme_testing/step_registry.py` | Step 可见性注册与匹配 | Main | ✅（step lib 基于模拟）|
+| `lme_testing/step_library.py` | Step 定义库（模拟 LME API）| Main | ⚠️ 模拟实现 |
+| `lme_testing/human_review.py` | Human review HTML 渲染 | Main | ✅ |
+| `lme_testing/schemas.py` | Schema 验证工具 | Main | ✅ |
+| `lme_testing/config.py` | 配置加载与类型定义 | Main+Cherry-pick | 🔄 SM-T04 加重试配置 |
+| `lme_testing/signals/__init__.py` | Governance signals 计算 | Main | ⚠️ 2/4 信号数据为空 |
+| `lme_testing/oracles/` | 8 个确定性验证模块 | Main | ✅（未在真实场景验证）|
+| `lme_testing/audit_trail.py` | 审计跟踪 HTML 生成 | **待实现（S2-B1）**| ❌ |
+| `lme_testing/case_compare.py` | Case 对比视图 | **待实现（S2-B2）**| ❌ |
 
-修改任何 artifact schema 必须同时更新：
-- schema 文件
-- 对应 fixture（valid + invalid）
-- 相关单元测试
-- `docs/acceptance.md` 对应 gate 的 Evidence
+### Master 分支额外实现（已分析，部分 cherry-pick）
+
+| Master 模块/特性 | 处理方式 | 原因 |
+|----------------|---------|------|
+| UTC 时间戳 | ✅ Cherry-pick（SM-T02）| 更规范 |
+| KeyboardInterrupt 处理 | ✅ Cherry-pick（SM-T03）| 改善 UX |
+| max_retries 配置 | 🧊 可选 Cherry-pick（SM-T04）| 待验证是否需要 |
+| audit_trail 调用点 | 📋 概念保留，模块待实现（S2-B1）| 模块缺失无法直接合并 |
+| case_compare 调用点 | 📋 概念保留，模块待实现（S2-B2）| 模块缺失无法直接合并 |
+| 旧版 providers.py（135行）| ❌ 不合并 | 编码损坏，缺 StubProvider |
+| 旧版 pipelines.py（639行）| ❌ 不合并 | 缺 planner/BDD pipeline |
+| 旧版 prompts.py（无版本）| ❌ 不合并 | 无版本控制 |
 
 ---
 
-## 六、Traceability 模型
+## 五、Web UI 路由映射（Main 完整版）
 
-### 当前可追溯路径
+### GET 路由
 
-```
-source document
-  → paragraph_id（stable anchor）
-    → atomic_rule（rule_id, paragraph_id）
-      → semantic_rule（semantic_rule_id, atomic_rule_ids, paragraph_ids）
-        → maker_output（semantic_rule_id, paragraph_ids）
-          → checker_output（case_id, semantic_rule_id）
-            → coverage_report（rule_coverage_status per semantic_rule_id）
-              → HTML report（clickable rule ID → scenario detail）
-```
+| 路径 | 功能 |
+|------|------|
+| `/` | 主界面 HTML |
+| `/api/session` | 当前 session 状态 |
+| `/api/history` | 迭代历史 |
+| `/api/bdd` | BDD scenarios（normalized_bdd）|
+| `/api/scripts` | Step definitions 可见性 |
+| `/api/stage` | Stage gates 状态 |
+| `/api/status/<job_id>` | 异步任务状态 |
+| `/report.html` | HTML 报告 |
+| `/maker_readable.html` | Maker 输出可读视图 |
+| `/checker_readable.html` | Checker 输出可读视图 |
+| `/coverage.csv` | Coverage 导出 |
+| `/files` | 文件浏览器 |
 
-### 当前 traceability 的已知缺口
+### POST 路由
 
-- planner_output → maker_output 的 traceability 存在于代码，但未在 HTML report 中可视化
-- normalized_bdd → executable_scenario 的链接存在于 schema，但无真实消费者验证
-- step_visibility → step_definitions 的链接基于模拟 step library，不对应真实 LME API
+| 路径 | 功能 |
+|------|------|
+| `/api/reviews/save` | 保存人工审核决策（atomic_write）|
+| `/api/bdd/save` | 保存 BDD 编辑（atomic_write）|
+| `/api/scripts/save` | 保存 step definitions 编辑 |
+| `/api/stage/advance` | 推进 stage gate |
+| `/api/submit` | 提交触发 checker/rewrite |
+| `/api/finalize` | 最终确认，触发 audit_trail 生成（待 S2-B1 实现）|
 
----
+**Master 版路由对比（仅供参考）：**
 
-## 七、验证架构
-
-### 验证层次
-
-| 层次 | 验证内容 | 实现状态 |
-|------|---------|---------|
-| Source ingestion | 可读性、格式、anchor 唯一性 | ✅ 实现 |
-| Rule artifact | Schema、enum、required fields、traceability | ✅ 实现，CI 验证 |
-| Generation artifact | Structured output、rule references、metadata | ✅ 实现 |
-| Review artifact | Decision format、action values | ✅ 实现 |
-| Reporting artifact | Completeness、metrics 一致性 | ✅ 实现 |
-
-### CI 验证矩阵
-
-| CI Job | 验证内容 | 当前状态 |
-|--------|---------|---------|
-| docs-governance | *.md 中无绝对路径 | ✅ 有效 |
-| artifact-governance | artifact 结构和 rule_type enum | ✅ 有效 |
-| schema-validation | JSON Schema fixtures + persistent output to `runs/schema_validation_latest.json` | ✅ 有效 |
-| upstream-validation | atomic + semantic rules 完整性 | ✅ 有效 |
-| unit-tests | 78 个单元测试 | ✅ 有效（基于 stub）|
-| smoke-test | E2E 端到端冒烟 | ✅ 有效（stub，2条规则）|
-| governance-signals | 计算 governance 指标 | ⚠️ 输出数字部分为空/stub |
-| release-governance | release 文件完整性检查 | ✅ 有效（结构检查）|
+| Master 路由 | Main 等价路由 | 说明 |
+|------------|-------------|------|
+| `/api/audit_trail` | 无（S2-B1 后添加）| Master 有但模块缺失 |
+| `/api/reviews/save` | `/api/reviews/save` | 相同 |
+| `/api/submit` | `/api/submit` | 相同 |
+| `/api/finalize` | `/api/finalize` | 相同 |
+| 无 | `/api/bdd` | Main 新增（BDD tab）|
+| 无 | `/api/scripts` | Main 新增（Scripts tab）|
+| 无 | `/api/stage` | Main 新增（Stage gates）|
 
 ---
 
-## 八、失败模型
+## 六、Governance Signals 数据来源（v3.0 更新）
 
-### 失败类别
-
-1. **Source failure** — 文档不可读、格式不支持、提取失败
-2. **Contract failure** — Schema 无效、enum 非法、trace 引用断裂
-3. **Model failure** — timeout、malformed structured output、不稳定输出
-4. **Review failure** — session snapshot 损坏（S1-T03 修复后降低概率）
-5. **Reporting failure** — 缺少必需 artifact、汇总生成失败
-
-### 架构规则
-
-失败必须：可见、可分类、可归因到阶段、可恢复（在可能的情况下）、**不得隐藏为成功输出**
+| 信号 | 数据来源 | 可信度 | 修复任务 |
+|------|---------|--------|---------|
+| `schema_failure_rate` | 无（从 coverage 推断）| ⚠️ 假数据 | S1-T01 |
+| `checker_instability_rate` | 真实 API 测量（MiniMax-M2.7）：v1/v2 14 cases → 71% instability；v3/v4 10 cases → 60% instability（delta 主要=1）；retry logic 已实现，但 API 随机断开阻止全量 322-case 测量 | ⚠️ 高 instability，但样本小且非全量；S2-T01 blocked by API 可靠性
+| `coverage_percent` | 全量运行数据（路径未对齐）| 🔄 待对齐 | S1-T02 |
+| `step_binding_success_rate` | 模拟 step library | ⚠️ 无实际意义 | Stage 3（待 LME VM）|
 
 ---
 
-## 九、已知架构限制（当前不计划解决）
-
-| 限制 | 影响范围 | 接受原因 |
-|------|---------|---------|
-| 单用户 Web UI | 不支持团队并发使用 | 当前工具定位为单用户 |
-| PDF 解析依赖文档规整度 | 复杂布局 PDF 提取质量低 | 超出当前阶段范围 |
-| Step library 基于模拟 API | step binding rate 无实际意义 | 等待 Stage 3 外部条件 |
-| Checker 是 LLM，输出概率性 | 无法保证 checker 判断一致性 | 通过 stability 测量和 oracle 部分缓解 |
-| Windows + PowerShell 工具链 | Linux/macOS 开发者无法使用 session handoff | 单人开发现状，跨平台支持非当前优先级 |
-| 无认证/授权 | Web UI 对本地网络开放 | 设计为本地工具，不面向网络部署 |
-
----
-
-## 十、架构评审检查清单（每次重大变更前）
-
-- [ ] 这个变更是否保留了 artifact 契约？
-- [ ] 是否改善或削弱了 traceability？
-- [ ] provider 逻辑是否保持隔离？
-- [ ] 是否模糊了模块边界？
-- [ ] 是否将确定性职责移入了纯 LLM 逻辑？
-- [ ] 是否引入了新的 LLM-driven 阶段而没有定义契约？
-- [ ] 是否将 governance signal 的数据来源标注清楚（real_api / stub / no_data）？
-- [ ] 是否与当前 roadmap 阶段一致？
-- [ ] 是否保留了 rollback 清晰度？
-
----
-
-## 附录：目录职责
+## 七、目录结构（含 vendor/）
 
 | 目录 | 职责 |
 |------|------|
-| `docs/` | 架构、roadmap、治理、验收规则、代理规则 |
-| `schemas/` | artifact schemas、fixtures、schema 演进支持 |
-| `lme_testing/` | 核心 Python 包：pipelines、providers、oracles、signals |
+| `lme_testing/` | 核心 Python 包（主路径）|
 | `scripts/` | 提取脚本、治理检查脚本 |
-| `config/` | provider 配置、approved_providers、benchmark_thresholds |
-| `artifacts/` | 规则 artifacts（lme_rules_v2_2、poc_two_rules） |
-| `runs/` | pipeline 运行输出（gitignored，路径结构见 run_directory_structure.md） |
+| `schemas/` | 7 套 artifact schemas + fixtures |
+| `config/` | provider 配置、governance 配置 |
+| `artifacts/` | 规则 artifacts（183条）|
+| `docs/` | 架构、roadmap、治理、验收文档 |
+| `tests/` | 15 个测试文件（78 个测试）|
+| `samples/ruby_cucumber/` | Ruby Cucumber 原型（存档）|
+| `logs-from-backup-run/` | POC 运行日志（存档）|
+| `runs/` | pipeline 运行输出（gitignored）|
 | `reports/` | HTML 报告输出 |
-| `tests/` | 单元测试（78 个） |
-| `samples/ruby_cucumber/` | Ruby Cucumber 原型（存档，非主路径） |
+| `screenshot/` | 界面截图 |
+| `vendor/master-branch/` | **新增（SM-T01）**：同事 master 分支快照，存档用 |
 
-**`runs/` 目录结构：** 见 `docs/run_directory_structure.md`
+**`vendor/master-branch/` 约束：**
+- 不参与任何 `import` 路径
+- 不包含在 pytest 测试扫描范围内（`pyproject.toml` 或 `pytest.ini` 中 exclude）
+- cherry-pick 完成后可删除，也可保留作历史参考
+
+---
+
+## 八、多人协作架构约束（v3.0 新增）
+
+基于本次 master 分支合并分析建立以下约束：
+
+### 分支合并前的必检项
+
+1. **文件集差异分析** — 先用 `comm` 或 `diff -rq` 确认哪些文件是新增/修改/删除
+2. **核心模块优先级** — `lme_testing/bdd_export.py`、`schemas/`、`lme_testing/oracles/`、`lme_testing/signals/` 是主分支的核心资产，合并时不得删除
+3. **broken import 检查** — 合并前检查所有 import 是否有对应模块文件
+4. **编码问题检查** — 检查文件是否有 `???` 乱码（Windows 编码问题）
+
+### 合并策略优先级
+
+```
+1. 新增文件（对方有，己方无）→ 直接评估是否纳入
+2. Cherry-pick（对方某文件局部改进）→ 逐段分析，最小化改动
+3. 整体覆盖（整个文件替换）→ 禁止，除非完全理解差异
+4. 概念保留（对方引用但缺失实现）→ 记录为新任务，不合并破损代码
+```
+
+### provider.py 编码规范
+
+开发者在 Windows 环境编写中文注释时，确保文件保存为 UTF-8（不带 BOM），避免 `???` 乱码。推荐在 `.editorconfig` 中强制：
+```
+charset = utf-8
+```
+
+---
+
+## 九、已知架构限制（v3.0 更新）
+
+| 限制 | 影响 | 接受原因 |
+|------|------|---------|
+| 单用户 Web UI | 不支持团队并发 | 工具定位 |
+| Step library 基于模拟 API | step binding rate 无意义 | 待 Stage 3 |
+| Checker 是 LLM，概率性 | 判断不保证一致性 | 通过 stability 测量缓解 |
+| audit_trail/case_compare 待实现 | 缺少审计视图 | Stage 2 任务 |
+| Windows PowerShell 工具链 | 跨平台受限 | 单人开发现状 |
+| vendor/ 目录引入 | 增加 repo 体积 | cherry-pick 完成后可清理 |
+
+---
+
+## 十、架构评审检查清单（v3.0 更新）
+
+在每次重大变更或分支合并前：
+
+- [ ] 所有新增 import 都有对应的模块文件？
+- [ ] 合并是否保留了 artifact 契约（7 套 schema）？
+- [ ] BDD 层（`bdd_export.py`、`normalized_bdd.schema.json`）是否完整？
+- [ ] Oracle 模块（8个）是否完整？
+- [ ] Governance signals 数据来源是否标注（real_api/stub/no_data）？
+- [ ] `atomic_write_json()` 是否保留？
+- [ ] CI smoke test 是否通过？
+- [ ] vendor/ 目录是否被 pytest exclude？
+- [ ] 是否与当前 roadmap 阶段一致？

@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-19 11:58:48 UTC`
+- `2026-04-19 12:49:51 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `docs: reconcile S2-T02 findings into v3.0 docs`
 - `fix(checker): error surfacing + retry logic for API stability`
 - `docs: unfreeze Stage 2 with S2-T01-T04 task breakdown`
 - `feat(maker): prompt v1.1 鈥?rule-type-specific case guidance`
 - `feat(S1-T04): full 183-rule baseline run 鈥?73.3% coverage, spot check, release doc`
-- `feat(S1-T03b): checker stability real API run`
 
 ---
 
