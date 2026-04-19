@@ -1,6 +1,7 @@
 # Baseline 183-Rules Quality Report
 
-**Run Date:** 2026-04-18
+**Run Date:** 2026-04-19
+**Run ID:** checker_v1.1_full/20260419T092854+0800
 **Model:** MiniMax-M2.7
 **Provider:** minimax
 **Prompt Version:** 1.0
@@ -15,11 +16,11 @@
 | Rules in input | 183 |
 | Rules processed by maker | 180 |
 | Maker scenarios generated | 322 |
-| Checker cases reviewed | 320 / 322 |
-| Checker review success rate | 99.4% |
-| Unreviewed cases | 2 (SR-MR-075-01 positive/negative — batch JSON parse error) |
+| Checker cases reviewed | 322 |
+| Checker review success rate | 100% |
+| Unreviewed cases | 0 |
 
-**Overall Coverage:** 132 / 180 = **73.3%** (fully covered rules)
+**Overall Coverage:** 131 / 180 = **72.78%** (fully covered rules)
 
 ---
 
@@ -27,14 +28,14 @@
 
 | Rule Type | Total | Fully | Partial | Uncovered | N/A | Coverage% |
 |-----------|------:|------:|--------:|----------:|----:|----------:|
-| obligation | 55 | 53 | 1 | 1 | 0 | 96.4% |
+| obligation | 55 | 52 | 1 | 2 | 0 | 94.5% |
 | permission | 21 | 21 | 0 | 0 | 0 | 100.0% |
-| deadline | 17 | 15 | 1 | 1 | 0 | 88.2% |
-| workflow | 17 | 14 | 3 | 0 | 0 | 82.4% |
+| deadline | 17 | 15 | 2 | 0 | 0 | 88.2% |
+| workflow | 17 | 11 | 6 | 0 | 0 | 64.7% |
 | enum_definition | 10 | 10 | 0 | 0 | 0 | 100.0% |
 | calculation | 8 | 5 | 3 | 0 | 0 | 62.5% |
-| data_constraint | 6 | 4 | 2 | 0 | 0 | 66.7% |
-| prohibition | 6 | 2 | 3 | 1 | 0 | 33.3% |
+| data_constraint | 6 | 6 | 0 | 0 | 0 | 100.0% |
+| prohibition | 6 | 3 | 3 | 0 | 0 | 50.0% |
 | state_transition | 6 | 6 | 0 | 0 | 0 | 100.0% |
 | reference_only | 34 | 0 | 0 | 0 | 34 | N/A |
 
@@ -173,18 +174,18 @@ Baseline governance signals should be updated with:
 ```
 coverage_signals:
   total_rules: 180
-  fully_covered: 132
-  partially_covered: 13
+  fully_covered: 131
+  partially_covered: 15
   uncovered: 3
   not_applicable: 34
-  coverage_percent: 73.3
+  coverage_percent: 72.78
 ```
 
 ---
 
 ## Run Artifacts
 
-- **Maker output:** `runs/maker/20260418T231915+0800/maker_cases.jsonl`
-- **Checker output:** `runs/checker/20260418T234515+0800/checker_reviews.jsonl`
-- **Coverage report:** `runs/checker/20260418T234515+0800/coverage_report.json`
+- **Maker output:** `runs/maker_v1.1_full/20260419T090524+0800/maker_cases.jsonl`
+- **Checker output:** `runs/checker_v1.1_full/20260419T092854+0800/checker_reviews.jsonl`
+- **Coverage report:** `runs/checker_v1.1_full/20260419T092854+0800/coverage_report.json`
 - **HTML report:** `reports/baseline_full_20260418.html`

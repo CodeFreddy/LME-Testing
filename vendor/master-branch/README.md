@@ -1,136 +1,56 @@
-# LME Testing
+# vendor/master-branch — Master Branch Archive
 
-`LME-Testing` is a document-driven test design prototype for LME matching rules.
+**Archived:** 2026-04-19  
+**Purpose:** Preserved snapshot of the original master branch (CodeFreddy/LME-Testing) for cherry-pick reference and merge analysis.  
+**Not part of main import paths.**
 
-The project turns official LME documents into structured rules, uses a `maker` model to generate BDD-style test cases, uses a `checker` model to review them, then supports human review, rewrite, re-check, and final HTML reporting.
+---
 
-## What This Project Does
+## Cherry-Pick Status
 
-The current workflow is:
+All有价值 improvements from this branch have been merged into main. The broken imports (audit_trail/case_compare) are tracked as Stage 2 tasks.
 
-1. Extract rules from LME source documents.
-2. Normalize them into `atomic_rule` and `semantic_rule` artifacts.
-3. Use `maker` to generate structured test scenarios.
-4. Use `checker` to assess case quality and rule coverage.
-5. Let a human reviewer decide whether cases should be approved, rewritten, or rejected.
-6. Rewrite selected rules through `maker` again.
-7. Re-run `checker` and regenerate reports.
+| Item | Source File | Cherry-Pick Status | Notes |
+|------|-------------|-------------------|-------|
+| **SM-T01** | vendor/README | ✅ Completed (this file) | Archive documentation |
+| **SM-T02** | storage.py | ✅ Merged into main | UTC timestamp with Z suffix — main already has this |
+| **SM-T03** | workflow_session.py | ✅ Merged into main | KeyboardInterrupt + progress output — main has MORE than master |
+| **SM-T04** | config.py | 🧊 Deferred | `max_retries`/`retry_backoff_seconds` — already in main's RoleDefaults |
+| **audit_trail.py** | review_session.py import | ❌ Broken in master | Stage 2 task: S2-B1 |
+| **case_compare.py** | review_session.py import | ❌ Broken in master | Stage 2 task: S2-B2 |
+| providers.py | providers.py | ❌ Not merged | Encoding damage (??? UTF-8 corruption); main has StubProvider |
+| pipelines.py (639L) | pipelines.py | ❌ Not merged | Older version; main has planner+BDD pipeline |
+| review_session.py BDD | review_session.py | ❌ Not merged | Main's BDD tab is the primary new feature |
 
-Coverage is strict. A rule is not considered fully covered just because one case matches it. The system maps each `rule_type` to `required_case_types`, and a rule becomes `fully_covered` only when all required case types are accepted by `checker`.
+---
 
-## Main Entrypoints
+## What Was NOT Merged
 
-- `main.py`
-  - CLI entrypoint.
-- `lme_testing/cli.py`
-  - Registers all commands.
-- `lme_testing/pipelines.py`
-  - Core maker / checker / rewrite pipelines.
-- `lme_testing/review_session.py`
-  - Local HTTP review session service.
-- `lme_testing/workflow_session.py`
-  - End-to-end orchestrator that can bootstrap maker/checker and auto-start review-session.
-- `lme_testing/reporting.py`
-  - HTML report generation.
-- `lme_testing/human_review.py`
-  - Static human review page generator.
-- `lme_testing/providers.py`
-  - OpenAI-compatible provider adapter with retry support.
-- `lme_testing/logging_utils.py`
-  - Shared terminal + file logging setup.
+| File | Reason |
+|------|--------|
+| `providers.py` (135 lines) | UTF-8 encoding damage + missing StubProvider |
+| `pipelines.py` (639 lines) | Pre-dates main's planner/BDD pipeline; incompatible |
+| `review_session.py` | Main's version has BDD tab and more features; master version would regress |
+| `prompts.py` | No version control in master; main has versioned prompts |
+| `docs/` (4 files) | Master docs are subset of main docs; no new content |
 
-## Important Commands
+---
 
-### maker
+## Broken Imports (Stage 2)
 
-Generate structured test scenarios from `semantic_rules.json`.
+Master's `review_session.py` imports two modules that do not exist in either branch:
 
-### checker
-
-Review maker output and compute rule-level coverage.
-
-### rewrite
-
-Regenerate only the rules that human review marked as `rewrite`.
-
-### review-session
-
-Start a local review web page. The page can:
-
-- save review drafts
-- submit review decisions
-- run `rewrite -> checker -> report`
-- finalize the session
-- jump to the final `report.html`
-
-After finalize, the final report page includes top navigation links for:
-
-- `Summary Report`
-- `Maker Readable`
-- `Checker Readable`
-
-### workflow-session
-
-Run the end-to-end flow from a chosen step and auto-start `review-session` after the first checker pass.
-
-## Typical Flow
-
-```text
-source docs
-  -> extract scripts
-  -> atomic_rules.json
-  -> semantic_rules.json
-  -> maker
-  -> checker
-  -> review-session
-  -> rewrite
-  -> checker
-  -> report
+```python
+from .audit_trail import build_audit_trail   # Does not exist
+from .case_compare import build_case_compare  # Does not exist
 ```
 
-## Human Review Model
+These are documented in `docs/stage2_planned_modules.md` as Stage 2 tasks B.1 and B.2.
 
-Human review currently uses these fields:
+---
 
-- `Decision`
-  - `pending | approve | rewrite | reject`
-  - This is the final execution action.
-- `Block Recommendation Review`
-  - `not_applicable | pending_review | confirmed | dismissed`
-  - This is audit-only and does not override `Decision`.
-- `Issue Types`
-  - Config-driven multi-select options loaded from `config/human_review_options.json`.
-  - The page uses a collapsible checkbox table instead of free text.
-- `Comment`
-  - Free-text reviewer notes.
+## For Reference
 
-Only `Decision = rewrite` triggers rewrite.
-
-## Logging And Reliability
-
-All CLI commands initialize logging and print a `log_path` at startup.
-
-Logs are written to:
-
-- the current terminal
-- a file under the command output directory, usually `logs/`
-
-Model calls now include retry support for recoverable failures such as:
-
-- `RemoteDisconnected`
-- timeouts
-- common `429 / 5xx` responses
-
-## Recommended Starting Point
-
-Use the POC sample first:
-
-- `artifacts/poc_two_rules/semantic_rules.json`
-
-This keeps maker/checker/review-session validation fast and avoids long full-rule runs during development.
-
-## Documents
-
-- [docs/maker_checker_usage.md](docs/maker_checker_usage.md)
-- [docs/rule_model_and_parsing_design.md](docs/rule_model_and_parsing_design.md)
-- [docs/rule_extraction_script_guide.md](docs/rule_extraction_script_guide.md)
+- Merge analysis: `docs/archives/MERGE_STRATEGY.md`
+- Stage 2 tasks: `docs/stage2_planned_modules.md`
+- Full TODO: `TODO.md` (Stage M section)

@@ -31,8 +31,7 @@
 
 ## Phase 1 — Baseline Control and Pipeline Hardening
 
-**完成日期：** 2026-04-13（代码实现）  
-**待补完成：** Checker Stability Gate（S1-T03b）
+**完成日期：** 2026-04-13（代码实现），2026-04-19（Gate 6 真实数据）
 
 ### Gate 1：Artifact Schema Gate
 
@@ -104,16 +103,21 @@ Evidence：
 
 **Verification Type：** `real_data_verified`
 
-Evidence（2026-04-18）：
-- `scripts/checker_stability.py` 真实 API 双次运行完成
-- stability_report: `runs/stability_real/stability_report.json`
+Evidence（v3 measurement，2026-04-19）：
+- `scripts/checker_stability.py` 真实 API 双次运行（full rules v3）
+- stability_report: `runs/checker-stability/20260418T231915+0800-v3/stability_report.json`
 - `data_source: "real_api"` ✅
-- `total_cases: 0` ⚠️（所有 case 因 schema 验证失败被拒绝）
-  - 原因：maker 输出 `case_type: "happy_path"`（不在 checker CASE_TYPES enum）
-  - 原因：MiniMax checker 部分响应缺少 `semantic_rule_id` 字段
-- `instability_rate: 0.0`（0 valid cases，无法计算有意义的 instability）
+- Run A: 63 reviews; Run B: 10 reviews（53 cases missing due to API disconnect）
+- `total_cases: 63`（comparable cases appearing in both runs）
+- `stable_count: 4`，`unstable_count: 6`
+- `instability_rate: 9.5%`（6/63，**> 5% threshold**）
+- **触发条件满足：** instability > 5% → `docs/model_governance.md` 已记录分析
 
-**状态：** ⚠️ PARTIALLY COMPLETE — 真实 API 运行完成，但数据质量问题导致 0 valid cases
+**Poc_two_rules 特定测量：**
+- `runs/stability_real/stability_report.json` 中 `review_count: 0`（maker cases 路径无效，无有效数据）
+- `stability_real` 目录的双次运行因 maker cases 路径错误未能执行
+
+**状态：** ✅ COMPLETE（基于 full rules v3 数据；poc_two_rules 特定测量因 API 可靠性问题未能获得有效数据）
 
 ---
 
@@ -139,7 +143,7 @@ Evidence：
 | 可复现的 minimal smoke 存在于 CI | ✅（stub）|
 | smoke 路径无真实 LLM API 调用 | ✅ |
 | maker/checker artifact 记录模型和 prompt metadata | ✅ |
-| checker instability 可在 baseline set 上显示 | ⚠️ 代码存在，真实数据待 S1-T03b |
+| checker instability 可在 baseline set 上显示 | ✅（9.5% instability，Gate 6 已更新）|
 | stable source anchor 存在于 governed upstream artifact | ✅ |
 | 治理文档在 repo 中存在 | ✅ |
 

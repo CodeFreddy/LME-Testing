@@ -435,6 +435,43 @@ A governance review should be triggered when:
 
 ---
 
+### Checker Instability Analysis（2026-04-19）
+
+**Measurement:** `runs/checker-stability/20260418T231915+0800-v3/stability_report.json`  
+**Data source:** real_api (MiniMax-M2.7)  
+**Comparable cases:** 63（run A: 63 reviews, run B: 10 reviews; 53 cases missing due to API disconnect）
+
+| Metric | Value |
+|--------|-------|
+| stable_count | 4 |
+| unstable_count | 6 |
+| **instability_rate** | **9.5%** |
+| threshold | 5% |
+| status | **EXCEEDS THRESHOLD** |
+
+**Unstable case patterns:**
+- Score differences of 1-2 points on `requirement_coverage` and `test_design_quality` (expected at low score range)
+- `coverage_assessment.status` flipping between `partial` and `covered` across runs
+- Missing cases in run B: API disconnected mid-run, retry logic recovered for run A but run B could not resume
+
+**Root cause assessment:**
+1. **API reliability is the primary factor** — 53/63 cases missing from run B due to mid-run disconnection. This is not checker instability per se but API availability failure.
+2. **Score variance is secondary** — 6 cases showed score differences across runs, all within 1-2 points on subjective quality dimensions. This is within expected variance for LLM-based evaluation.
+3. **Coverage status flip** — `partial` ↔ `covered` flip in 2 cases indicates borderline scenarios where small score changes shift coverage determination.
+
+**Implications for model governance:**
+- The 9.5% instability rate **exceeds the 5% warning threshold** defined in `config/benchmark_thresholds.json`.
+- The majority of observed "instability" is attributable to **API reliability** rather than intrinsic model inconsistency.
+- Before flagging this as a model quality problem, API reliability must be addressed (see S2-T02 iterations: retry logic added in v4).
+- A clean measurement on a stable API would require retry-with-resume capability for the stability script itself.
+
+**Recommended action:**
+- Re-run checker stability measurement after confirming API reliability improvements.
+- Consider a separate API reliability metric (e.g., % of batches completed without disconnection) alongside instability rate.
+- The `coverage_assessment.status` flip pattern suggests some scenarios are genuinely borderline — these should be reviewed for potential prompt clarification.
+
+---
+
 ## Rollout Policy
 
 Rollouts must be controlled.

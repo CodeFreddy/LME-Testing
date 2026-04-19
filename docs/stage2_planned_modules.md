@@ -8,7 +8,7 @@
 
 ## 1. `lme_testing/audit_trail.py`
 
-**Status:** Planned (not implemented)
+**Status:** ✅ Implemented (2026-04-19)
 
 ### Purpose
 Generate an audit trail HTML view that records the complete decision chain for each rule:
@@ -32,15 +32,15 @@ Generate an audit trail HTML view that records the complete decision chain for e
 - `GET /api/audit_trail` — Returns audit trail HTML for current session
 
 ### Acceptance Criteria
-- [ ] `lme_testing/audit_trail.py` module exists with `build_audit_trail(session_dir: Path) -> Path` function
-- [ ] HTML output shows maker → checker → human decision chain per rule
-- [ ] Works with existing `review_session.py` without modification
+- [x] `lme_testing/audit_trail.py` module exists with `build_audit_trail(session_dir: Path) -> dict` function ✅
+- [x] HTML output shows maker → checker → human decision chain per rule ✅
+- [x] Works with existing `review_session.py` without modification ✅
 
 ---
 
 ## 2. `lme_testing/case_compare.py`
 
-**Status:** Planned (not implemented)
+**Status:** ✅ Implemented (2026-04-19)
 
 ### Purpose
 Generate a side-by-side comparison view showing how a rule's cases changed between iterations (e.g., after a `rewrite` decision).
@@ -57,13 +57,10 @@ Generate a side-by-side comparison view showing how a rule's cases changed betwe
   - Right panel: iteration N+1 cases
   - Diff highlighting (added/removed/changed scenarios)
 
-### API Route (already stubbed in `review_session.py`)
-- `POST /api/case_compare` — Triggered after `/api/submit` when rewrite decisions exist
-
 ### Acceptance Criteria
-- [ ] `lme_testing/case_compare.py` module exists with `build_case_compare(session_dir: Path, iteration_a: int, iteration_b: int) -> Path` function
-- [ ] HTML output highlights differences between two iterations
-- [ ] Works with existing `review_session.py` without modification
+- [x] `lme_testing/case_compare.py` module exists with `build_case_compare(...)` function ✅
+- [x] HTML output highlights differences between two iterations ✅
+- [x] Works with existing `review_session.py` without modification ✅
 
 ---
 

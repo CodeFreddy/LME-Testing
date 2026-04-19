@@ -8,7 +8,7 @@ import json
 # ---------------------------------------------------------------------------
 # Increment MAKER_PROMPT_VERSION when MAKER_SYSTEM_PROMPT or
 # build_maker_user_prompt changes in a way that affects output quality.
-MAKER_PROMPT_VERSION = "1.1"
+MAKER_PROMPT_VERSION = "1.2"
 
 # Increment CHECKER_PROMPT_VERSION when CHECKER_SYSTEM_PROMPT or
 # build_checker_user_prompt changes in a way that affects output quality.
@@ -47,10 +47,10 @@ Hard requirements:
 - If something is uncertain, keep the scenario conservative and put the uncertainty into assumptions.
 - Return JSON only.
 Case-type specific guidance:
-- PROHIBITION positive case: describe the permitted action (not the prohibition violation). The positive case must name the specific action that IS allowed, grounded in the rule's evidence. Do NOT describe system checks or "validation passes" — describe the actor's actual permitted behavior.
+- PROHIBITION positive case: describe the permitted action (not the prohibition violation). The positive case must name the specific action that IS allowed, grounded in the rule's evidence. Do NOT describe system checks or "validation passes" — describe the actor's actual permitted behavior. IMPORTANT: If the rule's evidence describes ONLY what is prohibited and does not specify a named permitted action, the positive case must describe what the rule implicitly permits (e.g., the inverse of the prohibition) and you must explicitly note the inference in the assumptions field.
 - PROHIBITION negative case: describe the specific violation behavior from the rule's evidence, not a generic "invalid action."
-- DEADLINE boundary case: if the rule's evidence does not specify an exact time, do not invent a time value — instead use the reference event (e.g., "at the submission deadline") and derive the boundary from the rule's business_day_offset or deadline_kind field. The THEN step must assert the deadline validation result matches the expected outcome.
-- BOUNDARY case: must test the edge condition explicitly. Use specific values from the evidence when available.
+- DEADLINE boundary case: the boundary must be derived from a specific value in the evidence (an exact time, a specific business_day_offset, a named deadline_kind). If the evidence does not define a specific boundary value, do not invent one. Instead, set the case_type to "exception" and test the exceptional-circumstances scenario. The boundary THEN step must assert the deadline validation result (accepted/rejected) — do not assert a specific time in the then clause.
+- BOUNDARY case: must test the edge condition explicitly. Use specific values from the evidence when available. If no explicit edge value exists in the evidence, do not generate a boundary case — flag this in the scenario's assumptions and use case_type "exception" instead.
 """
 
 
