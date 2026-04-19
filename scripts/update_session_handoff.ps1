@@ -42,7 +42,7 @@ Before making substantial changes, read these files in order:
 1. `AGENTS.md`
 2. `README.md`
 3. `docs/index.md`
-4. `docs/roadmap.md` (v3.0 — Stage M is current priority)
+4. `docs/roadmap.md` (v3.0 — Stage M complete, Stage 2 Direction A underway)
 5. `docs/implementation_plan.md` (v3.0)
 6. `docs/acceptance.md`
 7. `docs/architecture.md` (v3.0)
@@ -89,21 +89,20 @@ Recent completed work:
   - `pipelines.py`: error surfacing with remaining count on exception
   - `providers.py`: retry loop for transient errors (SSL EOF, connection reset, HTTP 5xx)
 
-- **docs/ v3.0 restructure:** roadmap.md, architecture.md, implementation_plan.md, TODO.md v3.0 all updated. Stage M (master branch merge) is current top priority.
+- **Cleanup (2026-04-19):** Evidence preserved in `evidence/` (~1.3MB). Deleted: `vendor/` (1.7MB), `logs-from-backup-run/` (37KB), `reports/` (2.1MB), stale runs/ artifacts (~4.3MB)
+- **Stage M COMPLETE (2026-04-19):** SM-T01~SM-T05 all done — UTC timestamps, workflow interrupt handling, retry config merged from master
 
 ---
 
 ## Current Repo State
 
-Stage M (master branch merge) is the current priority per v3.0 docs. All Stage 1 work (v2.0) is complete.
+**Stage M (master branch merge) COMPLETED 2026-04-19.** All Stage 1 work is complete. Stage 2 Direction A is underway.
 
 Key repo state:
 
 - `pipelines.py` + `providers.py`: error surfacing and retry logic implemented
-- TODO.md v3.0: Stage M (SM-T01~SM-T05) defined as current top priority
-- S2-T02 findings reconciled into docs: 60-71% instability directionally concerning, API unreliability blocks full measurement
-- `docs/MERGE_STRATEGY.md` exists — master branch analyzed, 4 cherry-pick candidates identified
-- `vendor/master-branch/` directory exists (Stage M SM-T01 archive target)
+- `evidence/` directory: preserved key artifacts (stability v4, baseline full, governance signals)
+- `vendor/`, `logs-from-backup-run/`, `reports/` deleted (gitignored or archived evidence)
 - Phase 1/2/3 acceptance gates all marked complete in `docs/acceptance.md`
 
 Governance checks available:
@@ -116,15 +115,11 @@ Governance checks available:
 
 ## Recommended Next Step
 
-**Stage M is the current priority.** Execute SM-T01 through SM-T05:
+**Stage M complete. Stage 2 Direction A is the focus:**
 
-1. **SM-T01**: vendor/ archive — create `vendor/master-branch/`, extract master zip, write `vendor/master-branch/README.md`
-2. **SM-T02**: UTC timestamp cherry-pick — `storage.py:timestamp_slug()` → `datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")`
-3. **SM-T03**: KeyboardInterrupt handling cherry-pick — `workflow_session.py` + `pipelines.py` provider_out parameter
-4. **SM-T04**: Retry config cherry-pick (optional) — `config.py RoleDefaults` with `max_retries`/`retry_backoff_seconds`
-5. **SM-T05**: Merge docs archive — update vendor README with done status, confirm CI smoke test passes
-
-**S2-T02 status**: Error surfacing + retry logic committed. Full 322-case instability measurement blocked by MiniMax API reliability. S2-T01 (maker prompt quality) remains blocked.
+1. **S2-T01 (blocked)**: Full 183-rule re-run with maker prompt v1.2 — pending MiniMax API reliability resolution
+2. **S2-T02 resolved**: Error surfacing + retry logic committed; 60-71% instability observed due to API random disconnects
+3. **S2-B1/B2**: audit_trail.py + case_compare.py implemented (optional features)
 
 ---
 
@@ -136,14 +131,13 @@ Governance checks available:
 - Do not reintroduce absolute local paths in Markdown files.
 - Do not mix future enterprise or platform assumptions into current baseline work unless explicitly requested.
 - Every commit should refresh `docs/session_handoff.md`; if hooks are unavailable, run the update script manually before committing.
-- Merge by understanding, not by overwriting — per docs/roadmap.md v3.0 principle #8.
 
 ---
 
 ## Reference Material
 
-- `docs/roadmap.md` — current Stage M priorities
-- `docs/MERGE_STRATEGY.md` — master branch analysis and cherry-pick plan
+- `docs/roadmap.md` — current Stage 2 priorities
+- `docs/architecture.md` — system architecture and module boundaries
 - `docs/references/Claude-roadmap-compare.md` — historical comparison
 
 Treat reference files as non-normative unless their content is promoted into the official docs.
