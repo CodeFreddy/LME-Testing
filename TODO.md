@@ -183,19 +183,98 @@ Evidence（2026-04-18）：
 
 **当前状态：** ⚠️ 待决策 — 依赖 S2-T02 instability 测量结果
 
-### S2-T02：Checker 稳定性改进（未开始）
+### S2-T02：Checker 稳定性改进（已测量，结果复杂）
 
 **触发条件：** instability > 10%
 
 **当前数据：** POC 2-rule instability = 0%（StubProvider，无意义）
-**全量 instability：** 尚未测量
+**全量 instability：** 2026-04-19 测量完成
 
-- [ ] 对 v1.1 full run 产物做双次 checker 稳定性测量
-- [ ] 测量 instability rate 是否 > 10%
-- [ ] 若 instability 高：分析不稳定 case 的模式
-- [ ] 若 instability 低：确认 maker prompt 改进的价值可被稳定测量
+**S2-T02 Results — Checker Stability Measurement（2026-04-19）**
 
-**当前状态：** ❌ Not Started
+⚠️ **WARNING: Measurement is compromised. Both runs stopped early.**
+
+- Full dataset: 322 scenarios (180 rules)
+- Run A：15 API calls → 14 reviews written → stopped silently（SR-MR-001 ~ SR-MR-004.03）
+- Run B：65 API calls → 64 reviews written → stopped silently（SR-MR-001 ~ SR-MR-004.09）
+- `remaining_after_resume: 0` in both summaries — pipeline believed it completed normally
+- 50 cases（SR-MR-004.03-boundary 之后）从未被 checker 处理
+
+**Instability（14 comparable cases，Run A vs Run B）：**
+
+| Metric | Value |
+|--------|-------|
+| Stable | 4 (29%) |
+| Unstable | 10 (71%) |
+| **Instability rate** | **71%**（>> 10% threshold）|
+
+**Meaningful divergences（score delta ≥ 2）：**
+
+| Case | Field | Run A | Run B | Delta |
+|------|-------|-------|-------|-------|
+| TC-SR-MR-001-01-negative-01 | coverage_relevance | direct | indirect | — |
+| TC-SR-MR-001-01-negative-01 | evidence_consistency | 5 | 2 | **3** |
+| TC-SR-MR-001-01-negative-01 | requirement_coverage | 4 | 2 | **2** |
+| TC-SR-MR-001-01-negative-01 | coverage_assessment.status | covered | partial | — |
+| TC-SR-MR-003-03-positive-01 | coverage_relevance | direct | indirect | — |
+| TC-SR-MR-003-03-positive-01 | evidence_consistency | 5 | 3 | **2** |
+| TC-SR-MR-003-03-positive-01 | coverage_assessment.status | covered | partial | — |
+
+**Pattern：** Run B systematically rates same case 更低（degraded evidence_consistency + coverage_relevance），非随机噪声，指向 LLM 对证据充分性判断的不确定性。
+
+**Root cause：** 与 S1-T03b 相同 — checker pipeline 静默截断（API 错误未 surfacing 为失败），两次运行均未处理完全部 322 cases。需先修复截断问题才能做可靠的全量 instability 测量。
+
+**Artifact：** `runs/checker-stability/20260418T231915+0800/stability_report.json`
+
+- [x] 对 v1.1 full run 产物做双次 checker 稳定性测量（14/322 cases comparable）
+- [x] 测量 instability rate 是否 > 10%（71% >> 10%）
+- [x] 分析不稳定 case 的模式（score delta 1 普遍，3 cases 有意义分歧）
+- [x] 修复 checker pipeline 静默截断问题（API 错误未 surfacing）— `pipelines.py` 添加 `batches_processed`/`failed_batch_num` 追踪 + 错误日志
+- [x] v3 重测：error surfacing fix 生效，但 API 本身可靠性仍是瓶颈
+- [x] 添加 retry logic（`providers.py`，max_retries=3，transient errors 指数退避重试）
+- [x] v4 重测：retry 使 Run A 吞吐 63→121 cases（+92%），但 API 随机断开仍导致 Run B 进程中断
+
+**v3 重测结果（2026-04-19，fix 后）：**
+
+| | Run A | Run B |
+|---|---|---|
+| 处理完 batch 数 | 63/322 | 10/322 |
+| 失败 exception | `Remote end closed connection` (batch 64) | `timeout after 300s` (batch 11) |
+| 报告剩余 cases | 259 | 312 |
+| comparable cases | 10 | 10 |
+
+**Instability（10 comparable cases）：**
+
+| Metric | Value |
+|--------|-------|
+| Stable | 4 (40%) |
+| Unstable | 6 (60%) |
+| **Instability rate** | **60%**（>> 10% threshold）|
+
+**Unstable cases（score delta）：**
+
+| Case | Field | Run A | Run B | Delta |
+|------|-------|-------|-------|-------|
+| TC-SR-MR-001-02-positive-01 | test_design_quality | 5 | 3 | **2** |
+| 其他 5 cases | 各 score 字段 | — | — | delta=1（噪声级）|
+
+**Pattern shift：** v3 中 Run B 不再系统性地 rating 更低，instability 主要是 delta=1 的噪声。delta≥2 的 meaningful divergence 降至 1 case。
+
+**结论：** Error surfacing fix + retry logic 均已生效。v4 retry 使 Run A 从 63→121 cases，但 API 仍会在 97~121 cases 后随机断开/超时。全量 322-case instability measurement 需要 API 层可靠性提升，超出代码 fix 范畴。
+
+**v4 重测结果（2026-04-19，retry fix 后）：**
+
+| | Run A | Run B |
+|---|---|---|
+| 处理完 batch 数 | 121/322 | 97/322 |
+| 失败 exception | `Remote end closed connection` (batch 122) | 进程中断（batch 98 后卡住） |
+| 报告剩余 cases | 201 | — |
+| comparable cases | — | — |
+| stability_report | 未产出（Run B 进程中断） | — |
+
+**结论：** Retry 逻辑使 Run A 吞吐提升 92%（63→121），但 API 随机断开问题依然存在。全量 instability 测量需 API 稳定性支持，当前超出代码层可解决范围。
+
+**当前状态：** ⚠️ Error surfacing + retry fix 完成。API 可靠性导致仍无法完成全量 322-case 测量。S2-T01 仍 blocked。
 
 ### S2-T03：Oracle 框架实测验证（未开始）
 

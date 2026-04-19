@@ -345,35 +345,59 @@ class OpenAICompatibleProvider:
             **self.config.headers,
         }
         url = f"{self.config.base_url}/chat/completions"
-        request = urllib.request.Request(url=url, data=body, headers=headers, method="POST")
 
         # Use a thread so that Ctrl+C (KeyboardInterrupt / SIGINT) can break the
         # blocking urlopen call on Windows, where socket I/O is not signal-alertable.
         # The caller (pipelines) catches KeyboardInterrupt and aborts gracefully.
         timeout = getattr(self.config, "timeout_seconds", 300)
+        max_retries = getattr(self.config, "max_retries", 3)
+        import time as _time
 
-        def _do_request() -> dict:
-            with urllib.request.urlopen(request, timeout=timeout) as response:
-                return json.loads(response.read().decode("utf-8"))
+        last_exc: Exception = None
 
-        future = self._executor.submit(_do_request)
-        try:
-            raw = future.result(timeout=timeout + 5)
-        except FuturesTimeoutError:
-            future.cancel()
-            raise ProviderError(f"Provider '{self.config.name}' request timed out after {timeout}s (Ctrl+C to abort).")
-        except (KeyboardInterrupt, InterruptedError):
-            future.cancel()
-            raise KeyboardInterrupt("Request cancelled by user (Ctrl+C)")
-        except urllib.error.HTTPError as exc:
-            detail = exc.read().decode("utf-8", errors="ignore")
-            raise ProviderError(
-                f"Provider '{self.config.name}' HTTP {exc.code}: {detail}"
-            ) from exc
-        except urllib.error.URLError as exc:
-            raise ProviderError(
-                f"Provider '{self.config.name}' network error: {exc.reason}"
-            ) from exc
+        for attempt in range(1, max_retries + 1):
+            request = urllib.request.Request(url=url, data=body, headers=headers, method="POST")
+
+            def _do_request() -> dict:
+                with urllib.request.urlopen(request, timeout=timeout) as response:
+                    return json.loads(response.read().decode("utf-8"))
+
+            future = self._executor.submit(_do_request)
+            try:
+                raw = future.result(timeout=timeout + 5)
+                break  # success
+            except FuturesTimeoutError:
+                future.cancel()
+                last_exc = ProviderError(f"Provider '{self.config.name}' request timed out after {timeout}s (attempt {attempt}/{max_retries}).")
+                if attempt == max_retries:
+                    raise last_exc
+            except (KeyboardInterrupt, InterruptedError):
+                future.cancel()
+                raise KeyboardInterrupt("Request cancelled by user (Ctrl+C)")
+            except urllib.error.HTTPError as exc:
+                detail = exc.read().decode("utf-8", errors="ignore")
+                last_exc = ProviderError(
+                    f"Provider '{self.config.name}' HTTP {exc.code}: {detail}"
+                )
+                if exc.code in (429, 500, 502, 503, 504) and attempt < max_retries:
+                    _time.sleep(2 ** attempt)  # exponential backoff
+                    continue
+                raise last_exc
+            except urllib.error.URLError as exc:
+                reason = str(exc.reason)
+                last_exc = ProviderError(
+                    f"Provider '{self.config.name}' network error: {reason} (attempt {attempt}/{max_retries})."
+                )
+                # Retry on connection reset, SSL EOF, and similar transient errors
+                transient = any(x in reason for x in (
+                    "ConnectionResetError", "ConnectionRefusedError",
+                    "UNEXPECTED_EOF_WHILE_READING", "EOF occurred in violation",
+                    "ConnectionAbortedError", "Connection closed",
+                ))
+                if transient and attempt < max_retries:
+                    _time.sleep(2 ** attempt)
+                    continue
+                raise last_exc
 
         try:
             content = raw["choices"][0]["message"]["content"]

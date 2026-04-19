@@ -541,6 +541,8 @@ def run_checker_pipeline(
     total_item_count = len(review_items)
     print(f"[checker] Starting: {total_item_count} cases in {total_batch_count} batches (batch_size={batch_size})", flush=True)
 
+    batches_processed = 0
+    failed_batch_num = None
     try:
         for batch_num, batch in enumerate(batches, start=1):
             batch_case_ids = [item.get("scenario", {}).get("scenario_id") for item in batch]
@@ -583,11 +585,12 @@ def run_checker_pipeline(
                 reviews.append(result)
                 append_jsonl(reviews_path, [result])
             print(f"[checker] Batch {batch_num}/{total_batch_count} done: processed {len(payload['results'])} reviews", flush=True)
+            batches_processed = batch_num
     except Exception as e:
-        # If provider call fails (e.g., no real API in test environment),
-        # continue with empty reviews — summary still gets written below.
+        failed_batch_num = batch_num if batch_num > batches_processed else batches_processed + 1
+        remaining_count = sum(len(b) for b in batches[failed_batch_num - 1:])
         print(f"[checker] Exception during batch processing: {e}", flush=True)
-        pass
+        print(f"[checker] Batches processed: {batches_processed}/{total_batch_count}; remaining cases: {remaining_count}", flush=True)
 
     # Always write reviews file (even if empty) so downstream consumers can read it
     write_jsonl(reviews_path, reviews)
@@ -607,7 +610,7 @@ def run_checker_pipeline(
         "input_cases": str(maker_cases_path),
         "output_dir": str(run_dir),
         "review_count": len(reviews),
-        "remaining_after_resume": 0,
+        "remaining_after_resume": sum(len(b) for b in batches[failed_batch_num - 1:]) if failed_batch_num else 0,
         "results_path": str(reviews_path),
         "coverage_report_path": str(coverage_path),
         "raw_path": str(raw_path),
