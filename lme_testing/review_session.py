@@ -18,7 +18,7 @@ from .human_review import _render_case_detail
 from .pipelines import _case_map_from_maker_records, run_checker_pipeline, run_rewrite_pipeline
 from .reporting import generate_html_report
 from .schemas import load_issue_type_options, validate_human_review_payload
-from .storage import atomic_write_json, ensure_dir, load_json, load_jsonl, timestamp_slug, write_json
+from .storage import atomic_write_json, ensure_dir, load_json, load_jsonl, timestamp_slug
 
 logger = logging.getLogger(__name__)
 
@@ -406,7 +406,7 @@ class ReviewSessionManager:
         state["status"] = "finalized"
         final_dir = ensure_dir(self.session_dir / "final")
         final_manifest = final_dir / "final_session_manifest.json"
-        write_json(final_manifest, state)
+        atomic_write_json(final_manifest, state)
         self._save_manifest(state)
         final_report_path = Path(state.get("current_report_path") or "")
         final_maker_path = final_report_path.with_name("maker_readable.html") if final_report_path else None
@@ -636,7 +636,7 @@ class ReviewSessionManager:
             state = self._state
         else:
             self._state = state
-        write_json(self.manifest_path, self._state)
+        atomic_write_json(self.manifest_path, self._state)
 
     def current_report_file(self, route_name: str) -> Path:
         state = self._load_state()

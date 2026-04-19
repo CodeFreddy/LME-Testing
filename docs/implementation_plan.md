@@ -231,18 +231,14 @@ class RoleDefaults:
 
 ### S1-T03 — Session Snapshot 原子写入
 
-**状态：🔄 IN PROGRESS**
-Main 已有 `atomic_write_json()`（SM-T02 保留）。需要确认 `review_session.py` 中所有 snapshot 写入路径（reviews、bdd、scripts）都已使用 `atomic_write_json`。
-
-检查点：
-```
-diff: review_session.py line 138-139
-< write_json(snapshot_path, normalized)
-< write_json(latest_path, normalized)
----
-> atomic_write_json(snapshot_path, normalized)
-> atomic_write_json(latest_path, normalized)
-```
+**状态：✅ DONE（2026-04-19）**
+所有 `review_session.py` 写入路径均已使用 `atomic_write_json`：
+- reviews save: `atomic_write_json` (lines 151-152)
+- BDD save: `atomic_write_json` (lines 231-232)
+- scripts save: `atomic_write_json` (lines 354-355)
+- finalize manifest: `atomic_write_json` (line 409, fixed)
+- `_save_manifest`: `atomic_write_json` (line 639, fixed)
+- 移除未使用的 `write_json` import
 
 ### S1-T03b — Checker 真实稳定性
 
