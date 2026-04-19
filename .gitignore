@@ -11,6 +11,9 @@ __pycache__/
 # Runtime outputs
 runs/
 reports/
+
+# Preserved evidence (keep these versioned)
+!evidence/
 .tmp_test/
 
 # Generated validation artifacts

@@ -1,0 +1,42 @@
+{
+  "validated_at": "2026-04-18T21:35:42Z",
+  "total_schemas": 4,
+  "total_fixtures": 370,
+  "passed": 370,
+  "failed": 0,
+  "failures": [],
+  "validation_results": [
+    {
+      "artifact_type": "atomic_rule (poc)",
+      "path": "C:\\Codes\\GenAI\\LME-Testing\\artifacts\\poc_two_rules\\atomic_rules.json",
+      "total": 2,
+      "valid_count": 2,
+      "invalid_count": 0,
+      "errors": []
+    },
+    {
+      "artifact_type": "semantic_rule (poc)",
+      "path": "C:\\Codes\\GenAI\\LME-Testing\\artifacts\\poc_two_rules\\semantic_rules.json",
+      "total": 2,
+      "valid_count": 2,
+      "invalid_count": 0,
+      "errors": []
+    },
+    {
+      "artifact_type": "atomic_rule (lme)",
+      "path": "C:\\Codes\\GenAI\\LME-Testing\\artifacts\\lme_rules_v2_2\\atomic_rules.json",
+      "total": 183,
+      "valid_count": 183,
+      "invalid_count": 0,
+      "errors": []
+    },
+    {
+      "artifact_type": "semantic_rule (lme)",
+      "path": "C:\\Codes\\GenAI\\LME-Testing\\artifacts\\lme_rules_v2_2\\semantic_rules.json",
+      "total": 183,
+      "valid_count": 183,
+      "invalid_count": 0,
+      "errors": []
+    }
+  ]
+}

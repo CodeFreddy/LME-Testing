@@ -1,0 +1,48 @@
+{
+  "computed_at": "2026-04-19T13:43:19Z",
+  "repo_root": "C:\\Codes\\GenAI\\LME-Testing",
+  "signals_version": "1.0.0",
+  "runs_analyzed": 20,
+  "schema_signal_source": "real_validation",
+  "schema_failure_rate": 0.0,
+  "schema_signals": {
+    "total_validations": 4,
+    "total_artifacts_validated": 370,
+    "invalid_artifacts": 0,
+    "failure_rate": 0.0,
+    "recent_failures": []
+  },
+  "checker_instability_rate": 0.0,
+  "checker_instability_signals": {
+    "total_runs_compared": 0,
+    "total_cases": 0,
+    "stable_cases": 0,
+    "unstable_cases": 0,
+    "instability_rate": 0.0,
+    "missing_in_run_a": 0,
+    "missing_in_run_b": 0,
+    "unstable_case_ids": []
+  },
+  "coverage_signals": {
+    "latest_run_id": "20260419T092854+0800",
+    "latest_coverage_percent": 72.78,
+    "fully_covered": 131,
+    "partially_covered": 15,
+    "uncovered": 3,
+    "not_applicable": 34,
+    "total_rules": 180,
+    "coverage_trend": "declining",
+    "trend_delta": -2.22
+  },
+  "step_binding_success_rate": 0.0294,
+  "step_binding_signals": {
+    "total_bdd_steps": 94,
+    "unique_patterns": 68,
+    "exact_matches": 2,
+    "parameterized_matches": 0,
+    "candidates": 15,
+    "unmatched": 51,
+    "binding_success_rate": 0.0294,
+    "binding_rate": 0.25
+  }
+}

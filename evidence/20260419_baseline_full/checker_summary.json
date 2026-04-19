@@ -1,0 +1,17 @@
+{
+  "run_id": "20260419T092854+0800",
+  "role": "checker",
+  "pipeline_version": "2.0",
+  "prompt_version": "1.0",
+  "provider": "minimax",
+  "model": "MiniMax-M2.7",
+  "input_rules": "artifacts\\lme_rules_v2_2\\semantic_rules.json",
+  "source_rules_hash": "98ef5c5862e6f4d0",
+  "input_cases": "runs\\maker_v1.1_full\\20260419T090524+0800\\maker_cases.jsonl",
+  "output_dir": "runs\\checker_v1.1_full\\20260419T092854+0800",
+  "review_count": 322,
+  "remaining_after_resume": 0,
+  "results_path": "runs\\checker_v1.1_full\\20260419T092854+0800\\checker_reviews.jsonl",
+  "coverage_report_path": "runs\\checker_v1.1_full\\20260419T092854+0800\\coverage_report.json",
+  "raw_path": "runs\\checker_v1.1_full\\20260419T092854+0800\\checker_raw_responses.jsonl"
+}

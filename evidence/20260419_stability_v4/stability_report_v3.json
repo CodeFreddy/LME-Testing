@@ -1,0 +1,215 @@
+{
+  "data_source": "real_api",
+  "semantic_rules_path": "artifacts\\lme_rules_v2_2\\semantic_rules.json",
+  "maker_cases_path": "runs\\maker\\20260418T231915+0800\\maker_cases.jsonl",
+  "run_a_summary": {
+    "run_id": "20260419T164658+0800",
+    "results_path": "runs\\checker-stability\\20260418T231915+0800-v3\\run_a\\20260419T164658+0800\\checker_reviews.jsonl",
+    "review_count": 63
+  },
+  "run_b_summary": {
+    "run_id": "20260419T170904+0800",
+    "results_path": "runs\\checker-stability\\20260418T231915+0800-v3\\run_b\\20260419T170904+0800\\checker_reviews.jsonl",
+    "review_count": 10
+  },
+  "comparison": {
+    "total_cases": 63,
+    "stable_count": 4,
+    "unstable_count": 6,
+    "missing_in_run_a": [],
+    "missing_in_run_b": [
+      "TC-SR-MR-004-02-boundary-01",
+      "TC-SR-MR-004-02-negative-01",
+      "TC-SR-MR-004-02-positive-01",
+      "TC-SR-MR-004-03-boundary-01",
+      "TC-SR-MR-004-03-negative-01",
+      "TC-SR-MR-004-03-positive-01",
+      "TC-SR-MR-006-02-negative-01",
+      "TC-SR-MR-006-02-positive-01",
+      "TC-SR-MR-006-03-negative-01",
+      "TC-SR-MR-006-03-positive-01",
+      "TC-SR-MR-007-01-boundary-01",
+      "TC-SR-MR-007-01-negative-01",
+      "TC-SR-MR-007-01-positive-01",
+      "TC-SR-MR-008-01-negative-01",
+      "TC-SR-MR-008-01-positive-01",
+      "TC-SR-MR-008-02-data_validation-01",
+      "TC-SR-MR-008-02-negative-01",
+      "TC-SR-MR-008-02-positive-01",
+      "TC-SR-MR-008-03-negative-01",
+      "TC-SR-MR-008-03-positive-01",
+      "TC-SR-MR-009-01-data_validation-01",
+      "TC-SR-MR-009-01-negative-01",
+      "TC-SR-MR-009-01-positive-01",
+      "TC-SR-MR-009-02-positive-01",
+      "TC-SR-MR-010-01-negative-01",
+      "TC-SR-MR-010-01-positive-01",
+      "TC-SR-MR-010-02-negative-01",
+      "TC-SR-MR-010-02-positive-01",
+      "TC-SR-MR-011-01-negative-01",
+      "TC-SR-MR-011-01-positive-01",
+      "TC-SR-MR-012-01-negative-01",
+      "TC-SR-MR-012-01-positive-01",
+      "TC-SR-MR-013-01-negative-01",
+      "TC-SR-MR-013-01-positive-01",
+      "TC-SR-MR-014-B2-1-negative-01",
+      "TC-SR-MR-014-B2-1-positive-01",
+      "TC-SR-MR-014-B3-1-negative-01",
+      "TC-SR-MR-014-B3-1-positive-01",
+      "TC-SR-MR-014-B4-1-negative-01",
+      "TC-SR-MR-014-B4-1-positive-01",
+      "TC-SR-MR-014-B5-1-negative-01",
+      "TC-SR-MR-014-B5-1-positive-01",
+      "TC-SR-MR-014-B6-1-negative-01",
+      "TC-SR-MR-014-B6-1-positive-01",
+      "TC-SR-MR-014-B7-1-negative-01",
+      "TC-SR-MR-014-B7-1-positive-01",
+      "TC-SR-MR-014-B8-1-negative-01",
+      "TC-SR-MR-014-B8-1-positive-01",
+      "TC-SR-MR-014-B9-1-boundary-01",
+      "TC-SR-MR-014-B9-1-negative-01",
+      "TC-SR-MR-014-B9-1-positive-01",
+      "TC-SR-MR-015-B2-1-negative-01",
+      "TC-SR-MR-015-B2-1-positive-01"
+    ],
+    "stable_cases": [
+      "TC-SR-MR-003-01-positive-01",
+      "TC-SR-MR-003-02-positive-01",
+      "TC-SR-MR-003-03-positive-01",
+      "TC-SR-MR-004-01-boundary-01"
+    ],
+    "unstable_cases": [
+      {
+        "case_id": "TC-SR-MR-001-01-negative-01",
+        "semantic_rule_id": "SR-MR-001-01",
+        "differences": [
+          {
+            "field": "scores",
+            "differences": [
+              {
+                "score": "requirement_coverage",
+                "run_a": 4,
+                "run_b": 5,
+                "delta": 1
+              },
+              {
+                "score": "test_design_quality",
+                "run_a": 4,
+                "run_b": 5,
+                "delta": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "case_id": "TC-SR-MR-001-01-positive-01",
+        "semantic_rule_id": "SR-MR-001-01",
+        "differences": [
+          {
+            "field": "coverage_assessment.status",
+            "run_a": "partial",
+            "run_b": "covered"
+          }
+        ]
+      },
+      {
+        "case_id": "TC-SR-MR-001-02-positive-01",
+        "semantic_rule_id": "SR-MR-001-02",
+        "differences": [
+          {
+            "field": "scores",
+            "differences": [
+              {
+                "score": "evidence_consistency",
+                "run_a": 5,
+                "run_b": 4,
+                "delta": 1
+              },
+              {
+                "score": "requirement_coverage",
+                "run_a": 5,
+                "run_b": 4,
+                "delta": 1
+              },
+              {
+                "score": "test_design_quality",
+                "run_a": 5,
+                "run_b": 3,
+                "delta": 2
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "case_id": "TC-SR-MR-003-01-negative-01",
+        "semantic_rule_id": "SR-MR-003-01",
+        "differences": [
+          {
+            "field": "scores",
+            "differences": [
+              {
+                "score": "requirement_coverage",
+                "run_a": 4,
+                "run_b": 5,
+                "delta": 1
+              },
+              {
+                "score": "test_design_quality",
+                "run_a": 4,
+                "run_b": 5,
+                "delta": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "case_id": "TC-SR-MR-004-01-negative-01",
+        "semantic_rule_id": "SR-MR-004-01",
+        "differences": [
+          {
+            "field": "scores",
+            "differences": [
+              {
+                "score": "requirement_coverage",
+                "run_a": 3,
+                "run_b": 4,
+                "delta": 1
+              }
+            ]
+          },
+          {
+            "field": "coverage_assessment.status",
+            "run_a": "partial",
+            "run_b": "covered"
+          }
+        ]
+      },
+      {
+        "case_id": "TC-SR-MR-004-01-positive-01",
+        "semantic_rule_id": "SR-MR-004-01",
+        "differences": [
+          {
+            "field": "scores",
+            "differences": [
+              {
+                "score": "requirement_coverage",
+                "run_a": 5,
+                "run_b": 4,
+                "delta": 1
+              },
+              {
+                "score": "test_design_quality",
+                "run_a": 5,
+                "run_b": 4,
+                "delta": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
