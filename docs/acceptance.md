@@ -151,7 +151,7 @@ Evidence：
 
 ### Gate S1.1：Schema Signal 数据来源修复
 
-**Verification Type 目标：** `real_data_verified`
+**Verification Type：** `real_data_verified`
 
 **验收标准：**
 - `validate_schemas.py --output-json` 产出合法 JSON
@@ -159,7 +159,13 @@ Evidence：
 - `governance_signals.json` 中 `schema_signal_source: "real_validation"`
 - 故意引入 invalid fixture 时 `schema_failure_rate > 0`
 
-**状态：** ❌ NOT STARTED
+**Evidence（2026-04-19）：**
+- `runs/schema_validation_latest.json` 存在，370 fixtures validated，0 failures
+- `compute_governance_signals()` → `schema_signal_source: "real_validation"`
+- `test_schema_failure_rate_detects_invalid_fixtures` 测试通过：写入 1 invalid/10 total → `failure_rate = 0.1 > 0`
+- `validate_schemas.py --output-json runs/schema_validation_latest.json` 可正常执行
+
+**状态：** ✅ COMPLETE
 
 ---
 

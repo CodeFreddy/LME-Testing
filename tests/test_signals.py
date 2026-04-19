@@ -12,6 +12,7 @@ from lme_testing.signals import (
     CheckerInstabilitySignals,
     CoverageSignals,
     StepBindingSignals,
+    _compute_schema_signals,
     compute_governance_signals,
     write_signals_report,
 )
@@ -129,6 +130,42 @@ class CoverageSignalsFromRunsTests(unittest.TestCase):
         # Should find coverage reports
         self.assertGreaterEqual(signals.runs_analyzed, 0)
         self.assertGreaterEqual(signals.coverage_signals.latest_coverage_percent, 0.0)
+
+
+class SchemaSignalFailureDetectionTests(unittest.TestCase):
+    """Tests for Gate S1.1: schema failure detection end-to-end."""
+
+    def test_schema_failure_rate_detects_invalid_fixtures(self) -> None:
+        # Create a temp runs dir with a schema_validation_latest.json
+        # that reports fixture failures, then verify failure_rate > 0.
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            runs_dir = tmp_path / "runs"
+            runs_dir.mkdir()
+            # Write a validation report with 1 invalid artifact out of 10
+            validation_report = {
+                "validated_at": "2026-04-19T00:00:00Z",
+                "total_schemas": 2,
+                "total_fixtures": 10,
+                "passed": 9,
+                "failed": 1,
+                "failures": [
+                    {"artifact": "atomic_rules.json", "entry": 5, "message": "required property missing"}
+                ],
+                "validation_results": [],
+            }
+            report_path = runs_dir / "schema_validation_latest.json"
+            report_path.write_text(json.dumps(validation_report, indent=2), encoding="utf-8")
+
+            from lme_testing.signals import _compute_schema_signals
+            signals, source = _compute_schema_signals(runs_dir)
+
+            self.assertEqual(source, "real_validation")
+            self.assertEqual(signals.total_artifacts_validated, 10)
+            self.assertEqual(signals.invalid_artifacts, 1)
+            self.assertGreater(signals.failure_rate, 0.0)
+            self.assertEqual(len(signals.recent_failures), 1)
+            self.assertIn("required property missing", signals.recent_failures[0]["error"])
 
 
 if __name__ == "__main__":
