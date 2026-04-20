@@ -12,7 +12,7 @@ MAKER_PROMPT_VERSION = "1.2"
 
 # Increment CHECKER_PROMPT_VERSION when CHECKER_SYSTEM_PROMPT or
 # build_checker_user_prompt changes in a way that affects output quality.
-CHECKER_PROMPT_VERSION = "1.0"
+CHECKER_PROMPT_VERSION = "1.1"
 
 # Increment BDD_PROMPT_VERSION when BDD_SYSTEM_PROMPT or
 # build_bdd_user_prompt changes in a way that affects output quality.
@@ -303,6 +303,18 @@ def build_checker_user_prompt(batch: list[dict]) -> str:
         f"case_id -> rule: {json.dumps(expected_case_rule_map, ensure_ascii=False)}\n"
         "coverage_relevance: direct | indirect | not_relevant\n"
         "coverage_assessment.status: covered | partial | uncovered | not_applicable\n"
+        "\n"
+        "coverage_relevance guidelines:\n"
+        "- direct: the scenario directly tests a required aspect of the rule's core requirement\n"
+        "- indirect: the scenario tests a related but non-core aspect; use for supplementary coverage\n"
+        "- not_relevant: the scenario does not test this rule at all\n"
+        "\n"
+        "IMPORTANT — rule-type-specific rules:\n"
+        "- For rule_type=workflow, case_type=exception is DIRECT (exception handling is core to workflow completeness)\n"
+        "- For rule_type=deadline, case_type=boundary is DIRECT (boundary testing validates deadline boundary conditions)\n"
+        "- For rule_type=prohibition, case_type=positive is DIRECT (positive case tests that the prohibited action is indeed blocked)\n"
+        "- For rule_type=enum_definition, case_type=negative is DIRECT (negative case tests invalid enum values are rejected)\n"
+        "\n"
         "Schema:\n"
         f"{json.dumps(schema, ensure_ascii=False, indent=2)}\n"
         "Batch:\n"

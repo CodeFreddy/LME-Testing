@@ -152,6 +152,43 @@
 - 若 instability > 10%：Checker prompt 稳定性改进
 - 识别出的高频确定性规则类型 → Oracle 实测验证
 
+**S2-T01 覆盖率分析（2026-04-20）**
+
+| 指标 | 数值 |
+|------|------|
+| 规则总数 | 180 |
+| 完全覆盖 | 130 (72.22%) |
+| 部分覆盖 | 17 |
+| 未覆盖 | 2 (SR-MR-064-A-1, SR-MR-064-B-1) |
+| 不适用 | 34 |
+
+**部分覆盖分类（17条）：**
+
+| 根因 | 规则数 | 示例 |
+|------|--------|------|
+| Checker 将 exception 评为 indirect（非 direct）| 7 | workflow 规则 |
+| Checker 将 boundary 评为 not_relevant | 3 | deadline 规则 |
+| Checker 将 positive 评为 indirect | 2 | prohibition 规则 |
+| Maker 未生成 required case type | 4 | enum/deadline/calculation 规则 |
+
+**未覆盖规则（2条）：**
+
+| 规则 | 根因 | 处置 |
+|------|------|------|
+| SR-MR-064-A-1 | 证据文本被截断：`"(a) the OTC transaction must: i. ii. iii."` — source page_19.txt itself truncated | 已处置：标记为 coverage_eligible=false（页19本身缺失完整文本，无法修复）|
+| SR-MR-064-B-1 | 证据完整，checker 已接受 | 无需操作 |
+
+**结论：**
+- 根因 1（checker 过于严格）：需调整 `CHECKER_SYSTEM_PROMPT`，使 workflow+exception、deadline+boundary、prohibition+positive 获得 direct 评级
+- 根因 2（SR-MR-064-A-1 证据截断）：源文档页19本身截断，无法重新提取；已标记 coverage_eligible=false 排除在覆盖率计算外
+
+**修复计划：**
+1. ✅ SR-MR-064-A-1: 标记 `coverage_eligible=false`（源文档截断，无法修复）
+2. ✅ 调整 checker prompt 校准逻辑 (`CHECKER_PROMPT_VERSION: 1.0 → 1.1`)
+3. ⏳ 重新运行 maker + checker 验证覆盖率提升
+
+详见：`docs/s2t01_coverage_analysis.md`
+
 ### 方向 B：Master 缺失模块实现（新增）
 
 **B.1 — `lme_testing/audit_trail.py`**

@@ -17903,7 +17903,7 @@
       ],
       "testability": "testable",
       "priority": "high",
-      "coverage_eligible": true
+      "coverage_eligible": false
     },
     "statement": {
       "actor": {
