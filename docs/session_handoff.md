@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-20 05:40:34 UTC`
+- `2026-04-20 05:58:33 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `evidence: add S2-T01 full run artifacts (2026-04-20)`
 - `docs: refresh session handoff`
 - `fix: API reliability - transient error detection, requests session pooling`
 - `docs: update demo_for_boss.md with current state`
 - `docs: update session_handoff template and regenerate`
-- `docs: update all docs to reflect current state post-cleanup`
 
 ---
 

@@ -1,0 +1,16 @@
+{
+  "run_id": "20260420T023545Z",
+  "role": "maker",
+  "pipeline_version": "2.0",
+  "prompt_version": "1.2",
+  "provider": "maker_qwen",
+  "model": "glm-5",
+  "input_path": "artifacts\\lme_rules_v2_2\\semantic_rules.json",
+  "source_artifact_hash": "98ef5c5862e6f4d0",
+  "output_dir": "runs\\maker\\20260420T023545Z",
+  "processed_rule_count": 180,
+  "batch_count": 45,
+  "scenario_count": 322,
+  "results_path": "runs\\maker\\20260420T023545Z\\maker_cases.jsonl",
+  "raw_path": "runs\\maker\\20260420T023545Z\\maker_raw_responses.jsonl"
+}

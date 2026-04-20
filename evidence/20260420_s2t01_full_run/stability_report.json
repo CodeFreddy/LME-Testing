@@ -1,0 +1,39 @@
+{
+  "run_type": "s2t01_full_run",
+  "date": "2026-04-20",
+  "data_source": "real_api",
+  "semantic_rules_path": "artifacts/lme_rules_v2_2/semantic_rules.json",
+  "maker_summary": {
+    "run_id": "20260420T023545Z",
+    "processed_rule_count": 180,
+    "batch_count": 45,
+    "scenario_count": 322,
+    "prompt_version": "1.2",
+    "results_path": "runs\\maker\\20260420T023545Z\\maker_cases.jsonl"
+  },
+  "checker_summary": {
+    "run_id": "20260420T033143Z",
+    "review_count": 322,
+    "batch_count": 81,
+    "results_path": "runs\\checker\\20260420T033143Z\\checker_reviews.jsonl"
+  },
+  "coverage": {
+    "coverage_percent": 72.22,
+    "fully_covered": 130,
+    "partially_covered": 17,
+    "uncovered": 2,
+    "not_applicable": 34,
+    "total_requirements": 180
+  },
+  "stability": {
+    "total_batches": 126,
+    "failed_batches": 0,
+    "failure_rate": 0.0,
+    "note": "100% completion - requests session pooling + retry logic"
+  },
+  "fixes_applied": [
+    "transient error detection by exception type name (not string matching)",
+    "requests Session with HTTPAdapter (4-conn pool per host)",
+    "ProviderConfig max_retries and retry_backoff_seconds fields"
+  ]
+}
