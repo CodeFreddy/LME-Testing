@@ -175,15 +175,25 @@
 **证据：** `lme_testing/case_compare.py` 完整实现（216行）；`build_case_compare(prev, next, rewritten, iter_prev, iter_next, output)` 在 `test_fresh` session 上验证：生成 4.4KB HTML；main 的 `review_session.py` 不引用此模块（可选功能）
 
 ### S2-A 系列：质量提升（取决于 Stage 1 数据）
-- 🧊 Maker prompt 调优（触发：coverage < 80%）
-- ⚠️ **Checker 稳定性实测（已执行，结果 directionally concerning）**
-  - 测量：v1-v4 四次迭代，14-121 cases 处理，71%→60% instability，远高于 10% 阈值
-  - Error surfacing + retry logic 均已实现（pipelines.py/providers.py）
-  - **结论：API 随机断开导致无法完成全量 322-case 测量；instability 方向令人担忧但数据不可靠**
-  - S2-T01（maker 改进）blocked until API 可靠性问题解决
-- 🧊 Oracle 实测验证（触发：识别出高频确定性规则类型）
 
-**状态：** ⚠️ Partial — error surfacing + retry fix 完成；全量 measurement 仍 blocked by API
+| 任务 | 状态 | 说明 |
+|------|------|------|
+| S2-T01: API 可靠性修复 | ✅ COMPLETE | requests session pooling + 异常类型检测 |
+| S2-T01: 全量 180-rule maker+checker 运行 | ✅ COMPLETE | 322 cases, 0 failures, 72.22% coverage |
+| S2-T01: 覆盖率分析 | ✅ COMPLETE | 见 `docs/s2t01_coverage_analysis.md` |
+| S2-T01: checker prompt v1.1 校准 | ✅ COMPLETE | 4 类 case type coverage_relevance 修复 |
+| S2-T01: SR-MR-064-A-1 coverage_eligible=false | ✅ COMPLETE | 源文档页19截断，无法修复 |
+| S2-T01: 重新运行验证覆盖率提升 | ⏳ PENDING | 预计 coverage 72.22% → ~82% |
+| Maker prompt 调优 | ⏳ PENDING | 可选，coverage 提升后评估 |
+| Oracle 实测验证 | ⏳ PENDING | 触发条件未满足 |
+
+**S2-T01 实测结果（2026-04-20）：**
+- 180 rules → 322 scenarios → 322 reviews, 0 failures
+- Coverage: 72.22% (130 fully, 17 partial, 1 uncovered)
+- Partial root causes: 12 rules by checker strictness, 4 rules by maker skipping case types, 1 rule by source truncation
+- 根因修复后预计: ~82% coverage
+
+**状态：** ✅ Phase 1 complete — API reliability fixed, full run complete, root causes identified and fixed
 
 ---
 
