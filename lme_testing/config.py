@@ -35,6 +35,8 @@ class ProviderConfig:
     timeout_seconds: int = 90
     temperature: float = 0.1
     max_output_tokens: int = 4000
+    max_retries: int = 3
+    retry_backoff_seconds: float = 2.0
 
 
 @dataclass(slots=True)
@@ -114,6 +116,8 @@ def _build_provider(name: str, data: dict[str, Any]) -> ProviderConfig:
         timeout_seconds=int(data.get("timeout_seconds", 90)),
         temperature=float(data.get("temperature", 0.1)),
         max_output_tokens=int(data.get("max_output_tokens", 4000)),
+        max_retries=int(data.get("max_retries", 3)),
+        retry_backoff_seconds=float(data.get("retry_backoff_seconds", 2.0)),
     )
 
 

@@ -3,12 +3,59 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-import urllib.error
-import urllib.request
-from dataclasses import dataclass, field
+import time as _time
+import urllib.parse
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
+from dataclasses import dataclass, field
+from urllib3.util.retry import Retry
+
+import requests
+from requests.adapters import HTTPAdapter
 
 from .config import ProviderConfig
+
+
+# Transient errors that should trigger retries
+_TRANSIENT_ERROR_TYPES = frozenset((
+    "ConnectionResetError",
+    "ConnectionRefusedError",
+    "ConnectionAbortedError",
+    "BrokenPipeError",
+    "TimeoutError",           # socket timeout
+    "SSLError",                # SSL protocol violations
+    "SSLSyscallError",         # SSL system call errors
+    "SSLEOFError",             # SSL EOF violation
+    "IncompleteRead",          # urllib3 internal
+    "ProtocolError",           # HTTP protocol errors
+    "RequestException",        # requests base class (covers most network errors)
+    "ConnectionError",         # requests connection error
+    "Timeout",                 # requests timeout
+    "HTTPError",               # requests HTTP error (from raise_for_status)
+))
+
+
+def _is_transient_error(exc: Exception) -> bool:
+    """Return True if this is a transient error that may succeed on retry."""
+    exc_type = type(exc).__name__
+    if exc_type in _TRANSIENT_ERROR_TYPES:
+        return True
+    # Recurse into chained exceptions
+    if exc.__cause__ is not None and _is_transient_error(exc.__cause__):
+        return True
+    if isinstance(exc, requests.RequestException):
+        # For requests exceptions, check the response too (5xx, 429, etc.)
+        if exc.response is not None:
+            return exc.response.status_code in (429, 500, 502, 503, 504)
+        return True  # No response means network-level error, retry
+    return False
+
+
+# ---------------------------------------------------------------------------
+# HTTP Connection Pool via requests + urllib3.
+# Sessions are cached per host and shared across provider instances so that
+# connections are reused across batches. This avoids SSL handshake overhead on
+# every request and significantly improves reliability with flaky APIs.
+# ---------------------------------------------------------------------------
 
 
 class ProviderError(RuntimeError):
@@ -311,17 +358,53 @@ class StubProvider:
 
 # 当前先实现 OpenAI-compatible 风格接口，后续如需接 MiniMax/GLM 原生协议，可继续扩展。
 class OpenAICompatibleProvider:
+    # Per-class session cache keyed by (host, port). Sessions are shared across
+    # provider instances pointing to the same host so that connections are reused.
+    _session_cache: dict[tuple[str, int], requests.Session] = {}
+    _cache_lock = __import__("threading").Lock()
+
     def __init__(self, config: ProviderConfig):
         self.config = config
         self._executor = ThreadPoolExecutor(max_workers=4)
         self._interrupted = False
 
+        # Build a requests Session with connection pooling via HTTPAdapter.
+        # The session is cached per host so that multiple provider instances
+        # (e.g. maker + checker pointing to the same host) share the pool.
+        parsed = urllib.parse.urlparse(config.base_url)
+        host = parsed.hostname or "localhost"
+        port = parsed.port or (443 if parsed.scheme == "https" else 80)
+        cache_key = (host, port)
+
+        with self._cache_lock:
+            if cache_key not in self._session_cache:
+                session = requests.Session()
+                # Configure retry strategy via urllib3 beneath requests
+                max_retries = Retry(
+                    total=0,  # We handle retries ourselves for finer control
+                    connect=3,
+                    read=3,
+                    redirect=3,
+                    status_forcelist=(429, 500, 502, 503, 504),
+                    allowed_methods=None,
+                    raise_on_status=False,
+                )
+                adapter = HTTPAdapter(
+                    max_retries=max_retries,
+                    pool_connections=4,
+                    pool_maxsize=4,
+                )
+                session.mount(f"{parsed.scheme}://", adapter)
+                self._session_cache[cache_key] = session
+            self._session = self._session_cache[cache_key]
+
     def shutdown(self) -> None:
-        """Shut down the executor without waiting for threads blocked on urlopen.
+        """Shut down the executor.
 
         Called by workflow_session when a KeyboardInterrupt aborts the pipeline,
         preventing Python's atexit from joining live-but-stuck threads and raising
         KeyboardInterrupt inside the atexit handler itself.
+        Sessions are shared and intentionally left open for reuse by other providers.
         """
         self._interrupted = True
         self._executor.shutdown(wait=False, cancel_futures=True)
@@ -338,7 +421,6 @@ class OpenAICompatibleProvider:
             "max_tokens": self.config.max_output_tokens,
             "response_format": {"type": "json_object"},
         }
-        body = json.dumps(payload).encode("utf-8")
         headers = {
             "Authorization": f"Bearer {self.config.api_key}",
             "Content-Type": "application/json",
@@ -347,57 +429,78 @@ class OpenAICompatibleProvider:
         url = f"{self.config.base_url}/chat/completions"
 
         # Use a thread so that Ctrl+C (KeyboardInterrupt / SIGINT) can break the
-        # blocking urlopen call on Windows, where socket I/O is not signal-alertable.
+        # blocking requests call on Windows, where socket I/O is not signal-alertable.
         # The caller (pipelines) catches KeyboardInterrupt and aborts gracefully.
         timeout = getattr(self.config, "timeout_seconds", 300)
         max_retries = getattr(self.config, "max_retries", 3)
-        import time as _time
+        retry_backoff = getattr(self.config, "retry_backoff_seconds", 2.0)
 
         last_exc: Exception = None
 
         for attempt in range(1, max_retries + 1):
-            request = urllib.request.Request(url=url, data=body, headers=headers, method="POST")
-
-            def _do_request() -> dict:
-                with urllib.request.urlopen(request, timeout=timeout) as response:
-                    return json.loads(response.read().decode("utf-8"))
+            def _do_request() -> requests.Response:
+                return self._session.post(
+                    url,
+                    json=payload,
+                    headers=headers,
+                    timeout=timeout,
+                )
 
             future = self._executor.submit(_do_request)
             try:
-                raw = future.result(timeout=timeout + 5)
+                response: requests.Response = future.result(timeout=timeout + 5)
                 break  # success
             except FuturesTimeoutError:
                 future.cancel()
-                last_exc = ProviderError(f"Provider '{self.config.name}' request timed out after {timeout}s (attempt {attempt}/{max_retries}).")
+                last_exc = ProviderError(
+                    f"Provider '{self.config.name}' request timed out after {timeout}s "
+                    f"(attempt {attempt}/{max_retries})."
+                )
                 if attempt == max_retries:
                     raise last_exc
             except (KeyboardInterrupt, InterruptedError):
                 future.cancel()
                 raise KeyboardInterrupt("Request cancelled by user (Ctrl+C)")
-            except urllib.error.HTTPError as exc:
-                detail = exc.read().decode("utf-8", errors="ignore")
-                last_exc = ProviderError(
-                    f"Provider '{self.config.name}' HTTP {exc.code}: {detail}"
-                )
-                if exc.code in (429, 500, 502, 503, 504) and attempt < max_retries:
-                    _time.sleep(2 ** attempt)  # exponential backoff
+            except Exception as exc:
+                last_exc = exc
+                if _is_transient_error(exc) and attempt < max_retries:
+                    _time.sleep(retry_backoff * (2 ** attempt))
                     continue
                 raise last_exc
-            except urllib.error.URLError as exc:
-                reason = str(exc.reason)
-                last_exc = ProviderError(
-                    f"Provider '{self.config.name}' network error: {reason} (attempt {attempt}/{max_retries})."
-                )
-                # Retry on connection reset, SSL EOF, and similar transient errors
-                transient = any(x in reason for x in (
-                    "ConnectionResetError", "ConnectionRefusedError",
-                    "UNEXPECTED_EOF_WHILE_READING", "EOF occurred in violation",
-                    "ConnectionAbortedError", "Connection closed",
-                ))
-                if transient and attempt < max_retries:
-                    _time.sleep(2 ** attempt)
-                    continue
-                raise last_exc
+
+        # Check for HTTP-level errors before parsing JSON
+        try:
+            response.raise_for_status()
+        except requests.HTTPError as exc:
+            raise ProviderError(
+                f"Provider '{self.config.name}' HTTP {response.status_code}: {response.text[:200]}"
+            ) from exc
+
+        try:
+            raw = response.json()
+        except ValueError as exc:
+            raise ProviderError(
+                f"Provider '{self.config.name}' returned non-JSON response: {response.text[:200]}"
+            ) from exc
+
+        try:
+            content = raw["choices"][0]["message"]["content"]
+        except (KeyError, IndexError, TypeError) as exc:
+            raise ProviderError(
+                f"Provider '{self.config.name}' returned an unexpected payload."
+            ) from exc
+
+        # 少数兼容接口会返回 content 数组，这里做一次兼容拼接。
+        if isinstance(content, list):
+            content = "".join(
+                item.get("text", "") if isinstance(item, dict) else str(item)
+                for item in content
+            )
+        if not isinstance(content, str):
+            raise ProviderError(
+                f"Provider '{self.config.name}' returned non-text content."
+            )
+        return ModelResponse(content=content, raw_response=raw)
 
         try:
             content = raw["choices"][0]["message"]["content"]
