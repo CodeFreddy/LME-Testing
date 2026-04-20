@@ -52,3 +52,17 @@ Preserved run artifacts that document key results. These are snapshots of eviden
 **Key value:** `failure_rate = 0.0` (370 fixtures, 0 failures) — `schema_signal_source: "real_validation"`
 
 **Source:** `runs/schema_validation_latest.json`
+
+---
+
+## evidence/20260420_s2t01_v1p1_checker_run/
+
+**Purpose:** S2-T01 v1.1 checker re-run — verify coverage improvement from checker prompt calibration
+
+**Contents:**
+- `coverage_report.json` — v1.1 coverage results (75.0% coverage)
+- `summary.json` — v1.1 run metadata (prompt_version: 1.1)
+
+**Key findings:** Coverage 72.22% -> 75.0% (+2.78%). 9 rules improved (partial->full), 4 rules regressed (full->partial). Net +5 fully covered rules.
+
+**Source:** `runs/checker/20260420T062527Z/`

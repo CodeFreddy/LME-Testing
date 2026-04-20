@@ -125,3 +125,125 @@ The checker should be calibrated so that:
 | **Total** | **18** | **~10%** |
 
 Expected final coverage: **~82%**
+
+---
+
+## v1.1 Checker Run Results (2026-04-20)
+
+**Run ID:** `20260420T062527Z`
+**Prompt version:** 1.1
+**Source maker cases:** `runs/maker/20260420T023545Z` (same maker run as v1.0)
+
+### Coverage Comparison
+
+| Metric | v1.0 (Before) | v1.1 (After) | Delta |
+|--------|---------------|--------------|-------|
+| Coverage | 72.22% | **75.0%** | **+2.78%** |
+| Fully covered | 130 | 135 | +5 |
+| Partially covered | 17 | 12 | -5 |
+| Uncovered | 2 | 1 | -1 |
+| Not applicable | 34 | 35 | +1 |
+
+### Rules That Improved (partial → fully covered)
+
+| Rule | Root Cause Fixed | v1.0 Missing | v1.1 Status |
+|------|-----------------|--------------|-------------|
+| SR-MR-071-B-1 | workflow+exception | exception (indirect) | fixed |
+| SR-MR-071-C-1 | workflow+exception | exception (indirect) | fixed |
+| SR-MR-074-A-1 | workflow+exception | exception (indirect) | fixed |
+| SR-MR-074-B-1 | workflow+exception | exception (indirect) | fixed |
+| SR-MR-074-C-1 | workflow+exception | exception (indirect) | fixed |
+| SR-MR-015-B3-4 | deadline+boundary | boundary (not_relevant) | fixed |
+| SR-MR-021-02 | deadline+boundary | boundary (not_relevant) | fixed |
+| SR-MR-014-B4-1 | maker missed (self-corrected) | negative | fixed |
+| SR-MR-014-B5-1 | maker missed (self-corrected) | negative | fixed |
+
+### Still Partially Covered (12 rules)
+
+| Rule | Root Cause | v1.0 Missing | v1.1 Missing |
+|------|------------|--------------|--------------|
+| SR-MR-004-01 | deadline+boundary | boundary | boundary (not fixed) |
+| SR-MR-060-B-1 | workflow+exception | exception | exception (not fixed) |
+| SR-MR-071-A-1 | workflow+exception | exception | exception (not fixed) |
+| SR-MR-033-03 | prohibition+positive | positive | positive (not fixed) |
+| SR-MR-033-04 | prohibition+positive | positive | positive (not fixed) |
+| SR-MR-017-B6-1 | calculation+boundary | boundary | boundary (not fixed) |
+| SR-MR-028-01 | deadline+negative | negative | negative (not fixed) |
+| SR-MR-016-B3-1 | enum+negative | — | negative (new regression) |
+| SR-MR-017-B2-1 | calculation+data_validation | — | data_validation (new regression) |
+| SR-MR-070-02 | deadline+negative | — | negative (new regression) |
+| SR-MR-075-01 | prohibition+positive | — | positive (new regression) |
+
+### Regressions (4 rules: fully → partially covered)
+
+| Rule | v1.0 Accepted | v1.1 Accepted | Lost |
+|------|--------------|---------------|------|
+| SR-MR-016-B3-1 | negative, positive | positive | negative |
+| SR-MR-017-B2-1 | boundary, data_validation, positive | boundary, positive | data_validation |
+| SR-MR-070-02 | boundary, negative, positive | boundary, positive | negative |
+| SR-MR-075-01 | negative, positive | negative | positive |
+
+### Uncovered Rules
+
+| Rule | v1.0 Status | v1.1 Status | Note |
+|------|-------------|-------------|------|
+| SR-MR-064-A-1 | uncovered | not_applicable | Correctly marked; source page 19 itself truncated |
+| SR-MR-064-B-1 | partially_covered | fully_covered | improved (was blocked by 064-A-1) |
+
+### Why ~82% Wasn't Reached
+
+The expected +10% was based on all 17 partially-covered rules improving. Actual result:
+- 9 rules improved (partial → full)
+- 4 rules regressed (full → partial) — v1.1 prompt introduced new strictness
+- Net: +5 fully covered rules
+
+**Specific pattern failures:**
+- `workflow+exception`: Fixed 5/7 rules. SR-MR-060-B-1 and SR-MR-071-A-1 still fail.
+- `deadline+boundary`: Fixed 2/3 rules. SR-MR-004-01 still fails.
+- `prohibition+positive`: Fixed 0/2 rules. SR-MR-033-03 and SR-MR-033-04 still fail.
+
+**New regressions:** v1.1 prompt caused checker to de-accept previously-accepted case types on 4 rules (SR-MR-016-B3-1, SR-MR-017-B2-1, SR-MR-070-02, SR-MR-075-01).
+
+### v1.1 Regression Analysis (4 rules: fully -> partially covered)
+
+All 4 regressions share a pattern: **v1.1's stricter guideline language caused the checker to scrutinize evidence_consistency more carefully**, leading to lower scores and downgraded coverage_relevance.
+
+| Rule | v1.0 Accepted | v1.1 Accepted | Lost Case | Root Cause |
+|------|--------------|---------------|-----------|------------|
+| SR-MR-016-B3-1 | negative, positive | positive | negative (3,4,4) | Negative scenario for enum_definition tested invalid value not grounded in evidence |
+| SR-MR-017-B2-1 | boundary, data_validation, positive | boundary, positive | data_validation (3,3,4) | v1.1 stricter evidence scrutiny lowered data_validation scores |
+| SR-MR-070-02 | boundary, negative, positive | boundary, positive | negative (4,3,4) | v1.1 stricter evidence scrutiny lowered negative scores |
+| SR-MR-075-01 | negative, positive | negative | positive (3,4,3) | Positive scenario tested normal OTC usage, not the prohibited misuse |
+
+### Root Cause of Remaining Failures
+
+After examining the evidence quotes vs. maker scenarios, **all remaining failures are maker quality issues or evidence gaps** — not checker calibration issues. The v1.1 guidelines are working correctly when the maker output is sound.
+
+| Rule | Issue Type | Evidence vs Scenario | Fix Owner |
+|------|-----------|---------------------|-----------|
+| SR-MR-033-03 positive | **Maker semantic error** | Prohibition = cross-account offset; scenario = within-one-account (permitted) | Maker |
+| SR-MR-033-04 positive | **Maker semantic error** | Prohibition = different pricing bases; scenario = same pricing basis (permitted) | Maker |
+| SR-MR-075-01 positive | **Maker semantic error** | Prohibition = misuse OTC; scenario = normal OTC usage (permitted) | Maker |
+| SR-MR-060-B-1 exception | **Evidence gap + maker overreach** | Evidence truncated at clause (b); no exception handling described | Evidence extraction |
+| SR-MR-071-A-1 exception | **Maker overreach** | Rule covers invalid ID rejection; scenario covers service unavailability | Maker |
+| SR-MR-004-01 boundary | **Likely maker** | Rule covers deadline extension in exceptional circumstances; scenario covers submission timing at cutoff | Maker |
+| SR-MR-017-B6-1 boundary | **Likely maker** | Rule covers calculation methodology; boundary scenario may not be grounded | Maker |
+| SR-MR-028-01 negative | **Likely maker** | Negative case for deadline may not test the actual constraint | Maker |
+
+### Path to ~82% Coverage
+
+Reaching ~82% requires **maker prompt improvements**, not checker calibration:
+
+1. **Prohibition positive cases** (SR-MR-033-03, 033-04, 075-01): Maker must generate positive cases that attempt the **prohibited** action and expect rejection — not test similar permitted actions
+2. **Workflow exception cases** (SR-MR-060-B-1, 071-A-1): Exception cases must be grounded in source text; maker should not infer exception scenarios not described in evidence
+3. **Boundary cases** (SR-MR-004-01, 017-B6-1): Boundary scenarios must specifically test the edge conditions described in the evidence, not generic timing tests
+4. **Evidence re-extraction**: SR-MR-060-B-1 source text is truncated; re-extracting page 60(b) may reveal the exception handling clause
+
+### v1.2 Calibration Scope
+
+v1.2 can only address:
+1. Any remaining deadline+boundary cases where v1.1 guideline was truly not followed (SR-MR-004-01 — needs investigation)
+2. Possible regression guardrails: ensure v1.1 stricter language doesn't inadvertently lower scores on valid cases
+3. Add explicit regression warnings in the guideline: "DO NOT lower evidence_consistency solely because the scenario tests an edge case — only lower if the evidence does not support the specific action being tested"
+
+**Conclusion**: The 75.0% coverage from v1.1 is the practical ceiling for checker-only improvements. Further gains require maker prompt revisions targeting the specific semantic misalignment patterns above.

@@ -1,0 +1,4284 @@
+{
+  "total_requirements": 180,
+  "fully_covered": 135,
+  "partially_covered": 12,
+  "uncovered": 1,
+  "not_applicable": 35,
+  "coverage_percent": 75.0,
+  "status_by_rule": {
+    "SR-MR-001-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-001-01"
+      ]
+    },
+    "SR-MR-001-02": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-001-02"
+      ]
+    },
+    "SR-MR-002-01": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-002-01"
+      ]
+    },
+    "SR-MR-003-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-003-01"
+      ]
+    },
+    "SR-MR-003-02": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-003-02"
+      ]
+    },
+    "SR-MR-003-03": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-003-03"
+      ]
+    },
+    "SR-MR-004-01": {
+      "rule_type": "deadline",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "negative"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [
+        "boundary"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-004-01"
+      ]
+    },
+    "SR-MR-004-02": {
+      "rule_type": "deadline",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "negative"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-004-02"
+      ]
+    },
+    "SR-MR-004-03": {
+      "rule_type": "deadline",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "negative"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-004-03"
+      ]
+    },
+    "SR-MR-005-01": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-005-01"
+      ]
+    },
+    "SR-MR-006-01": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-006-01"
+      ]
+    },
+    "SR-MR-006-02": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-006-02"
+      ]
+    },
+    "SR-MR-006-03": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-006-03"
+      ]
+    },
+    "SR-MR-007-01": {
+      "rule_type": "deadline",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "negative"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-007-01"
+      ]
+    },
+    "SR-MR-007-02": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-007-02"
+      ]
+    },
+    "SR-MR-008-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-008-01"
+      ]
+    },
+    "SR-MR-008-02": {
+      "rule_type": "data_constraint",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "boundary"
+      ],
+      "present_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-008-02"
+      ]
+    },
+    "SR-MR-008-03": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-008-03"
+      ]
+    },
+    "SR-MR-009-01": {
+      "rule_type": "data_constraint",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "boundary"
+      ],
+      "present_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-009-01"
+      ]
+    },
+    "SR-MR-009-02": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-009-02"
+      ]
+    },
+    "SR-MR-010-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-010-01"
+      ]
+    },
+    "SR-MR-010-02": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-010-02"
+      ]
+    },
+    "SR-MR-011-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-011-01"
+      ]
+    },
+    "SR-MR-011-02": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-011-02"
+      ]
+    },
+    "SR-MR-012-01": {
+      "rule_type": "prohibition",
+      "required_case_types": [
+        "negative",
+        "positive"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-012-01"
+      ]
+    },
+    "SR-MR-013-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-013-01"
+      ]
+    },
+    "SR-MR-014-B1-1": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-014-B1-1"
+      ]
+    },
+    "SR-MR-014-B2-1": {
+      "rule_type": "enum_definition",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-014-B2-1"
+      ]
+    },
+    "SR-MR-014-B3-1": {
+      "rule_type": "enum_definition",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-014-B3-1"
+      ]
+    },
+    "SR-MR-014-B4-1": {
+      "rule_type": "enum_definition",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-014-B4-1"
+      ]
+    },
+    "SR-MR-014-B4-2": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-014-B4-2"
+      ]
+    },
+    "SR-MR-014-B5-1": {
+      "rule_type": "enum_definition",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-014-B5-1"
+      ]
+    },
+    "SR-MR-014-B6-1": {
+      "rule_type": "enum_definition",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-014-B6-1"
+      ]
+    },
+    "SR-MR-014-B7-1": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-014-B7-1"
+      ]
+    },
+    "SR-MR-014-B7-2": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-014-B7-2"
+      ]
+    },
+    "SR-MR-014-B8-1": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-014-B8-1"
+      ]
+    },
+    "SR-MR-014-B8-2": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-014-B8-2"
+      ]
+    },
+    "SR-MR-014-B9-1": {
+      "rule_type": "deadline",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "negative"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-014-B9-1"
+      ]
+    },
+    "SR-MR-015-B1-1": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-015-B1-1"
+      ]
+    },
+    "SR-MR-015-B2-1": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-015-B2-1"
+      ]
+    },
+    "SR-MR-015-B3-1": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-015-B3-1"
+      ]
+    },
+    "SR-MR-015-B3-2": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-015-B3-2"
+      ]
+    },
+    "SR-MR-015-B3-3": {
+      "rule_type": "deadline",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "negative"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-015-B3-3"
+      ]
+    },
+    "SR-MR-015-B3-4": {
+      "rule_type": "deadline",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "negative"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-015-B3-4"
+      ]
+    },
+    "SR-MR-016-B1-1": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-016-B1-1"
+      ]
+    },
+    "SR-MR-016-B2-1": {
+      "rule_type": "enum_definition",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-016-B2-1"
+      ]
+    },
+    "SR-MR-016-B3-1": {
+      "rule_type": "enum_definition",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [
+        "negative"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-016-B3-1"
+      ]
+    },
+    "SR-MR-016-B4-1": {
+      "rule_type": "enum_definition",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-016-B4-1"
+      ]
+    },
+    "SR-MR-016-B5-1": {
+      "rule_type": "enum_definition",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-016-B5-1"
+      ]
+    },
+    "SR-MR-017-B1-1": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-017-B1-1"
+      ]
+    },
+    "SR-MR-017-B2-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "positive"
+      ],
+      "missing_case_types": [
+        "data_validation"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-017-B2-1"
+      ]
+    },
+    "SR-MR-017-B3-1": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-017-B3-1"
+      ]
+    },
+    "SR-MR-017-B3-2": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-017-B3-2"
+      ]
+    },
+    "SR-MR-017-B4-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-017-B4-1"
+      ]
+    },
+    "SR-MR-017-B5-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-017-B5-1"
+      ]
+    },
+    "SR-MR-017-B6-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [
+        "boundary"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-017-B6-1"
+      ]
+    },
+    "SR-MR-017-B7-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-017-B7-1"
+      ]
+    },
+    "SR-MR-017-B8-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-017-B8-1"
+      ]
+    },
+    "SR-MR-018-01": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-018-01"
+      ]
+    },
+    "SR-MR-018-02": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-018-02"
+      ]
+    },
+    "SR-MR-019-01": {
+      "rule_type": "deadline",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "negative"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-019-01"
+      ]
+    },
+    "SR-MR-020-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-020-01"
+      ]
+    },
+    "SR-MR-021-01": {
+      "rule_type": "deadline",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "negative"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-021-01"
+      ]
+    },
+    "SR-MR-021-02": {
+      "rule_type": "deadline",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "negative"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-021-02"
+      ]
+    },
+    "SR-MR-022-01": {
+      "rule_type": "deadline",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "negative"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-022-01"
+      ]
+    },
+    "SR-MR-022-02": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-022-02"
+      ]
+    },
+    "SR-MR-023-B1-1": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-023-B1-1"
+      ]
+    },
+    "SR-MR-023-B2-1": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-023-B2-1"
+      ]
+    },
+    "SR-MR-023-B3-1": {
+      "rule_type": "data_constraint",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "boundary"
+      ],
+      "present_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-023-B3-1"
+      ]
+    },
+    "SR-MR-023-B4-1": {
+      "rule_type": "data_constraint",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "boundary"
+      ],
+      "present_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-023-B4-1"
+      ]
+    },
+    "SR-MR-023-B5-1": {
+      "rule_type": "data_constraint",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "boundary"
+      ],
+      "present_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-023-B5-1"
+      ]
+    },
+    "SR-MR-024-D-1": {
+      "rule_type": "enum_definition",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-024-D-1"
+      ]
+    },
+    "SR-MR-024-E-1": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-024-E-1"
+      ]
+    },
+    "SR-MR-025-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-025-01"
+      ]
+    },
+    "SR-MR-025-02": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-025-02"
+      ]
+    },
+    "SR-MR-026-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-026-01"
+      ]
+    },
+    "SR-MR-026-02": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-026-02"
+      ]
+    },
+    "SR-MR-027-01": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-027-01"
+      ]
+    },
+    "SR-MR-028-01": {
+      "rule_type": "deadline",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "negative"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "positive"
+      ],
+      "missing_case_types": [
+        "negative"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-028-01"
+      ]
+    },
+    "SR-MR-029-01": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-029-01"
+      ]
+    },
+    "SR-MR-030-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-030-01"
+      ]
+    },
+    "SR-MR-030-02": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-030-02"
+      ]
+    },
+    "SR-MR-030-03": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-030-03"
+      ]
+    },
+    "SR-MR-030-04": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-030-04"
+      ]
+    },
+    "SR-MR-031-01": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-031-01"
+      ]
+    },
+    "SR-MR-032-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-032-01"
+      ]
+    },
+    "SR-MR-032-02": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-032-02"
+      ]
+    },
+    "SR-MR-033-01": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-033-01"
+      ]
+    },
+    "SR-MR-033-02": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-033-02"
+      ]
+    },
+    "SR-MR-033-03": {
+      "rule_type": "prohibition",
+      "required_case_types": [
+        "negative",
+        "positive"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative"
+      ],
+      "missing_case_types": [
+        "positive"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-033-03"
+      ]
+    },
+    "SR-MR-033-04": {
+      "rule_type": "prohibition",
+      "required_case_types": [
+        "negative",
+        "positive"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative"
+      ],
+      "missing_case_types": [
+        "positive"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-033-04"
+      ]
+    },
+    "SR-MR-034-01": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-034-01"
+      ]
+    },
+    "SR-MR-035-01": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-035-01"
+      ]
+    },
+    "SR-MR-036-01": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-036-01"
+      ]
+    },
+    "SR-MR-037-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-037-01"
+      ]
+    },
+    "SR-MR-037-02": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-037-02"
+      ]
+    },
+    "SR-MR-038-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-038-01"
+      ]
+    },
+    "SR-MR-039-01": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-039-01"
+      ]
+    },
+    "SR-MR-040-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-040-01"
+      ]
+    },
+    "SR-MR-041-01": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-041-01"
+      ]
+    },
+    "SR-MR-042-B1-1": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-042-B1-1"
+      ]
+    },
+    "SR-MR-042-B2-1": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-042-B2-1"
+      ]
+    },
+    "SR-MR-042-B3-1": {
+      "rule_type": "workflow",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "exception"
+      ],
+      "optional_case_types": [
+        "state_transition"
+      ],
+      "present_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-042-B3-1"
+      ]
+    },
+    "SR-MR-042-B3-2": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-042-B3-2"
+      ]
+    },
+    "SR-MR-042-B3-3": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-042-B3-3"
+      ]
+    },
+    "SR-MR-043-01": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-043-01"
+      ]
+    },
+    "SR-MR-060-A-1": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-060-A-1"
+      ]
+    },
+    "SR-MR-060-B-1": {
+      "rule_type": "workflow",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "exception"
+      ],
+      "optional_case_types": [
+        "state_transition"
+      ],
+      "present_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [
+        "exception"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-060-B-1"
+      ]
+    },
+    "SR-MR-060-C-1": {
+      "rule_type": "workflow",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "exception"
+      ],
+      "optional_case_types": [
+        "state_transition"
+      ],
+      "present_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-060-C-1"
+      ]
+    },
+    "SR-MR-044-A-1": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-044-A-1"
+      ]
+    },
+    "SR-MR-044-A-2": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-044-A-2"
+      ]
+    },
+    "SR-MR-044-A-3": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-044-A-3"
+      ]
+    },
+    "SR-MR-044-B-1": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-044-B-1"
+      ]
+    },
+    "SR-MR-044-C-1": {
+      "rule_type": "workflow",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "exception"
+      ],
+      "optional_case_types": [
+        "state_transition"
+      ],
+      "present_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-044-C-1"
+      ]
+    },
+    "SR-MR-044-D-1": {
+      "rule_type": "workflow",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "exception"
+      ],
+      "optional_case_types": [
+        "state_transition"
+      ],
+      "present_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-044-D-1"
+      ]
+    },
+    "SR-MR-045-01": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-045-01"
+      ]
+    },
+    "SR-MR-046-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-046-01"
+      ]
+    },
+    "SR-MR-046-02": {
+      "rule_type": "deadline",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "negative"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-046-02"
+      ]
+    },
+    "SR-MR-046-03": {
+      "rule_type": "prohibition",
+      "required_case_types": [
+        "negative",
+        "positive"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-046-03"
+      ]
+    },
+    "SR-MR-046-04": {
+      "rule_type": "prohibition",
+      "required_case_types": [
+        "negative",
+        "positive"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-046-04"
+      ]
+    },
+    "SR-MR-047-01": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-047-01"
+      ]
+    },
+    "SR-MR-047-02": {
+      "rule_type": "data_constraint",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "boundary"
+      ],
+      "present_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-047-02"
+      ]
+    },
+    "SR-MR-048-01": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-048-01"
+      ]
+    },
+    "SR-MR-048-02": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-048-02"
+      ]
+    },
+    "SR-MR-049-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-049-01"
+      ]
+    },
+    "SR-MR-049-02": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-049-02"
+      ]
+    },
+    "SR-MR-050-01": {
+      "rule_type": "state_transition",
+      "required_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "accepted_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-050-01"
+      ]
+    },
+    "SR-MR-050-02": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-050-02"
+      ]
+    },
+    "SR-MR-050-03": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-050-03"
+      ]
+    },
+    "SR-MR-051-01": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-051-01"
+      ]
+    },
+    "SR-MR-051-02": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-051-02"
+      ]
+    },
+    "SR-MR-052-A-1": {
+      "rule_type": "workflow",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "exception"
+      ],
+      "optional_case_types": [
+        "state_transition"
+      ],
+      "present_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-052-A-1"
+      ]
+    },
+    "SR-MR-052-B-1": {
+      "rule_type": "workflow",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "exception"
+      ],
+      "optional_case_types": [
+        "state_transition"
+      ],
+      "present_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-052-B-1"
+      ]
+    },
+    "SR-MR-053-01": {
+      "rule_type": "state_transition",
+      "required_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "accepted_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-053-01"
+      ]
+    },
+    "SR-MR-054-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-054-01"
+      ]
+    },
+    "SR-MR-055-A-1": {
+      "rule_type": "workflow",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "exception"
+      ],
+      "optional_case_types": [
+        "state_transition"
+      ],
+      "present_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-055-A-1"
+      ]
+    },
+    "SR-MR-055-B-1": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-055-B-1"
+      ]
+    },
+    "SR-MR-056-A-1": {
+      "rule_type": "workflow",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "exception"
+      ],
+      "optional_case_types": [
+        "state_transition"
+      ],
+      "present_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-056-A-1"
+      ]
+    },
+    "SR-MR-056-B-1": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-056-B-1"
+      ]
+    },
+    "SR-MR-057-01": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-057-01"
+      ]
+    },
+    "SR-MR-058-01": {
+      "rule_type": "state_transition",
+      "required_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "accepted_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-058-01"
+      ]
+    },
+    "SR-MR-059-01": {
+      "rule_type": "deadline",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "negative"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-059-01"
+      ]
+    },
+    "SR-MR-059-02": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-059-02"
+      ]
+    },
+    "SR-MR-059-03": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-059-03"
+      ]
+    },
+    "SR-MR-061-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-061-01"
+      ]
+    },
+    "SR-MR-062-01": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-062-01"
+      ]
+    },
+    "SR-MR-062-02": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-062-02"
+      ]
+    },
+    "SR-MR-063-01": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-063-01"
+      ]
+    },
+    "SR-MR-063-02": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-063-02"
+      ]
+    },
+    "SR-MR-063-03": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-063-03"
+      ]
+    },
+    "SR-MR-063-04": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-063-04"
+      ]
+    },
+    "SR-MR-064-A-1": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-064-A-1"
+      ]
+    },
+    "SR-MR-064-B-1": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-064-B-1"
+      ]
+    },
+    "SR-MR-064-B-2": {
+      "rule_type": "deadline",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "negative"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-064-B-2"
+      ]
+    },
+    "SR-MR-064-B-3": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-064-B-3"
+      ]
+    },
+    "SR-MR-064-B-4": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-064-B-4"
+      ]
+    },
+    "SR-MR-065-01": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-065-01"
+      ]
+    },
+    "SR-MR-066-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-066-01"
+      ]
+    },
+    "SR-MR-066-02": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-066-02"
+      ]
+    },
+    "SR-MR-067-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-067-01"
+      ]
+    },
+    "SR-MR-068-01": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-068-01"
+      ]
+    },
+    "SR-MR-069-01": {
+      "rule_type": "state_transition",
+      "required_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "accepted_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-069-01"
+      ]
+    },
+    "SR-MR-069-02": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-069-02"
+      ]
+    },
+    "SR-MR-069-03": {
+      "rule_type": "state_transition",
+      "required_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "accepted_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-069-03"
+      ]
+    },
+    "SR-MR-069-04": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": [
+        "MR-069-04"
+      ]
+    },
+    "SR-MR-070-01": {
+      "rule_type": "deadline",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "negative"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-070-01"
+      ]
+    },
+    "SR-MR-070-02": {
+      "rule_type": "deadline",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "negative"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "boundary",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "positive"
+      ],
+      "missing_case_types": [
+        "negative"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-070-02"
+      ]
+    },
+    "SR-MR-070-03": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-070-03"
+      ]
+    },
+    "SR-MR-070-04": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-070-04"
+      ]
+    },
+    "SR-MR-071-A-1": {
+      "rule_type": "workflow",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "exception"
+      ],
+      "optional_case_types": [
+        "state_transition"
+      ],
+      "present_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [
+        "exception"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-071-A-1"
+      ]
+    },
+    "SR-MR-071-B-1": {
+      "rule_type": "workflow",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "exception"
+      ],
+      "optional_case_types": [
+        "state_transition"
+      ],
+      "present_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-071-B-1"
+      ]
+    },
+    "SR-MR-071-C-1": {
+      "rule_type": "workflow",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "exception"
+      ],
+      "optional_case_types": [
+        "state_transition"
+      ],
+      "present_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-071-C-1"
+      ]
+    },
+    "SR-MR-072-D-1": {
+      "rule_type": "permission",
+      "required_case_types": [
+        "positive"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive"
+      ],
+      "accepted_case_types": [
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 1,
+      "paragraph_ids": [
+        "MR-072-D-1"
+      ]
+    },
+    "SR-MR-073-01": {
+      "rule_type": "state_transition",
+      "required_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "optional_case_types": [
+        "negative",
+        "exception"
+      ],
+      "present_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "accepted_case_types": [
+        "positive",
+        "state_transition"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-073-01"
+      ]
+    },
+    "SR-MR-074-A-1": {
+      "rule_type": "workflow",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "exception"
+      ],
+      "optional_case_types": [
+        "state_transition"
+      ],
+      "present_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-074-A-1"
+      ]
+    },
+    "SR-MR-074-B-1": {
+      "rule_type": "workflow",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "exception"
+      ],
+      "optional_case_types": [
+        "state_transition"
+      ],
+      "present_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-074-B-1"
+      ]
+    },
+    "SR-MR-074-C-1": {
+      "rule_type": "workflow",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "exception"
+      ],
+      "optional_case_types": [
+        "state_transition"
+      ],
+      "present_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-074-C-1"
+      ]
+    },
+    "SR-MR-074-D-1": {
+      "rule_type": "workflow",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "exception"
+      ],
+      "optional_case_types": [
+        "state_transition"
+      ],
+      "present_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-074-D-1"
+      ]
+    },
+    "SR-MR-074-E-1": {
+      "rule_type": "workflow",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "exception"
+      ],
+      "optional_case_types": [
+        "state_transition"
+      ],
+      "present_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "exception",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "MR-074-E-1"
+      ]
+    },
+    "SR-MR-075-01": {
+      "rule_type": "prohibition",
+      "required_case_types": [
+        "negative",
+        "positive"
+      ],
+      "optional_case_types": [
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative"
+      ],
+      "missing_case_types": [
+        "positive"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 2,
+      "paragraph_ids": [
+        "MR-075-01"
+      ]
+    }
+  }
+}

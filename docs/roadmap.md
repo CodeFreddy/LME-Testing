@@ -152,40 +152,39 @@
 - 若 instability > 10%：Checker prompt 稳定性改进
 - 识别出的高频确定性规则类型 → Oracle 实测验证
 
-**S2-T01 覆盖率分析（2026-04-20）**
+**S2-T01 覆盖率分析与修复（2026-04-20）**
 
-| 指标 | 数值 |
-|------|------|
-| 规则总数 | 180 |
-| 完全覆盖 | 130 (72.22%) |
-| 部分覆盖 | 17 |
-| 未覆盖 | 2 (SR-MR-064-A-1, SR-MR-064-B-1) |
-| 不适用 | 34 |
+| 指标 | v1.0 (修复前) | v1.1 (修复后) | Delta |
+|------|--------------|---------------|-------|
+| 覆盖率 | 72.22% | **75.0%** | **+2.78%** |
+| 完全覆盖 | 130 | 135 | +5 |
+| 部分覆盖 | 17 | 12 | -5 |
+| 未覆盖 | 2 | 1 | -1 |
 
-**部分覆盖分类（17条）：**
+**v1.1 改善结果：9条改善，4条回归，净增益+5条 fully covered**
 
-| 根因 | 规则数 | 示例 |
-|------|--------|------|
-| Checker 将 exception 评为 indirect（非 direct）| 7 | workflow 规则 |
-| Checker 将 boundary 评为 not_relevant | 3 | deadline 规则 |
-| Checker 将 positive 评为 indirect | 2 | prohibition 规则 |
-| Maker 未生成 required case type | 4 | enum/deadline/calculation 规则 |
+| 根因 | 规则数 | 改善 | 未改善 | 说明 |
+|------|--------|------|--------|------|
+| workflow+exception indirect | 7 | 5 | 2 | SR-MR-060-B-1, SR-MR-071-A-1 — maker场景未基于证据 |
+| deadline+boundary not_relevant | 3 | 2 | 1 | SR-MR-004-01 — maker场景语义不匹配 |
+| prohibition+positive indirect | 2 | 0 | 2 | SR-MR-033-03, SR-MR-033-04 — maker测试了允许动作而非禁止动作 |
+| maker self-corrected | 4 | 2 | 2 | SR-MR-017-B6-1, SR-MR-028-01 |
+| v1.1 回归（更严格审查）| 4 | — | — | SR-MR-016-B3-1, SR-MR-017-B2-1, SR-MR-070-02, SR-MR-075-01 |
 
-**未覆盖规则（2条）：**
+**根本结论**：剩余12条部分覆盖均不是checker校准问题，而是**maker输出质量**或**证据缺失**问题：
+- prohibition positive场景测试了允许动作（如账户内转移），而非禁止动作（跨账户转移）
+- workflow exception场景超出了证据描述范围
+- 这些需要maker prompt改进，不是checker prompt改进
 
-| 规则 | 根因 | 处置 |
-|------|------|------|
-| SR-MR-064-A-1 | 证据文本被截断：`"(a) the OTC transaction must: i. ii. iii."` — source page_19.txt itself truncated | 已处置：标记为 coverage_eligible=false（页19本身缺失完整文本，无法修复）|
-| SR-MR-064-B-1 | 证据完整，checker 已接受 | 无需操作 |
+**到 ~82% 的路径**：需要maker prompt修复以下语义错位：
+1. prohibition positive：必须测试被禁止的动作本身（跨账户/different pricing）并期望被拒绝
+2. workflow exception：必须基于证据中实际描述的异常处理
+3. 证据重新提取：SR-MR-060-B-1 证据在条款(b)处截断，需要补充
 
-**结论：**
-- 根因 1（checker 过于严格）：需调整 `CHECKER_SYSTEM_PROMPT`，使 workflow+exception、deadline+boundary、prohibition+positive 获得 direct 评级
-- 根因 2（SR-MR-064-A-1 证据截断）：源文档页19本身截断，无法重新提取；已标记 coverage_eligible=false 排除在覆盖率计算外
-
-**修复计划：**
-1. ✅ SR-MR-064-A-1: 标记 `coverage_eligible=false`（源文档截断，无法修复）
-2. ✅ 调整 checker prompt 校准逻辑 (`CHECKER_PROMPT_VERSION: 1.0 → 1.1`)
-3. ⏳ 重新运行 maker + checker 验证覆盖率提升
+**下一步：**
+1. ⏳ maker prompt v1.3 修复 prohibition positive 和 workflow exception 语义错位
+2. ⏳ 证据重新提取 SR-MR-060-B-1 clause (b)
+3. ⏳ 回归分析：v1.1 更严格导致4条规则降级
 
 详见：`docs/s2t01_coverage_analysis.md`
 
