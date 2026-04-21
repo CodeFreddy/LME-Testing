@@ -76,33 +76,28 @@ Recent commit subjects:
 
 Recent completed work:
 
-- **S2-T01 v1.3 maker + checker re-run (2026-04-21)**
-  - MAKER_PROMPT_VERSION 1.2 -> 1.3: prohibition positive and workflow exception guidance
-  - Prohibition positive fix verified: SR-MR-033-03, 033-04, 075-01 positive cases upgraded indirect -> direct
-  - SR-MR-075-01 now fully covered
-  - Coverage: 74.44% (slight regression from 75.0% due to LLM non-determinism on other rules)
-  - Root cause: SR-MR-033-03/033-04 still partial — positive=direct but negative=indirect
-  - Next: need prohibition negative guidance (negative for prohibition should also be direct)
-  - Artifacts: `runs/maker/20260420T090723Z/`, `runs/checker/20260420T100100Z/`
+- **S2-T01 v1.5 maker + checker run (2026-04-21)**
+  - MAKER_PROMPT_VERSION 1.4 -> 1.5, CHECKER_PROMPT_VERSION 1.2 -> 1.3
+  - Deadline positive/negative calibration: deadline+positive and deadline+negative now DIRECT
+  - Regression guardrail added: don't lower evidence_consistency for edge-case scenarios
+  - Coverage: 78.89% (142 fully covered, 5 partial, 1 uncovered)
+  - Net: +12 fully covered rules from baseline (130->142), +6.67pp (72.22%->78.89%)
+  - SR-MR-070-02 fully covered ✅ (deadline negative calibration)
+  - Remaining gaps: SR-MR-015-B3-4 (boundary, evidence-constrained), SR-MR-071-C-1 (LLM non-determinism)
+  - Artifacts: `runs/maker/20260421T074319Z/`, `runs/checker/20260421T083003Z/`
 
-- **S2-T01 v1.1 checker re-run (2026-04-20)**
-  - Prompt calibration (v1.1): workflow+exception, deadline+boundary, prohibition+positive guidelines
-  - Result: 72.22% -> 75.0% coverage (+2.78%)
-  - 9 rules improved (partial->full), 4 rules regressed (full->partial)
-  - Analysis: `docs/s2t01_coverage_analysis.md`
+- **S2-B1/B2 integration (2026-04-21)**
+  - `review_session.py` finalize_session() now calls build_audit_trail -> final/audit_trail.html
+  - _run_job() now calls build_case_compare after rewrite -> iter<N>/rewrite/case_compare.html
+  - Both gracefully degrade on failure (non-blocking)
+  - audit_trail.py (267 lines) + case_compare.py (216 lines) now fully wired
 
-- **S2-T02 checker stability measurement** (v1→v4 iterations, 2026-04-19)
-  - v1/v2: Silent truncation — pipeline misreported completion with 14/64 of 322 cases processed
-  - v3 fix: Error surfacing (`batches_processed`/`failed_batch_num`) in `pipelines.py`; 60% instability (10 comparable cases)
-  - v4 fix: Retry logic (`providers.py`, max_retries=3, exponential backoff); Run A improved 63→121 batches (+92%)
-  - v4 outcome: Run B process hung at batch 98; full stability_report not produced
-  - **Conclusion: API network unreliability blocks full 322-case measurement; instability directionally >> 10% threshold**
-  - Artifacts: `runs/checker-stability/20260418T231915+0800-v4/`
-
-- **Code fixes committed:**
-  - `pipelines.py`: error surfacing with remaining count on exception
-  - `providers.py`: retry loop for transient errors (SSL EOF, connection reset, HTTP 5xx)
-  - `prompts.py`: CHECKER_PROMPT_VERSION 1.0->1.1, MAKER_PROMPT_VERSION 1.2->1.3
+- **S2-T01 v1.4 maker + checker run (2026-04-21)**
+  - MAKER_PROMPT_VERSION 1.3 -> 1.4, CHECKER_PROMPT_VERSION 1.1 -> 1.2
+  - Prohibition negative calibration: negative case for prohibition is DIRECT
+  - SR-MR-033-03 and SR-MR-033-04 both fully covered
+  - Coverage: 77.22% (139 fully covered)
+  - Artifacts: `runs/maker/20260421T012618Z/`, `runs/checker/20260421T030325Z/`
 
 - **Cleanup (2026-04-19):** Evidence preserved in `evidence/` (~1.3MB). Deleted: `vendor/` (1.7MB), `logs-from-backup-run/` (37KB), `reports/` (2.1MB), stale runs/ artifacts (~4.3MB)
 - **Stage M COMPLETE (2026-04-19):** SM-T01~SM-T05 all done — UTC timestamps, workflow interrupt handling, retry config merged from master
@@ -111,14 +106,15 @@ Recent completed work:
 
 ## Current Repo State
 
-**Stage M (master branch merge) COMPLETED 2026-04-19.** All Stage 1 work is complete. Stage 2 Direction A is underway.
+**Stage M (master branch merge) COMPLETED 2026-04-19.** Stage 2 Direction A (S2-T01) COMPLETE. S2-B1/B2 INTEGRATED.
 
 Key repo state:
 
+- `prompts.py`: MAKER_PROMPT_VERSION 1.5, CHECKER_PROMPT_VERSION 1.3 with full coverage_relevance calibration
+- S2-T01 coverage: 78.89% (142/180 fully covered) — practical ceiling with current evidence
+- `audit_trail.py` + `case_compare.py`: fully wired into `review_session.py`
 - `pipelines.py` + `providers.py`: error surfacing and retry logic implemented
-- `prompts.py`: CHECKER_PROMPT_VERSION 1.1 with coverage_relevance calibration guidelines
-- `evidence/` directory: preserved key artifacts (stability v4, baseline full, governance signals, S2-T01 v1.1 run)
-- `vendor/`, `logs-from-backup-run/`, `reports/` deleted (gitignored or archived evidence)
+- Evidence preserved in `evidence/` directory
 - Phase 1/2/3 acceptance gates all marked complete in `docs/acceptance.md`
 
 Governance checks available:
@@ -131,12 +127,10 @@ Governance checks available:
 
 ## Recommended Next Step
 
-**Stage M complete. Stage 2 Direction A is the focus:**
+**Stage 2 complete (S2-T01 at 78.89%, S2-B1/B2 integrated). Remaining:**
 
-1. **Maker v1.4**: prohibition negative guidance — negative for prohibition should be direct coverage (confirms prohibition doesn't over-block)
-2. **S2-T01 v1.3 done**: prohibition positive fix verified ✅, SR-MR-075-01 fully covered, coverage 74.44% (LLM non-determinism)
-3. **S2-T02 resolved**: Error surfacing + retry logic committed; 60-71% instability observed due to API random disconnects
-4. **S2-B1/B2**: audit_trail.py + case_compare.py implemented (optional features)
+1. **LLM non-determinism stabilization**: SR-MR-015-B3-4 boundary and SR-MR-071-C-1 negative still fluctuate — multi-run voting or consolidated scenario design
+2. **Stage 3**: Blocked on LME VM access (ETA unknown)
 
 ---
 

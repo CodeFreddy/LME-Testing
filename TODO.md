@@ -69,8 +69,8 @@
 
 | 模块 | Master 状态 | Main 状态 | 计划 |
 |------|------------|---------|------|
-| `lme_testing/audit_trail.py` | 引用但不存在（broken import）| 不存在 | S2-B1 |
-| `lme_testing/case_compare.py` | 引用但不存在（broken import）| 不存在 | S2-B2 |
+| `lme_testing/audit_trail.py` | 引用但不存在（broken import）| ✅ 已实现并集成入 `review_session.py` | S2-B1 ✅ |
+| `lme_testing/case_compare.py` | 引用但不存在（broken import）| ✅ 已实现并集成入 `review_session.py` | S2-B2 ✅ |
 
 ---
 
@@ -151,8 +151,8 @@
 | `pipelines.py` | ✅ Code（planner+BDD，910行）| 旧版（639行，无 planner/BDD）| Main 更完整 |
 | `workflow_session.py` | ✅ Code（无中断处理）| 有中断处理（更好）| 通过 SM-T03 合并 |
 | `storage.py` | ✅ Code（本地时间）| UTC 时间（更好）| 通过 SM-T02 合并 |
-| `audit_trail.py` | 不存在 | 引用但不存在（broken）| S2-B1 实现 |
-| `case_compare.py` | 不存在 | 引用但不存在（broken）| S2-B2 实现 |
+| `audit_trail.py` | 不存在 | ✅ 已实现并集成 | S2-B1 ✅ |
+| `case_compare.py` | 不存在 | ✅ 已实现并集成 | S2-B2 ✅ |
 
 ---
 
@@ -164,7 +164,7 @@
 - [x] Works with existing `review_session.py` without modification
 
 **状态：** ✅ COMPLETE  
-**证据：** `lme_testing/audit_trail.py` 完整实现（267行），`build_audit_trail(session_dir, output_path) -> dict` 可用；在 `test_fresh` session 上验证：生成 16KB HTML，包含完整 decision chain；main 的 `review_session.py` 不引用此模块（可选功能）
+**证据：** `lme_testing/audit_trail.py` 完整实现（267行），`build_audit_trail(session_dir, output_path) -> dict`；`review_session.py` 的 `finalize_session()` 已集成调用，输出到 `final/audit_trail.html`；生成失败不影响 session（graceful degradation）
 
 ### S2-B2：case_compare.py 实现（来自 master 概念）
 - [x] `lme_testing/case_compare.py`：`build_case_compare(...)` 实现
@@ -172,7 +172,7 @@
 - [x] Works with existing `review_session.py` without modification
 
 **状态：** ✅ COMPLETE  
-**证据：** `lme_testing/case_compare.py` 完整实现（216行）；`build_case_compare(prev, next, rewritten, iter_prev, iter_next, output)` 在 `test_fresh` session 上验证：生成 4.4KB HTML；main 的 `review_session.py` 不引用此模块（可选功能）
+**证据：** `lme_testing/case_compare.py` 完整实现（216行），`build_case_compare(...)`；`review_session.py` 的 `_run_job()` 已集成调用，输出到 `iter<N>/rewrite/case_compare.html`；生成失败不影响 session（graceful degradation）
 
 ### S2-A 系列：质量提升（取决于 Stage 1 数据）
 
