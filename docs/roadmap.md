@@ -182,17 +182,17 @@
 3. SR-MR-071-A-1：maker推断的场景无证据支撑
 4. LLM非决定性：部分规则在运行间波动，可通过多轮投票或稳定化策略部分恢复
 
-**v1.4 maker + checker 结果（2026-04-21）：**
-- MAKER_PROMPT_VERSION 1.3 → 1.4, CHECKER_PROMPT_VERSION 1.2
-- prohibition negative 修复：SR-MR-033-03 和 SR-MR-033-04 均已 fully covered
-- 覆盖率：77.22%（139 fully covered, 8 partial, 1 uncovered）
-- 净增益：+9 fully covered rules from baseline (130→139), +5.0 percentage points (72.22%→77.22%)
-- **结论：77.22% 是证据约束下的实际天花板，无法通过 prompt 调优突破**
+**v1.5 maker + checker 结果（2026-04-21）：**
+- MAKER_PROMPT_VERSION 1.4 → 1.5, CHECKER_PROMPT_VERSION 1.2 → 1.3
+- deadline positive/negative 校准：SR-MR-070-02 现已 fully covered ✅
+- 覆盖率：78.89%（142 fully covered, 5 partial, 1 uncovered）
+- 净增益：+12 fully covered rules from baseline (130→142), +6.67 percentage points (72.22%→78.89%)
+- **结论：78.89% 是 prompt 校准的实际天花板；剩余 gap 为证据约束或 LLM 非决定性**
 
 **下一步：**
-1. ✅ S2-T01 已完成：77.22% 为证据约束极限
-2. ⏳ LLM非决定性应对：多轮投票或场景设计稳定化（针对 SR-MR-015-B3-4、SR-MR-070-02、SR-MR-071-C-1）
-3. ⏳ 可选：S2-B1 audit_trail.py + S2-B2 case_compare.py（Master 缺失模块）
+1. ✅ S2-T01 已完成：78.89% 为 prompt 校准极限
+2. ⏳ LLM非决定性应对：多轮投票或场景设计稳定化（SR-MR-015-B3-4 boundary、SR-MR-071-C-1 negative）
+3. ⏳ 可选：S2-B1 audit_trail.py + S2-B2 case_compare.py（Master 缺失模块，已实现但未集成）
 
 详见：`docs/s2t01_coverage_analysis.md`
 

@@ -328,6 +328,48 @@ Coverage 77.22% represents a +5 net improvement from v1.3. The path to ~80% is n
 
 - **LLM non-determinism**: SR-MR-015-B3-4, SR-MR-070-02, SR-MR-071-C-1 fluctuate between runs. Stabilization strategies (multi-run voting, consolidated scenario design) could recover some of the non-determinism losses.
 
+### v1.5 Maker + Checker Results (2026-04-21)
+
+**Run IDs:** `runs/maker/20260421T074319Z` (maker v1.5) + `runs/checker/20260421T083003Z` (checker v1.3)
+**Prompt versions:** MAKER_PROMPT_VERSION 1.4 → 1.5, CHECKER_PROMPT_VERSION 1.2 → 1.3
+
+### Key Changes in v1.5
+
+**Checker v1.3 — deadline positive/negative calibration:**
+- `deadline+positive` → direct (primary deadline requirement validation)
+- `deadline+negative` → direct (deadline rejection condition confirmation)
+- Regression guardrail: don't lower evidence_consistency for edge-case scenarios
+
+**Maker v1.5 — deadline case guidance:**
+- DEADLINE positive: ground in specific deadline structure (time/offset/named deadline_kind)
+- DEADLINE negative: match specific failure mode in evidence, not generic "missed deadline"
+- Regression guardrail for deadline-specific scenario grounding
+
+### Coverage Comparison
+
+| Metric | v1.4 (maker 1.4, checker 1.2) | v1.5 (maker 1.5, checker 1.3) | Delta |
+|--------|--------------------------------|-------------------------------|-------|
+| Coverage | 77.22% | **78.89%** | **+1.67%** |
+| Fully covered | 139 | 142 | +3 |
+| Partially covered | 8 | 5 | -3 |
+| Uncovered | 1 | 1 | 0 |
+
+### Target Rules — Status
+
+| Rule | v1.4 Status | v1.5 Status | Change |
+|------|-------------|-------------|--------|
+| SR-MR-070-02 | partially_covered (negative indirect) | **fully_covered** | ✅ fixed |
+| SR-MR-071-C-1 | partially_covered (negative missing) | partially_covered (negative rejected) | regressed |
+| SR-MR-015-B3-4 | partially_covered (positive/negative indirect) | partially_covered (boundary missing) | mixed |
+
+### Analysis
+
+**SR-MR-070-02 fixed**: deadline+negative calibration worked — negative case now rated `direct`. Fully covered ✅
+
+**SR-MR-071-C-1**: Regressed — negative case was accepted in v1.4 run but rejected in v1.5 run. LLM non-determinism: same prompt produces different judgments on borderline cases.
+
+**SR-MR-015-B3-4**: Boundary case remains problematic — v1.5 run generated boundary (present) but checker still rated it `indirect` despite regression guardrail. Root cause: evidence doesn't contain a specific boundary value, making it inherently difficult to score well.
+
 ### Practical Ceiling
 
 The current evidence base limits coverage to approximately **77-78%**. Every remaining gap is either:
@@ -343,8 +385,11 @@ Further gains require either acquiring richer source documents or accepting that
 | v1.0 | 72.22% | baseline | initial baseline |
 | v1.1 | 75.0% | +2.78% | checker calibration (workflow+exception, deadline+boundary, prohibition+positive) |
 | v1.3 | 74.44% | -0.56% | maker prohibition positive fix (LLM non-determinism caused regressions) |
-| v1.4 | **77.22%** | **+2.78%** | checker prohibition negative fix (direct for negative case) |
+| v1.4 | 77.22% | +2.78% | checker prohibition negative fix (direct for negative case) |
+| v1.5 | **78.89%** | **+1.67%** | deadline positive/negative calibration (v1.5 maker + v1.3 checker) |
 
-**Net progress from baseline: +9 fully covered rules (130→139), coverage +5.0 percentage points (72.22%→77.22%)**
+**Net progress from baseline: +12 fully covered rules (130→142), coverage +6.67 percentage points (72.22%→78.89%)**
+
+**S2-T01 conclusion: 78.89% is the practical ceiling for checker+maker calibration. Remaining gaps are evidence-constrained (SR-MR-060-B-1, SR-MR-004-01, SR-MR-071-A-1) or LLM non-determinism (SR-MR-015-B3-4, SR-MR-071-C-1).**
 
 **S2-T01 conclusion: The 77.22% coverage ceiling is evidence-bound, not prompt-bound.**

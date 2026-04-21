@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-21 05:37:03 UTC`
+- `2026-04-21 10:02:47 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `docs: record S2-T01 v1.5 results 鈥?78.89% coverage (+6.67pp from baseline)`
 - `fix: checker v1.3 + maker v1.5 鈥?deadline positive/negative direct, regression guardrail`
 - `docs: conclude S2-T01 鈥?77.22% is evidence-bound ceiling`
 - `docs: refresh session handoff with S2-T01 v1.4 results`
 - `docs: record S2-T01 v1.4 maker + checker results (77.22%)`
-- `fix: maker prompt v1.3 鈥?prohibition positive and workflow exception guidance`
 
 ---
 
