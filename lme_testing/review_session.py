@@ -19,6 +19,8 @@ from .pipelines import _case_map_from_maker_records, run_checker_pipeline, run_r
 from .reporting import generate_html_report
 from .schemas import load_issue_type_options, validate_human_review_payload
 from .storage import atomic_write_json, ensure_dir, load_json, load_jsonl, timestamp_slug
+from .audit_trail import build_audit_trail
+from .case_compare import build_case_compare
 
 logger = logging.getLogger(__name__)
 
@@ -408,6 +410,12 @@ class ReviewSessionManager:
         final_manifest = final_dir / "final_session_manifest.json"
         atomic_write_json(final_manifest, state)
         self._save_manifest(state)
+        audit_trail_path = final_dir / "audit_trail.html"
+        try:
+            trail_result = build_audit_trail(self.session_dir, audit_trail_path)
+            logger.info("Audit trail generated. path=%s divergent_count=%s", audit_trail_path, trail_result.get("divergent_count"))
+        except Exception:
+            logger.warning("Audit trail generation failed. session_id=%s error=%s", self.session_id, traceback.format_exc())
         final_report_path = Path(state.get("current_report_path") or "")
         final_maker_path = final_report_path.with_name("maker_readable.html") if final_report_path else None
         final_checker_path = final_report_path.with_name("checker_readable.html") if final_report_path else None
@@ -421,6 +429,7 @@ class ReviewSessionManager:
             "final_checker_path": str(final_checker_path) if final_checker_path else None,
             "final_checker_url": self.report_route_url("checker") if final_checker_path else None,
             "final_manifest_path": str(final_manifest),
+            "audit_trail_path": str(audit_trail_path) if audit_trail_path.exists() else None,
         }
 
     def job_status(self, job_id: str) -> dict[str, Any]:
@@ -459,6 +468,32 @@ class ReviewSessionManager:
                 batch_size=self.rewrite_batch_size,
                 human_scripts_edits_path=Path(state.get("human_scripts_edits_latest_path") or ""),
             )
+            # Generate case comparison HTML (previous vs rewritten iteration)
+            compare_output_path = rewrite_dir / "case_compare.html"
+            try:
+                prev_iter = iteration - 1
+                prev_maker_path = None
+                if str(prev_iter) in state["iterations"]:
+                    prev_iter_data = state["iterations"][str(prev_iter)]
+                    if prev_iter_data.get("maker_cases_path"):
+                        prev_maker_path = Path(prev_iter_data["maker_cases_path"])
+                if prev_maker_path and prev_maker_path.exists():
+                    human_reviews_data = load_json(human_reviews_path)
+                    rewritten_case_ids = [
+                        r["case_id"] for r in human_reviews_data.get("reviews", [])
+                        if r.get("review_decision") == "rewrite" and r.get("case_id")
+                    ]
+                    compare_result = build_case_compare(
+                        prev_cases_path=prev_maker_path,
+                        next_cases_path=Path(rewrite_summary["merged_cases_path"]),
+                        rewritten_case_ids=rewritten_case_ids,
+                        iteration_prev=prev_iter,
+                        iteration_next=iteration,
+                        output_path=compare_output_path,
+                    )
+                    logger.info("Case compare generated. path=%s rewritten=%s", compare_output_path, compare_result.get("rewritten_count"))
+            except Exception:
+                logger.warning("Case compare generation failed. session_id=%s error=%s", self.session_id, traceback.format_exc())
             checker_summary = run_checker_pipeline(
                 config=self.config,
                 semantic_rules_path=self.rules_path,
@@ -530,6 +565,7 @@ class ReviewSessionManager:
                     "checker_reviews": self._file_url(Path(checker_summary["results_path"])),
                     "coverage_report": self._file_url(Path(checker_summary["coverage_report_path"])),
                     "report_html": self._file_url(report_path),
+                    "case_compare_html": self._file_url(compare_output_path) if compare_output_path.exists() else None,
                 },
             }
             with self._lock:
