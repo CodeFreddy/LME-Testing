@@ -176,23 +176,23 @@
 - workflow exception场景超出了证据描述范围
 - 这些需要maker prompt改进，不是checker prompt改进
 
-**到 ~82% 的路径**：需要maker prompt修复以下语义错位：
-1. prohibition positive：必须测试被禁止的动作本身（跨账户/different pricing）并期望被拒绝
-2. workflow exception：必须基于证据中实际描述的异常处理
-3. 证据重新提取：SR-MR-060-B-1 证据在条款(b)处截断，需要补充
+**到 ~80% 的结论**：以下 gap 无法通过 prompt 修复——证据本身缺乏必要的细节：
+1. SR-MR-060-B-1：条款60在第13-14页完整，没有独立的例外条款可测试
+2. SR-MR-004-01：证据只有"在例外情况下"而无具体边界值
+3. SR-MR-071-A-1：maker推断的场景无证据支撑
+4. LLM非决定性：部分规则在运行间波动，可通过多轮投票或稳定化策略部分恢复
 
-**v1.3 maker 结果（2026-04-21）：**
-- MAKER_PROMPT_VERSION 1.2 → 1.3
-- prohibition positive 修复已验证：SR-MR-033-03, 033-04, 075-01 positive 均从 indirect → direct
-- SR-MR-075-01 现已 fully covered ✅
-- SR-MR-033-03/033-04 仍 partial：positive=direct ✅ 但 negative=indirect ❌（prohibition negative 也需 checker 指导）
-- 覆盖率 74.44%（轻微下降：LLM 非决定性导致6条回归）
+**v1.4 maker + checker 结果（2026-04-21）：**
+- MAKER_PROMPT_VERSION 1.3 → 1.4, CHECKER_PROMPT_VERSION 1.2
+- prohibition negative 修复：SR-MR-033-03 和 SR-MR-033-04 均已 fully covered
+- 覆盖率：77.22%（139 fully covered, 8 partial, 1 uncovered）
+- 净增益：+9 fully covered rules from baseline (130→139), +5.0 percentage points (72.22%→77.22%)
+- **结论：77.22% 是证据约束下的实际天花板，无法通过 prompt 调优突破**
 
 **下一步：**
-1. ⏳ maker prompt v1.4: prohibition negative 指导（negative 也应算 direct for prohibition）
-2. ⏳ SR-MR-004-01 boundary：maker v1.3 仍生成但 checker 拒绝，需特定边界值证据
-3. ⏳ 证据重新提取 SR-MR-060-B-1 clause (b)
-4. ⏳ 多轮重跑验证：LLM 非决定性导致结果波动
+1. ✅ S2-T01 已完成：77.22% 为证据约束极限
+2. ⏳ LLM非决定性应对：多轮投票或场景设计稳定化（针对 SR-MR-015-B3-4、SR-MR-070-02、SR-MR-071-C-1）
+3. ⏳ 可选：S2-B1 audit_trail.py + S2-B2 case_compare.py（Master 缺失模块）
 
 详见：`docs/s2t01_coverage_analysis.md`
 

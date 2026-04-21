@@ -318,11 +318,23 @@ The v1.3 prohibition positive guidance worked: positive cases now rated `direct`
 
 ### Path Forward
 
-Coverage 77.22% represents a +5 net improvement from v1.3. Remaining gaps:
-- **SR-MR-004-01 boundary**: Evidence too generic ("exceptional circumstances") — no specific boundary value
-- **SR-MR-060-B-1 exception**: Source text truncated — needs evidence re-extraction
-- **SR-MR-071-A-1 workflow exception**: maker inferred scenario not grounded in evidence
-- **LLM non-determinism**: Some rules fluctuate between runs (SR-MR-015-B3-4, SR-MR-070-02, SR-MR-071-C-1)
+Coverage 77.22% represents a +5 net improvement from v1.3. The path to ~80% is now blocked by fundamental evidence constraints, not prompt calibration:
+
+- **SR-MR-060-B-1**: Source text is not truncated — clause 60 is complete across pages 13-14. The maker incorrectly framed the permitted UNA use (Client Contracts registration) as an `exception` case, but the evidence treats this as the primary permitted path. No separate exception clause exists in the source. **Fix: not available** — the rule lacks an exception condition to test.
+
+- **SR-MR-004-01 boundary**: Evidence says "in exceptional circumstances" without specifying a boundary value. The maker cannot generate a grounded boundary case without a specific value in the evidence. **Fix: not available** — evidence lacks specificity.
+
+- **SR-MR-071-A-1 workflow exception**: Maker inferred scenario (service unavailability) not grounded in evidence. Source text has no exception clause for this rule. **Fix: not available.**
+
+- **LLM non-determinism**: SR-MR-015-B3-4, SR-MR-070-02, SR-MR-071-C-1 fluctuate between runs. Stabilization strategies (multi-run voting, consolidated scenario design) could recover some of the non-determinism losses.
+
+### Practical Ceiling
+
+The current evidence base limits coverage to approximately **77-78%**. Every remaining gap is either:
+1. A rule whose source text lacks the specificity needed (no exception clause, no boundary value, no prohibited action description), or
+2. LLM non-determinism across runs
+
+Further gains require either acquiring richer source documents or accepting that some rules are not fully testable with current evidence.
 
 ### Progress Summary
 
@@ -333,6 +345,6 @@ Coverage 77.22% represents a +5 net improvement from v1.3. Remaining gaps:
 | v1.3 | 74.44% | -0.56% | maker prohibition positive fix (LLM non-determinism caused regressions) |
 | v1.4 | **77.22%** | **+2.78%** | checker prohibition negative fix (direct for negative case) |
 
-**Net progress from baseline: +5 fully covered rules (130→139), coverage +5.0 percentage points (72.22%→77.22%)**
+**Net progress from baseline: +9 fully covered rules (130→139), coverage +5.0 percentage points (72.22%→77.22%)**
 
-Remaining ceiling (~80%): Unfixable gaps require evidence re-extraction (SR-MR-060-B-1) or are inherently unbounded (generic deadline language).
+**S2-T01 conclusion: The 77.22% coverage ceiling is evidence-bound, not prompt-bound.**
