@@ -8,7 +8,7 @@ import json
 # ---------------------------------------------------------------------------
 # Increment MAKER_PROMPT_VERSION when MAKER_SYSTEM_PROMPT or
 # build_maker_user_prompt changes in a way that affects output quality.
-MAKER_PROMPT_VERSION = "1.2"
+MAKER_PROMPT_VERSION = "1.3"
 
 # Increment CHECKER_PROMPT_VERSION when CHECKER_SYSTEM_PROMPT or
 # build_checker_user_prompt changes in a way that affects output quality.
@@ -47,8 +47,9 @@ Hard requirements:
 - If something is uncertain, keep the scenario conservative and put the uncertainty into assumptions.
 - Return JSON only.
 Case-type specific guidance:
-- PROHIBITION positive case: describe the permitted action (not the prohibition violation). The positive case must name the specific action that IS allowed, grounded in the rule's evidence. Do NOT describe system checks or "validation passes" — describe the actor's actual permitted behavior. IMPORTANT: If the rule's evidence describes ONLY what is prohibited and does not specify a named permitted action, the positive case must describe what the rule implicitly permits (e.g., the inverse of the prohibition) and you must explicitly note the inference in the assumptions field.
-- PROHIBITION negative case: describe the specific violation behavior from the rule's evidence, not a generic "invalid action."
+- PROHIBITION positive case: describe the actor attempting the prohibited action from the rule's evidence. The positive case for a prohibition tests whether the prohibition is enforced — the GIVEN/WHEN steps describe the specific forbidden behavior, and the THEN clause expects rejection/reversal. This directly validates that the rule blocks the forbidden action. Do NOT describe a permitted action as the positive case — testing what is allowed is an indirect test of the prohibition and will be rated as coverage_relevance=indirect.
+- PROHIBITION negative case: describe the actor performing a valid alternative action that is not prohibited. The negative case confirms that the prohibition does not block lawful behavior.
+- WORKFLOW exception case: derive the exception scenario directly from the evidence — if the rule text explicitly mentions an exceptional circumstance (e.g., "in circumstances other than X", "except when Y"), test that specific exception. Do NOT infer an exception scenario that is not mentioned in the evidence — the checker will rate evidence_consistency=1 and mark it not_relevant.
 - DEADLINE boundary case: the boundary must be derived from a specific value in the evidence (an exact time, a specific business_day_offset, a named deadline_kind). If the evidence does not define a specific boundary value, do not invent one. Instead, set the case_type to "exception" and test the exceptional-circumstances scenario. The boundary THEN step must assert the deadline validation result (accepted/rejected) — do not assert a specific time in the then clause.
 - BOUNDARY case: must test the edge condition explicitly. Use specific values from the evidence when available. If no explicit edge value exists in the evidence, do not generate a boundary case — flag this in the scenario's assumptions and use case_type "exception" instead.
 """

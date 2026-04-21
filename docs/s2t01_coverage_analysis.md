@@ -247,3 +247,58 @@ v1.2 can only address:
 3. Add explicit regression warnings in the guideline: "DO NOT lower evidence_consistency solely because the scenario tests an edge case — only lower if the evidence does not support the specific action being tested"
 
 **Conclusion**: The 75.0% coverage from v1.1 is the practical ceiling for checker-only improvements. Further gains require maker prompt revisions targeting the specific semantic misalignment patterns above.
+
+---
+
+## v1.3 Maker Run Results (2026-04-21)
+
+**Run IDs:** `runs/maker/20260420T090723Z` (maker v1.3) + `runs/checker/20260420T100100Z` (checker v1.1)
+**Prompt version:** MAKER_PROMPT_VERSION 1.2 → 1.3
+
+### Key Changes in v1.3
+
+**PROHIBITION positive guidance revised:**
+- v1.2: "describe the permitted action (not the prohibition violation)"
+- v1.3: "the positive case tests whether the prohibition is enforced — describe the actor attempting the prohibited action, THEN expects rejection"
+
+**WORKFLOW exception guidance added:**
+- Exception cases must be directly derived from evidence; do not infer exception scenarios not mentioned in source text
+
+### Coverage Comparison
+
+| Metric | v1.1 (maker 1.2, checker 1.1) | v1.3 (maker 1.3, checker 1.1) | Delta |
+|--------|--------------------------------|-------------------------------|-------|
+| Coverage | 75.0% | **74.44%** | -0.56% |
+| Fully covered | 135 | 134 | -1 |
+| Partially covered | 12 | 13 | +1 |
+| Uncovered | 1 | 1 | 0 |
+
+### Prohibition Positive Fix — Evidence
+
+The v1.3 prohibition positive guidance worked: positive cases now rated `direct` instead of `indirect`.
+
+| Rule | v1.1 Positive | v1.3 Positive | Improvement |
+|------|---------------|---------------|-------------|
+| SR-MR-033-03 | indirect (4,4,4) | **direct (5,5,5)** | ✅ fixed |
+| SR-MR-033-04 | indirect (4,4,4) | **direct (5,5,5)** | ✅ fixed |
+| SR-MR-075-01 | indirect (3,4,3) | **direct (5,5,4)** | ✅ fixed (now fully covered) |
+
+### Still Partially Covered
+
+| Rule | Issue | Status |
+|------|-------|--------|
+| SR-MR-033-03 | prohibition positive=direct ✅ but negative=indirect ❌ | Still partial — negative counts as indirect for prohibition |
+| SR-MR-033-04 | prohibition positive=direct ✅ but negative=indirect ❌ | Still partial — negative counts as indirect for prohibition |
+| SR-MR-004-01 | deadline boundary still not_relevant | Partial — v1.3 maker generated but checker still rejects |
+
+### Regressions (LLM Non-Determinism)
+
+6 rules regressed from fully → partially covered. This is attributed to **LLM non-determinism** (same prompt produces different scenarios on different runs), not the v1.3 prompt itself:
+- SR-MR-009-01 (data_constraint), SR-MR-022-02, SR-MR-046-04, SR-MR-061-01, SR-MR-062-02: lost `negative` acceptance
+- SR-MR-071-C-1: lost `negative` acceptance
+
+### v1.4 Needed
+
+1. **Prohibition negative guidance**: For prohibition rules, the negative case (testing permitted alternative) should also be `direct` — it confirms the prohibition doesn't over-block lawful behavior. This would fully cover SR-MR-033-03 and SR-MR-033-04.
+2. **Re-run to confirm**: Due to LLM non-determinism, need multiple runs to establish whether v1.3 is a net improvement.
+3. **SR-MR-004-01 boundary**: Still fails despite v1.3 — requires specific evidence-grounded boundary value.

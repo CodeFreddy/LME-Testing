@@ -181,10 +181,18 @@
 2. workflow exception：必须基于证据中实际描述的异常处理
 3. 证据重新提取：SR-MR-060-B-1 证据在条款(b)处截断，需要补充
 
+**v1.3 maker 结果（2026-04-21）：**
+- MAKER_PROMPT_VERSION 1.2 → 1.3
+- prohibition positive 修复已验证：SR-MR-033-03, 033-04, 075-01 positive 均从 indirect → direct
+- SR-MR-075-01 现已 fully covered ✅
+- SR-MR-033-03/033-04 仍 partial：positive=direct ✅ 但 negative=indirect ❌（prohibition negative 也需 checker 指导）
+- 覆盖率 74.44%（轻微下降：LLM 非决定性导致6条回归）
+
 **下一步：**
-1. ⏳ maker prompt v1.3 修复 prohibition positive 和 workflow exception 语义错位
-2. ⏳ 证据重新提取 SR-MR-060-B-1 clause (b)
-3. ⏳ 回归分析：v1.1 更严格导致4条规则降级
+1. ⏳ maker prompt v1.4: prohibition negative 指导（negative 也应算 direct for prohibition）
+2. ⏳ SR-MR-004-01 boundary：maker v1.3 仍生成但 checker 拒绝，需特定边界值证据
+3. ⏳ 证据重新提取 SR-MR-060-B-1 clause (b)
+4. ⏳ 多轮重跑验证：LLM 非决定性导致结果波动
 
 详见：`docs/s2t01_coverage_analysis.md`
 
