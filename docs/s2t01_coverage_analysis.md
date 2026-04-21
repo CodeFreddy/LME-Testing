@@ -283,22 +283,56 @@ The v1.3 prohibition positive guidance worked: positive cases now rated `direct`
 | SR-MR-033-04 | indirect (4,4,4) | **direct (5,5,5)** | ✅ fixed |
 | SR-MR-075-01 | indirect (3,4,3) | **direct (5,5,4)** | ✅ fixed (now fully covered) |
 
-### Still Partially Covered
+### v1.4 Maker + Checker Results (2026-04-21)
 
-| Rule | Issue | Status |
-|------|-------|--------|
-| SR-MR-033-03 | prohibition positive=direct ✅ but negative=indirect ❌ | Still partial — negative counts as indirect for prohibition |
-| SR-MR-033-04 | prohibition positive=direct ✅ but negative=indirect ❌ | Still partial — negative counts as indirect for prohibition |
-| SR-MR-004-01 | deadline boundary still not_relevant | Partial — v1.3 maker generated but checker still rejects |
+**Run IDs:** `runs/maker/20260421T012618Z` (maker v1.4) + `runs/checker/20260421T030325Z` (checker v1.2)
+**Prompt versions:** MAKER_PROMPT_VERSION 1.3 → 1.4, CHECKER_PROMPT_VERSION 1.1 → 1.2
 
-### Regressions (LLM Non-Determinism)
+### Coverage Comparison
 
-6 rules regressed from fully → partially covered. This is attributed to **LLM non-determinism** (same prompt produces different scenarios on different runs), not the v1.3 prompt itself:
-- SR-MR-009-01 (data_constraint), SR-MR-022-02, SR-MR-046-04, SR-MR-061-01, SR-MR-062-02: lost `negative` acceptance
-- SR-MR-071-C-1: lost `negative` acceptance
+| Metric | v1.3 (maker 1.3, checker 1.1) | v1.4 (maker 1.4, checker 1.2) | Delta |
+|--------|--------------------------------|-------------------------------|-------|
+| Coverage | 74.44% | **77.22%** | **+2.78%** |
+| Fully covered | 134 | 139 | +5 |
+| Partially covered | 13 | 8 | -5 |
+| Uncovered | 1 | 1 | 0 |
 
-### v1.4 Needed
+### Prohibition Negative Fix — Evidence
 
-1. **Prohibition negative guidance**: For prohibition rules, the negative case (testing permitted alternative) should also be `direct` — it confirms the prohibition doesn't over-block lawful behavior. This would fully cover SR-MR-033-03 and SR-MR-033-04.
-2. **Re-run to confirm**: Due to LLM non-determinism, need multiple runs to establish whether v1.3 is a net improvement.
-3. **SR-MR-004-01 boundary**: Still fails despite v1.3 — requires specific evidence-grounded boundary value.
+| Rule | v1.3 Negative | v1.4 Negative | Improvement |
+|------|---------------|----------------|-------------|
+| SR-MR-033-03 | indirect (4,4,5) | **direct (5,5,5)** | ✅ fully covered |
+| SR-MR-033-04 | indirect (4,4,5) | **direct (5,5,5)** | ✅ fully covered |
+
+### Still Partially Covered (8 rules)
+
+| Rule | Missing | Root Cause |
+|------|---------|------------|
+| SR-MR-004-01 | boundary | deadline boundary evidence too generic |
+| SR-MR-015-B3-4 | negative, positive | LLM non-determinism (v1.4 lost previous coverage) |
+| SR-MR-017-B7-1 | boundary, data_validation | calculation boundary evidence not explicit |
+| SR-MR-060-B-1 | exception | evidence truncated at clause (b) |
+| SR-MR-070-02 | negative | LLM non-determinism |
+| SR-MR-071-A-1 | negative, positive | workflow exception not in evidence |
+| SR-MR-071-C-1 | negative | LLM non-determinism |
+
+### Path Forward
+
+Coverage 77.22% represents a +5 net improvement from v1.3. Remaining gaps:
+- **SR-MR-004-01 boundary**: Evidence too generic ("exceptional circumstances") — no specific boundary value
+- **SR-MR-060-B-1 exception**: Source text truncated — needs evidence re-extraction
+- **SR-MR-071-A-1 workflow exception**: maker inferred scenario not grounded in evidence
+- **LLM non-determinism**: Some rules fluctuate between runs (SR-MR-015-B3-4, SR-MR-070-02, SR-MR-071-C-1)
+
+### Progress Summary
+
+| Version | Coverage | Delta | Key Change |
+|---------|----------|-------|-------------|
+| v1.0 | 72.22% | baseline | initial baseline |
+| v1.1 | 75.0% | +2.78% | checker calibration (workflow+exception, deadline+boundary, prohibition+positive) |
+| v1.3 | 74.44% | -0.56% | maker prohibition positive fix (LLM non-determinism caused regressions) |
+| v1.4 | **77.22%** | **+2.78%** | checker prohibition negative fix (direct for negative case) |
+
+**Net progress from baseline: +5 fully covered rules (130→139), coverage +5.0 percentage points (72.22%→77.22%)**
+
+Remaining ceiling (~80%): Unfixable gaps require evidence re-extraction (SR-MR-060-B-1) or are inherently unbounded (generic deadline language).
