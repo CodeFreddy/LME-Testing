@@ -8,11 +8,11 @@ import json
 # ---------------------------------------------------------------------------
 # Increment MAKER_PROMPT_VERSION when MAKER_SYSTEM_PROMPT or
 # build_maker_user_prompt changes in a way that affects output quality.
-MAKER_PROMPT_VERSION = "1.4"
+MAKER_PROMPT_VERSION = "1.5"
 
 # Increment CHECKER_PROMPT_VERSION when CHECKER_SYSTEM_PROMPT or
 # build_checker_user_prompt changes in a way that affects output quality.
-CHECKER_PROMPT_VERSION = "1.2"
+CHECKER_PROMPT_VERSION = "1.3"
 
 # Increment BDD_PROMPT_VERSION when BDD_SYSTEM_PROMPT or
 # build_bdd_user_prompt changes in a way that affects output quality.
@@ -52,6 +52,9 @@ Case-type specific guidance:
 - WORKFLOW exception case: derive the exception scenario directly from the evidence — if the rule text explicitly mentions an exceptional circumstance (e.g., "in circumstances other than X", "except when Y"), test that specific exception. Do NOT infer an exception scenario that is not mentioned in the evidence — the checker will rate evidence_consistency=1 and mark it not_relevant.
 - DEADLINE boundary case: the boundary must be derived from a specific value in the evidence (an exact time, a specific business_day_offset, a named deadline_kind). If the evidence does not define a specific boundary value, do not invent one. Instead, set the case_type to "exception" and test the exceptional-circumstances scenario. The boundary THEN step must assert the deadline validation result (accepted/rejected) — do not assert a specific time in the then clause.
 - BOUNDARY case: must test the edge condition explicitly. Use specific values from the evidence when available. If no explicit edge value exists in the evidence, do not generate a boundary case — flag this in the scenario's assumptions and use case_type "exception" instead.
+- DEADLINE positive case: describe the member meeting the deadline requirement as specified in the evidence. Ground the scenario in the specific deadline structure (time, offset, named deadline_kind) — do not generate a generic timing test.
+- DEADLINE negative case: describe the member failing to meet the deadline requirement. The WHEN step must match the specific failure mode in the evidence (e.g., missing field, wrong time, wrong format) — do not generate a generic "missed deadline" scenario.
+- REGRESSION GUARDRAIL: For deadline rules, ensure scenarios are grounded in the specific deadline structure described in the evidence. Generic timing tests will receive low evidence_consistency scores.
 """
 
 
@@ -313,9 +316,15 @@ def build_checker_user_prompt(batch: list[dict]) -> str:
         "IMPORTANT — rule-type-specific rules:\n"
         "- For rule_type=workflow, case_type=exception is DIRECT (exception handling is core to workflow completeness)\n"
         "- For rule_type=deadline, case_type=boundary is DIRECT (boundary testing validates deadline boundary conditions)\n"
+        "- For rule_type=deadline, case_type=positive is DIRECT (positive case validates the primary deadline requirement)\n"
+        "- For rule_type=deadline, case_type=negative is DIRECT (negative case confirms the deadline's rejection condition)\n"
         "- For rule_type=prohibition, case_type=positive is DIRECT (positive case tests that the prohibited action is indeed blocked)\n"
         "- For rule_type=prohibition, case_type=negative is DIRECT (negative case tests that the prohibition does not over-block lawful behavior — without this, the prohibition's scope cannot be confirmed)\n"
         "- For rule_type=enum_definition, case_type=negative is DIRECT (negative case tests invalid enum values are rejected)\n"
+        "\n"
+        "IMPORTANT — regression guardrail:\n"
+        "- DO NOT lower evidence_consistency solely because the scenario tests an edge case or boundary condition — only lower if the evidence does not support the specific action being tested\n"
+        "- A scenario that is well-grounded in the evidence should receive evidence_consistency >= 4 even when testing an unusual or exceptional condition\n"
         "\n"
         "Schema:\n"
         f"{json.dumps(schema, ensure_ascii=False, indent=2)}\n"
