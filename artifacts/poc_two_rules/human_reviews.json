@@ -1,0 +1,49 @@
+{
+  "metadata": {
+    "maker_cases_path": "runs\\poc_strict\\maker_complete\\20260322T170107Z\\maker_cases.jsonl",
+    "checker_reviews_path": "runs\\poc_strict\\checker_complete\\20260322T170222Z\\checker_reviews.jsonl",
+    "total_cases": 5
+  },
+  "reviews": [
+    {
+      "case_id": "TC-SR-MR-003-01-positive-01",
+      "semantic_rule_id": "SR-MR-003-01",
+      "review_decision": "rewrite",
+      "block_recommendation_review": "not_applicable",
+      "human_comment": "",
+      "issue_types": []
+    },
+    {
+      "case_id": "TC-SR-MR-003-01-negative-01",
+      "semantic_rule_id": "SR-MR-003-01",
+      "review_decision": "rewrite",
+      "block_recommendation_review": "pending_review",
+      "human_comment": "",
+      "issue_types": []
+    },
+    {
+      "case_id": "TC-SR-MR-004-02-positive-01",
+      "semantic_rule_id": "SR-MR-004-02",
+      "review_decision": "pending",
+      "block_recommendation_review": "not_applicable",
+      "human_comment": "",
+      "issue_types": []
+    },
+    {
+      "case_id": "TC-SR-MR-004-02-boundary-01",
+      "semantic_rule_id": "SR-MR-004-02",
+      "review_decision": "pending",
+      "block_recommendation_review": "not_applicable",
+      "human_comment": "",
+      "issue_types": []
+    },
+    {
+      "case_id": "TC-SR-MR-004-02-negative-01",
+      "semantic_rule_id": "SR-MR-004-02",
+      "review_decision": "pending",
+      "block_recommendation_review": "not_applicable",
+      "human_comment": "",
+      "issue_types": []
+    }
+  ]
+}
