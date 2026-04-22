@@ -208,7 +208,7 @@
 
 ## Darcy 个人任务（更新）
 
-- [x] ✅ Code　Ruby Cucumber prototype 创建
+- [x] ✅ Code　Ruby Cucumber prototype 创建（已归档，由 Python step_registry 替代）
 - [x] ✅ Code　BDD tab：显示 normalized BDD，支持 Given/When/Then 编辑
 - [x] ✅ Code　Scripts tab：步骤可见性显示
 - [x] ✅ SM-T03　workflow_session.py 中断处理（cherry-pick from master）

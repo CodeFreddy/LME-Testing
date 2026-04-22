@@ -777,10 +777,11 @@ def write_feature_files_from_llm(bdd_results: list[dict], output_dir: Path) -> l
     return render_gherkin_from_normalized_bdd(bdd_results, output_dir)
 
 
-def write_step_definitions_from_llm(bdd_results: list[dict], output_dir: Path) -> Path:
+def write_step_definitions_from_llm(bdd_results: list[dict], output_dir: Path) -> list[Path]:
     """DEPRECATED: Use render_steps_from_normalized_bdd instead.
 
     Write step definitions directly from LLM-generated content.
+    Returns a list of per-feature step definition file paths.
     """
     return render_steps_from_normalized_bdd(bdd_results, output_dir)
 
@@ -860,12 +861,16 @@ def apply_human_step_edits(
     bdd_results: list[dict],
     human_scripts_edits_path: Path,
 ) -> list[dict]:
-    """Apply human step edits from Scripts tab to normalized BDD results.
+    """Apply human step edits (Scripts tab and BDD tab) to normalized BDD results.
 
-    Modifies step_text, step_pattern, and code fields in-place.
+    Supports two edit formats:
+    - Scripts tab (no scenario_id): updates ``step_definitions[step_type][step_index]``
+    - BDD tab (scenario_id present): updates BOTH scenario step arrays
+      (``scenarios[i][step_type_steps][step_index]``) AND ``step_definitions``
+
     Gap steps (is_gap=True) are appended as new entries in step_definitions.
 
-    Returns the modified bdd_results list.
+    Modifies bdd_results in-place and returns it.
     """
     import json as _json
 
@@ -890,6 +895,7 @@ def apply_human_step_edits(
         gap_index = edit.get("gap_index")
         step_text = edit.get("step_text", "").strip()
         is_gap = edit.get("is_gap", False)
+        scenario_id = edit.get("scenario_id")  # Present for BDD tab edits
 
         if not step_text:
             continue
@@ -897,7 +903,7 @@ def apply_human_step_edits(
         # Extract pattern from the (possibly new) step text
         step_pattern = extract_step_pattern(step_text)
 
-        # Generate Ruby code: prefer template, fall back to implementation generator
+        # Generate code: prefer template, fall back to implementation generator
         template_code = map_step_to_template(step_text, step_type, require_exact=False)
         if template_code:
             code = template_code
@@ -906,7 +912,7 @@ def apply_human_step_edits(
             code = generated or ""
 
         if is_gap:
-            # Append gap step as a new entry in the appropriate step type array
+            # Append gap step as a new entry in step_definitions
             for item in bdd_results:
                 step_defs = item.setdefault("step_definitions", {})
                 type_steps = step_defs.setdefault(step_type, [])
@@ -918,8 +924,38 @@ def apply_human_step_edits(
                     "is_gap": True,
                     "gap_index": gap_index,
                 })
+        elif scenario_id is not None:
+            # BDD tab edit: update scenario step text AND step_definitions
+            for item in bdd_results:
+                for scenario in item.get("scenarios", []):
+                    if scenario.get("scenario_id") != scenario_id:
+                        continue
+                    steps_key = f"{step_type}_steps"
+                    type_steps = scenario.get(steps_key, [])
+                    if step_index is not None and 0 <= step_index < len(type_steps):
+                        # Update scenario step text and pattern
+                        type_steps[step_index] = {
+                            **type_steps[step_index],
+                            "step_text": step_text,
+                            "step_pattern": step_pattern,
+                        }
+                        # Also update the corresponding step_definitions entry
+                        step_defs = item.setdefault("step_definitions", {})
+                        def_steps = step_defs.get(step_type, [])
+                        if 0 <= step_index < len(def_steps):
+                            def_steps[step_index] = {
+                                **def_steps[step_index],
+                                "step_text": step_text,
+                                "step_pattern": step_pattern,
+                                "code": code,
+                                "human_edited": True,
+                            }
+                        break
+                else:
+                    continue
+                break
         else:
-            # Update existing step by step_type + step_index
+            # Scripts tab edit (no scenario_id): update step_definitions only
             for item in bdd_results:
                 step_defs = item.get("step_definitions", {})
                 type_steps = step_defs.get(step_type, [])
@@ -936,21 +972,174 @@ def apply_human_step_edits(
     return bdd_results
 
 
+def _canonicalize_step_code(step_text: str, step_type: str, idx: int, feature_name: str, human_edited: bool, existing_code: str) -> str:
+    """Resolve step code: prefer STEP_LIBRARY, then existing_code, then generator."""
+    from lme_testing.step_library import STEP_LIBRARY
+
+    if step_text in STEP_LIBRARY:
+        return STEP_LIBRARY[step_text].render()
+    if existing_code:
+        return existing_code
+    if human_edited:
+        return generate_step_definition(step_text, step_type, idx, feature_name, human_edited=True)
+    return ""
+
+
+def _render_step_with_context(step_text: str, step_type: str, step_pattern: str) -> str:
+    """Render a single step definition using context for state sharing.
+
+    Uses behave-style context object instead of module-level globals.
+    Shared objects are stored as context attributes (context.member, context.trade, etc.).
+    """
+    keyword = step_type.lower()
+    safe_name = re.sub(r"[^\w]", "_", step_pattern.lower())[:50].strip("_") or f"step_{keyword}_{abs(hash(step_text)) % 1000}"
+
+    # Escape single quotes in step text for Python string literal
+    escaped = step_text.replace("\\", "\\\\").replace("'", "\\'")
+    return f'''@{keyword}("{escaped}")
+def {safe_name}(context):
+    # TODO: implement step: {step_text}
+    pass'''
+
+
+def render_environment_file(output_dir: Path) -> Path:
+    """Write behave environment.py with before/after scenario hooks.
+
+    Provides shared context setup/teardown and LME client initialization.
+    """
+    env_dir = output_dir / "features"
+    env_dir.mkdir(parents=True, exist_ok=True)
+
+    content = '''"""Behave environment hooks for LME Matching Rules BDD suite."""
+from __future__ import annotations
+
+
+def before_all(context):
+    """Initialize LME test environment before any scenarios run."""
+    # Import LME client stubs — replace with real LME client when VM access is available
+    try:
+        from lme_testing.step_library import LME_CLIENT
+        context.lme = LME_CLIENT
+    except ImportError:
+        # Fallback: use mock client for demo
+        class MockLME:
+            Client = MockLMEClient()
+            API = MockLMEAPI()
+            PostTrade = MockLMEPostTrade()
+
+        class MockLMEClient:
+            def login(self, username=None, password=None):
+                return MockSession()
+
+        class MockLMEAPI:
+            def submit_order(self, member, price=None):
+                return MockResponse(status="submitted")
+            def validate_price(self, trade):
+                return MockValidationResult(status="passed")
+            def contact_exchange(self, member, trade, rationale=None):
+                return MockResponse(status="recorded")
+            def get_contact_status(self, trade):
+                return MockResponse(status="no_contact")
+            def get_processing_record(self, trade):
+                return {"record": "exists"}
+            def submit_request(self, request):
+                return MockResponse(status="accepted")
+            def get_request_status(self, request):
+                return "accepted"
+
+        class MockLMEPostTrade:
+            def create_trade(self, order):
+                return MockTrade()
+            def create_deadline(self):
+                return {"timestamp": 1700000000}
+            def create_request(self, deadline, offset_minutes=15):
+                return MockRequest(deadline, offset_minutes)
+            def validate_deadline(self, request):
+                return MockValidationResult(result="pass")
+            def get_obligation_status(self, trade):
+                return "fulfilled"
+            def get_outstanding_action(self, trade):
+                return MockAction(type="contact_exchange", status="required")
+
+        class MockSession:
+            member_id = "TEST_MEMBER_001"
+            token = "TEST_TOKEN"
+
+        class MockTrade:
+            id = "TRADE_001"
+            status = "failed"
+
+        class MockRequest:
+            def __init__(self, deadline, offset_minutes):
+                self.deadline = deadline
+                self.offset_minutes = offset_minutes
+                self.submitted_at = deadline["timestamp"] - (offset_minutes * 60)
+
+        class MockAction:
+            def __init__(self, type, status):
+                self.type = type
+                self.status = status
+
+        class MockResponse:
+            def __init__(self, status=None):
+                self.status = status
+
+        class MockValidationResult:
+            def __init__(self, status=None, result=None):
+                self.status = status
+                self.result = result
+
+        context.lme = MockLME()
+
+    context.session = None
+    context.member = None
+    context.trade = None
+    context.order = None
+    context.request = None
+    context.deadline = None
+    context.contact_response = None
+    context.validation_result = None
+
+
+def before_scenario(context, scenario):
+    """Reset context state before each scenario."""
+    context.session = None
+    context.member = None
+    context.trade = None
+    context.order = None
+    context.request = None
+    context.deadline = None
+    context.contact_response = None
+    context.validation_result = None
+    context.agreements = []
+
+
+def after_scenario(context, scenario):
+    """Cleanup after each scenario (placeholder for real teardown)."""
+    pass
+'''
+
+    filepath = env_dir / "environment.py"
+    filepath.write_text(content, encoding="utf-8")
+    return filepath
+
+
 def render_steps_from_normalized_bdd(
     bdd_results: list[dict],
     output_dir: Path,
     human_scripts_edits_path: Path | None = None,
-) -> Path:
+) -> list[Path]:
     """Render Python step definitions from normalized BDD output.
 
-    Consumes normalized BDD results (produced by run_bdd_pipeline) and
-    renders them into Python step definition files.
+    Produces behave-style grouped step files:
+    - ``features/step_definitions/{semantic_rule_id}_steps.py`` — one file per feature
+    - ``features/environment.py`` — behave hooks for context setup
+
+    Each step file uses ``context`` to share state (context.member, context.trade, etc.)
+    instead of module-level global variables.
 
     If ``human_scripts_edits_path`` is provided, applies human step edits
-    (from the Scripts tab) before rendering — this ensures edited and gap
-    steps get proper Python implementations rather than pending stubs.
-
-    Output: ``features/step_definitions/steps.py``
+    (from the Scripts tab) before rendering.
     """
     if human_scripts_edits_path:
         bdd_results = apply_human_step_edits(bdd_results, human_scripts_edits_path)
@@ -958,23 +1147,35 @@ def render_steps_from_normalized_bdd(
     steps_dir = output_dir / "features" / "step_definitions"
     steps_dir.mkdir(parents=True, exist_ok=True)
 
-    filepath = steps_dir / "steps.py"
+    # Write environment.py hooks
+    env_path = render_environment_file(output_dir)
 
-    all_lines: list[str] = []
-    seen_patterns: set[str] = set()
-
-    all_lines.append("# frozen_string_literal: true")
-    all_lines.append("# Step definitions - Generated from LME BDD Pipeline (Normalized BDD)")
-    all_lines.append("# WARNING: Auto-generated - DO NOT EDIT MANUALLY")
-    all_lines.append("#")
-    all_lines.append("# This file uses pytest-bdd / behave-style Python step decorators.")
-    all_lines.append("# For framework integration, ensure LME.Client, LME.API, LME.PostTrade")
-    all_lines.append("# are available in the test environment.")
-    all_lines.append("")
+    written_files: list[Path] = []
 
     for item in bdd_results:
-        feature_name = item.get("feature_title", "unnamed")
+        semantic_rule_id = item.get("semantic_rule_id", "unknown")
+        feature_title = item.get("feature_title", "unnamed")
         step_defs = item.get("step_definitions", {})
+
+        # Deduplicate steps within this feature
+        seen: set[str] = set()
+        lines: list[str] = []
+
+        header = f'''"""Step definitions for: {feature_title} ({semantic_rule_id})
+
+Generated from LME BDD Pipeline (Normalized BDD).
+WARNING: Auto-generated — DO NOT EDIT MANUALLY.
+
+Behave framework: steps use ``context`` for state sharing.
+Shared objects: context.session, context.member, context.trade,
+                context.order, context.request, context.deadline,
+                context.contact_response, context.validation_result
+"""
+from behave import given, when, then
+
+
+'''
+        lines.append(header)
 
         for step_type in ("given", "when", "then"):
             steps = step_defs.get(step_type, [])
@@ -985,33 +1186,96 @@ def render_steps_from_normalized_bdd(
                 code = step_dict.get("code", "") if isinstance(step, dict) else ""
                 human_edited = step_dict.get("human_edited", False)
 
-                if not step_pattern or step_pattern in seen_patterns:
+                if not step_pattern or step_pattern in seen:
                     continue
-                seen_patterns.add(step_pattern)
+                seen.add(step_pattern)
 
-                # Prefer STEP_LIBRARY canonical implementations when available
-                from lme_testing.step_library import STEP_LIBRARY
-                if step_text in STEP_LIBRARY:
-                    code = STEP_LIBRARY[step_text].render()
-                elif code:
-                    pass  # Use LLM-generated code as-is
-                elif human_edited:
-                    # Human-edited steps with no stored code: generate from templates
-                    generated = generate_step_definition(
-                        step_text, step_type, idx, feature_name, human_edited=True
-                    )
-                    code = generated
+                resolved_code = _canonicalize_step_code(
+                    step_text, step_type, idx, feature_title, human_edited, code
+                )
+
+                if resolved_code:
+                    # Convert module-level step to context-aware version
+                    context_code = _convert_to_context_style(resolved_code, step_text, step_type)
+                    lines.append(context_code)
+                    lines.append("")
                 else:
-                    code = ""
+                    # Fallback: generate context-aware pending stub
+                    stub = _render_step_with_context(step_text, step_type, step_pattern)
+                    lines.append(stub)
+                    lines.append("")
 
-                if code:
-                    all_lines.append(code)
-                    all_lines.append("")
+        # Write per-feature step file
+        safe_id = re.sub(r"[^\w]", "_", semantic_rule_id)
+        filepath = steps_dir / f"{safe_id}_steps.py"
+        filepath.write_text("\n".join(lines), encoding="utf-8")
+        written_files.append(filepath)
 
-    content = "\n".join(all_lines)
-    filepath.write_text(content, encoding="utf-8")
+    return written_files
 
-    return filepath
+
+def _convert_to_context_style(code: str, step_text: str, step_type: str) -> str:
+    """Convert a module-level step definition to behave context style.
+
+    Replaces bare ``variable = ...`` assignments with ``context.variable = ...``,
+    replaces bare ``variable.name`` attribute accesses with ``context.variable.name``,
+    bare ``variable`` function-call arguments with ``context.variable``,
+    and adds ``context`` parameter to the function.
+    """
+    import re as _re
+
+    # If already has (context) parameter, return as-is
+    if "(context)" in code:
+        return code
+
+    # Strip the decorator and function signature
+    decorator_match = _re.search(r"^(@\w+\(.*?\)\n)", code)
+    decorator = decorator_match.group(1) if decorator_match else f"@{step_type.lower()}('{_escape_py_str(step_text)}')\n"
+
+    # Extract function body
+    body_match = _re.search(r"^@\w+\(.*?\)\ndef \w+\(.*?\):\n(.*)$", code, _re.DOTALL)
+    if body_match:
+        body = body_match.group(1)
+    else:
+        return code.replace("def ", "def ", 1)
+
+    # Known LME object names
+    lme_objects = [
+        "member", "session", "trade", "order", "request", "deadline",
+        "contact_response", "validation_result", "trade_params",
+        "trade_submission", "resubmission_response", "response",
+        "agreement", "agreements", "env", "rules", "adoption_status",
+        "contact_status",
+    ]
+
+    # Step 1: Bare assignment targets at line start.
+    # Matches "    member = ..." → "    context.member = ..."
+    # Captures the "= ..." part so it's preserved after replacement.
+    for obj in lme_objects:
+        body = _re.sub(rf"^(\s*)\b{obj}\b(\s*=\s*)", rf"\1context.{obj}\2", body, flags=_re.MULTILINE)
+
+    # Step 2: Bare attribute accesses (.obj. or .obj at EOL), not already context.
+    # Matches ".validation_result." or ".validation_result" at end of line
+    for obj in lme_objects:
+        body = _re.sub(rf"(?<!\bcontext\.)\b{obj}\b(?=\s*\.)", rf"context.{obj}", body)
+        body = _re.sub(rf"(?<!\bcontext\.)\b{obj}\b(\s*$)", rf"context.{obj}\1", body)
+
+    # Step 3: Bare return statements (return obj at line start), not already context.
+    # Must have word boundary before and nothing after but whitespace.
+    for obj in lme_objects:
+        body = _re.sub(rf"^(\s*)\breturn\s+{obj}\b\s*$", rf"\1return context.{obj}", body, flags=_re.MULTILINE)
+
+    # Step 4: Bare variables used as function arguments.
+    # Matches "func(arg1, member, arg3)" — member is not at line start and
+    # is followed by comma or close-paren, not an equals sign.
+    # Negative lookbehind ensures not already context.member.
+    for obj in lme_objects:
+        body = _re.sub(rf"(?<!\bcontext\.)\b{obj}\b(?=\s*[,)])", rf"context.{obj}", body)
+
+    func_name_match = _re.search(r"def (\w+)\(", code)
+    func_name = func_name_match.group(1) if func_name_match else "unnamed_step"
+
+    return f"{decorator}def {func_name}(context):\n{body}"
 
 
 def run_bdd_export(maker_cases_path: Path, output_dir: Path) -> dict:

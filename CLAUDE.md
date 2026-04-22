@@ -44,6 +44,30 @@ python main.py report --maker-cases <path> --checker-reviews <path> --maker-summ
 python main.py maker --input <path> --output-dir <path> --batch-size 4 --resume-from runs/maker/<run_id>/maker_cases.jsonl
 ```
 
+### End-to-End POC (2 rules)
+When asked to run an "end to end 2 rule poc", run all four stages (maker + checker + BDD + step-registry):
+```bash
+# 1. Maker
+python main.py maker --input artifacts/poc_two_rules/semantic_rules.json --output-dir runs/poc_two_rules_poc --batch-size 4
+
+# 2. Checker
+python main.py checker --rules artifacts/poc_two_rules/semantic_rules.json --cases runs/poc_two_rules_poc/<maker_run_id>/maker_cases.jsonl --output-dir runs/poc_two_rules_poc --batch-size 4
+
+# 3. BDD export (for review session BDD tab)
+python main.py bdd --cases runs/poc_two_rules_poc/<maker_run_id>/maker_cases.jsonl --output-dir runs/poc_two_rules_poc/bdd
+
+# 4. Step registry (for review session Scripts tab — run after BDD)
+python main.py step-registry --bdd runs/poc_two_rules_poc/bdd/<bdd_run_id>/normalized_bdd.jsonl --output-dir runs/poc_two_rules_poc/step-registry
+
+# 5. Report
+python main.py report --maker-cases runs/poc_two_rules_poc/<maker_run_id>/maker_cases.jsonl --checker-reviews runs/poc_two_rules_poc/<checker_run_id>/checker_reviews.jsonl --maker-summary runs/poc_two_rules_poc/<maker_run_id>/summary.json --checker-summary runs/poc_two_rules_poc/<checker_run_id>/summary.json --coverage-report runs/poc_two_rules_poc/<checker_run_id>/coverage_report.json --output-html runs/poc_two_rules_poc/report.html
+```
+
+For the review session, include both BDD and step-registry:
+```bash
+python main.py review-session --rules artifacts/poc_two_rules/semantic_rules.json --cases runs/poc_two_rules_poc/<maker_run_id>/maker_cases.jsonl --checker-reviews runs/poc_two_rules_poc/<checker_run_id>/checker_reviews.jsonl --checker-summary runs/poc_two_rules_poc/<checker_run_id>/summary.json --coverage-report runs/poc_two_rules_poc/<checker_run_id>/coverage_report.json --normalized-bdd runs/poc_two_rules_poc/bdd/<bdd_run_id>/normalized_bdd.jsonl --step-registry runs/poc_two_rules_poc/step-registry/<step_reg_run_id>/step_visibility.json --output-dir runs/poc_two_rules_poc/sessions --port 8765
+```
+
 ## Governance Checks
 
 Before or after substantial repo changes, run baseline governance checks:

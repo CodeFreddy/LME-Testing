@@ -662,9 +662,28 @@ def extract_steps_from_step_defs(
 
 
 PYTHON_STEP_DEF_RE = re.compile(
-    "@(given|when|then)\\(['\"](.+?)['\"]\\)"
-    "\\s*def\\s+(\\w+)\\s*\\([^)]*\\)\\s*:\\s*\\n((?:[ \\t]+.+\\n)*)",
-    re.DOTALL | re.IGNORECASE,
+    # Matches @given("...") / @when('...') / @then("...") decorators
+    # with Python step definition bodies.
+    #
+    # Step text: [^"\n]* (double-quoted) or [^'\n]* (single-quoted).
+    # Both stop at the first quote or newline, preventing the body pattern
+    # from consuming subsequent decorator lines.
+    #
+    # Body: ((?:[ \t]+[^\n]+\n)*) — zero or more lines that start with
+    # whitespace (indent), contain non-newline content, and end with newline.
+    # Using [^\n]+ instead of .+ prevents matching across blank lines
+    # into subsequent @when/@then decorators (which was the DOTALL bug).
+    r"@(given|when|then)"
+    r"\("
+    r"(?:"
+    r'"([^"\n]*)"'
+    r"|"
+    r"'([^'\n]*)'"
+    r")"
+    r"\)"
+    r"[ \t]*\ndef[ \t]+\w+\([^)]*\)[ \t]*:[ \t]*\n"
+    r"((?:[ \t]+[^\n]+\n)*)",
+    re.IGNORECASE,
 )
 
 

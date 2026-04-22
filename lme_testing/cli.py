@@ -306,13 +306,12 @@ def main() -> int:
 
         bdd_inventory = extract_steps_from_normalized_bdd(normalized_bdd_path)
 
-        library_inventory = StepInventory()
-        if args.step_defs:
-            step_defs_path = Path(args.step_defs)
-            if step_defs_path.suffix == ".py":
-                library_inventory = extract_steps_from_python_step_defs(step_defs_path)
-            else:
-                library_inventory = extract_steps_from_step_defs(step_defs_path)
+        # Default to lme_testing/step_library.py as the canonical library
+        step_defs_path = Path(args.step_defs) if args.step_defs else Path("lme_testing/step_library.py")
+        if step_defs_path.suffix == ".py":
+            library_inventory = extract_steps_from_python_step_defs(step_defs_path)
+        else:
+            library_inventory = extract_steps_from_step_defs(step_defs_path)
 
         report = compute_step_matches(
             bdd_inventory,

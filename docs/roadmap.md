@@ -226,7 +226,7 @@
 **当前 ETA：** 未知
 
 核心工作：
-- 用真实 LME API 替换 `samples/ruby_cucumber/lib/lme_*.rb` 模拟实现
+- 用真实 LME API 替换 `lme_testing/step_registry.py` 中的 stub 实现
 - 重建 `lme_testing/step_library.py`（基于真实 API 模式）
 - 重新测量 step binding rate（当前 35.4% 基于模拟）
 - 在真实环境执行 BDD 场景

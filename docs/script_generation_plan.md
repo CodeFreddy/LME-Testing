@@ -1,8 +1,10 @@
 # Script Generation Investigation
 
-## Status: ✅ Prototype Complete
+## Status: Archived (2026-04-22)
 
-Created `samples/ruby_cucumber/` with working prototype.
+Ruby Cucumber prototype (`samples/ruby_cucumber/`) has been deleted.
+Python `step_registry.py` is the current implementation for step visibility analysis.
+This document is kept for historical reference only.
 
 ## Current State
 BDD stage outputs:

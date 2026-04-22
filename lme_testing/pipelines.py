@@ -699,12 +699,15 @@ def run_bdd_pipeline(
 
     # Render Gherkin feature files and step definitions from normalized BDD
     feature_files: list[Path] = []
-    step_file: Path | None = None
+    step_files: list[Path] = []
     if results_path.exists():
         bdd_results = load_jsonl(results_path)
         if bdd_results:
+            # Apply human edits before Gherkin rendering so scenario step text is updated
+            if human_scripts_edits_path:
+                bdd_results = apply_human_step_edits(bdd_results, human_scripts_edits_path)
             feature_files = render_gherkin_from_normalized_bdd(bdd_results, run_dir)
-            step_file = render_steps_from_normalized_bdd(
+            step_files = render_steps_from_normalized_bdd(
                 bdd_results, run_dir, human_scripts_edits_path=human_scripts_edits_path
             )
 
@@ -722,7 +725,8 @@ def run_bdd_pipeline(
         "raw_path": str(raw_path),
         "feature_files_count": len(feature_files),
         "feature_files": [str(f) for f in feature_files],
-        "step_definitions_file": str(step_file) if step_file else None,
+        "step_definitions_files": [str(f) for f in step_files],
+        "step_definitions_count": len(step_files),
     }
     write_json(summary_path, summary)
     return summary
@@ -887,8 +891,8 @@ def run_rewrite_pipeline(
         normalized_bdd = _maker_records_to_normalized_bdd(merged_records)
         normalized_bdd = apply_human_step_edits(normalized_bdd, _edits_path)
         ensure_dir(output_dir / "bdd")
-        step_file = render_steps_from_normalized_bdd(normalized_bdd, output_dir / "bdd")
-        logger.info("Rewritten step definitions with human edits. step_file=%s", step_file)
+        step_files = render_steps_from_normalized_bdd(normalized_bdd, output_dir / "bdd")
+        logger.info("Rewritten step definitions with human edits. count=%s files=%s", len(step_files), step_files)
 
     summary = {
         "run_id": timestamp_slug(),

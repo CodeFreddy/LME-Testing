@@ -113,15 +113,36 @@ semantic_rules.json
 | `lme_testing/workflow_session.py` | 全流程编排 | Main+Cherry-pick | ✅ SM-T03 加中断处理 |
 | `lme_testing/storage.py` | 文件 I/O 工具 | Main+Cherry-pick | ✅ SM-T02 UTC 时间戳 |
 | `lme_testing/bdd_export.py` | BDD 产物导出（.feature, step defs）| Main | ✅ |
-| `lme_testing/step_registry.py` | Step 可见性注册与匹配 | Main | ✅（step lib 基于模拟）|
+| `lme_testing/step_registry.py` | Step 可见性注册与匹配 | Main | ✅ |
 | `lme_testing/step_library.py` | Step 定义库（模拟 LME API）| Main | ⚠️ 模拟实现 |
+
+**Scripts Tab 工作流（Review Session）**
+
+Review Session 启动时传入 `--step-registry step_visibility.json`，Scripts tab 显示三类 step 状态：
+
+| 状态 | 含义 | UI 显示 |
+|------|------|---------|
+| `exact` | BDD step text 与 library 精确匹配 | 绿色 badge |
+| `parameterized` | 正则 capture group 兼容匹配 | 蓝色 badge |
+| `candidate` | 相似但非精确匹配（TF-IDF similarity） | 黄色 badge，下方显示 Suggestions |
+| `unmatched` / GAP | BDD step 在 library 中无匹配 | 红色 GAP section |
+
+**采用候选实现的步骤：**
+
+1. 在 matched step 的 Suggestions 列表中，找到合适的 library step text（标注相似度 %）
+2. 在页面底部红色 **GAP** section 中找到对应的未实现 step
+3. 将 library step text 填入 GAP step 的 textarea
+4. 点击 **Save Scripts Edits** → 保存到 `human_scripts_edits_latest.json`
+5. 下次 Rewrite 时，`apply_human_step_edits()` 读取该文件，用 library 实现替换 pending stub
+
+**注意：** GAP section 的 step 是原始 BDD step，Suggestions 来自 library。直接编辑 GAP textarea 即表示"我要用这条 library text 替代原始 BDD text"。
 | `lme_testing/human_review.py` | Human review HTML 渲染 | Main | ✅ |
 | `lme_testing/schemas.py` | Schema 验证工具 | Main | ✅ |
 | `lme_testing/config.py` | 配置加载与类型定义 | Main+Cherry-pick | ✅ SM-T04 重试配置 |
 | `lme_testing/signals/__init__.py` | Governance signals 计算 | Main | ⚠️ 2/4 信号数据为空 |
 | `lme_testing/oracles/` | 8 个确定性验证模块 | Main | ✅（未在真实场景验证）|
-| `lme_testing/audit_trail.py` | 审计跟踪 HTML 生成 | **待实现（S2-B1）**| ❌ |
-| `lme_testing/case_compare.py` | Case 对比视图 | **待实现（S2-B2）**| ❌ |
+| `lme_testing/audit_trail.py` | 审计跟踪 HTML 生成 | Main | ✅ 已实现并集成入 `review_session.py` |
+| `lme_testing/case_compare.py` | Case 对比视图 | Main | ✅ 已实现并集成入 `review_session.py` |
 
 ### Master 分支额外实现（已分析，部分 cherry-pick）
 
@@ -130,8 +151,8 @@ semantic_rules.json
 | UTC 时间戳 | ✅ Cherry-pick（SM-T02）| 更规范 |
 | KeyboardInterrupt 处理 | ✅ Cherry-pick（SM-T03）| 改善 UX |
 | max_retries 配置 | 🧊 可选 Cherry-pick（SM-T04）| 待验证是否需要 |
-| audit_trail 调用点 | 📋 概念保留，模块待实现（S2-B1）| 模块缺失无法直接合并 |
-| case_compare 调用点 | 📋 概念保留，模块待实现（S2-B2）| 模块缺失无法直接合并 |
+| audit_trail 调用点 | ✅ 已实现并集成（S2-B1）| 模块已实现 |
+| case_compare 调用点 | ✅ 已实现并集成（S2-B2）| 模块已实现 |
 | 旧版 providers.py（135行）| ❌ 不合并 | 编码损坏，缺 StubProvider |
 | 旧版 pipelines.py（639行）| ❌ 不合并 | 缺 planner/BDD pipeline |
 | 旧版 prompts.py（无版本）| ❌ 不合并 | 无版本控制 |
@@ -172,7 +193,7 @@ semantic_rules.json
 
 | Master 路由 | Main 等价路由 | 说明 |
 |------------|-------------|------|
-| `/api/audit_trail` | 无（S2-B1 后添加）| Master 有但模块缺失 |
+| `/api/audit_trail` | ✅ 已实现（S2-B1）| 集成入 `finalize_session()` |
 | `/api/reviews/save` | `/api/reviews/save` | 相同 |
 | `/api/submit` | `/api/submit` | 相同 |
 | `/api/finalize` | `/api/finalize` | 相同 |
@@ -206,7 +227,6 @@ semantic_rules.json
 | `tests/` | 15 个测试文件（78 个测试）|
 | `evidence/` | 关键运行证据（versioned）：stability、baseline、governance signals |
 | `runs/` | pipeline 运行输出（gitignored）|
-| `samples/ruby_cucumber/` | Ruby Cucumber 原型（存档）|
 
 ---
 

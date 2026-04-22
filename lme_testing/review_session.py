@@ -15,7 +15,7 @@ from urllib.parse import parse_qs, quote, urlparse
 
 from .config import ProjectConfig
 from .human_review import _render_case_detail
-from .pipelines import _case_map_from_maker_records, run_checker_pipeline, run_rewrite_pipeline
+from .pipelines import _case_map_from_maker_records, run_bdd_pipeline, run_checker_pipeline, run_rewrite_pipeline
 from .reporting import generate_html_report
 from .schemas import load_issue_type_options, validate_human_review_payload
 from .storage import atomic_write_json, ensure_dir, load_json, load_jsonl, timestamp_slug
@@ -229,10 +229,56 @@ class ReviewSessionManager:
         edits = payload.get("edits", [])
         timestamp = timestamp_slug()
         snapshot_path = bdd_dir / f"human_bdd_edits_{timestamp}.json"
+
+        # Also write BDD edits to human_scripts_edits_latest.json (merged) so the
+        # rewrite pipeline picks them up via apply_human_step_edits.
+        # Load existing Scripts tab edits first so we don't overwrite them.
+        scripts_latest = state.get("human_scripts_edits_latest_path")
+        scripts_edits = []
+        if scripts_latest:
+            scripts_path = Path(scripts_latest)
+            if scripts_path.exists():
+                existing = load_json(scripts_path)
+                scripts_edits = existing.get("edits", []) if isinstance(existing, dict) else []
+
+        # Flatten BDD tab edits into apply_human_step_edits-compatible format:
+        # {scenario_id, step_type, step_index, step_text}
+        flat_edits: list[dict[str, Any]] = []
+        for edit in edits:
+            sid = edit.get("scenario_id", "")
+            for step_type in ("given", "when", "then"):
+                steps = edit.get(f"{step_type}_steps", [])
+                for idx, step in enumerate(steps):
+                    if isinstance(step, dict) and step.get("step_text"):
+                        flat_edits.append({
+                            "scenario_id": sid,
+                            "step_type": step_type,
+                            "step_index": idx,
+                            "step_text": step["step_text"],
+                        })
+                    elif isinstance(step, str) and step:
+                        flat_edits.append({
+                            "scenario_id": sid,
+                            "step_type": step_type,
+                            "step_index": idx,
+                            "step_text": step,
+                        })
+
+        merged_edits = scripts_edits + flat_edits
+        scripts_snapshot = bdd_dir / f"human_scripts_edits_{timestamp}.json"
+        scripts_latest_path = bdd_dir / "human_scripts_edits_latest.json"
+        atomic_write_json(scripts_snapshot, {"edits": merged_edits, "timestamp": timestamp})
+        atomic_write_json(scripts_latest_path, {"edits": merged_edits, "timestamp": timestamp})
+
+        # Persist the merged scripts path in state so _run_job passes it to the pipeline
+        state["human_scripts_edits_latest_path"] = str(scripts_latest_path)
+
+        # Keep human_bdd_edits_latest.json as an audit trail (BDD-tab-native format)
         latest_path = bdd_dir / "human_bdd_edits_latest.json"
         atomic_write_json(snapshot_path, {"edits": edits, "timestamp": timestamp})
         atomic_write_json(latest_path, {"edits": edits, "timestamp": timestamp})
-        if edits:
+
+        if flat_edits:
             if "stage_gates" not in state:
                 state["stage_gates"] = {"review_decided": False, "bdd_edited": False, "scripts_viewed": False}
             state["stage_gates"]["bdd_edited"] = True
@@ -240,8 +286,8 @@ class ReviewSessionManager:
                 state["iterations"][str(iteration)]["stage_gates"] = {"review_decided": False, "bdd_edited": False, "scripts_viewed": False}
             state["iterations"][str(iteration)]["stage_gates"]["bdd_edited"] = True
         self._save_manifest(state)
-        logger.info("Saved BDD edits. session_id=%s iteration=%s saved=%s latest=%s edit_count=%s", state["session_id"], iteration, snapshot_path, latest_path, len(edits))
-        return {"saved_path": str(snapshot_path), "latest_path": str(latest_path), "edit_count": len(edits)}
+        logger.info("Saved BDD edits. session_id=%s iteration=%s saved=%s latest=%s flat_edit_count=%s merged_edit_count=%s", state["session_id"], iteration, snapshot_path, latest_path, len(flat_edits), len(merged_edits))
+        return {"saved_path": str(snapshot_path), "latest_path": str(latest_path), "edit_count": len(flat_edits), "merged_edit_count": len(merged_edits)}
 
     def scripts_payload(self) -> dict[str, Any]:
         """Return step registry visibility data for the Scripts tab."""
@@ -504,6 +550,32 @@ class ReviewSessionManager:
                 resume_from=None,
             )
 
+            # Re-run BDD pipeline so rewritten maker cases get fresh normalized_bdd
+            # with human (BDD tab + Scripts tab) edits applied.
+            bdd_dir = ensure_dir(self._iteration_dir(iteration) / "bdd")
+            human_scripts_path = state.get("human_scripts_edits_latest_path")
+            bdd_summary = None
+            if human_scripts_path and Path(human_scripts_path).exists():
+                try:
+                    bdd_summary = run_bdd_pipeline(
+                        config=self.config,
+                        maker_cases_path=Path(rewrite_summary["merged_cases_path"]),
+                        output_dir=bdd_dir,
+                        limit=None,
+                        batch_size=self.checker_batch_size,
+                        resume_from=None,
+                        human_scripts_edits_path=Path(human_scripts_path),
+                    )
+                    curr_normalized = bdd_summary.get("results_path") or state.get("normalized_bdd_path")
+                    state["iterations"][str(iteration)]["normalized_bdd_path"] = curr_normalized
+                    logger.info("BDD pipeline re-run after rewrite. session_id=%s iteration=%s results_path=%s", self.session_id, iteration, curr_normalized)
+                except Exception:
+                    logger.warning("BDD pipeline re-run failed after rewrite (BDD tab edits not applied). session_id=%s error=%s", self.session_id, traceback.format_exc())
+                    curr_normalized = state.get("normalized_bdd_path") or state["iterations"][str(iteration)].get("normalized_bdd_path")
+            else:
+                curr_normalized = state.get("normalized_bdd_path") or state["iterations"][str(iteration)].get("normalized_bdd_path")
+            curr_step_reg = state.get("step_registry_path") or state["iterations"][str(iteration)].get("step_registry_path")
+
             state["history"].append(
                 {
                     "iteration": iteration,
@@ -519,10 +591,6 @@ class ReviewSessionManager:
 
             next_iteration = iteration + 1
             self._ensure_iteration_dirs(next_iteration)
-            # Carry forward normalized_bdd and step_registry paths from current iteration
-            # so the BDD review and Scripts tabs remain usable for the new iteration's cases
-            curr_normalized = state.get("normalized_bdd_path") or state["iterations"][str(iteration)].get("normalized_bdd_path")
-            curr_step_reg = state.get("step_registry_path") or state["iterations"][str(iteration)].get("step_registry_path")
             next_state = {
                 "iteration": next_iteration,
                 "maker_cases_path": rewrite_summary["merged_cases_path"],
@@ -552,6 +620,7 @@ class ReviewSessionManager:
             result = {
                 "rewrite_summary": rewrite_summary,
                 "checker_summary": checker_summary,
+                "bdd_summary": bdd_summary,
                 "report_summary": {
                     "output_html": str(report_path),
                     "maker_html": str(report_path.with_name("maker_readable.html")),
@@ -566,6 +635,7 @@ class ReviewSessionManager:
                     "coverage_report": self._file_url(Path(checker_summary["coverage_report_path"])),
                     "report_html": self._file_url(report_path),
                     "case_compare_html": self._file_url(compare_output_path) if compare_output_path.exists() else None,
+                    "normalized_bdd": self._file_url(Path(curr_normalized)) if curr_normalized else None,
                 },
             }
             with self._lock:
@@ -1104,7 +1174,7 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   document.querySelector('[data-tab="' + tab + '"]').classList.add('active');
-  if (tab === 'bdd' && !bddPayload) loadBddData();
+  if (tab === 'bdd') loadBddData();  // Always reload: bddPayload may be stale after a rewrite job
   if (tab === 'scripts' && !scriptsPayload) loadScriptsData();
 }
 function loadBddData() {
@@ -1140,16 +1210,26 @@ function renderBddTab(data) {
   `).join('');
 }
 async function saveBddEdits() {
-  const byScenario = {};
-  document.querySelectorAll('.step-textarea').forEach(ta => {
-    const sid = ta.dataset.scenario, stype = ta.dataset.stepType, sidx = parseInt(ta.dataset.stepIndex);
-    if (!byScenario[sid]) byScenario[sid] = { scenario_id: sid, given_steps: [], when_steps: [], then_steps: [] };
-    byScenario[sid][stype + '_steps'][sidx] = { step_text: ta.value, step_pattern: '' };
-  });
-  const edits = Object.values(byScenario);
-  const result = await postJson('/api/bdd/save', { edits });
-  document.getElementById('bddStatus').textContent = `已保存 ${result.edit_count} 条编辑到 ${escapeHtml(result.latest_path)}`;
-  await loadStageData();
+  try {
+    const byScenario = {};
+    document.querySelectorAll('#bddContent textarea[data-scenario]').forEach(ta => {
+      const sid = String(ta.dataset.scenario || '');
+      const stype = String(ta.dataset.stepType || '').toLowerCase();
+      const sidx = parseInt(ta.dataset.stepIndex || '0', 10);
+      if (!sid || !stype) return;
+      if (!byScenario[sid]) byScenario[sid] = { scenario_id: sid, given_steps: [], when_steps: [], then_steps: [] };
+      const stepsKey = stype + '_steps';
+      if (!byScenario[sid][stepsKey]) byScenario[sid][stepsKey] = [];
+      byScenario[sid][stepsKey][sidx] = { step_text: ta.value, step_pattern: '' };
+    });
+    const edits = Object.values(byScenario);
+    const result = await postJson('/api/bdd/save', { edits });
+    document.getElementById('bddStatus').textContent = `已保存 ${result.edit_count} 条编辑到 ${escapeHtml(result.latest_path)}`;
+    await loadStageData();
+  } catch (err) {
+    document.getElementById('bddStatus').textContent = `保存失败: ${err.message}`;
+    console.error('saveBddEdits error:', err);
+  }
 }
 function loadScriptsData() {
   fetch('/api/scripts').then(r => r.json()).then(data => {
@@ -1275,7 +1355,7 @@ async function saveDraft() { const result = await postJson('/api/reviews/save', 
 async function refreshSession() { const response = await fetch('/api/session'); sessionPayload = await response.json(); reviewMap = new Map(sessionPayload.reviews.map(item => [item.case_id, item])); document.getElementById('summaryCard').innerHTML = `<div class="grid"><div class="metric"><strong>Session ID</strong><br/>${escapeHtml(sessionPayload.session_id)}</div><div class="metric"><strong>Status</strong><br/>${escapeHtml(sessionPayload.session_status)}</div><div class="metric"><strong>Current Iteration</strong><br/>${escapeHtml(String(sessionPayload.current_iteration))}</div></div><div class="muted">Latest review path: ${escapeHtml(sessionPayload.metadata.latest_review_path || '')}</div><div class="muted">Current report path: ${escapeHtml(sessionPayload.metadata.current_report_path || '')}</div>`; renderRows(); renderHistory(); applyFilters(); await loadStageData(); }
 async function pollJob(jobId) { const response = await fetch(`/api/status/${jobId}`); const payload = await response.json(); if (payload.status === 'queued' || payload.status === 'running') { renderResult('后台执行中', `<div class="status-running">状态: ${escapeHtml(payload.status)}</div>`, 'status-running'); pollTimer = setTimeout(() => pollJob(jobId), 2000); return; } if (payload.status === 'failed') { renderResult('执行失败', `<pre>${escapeHtml(payload.error || '')}</pre>`, 'status-failed'); return; } const result = payload.result || {}; await refreshSession(); renderResult('执行成功', `<div class="status-succeeded">状态: ${escapeHtml(payload.status)}</div><div><strong>Next Iteration</strong>: ${escapeHtml(String(result.next_iteration || ''))}</div><pre>${escapeHtml(JSON.stringify({ rewrite_summary: result.rewrite_summary, checker_summary: result.checker_summary, report_summary: result.report_summary }, null, 2))}</pre><div>${resultLinksHtml(result.links)}</div>`, 'status-succeeded'); }
 async function submitAndRun() { if (pollTimer) clearTimeout(pollTimer); const result = await postJson('/api/submit', currentPayload()); renderResult('已提交', `<div>Job ID: ${escapeHtml(result.job_id)}</div><div>Latest: ${escapeHtml(result.latest_review_path)}</div>`); pollJob(result.job_id); }
-async function finalizeSession() { const result = await postJson('/api/finalize', {}); if (result.final_report_url) { window.location.href = result.final_report_url; return; } await refreshSession(); renderResult('Session Finalized', `<div class="status-finalized">??: ${escapeHtml(result.status)}</div><div><strong>Final Report</strong>: ${escapeHtml(result.final_report_path || "")}</div><div>${resultLinksHtml({ report_html: result.final_report_url, maker_html: result.final_maker_url, checker_html: result.final_checker_url })}</div>`, 'status-finalized'); }
+async function finalizeSession() { try { const result = await postJson('/api/finalize', {}); if (result.error) { renderResult('Finalize Failed', `<div class="status-failed">${escapeHtml(result.error)}</div>`, 'status-failed'); return; } if (result.final_report_url) { window.location.href = result.final_report_url; return; } await refreshSession(); renderResult('Session Finalized', `<div class="status-finalized">Status: ${escapeHtml(result.status || '')}</div><div><strong>Final Report</strong>: ${escapeHtml(result.final_report_path || "")}</div><div>${resultLinksHtml({ report_html: result.final_report_url, maker_html: result.final_maker_url, checker_html: result.final_checker_url })}</div>`, 'status-finalized'); } catch (err) { renderResult('Finalize Failed', `<div class="status-failed">${escapeHtml(err.message)}</div>`, 'status-failed'); } }
 async function bootstrap() { await refreshSession(); attachHandlers(); }
 function attachHandlers() { document.getElementById('overallFilter').addEventListener('change', applyFilters); document.getElementById('coverageFilter').addEventListener('change', applyFilters); document.getElementById('blockingFilter').addEventListener('change', applyFilters); document.getElementById('saveBtn').addEventListener('click', saveDraft); document.getElementById('submitBtn').addEventListener('click', submitAndRun); document.getElementById('finalizeBtn').addEventListener('click', finalizeSession); document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab))); document.getElementById('saveBddBtn').addEventListener('click', saveBddEdits); document.getElementById('saveScriptsBtn').addEventListener('click', saveScriptsEdits); document.querySelectorAll('.stage-step').forEach(el => el.addEventListener('click', () => { const stage = el.dataset.stage; if (stage === 'finalize') { if (confirm('Finalize this review session? No further edits will be possible.')) finalizeSession(); } else { const tab = STAGE_TAB_MAP[stage]; if (tab) switchTab(tab); } })); }
 // Re-attach handlers and refresh state when navigating via browser back/forward (bfcache restore)
