@@ -20,7 +20,7 @@ flowchart TD
     B --> C["generate_semantic_rules.py<br/>structured rules + evidence"]
     C --> D["Maker: qwen3.5-plus<br/>generates BDD scenarios"]
     D --> E["maker_cases.jsonl<br/>TC-SR-MR-003-01-positive-01<br/>case_type enum · evidence · page#"]
-    E --> F["Checker: MiniMax-M2.5<br/>quality scores + coverage"]
+    E --> F["Checker: MiniMax<br/>quality scores + coverage"]
     E --> G["BDD Pipeline<br/>normalized BDD → Gherkin"]
     F --> H["checker_reviews.jsonl<br/>4-dim scores · blocking flag"]
     H --> I["Human Review UI<br/>approve · rewrite · reject"]
@@ -28,12 +28,10 @@ flowchart TD
     J -->|rewrite| K["Rewrite<br/>regenerate flagged only"]
     K --> D
     J -->|approve| L["HTML Report<br/>coverage · audit trail"]
-    G --> M["step-registry<br/>reuse gaps · what to build"]
 
     style A fill:#e1eaf5
     style L fill:#d4edda
     style G fill:#fde8b5
-    style M fill:#fde8b5
 ```
 
 **183 rules → \~500 scenarios in \~3 hours** (full corpus, batch\_size=4)
@@ -59,8 +57,6 @@ flowchart TD
     G --> H1["lme_testing/prompts.py<br/>MAKER_SYSTEM_PROMPT v1.5"]
     G --> H2["lme_testing/pipelines.py<br/>run_checker_pipeline()"]
     H2 --> I["schemas/checker_output.schema.json<br/>Schema: scores (4-dim),<br/>case_type_accepted, coverage_relevance"]
-
-    I --> J["lme_testing/signals/<br/>compute_governance_signals()"]
     I --> K["lme_testing/human_review.py<br/>generate_human_review_page()"]
     K --> L["runs/review_sessions/<br/>review.html — filterable table<br/>Issue types + JSON import/export"]
 
@@ -69,17 +65,9 @@ flowchart TD
     N --> O["lme_testing/bdd_export.py<br/>render_gherkin_from_normalized_bdd()"]
     O --> P["runs/bdd-export/<br/>*.feature + step_definitions.py"]
 
-    P --> Q["lme_testing/step_registry.py<br/>compute_step_matches()"]
-    Q --> R["runs/step-registry/<br/>step_visibility.json — reuse score + gaps"]
-
-    G --> S["lme_testing/oracles/<br/>evaluate_assertion()"]
-    S --> T["8 oracle modules: field_validation,<br/>deadline_check, event_sequence..."]
-
     style A fill:#e1eaf5
     style L fill:#d4edda
     style P fill:#fde8b5
-    style R fill:#fde8b5
-    style T fill:#fde8b5
 ```
 
 ### The 10 Concrete Improvements
@@ -163,64 +151,12 @@ maker_cases.jsonl → bdd → normalized_bdd.jsonl → bdd-export → *.feature 
 
 ***
 
-#### 7. Step Registry — Know What to Build Next
-
-> Old: not present.
-> New: maps every generated step against an existing step definition library, reports exact/parameterized/candidate matches and unmatched gaps.
-
-```
-total_steps: 27
-unmatched: 15   ← 15 steps need new step definitions built
-exact_matches: 0
-reuse_score: 35.4%
-```
-
-**Code:** [`lme_testing/step_registry.py`](../lme_testing/step_registry.py) `compute_step_matches()`, `extract_steps_from_normalized_bdd()`; [`lme_testing/cli.py`](../lme_testing/cli.py) `step-registry` CLI command.
-
-***
-
-#### 8. Human Review UI — Filterable, Taggable, Auditable
+#### 7. Human Review UI — Filterable, Taggable, Auditable
 
 > Old: static table, no filters, no import/export.
 > New: filter by overall/coverage/blocking; tag issue types; download/upload JSON for audit trail.
 
 **Code:** [`lme_testing/human_review.py`](../lme_testing/human_review.py) `generate_human_review_page()`; [`lme_testing/review_session.py`](../lme_testing/review_session.py) live web server at `http://127.0.0.1:8765`.
-
-***
-
-#### 9. Governance Signals — Operational Metrics
-
-> Old: none.
-> New: automated metrics from run artifacts — `schema_failure_rate`, `checker_instability_rate`, `coverage_percent`, `step_binding_rate`.
-
-```
-schema_failure_rate:    0.0%   (370 fixtures, 0 failures)
-checker_instability:    ~60%   (API random disconnects — retry logic added, resolves most)
-coverage_percent:     78.89% (142/180 rules fully covered)
-step_binding_rate:    35.4%  (simulated step library, not real LME API)
-```
-
-**Code:** [`lme_testing/signals/compute_governance_signals()`](../lme_testing/signals/__init__.py); [`scripts/check_model_governance.py`](../scripts/check_model_governance.py); [`lme_testing/cli.py`](../lme_testing/cli.py) `governance-signals` CLI command.
-
-***
-
-#### 10. Deterministic Oracles — No LLM Needed to Judge Results
-
-> Old: test pass/fail depended on human judgment.
-> New: 8 deterministic assertion modules that evaluate rule-type-specific behavior without LLM.
-
-```python
-evaluate_assertion(
-    {'assertion_id': 't1', 'type': 'null_check',
-     'parameters': {'field': 'result', 'expected': 'non_null'}},
-    {'input_data': {'result': 'ok'}}, None, {}
-)
-# result.status: pass | fail | unable_to_determine | error
-```
-
-**Code:** [`lme_testing/oracles/`](../lme_testing/oracles/__init__.py) — 8 modules: `field_validation`, `state_validation`, `calculation_validation`, `deadline_check`, `event_sequence`, `pass_fail_accounting`, `null_check`, `compliance_check`; [`lme_testing/oracles/__init__.py`](../lme_testing/oracles/__init__.py) `evaluate_assertion()` + `@register_oracle`.
-
-***
 
 ## Step 1 — Semantic Rule (Input)
 
@@ -340,27 +276,7 @@ This is ready to drop into any Cucumber-compatible test runner.
 
 ***
 
-## Step 5 — Step Registry (Gap Analysis)
-
-The system also maps generated steps against a **step definition library** to find reuse opportunities and gaps:
-
-```json
-{
-  "total_steps": 27,
-  "unique_bdd_patterns": 21,
-  "exact_matches": 0,
-  "parameterized_matches": 0,
-  "candidates": 6,
-  "unmatched": 15,
-  "reuse_score": "35.4%"
-}
-```
-
-**15 steps need new step definitions** — this tells the automation team exactly what to build next.
-
-***
-
-## Step 6 — Web UI (Human Review)
+## Step 5 — Web UI (Human Review)
 
 The review session runs at `http://127.0.0.1:8765`:
 
@@ -386,8 +302,6 @@ The April 1st action items assigned to the AI agent:
 | - | -------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | 1 | Based on test cases, generate BDD            | ✅ Done — `bdd` pipeline produces `normalized_bdd.jsonl` + Gherkin export                       |
 | 2 | Review & improve test case generation prompt | ✅ Done — Maker prompt v1.5 with hard requirements on evidence, case\_type enum, no duplication |
-| 3 | After BDD, generate Scripts                  | ✅ Done — Step definitions auto-generated from normalized BDD                                   |
-| 4 | Show BDD in web portal with human edit       | ✅ Done — BDD tab with editable Given/When/Then; Scripts tab with match quality badges         |
 
 **Report UX (2026/04/18):**
 
@@ -458,213 +372,9 @@ The output is governed by a schema that forces a specific structure:
 }
 ```
 
-The key fields: `step_text` (human-readable) + `step_pattern` (regex-ready for step definition matching). The step pattern is what lets the **step registry** match generated steps against an existing Ruby/Python step definition library.
+The key fields: `step_text` (human-readable) + `step_pattern` (regex-ready for step definition matching).
 
 **Code:** [`schemas/normalized_bdd.schema.json`](../schemas/normalized_bdd.schema.json) — enforces `step_text` + `step_pattern` per step; [`lme_testing/schemas.py`](../lme_testing/schemas.py) `validate_normalized_bdd_payload()`
-
-***
-
-#### Layer 3 — Template Registry: "Learning" from Good Step Definitions
-
-The `bdd_export.py` includes a **template registry** of known LME step patterns with working Ruby/Python step definition code. This is the "BDD skill" — patterns learned from how the exchange actually works:
-
-```python
-TEMPLATE_REGISTRY = {
-    "contact_exchange": {
-        "given_pattern": "a member with valid LME session",
-        "given_code": '''Given(/^a member with valid LME session$/) do
-  @session = LME::Client.login
-end'''
-    },
-    "order_fails_validation": {
-        "when_pattern": "order fails price validation",
-        "when_code": '''When(/^order fails price validation$/) do
-  @order_params[:price] = '999999'
-  @response = @session.submit_order(@order_params)
-  expect(@response.status).to eq(:rejected)
-end'''
-    },
-    "exchange_records_contact": {
-        "then_pattern": "Exchange records the contact",
-        "then_code": '''Then(/^Exchange records the contact$/) do
-  expect(LME::PostTrade).to receive(:contact_exchange)
-end'''
-    }
-}
-```
-
-When `bdd-export` renders Gherkin, it can **auto-generate step definition stubs** in Ruby/Python for any step that doesn't match the template registry — giving the automation team a head start on what to implement.
-
-**Code:** [`lme_testing/bdd_export.py`](../lme_testing/bdd_export.py) `TEMPLATE_REGISTRY` + `render_steps_from_normalized_bdd()`
-
-***
-
-#### Why It Matters
-
-A good BDD prompt without a schema produces inconsistent output. A schema without good prompts produces valid-but-nonsense output. The three layers together mean:
-
-- The AI **cannot** skip required traceability fields
-- Every step has a `step_pattern` that can be **matched against a step definition library**
-- The automation team gets **working Ruby/Python step definition stubs** — they don't start from scratch
-- Each `.feature` file is **drop-in compatible** with Cucumber, Behave, or any Gherkin runner
-
-***
-
-### What "After BDD, Generate Scripts" Means
-
-*"After BDD stage, generate Scripts. This would be very challenging and interesting to investigate how to create meaningful code."*
-
-There are **two distinct kinds** of script/code generation, both non-LLM and deterministic:
-
-***
-
-#### Script Layer 1 — Ruby/Python Step Definitions from BDD Steps
-
-After the `bdd-export` stage, every BDD step has a `step_pattern`. The system generates Ruby/Python step definition code that binds each pattern to actual automation logic:
-
-```mermaid
-flowchart LR
-    A["BDD step text<br/>'order fails price validation'"] --> B["extract_step_pattern()<br/>regex: (?:a\|an\|the) order fails..."]
-    B --> C{"map_step_to_template()<br/>TEMPLATE_REGISTRY?"}
-    C -->|hit| D["Template match<br/>order_fails_validation"]
-    D --> E["Generated Ruby code<br/>When(/^order fails price validation$/)<br/>@response = @session.submit_order<br/>expect(@response.status).to eq(:rejected)"]
-    C -->|miss| F["No template match<br/>Generate pending stub<br/>pending 'Step not implemented'"]
-    E --> G["Ruby step definition<br/>ready for Cucumber"]
-    F --> G
-
-    style A fill:#e1eaf5
-    style D fill:#d4edda
-    style F fill:#fff3cd
-    style G fill:#fde8b5
-```
-
-The `TEMPLATE_REGISTRY` is the "skill" — it encodes real LME trading patterns:
-
-```python
-TEMPLATE_REGISTRY = {
-    "order_fails_validation": {
-        "when_pattern": "order fails price validation",
-        "when_code": '''When(/^order fails price validation$/) do
-  @order_params[:price] = '999999'
-  @response = @session.submit_order(@order_params)
-  expect(@response.status).to eq(:rejected)
-end'''
-    },
-    "contact_exchange": {
-        "then_pattern": "member contacts Exchange",
-        "then_code": '''Then(/^member contacts Exchange$/) do
-  expect(LME::PostTrade).to receive(:contact_exchange)
-  LME::PostTrade.contact_exchange(reason: @response.rejection_reason)
-end'''
-    }
-}
-```
-
-The registry currently covers: session login, order submission, price validation failure, exchange contact, exchange records contact, deadline assertions, API GET/POST, and web/Selenium patterns.
-
-**Code:** [`lme_testing/bdd_export.py`](../lme_testing/bdd_export.py) `render_steps_from_normalized_bdd()` + `TEMPLATE_REGISTRY`
-
-For steps **not** in the registry, the system generates a **stub** with `pending`:
-
-```ruby
-Given(/^a member is logged in$/) do
-  # TODO: Implement: A member is logged in
-  pending "Step not implemented: a member is logged in"
-end
-```
-
-These stubs are **not dead code** — they are a **roadmap**. Every `pending` step tells the automation team: "this step exists in our BDD, please implement it."
-
-***
-
-#### Script Layer 2 — Deterministic Oracles (Executable Assertions)
-
-Assertions that run against actual test results, without any LLM:
-
-Each `ExecutableScenario` can carry `assertions[]` — deterministic checks bound to rule types:
-
-```json
-{
-  "assertion_id": "DLN-001-check",
-  "type": "deadline_check",
-  "parameters": {
-    "submission_time": "result.submitted_at",
-    "deadline": "2026-08-01T15:00:00Z",
-    "operator": "before",
-    "tolerance_minutes": 0
-  }
-}
-```
-
-The oracle evaluates it deterministically:
-
-```python
-result = evaluate_assertion(assertion, scenario, rule, context)
-# result.status: pass | fail | unable_to_determine | error
-```
-
-8 oracle modules handle the 8 rule categories:
-
-| Oracle                   | What it validates                                                   |
-| ------------------------ | ------------------------------------------------------------------- |
-| `field_validation`       | Field type, format, regex, enum, range, length                      |
-| `state_validation`       | System state transitions (e.g., trade: pending → matched → settled) |
-| `calculation_validation` | Arithmetic results, formula outputs                                 |
-| `deadline_check`         | Submission before deadline, within window, tolerance                |
-| `event_sequence`         | Events occurred in required order                                   |
-| `pass_fail_accounting`   | Explicit pass/fail bookkeeping entries                              |
-| `null_check`             | Field is null / non-null / equals a value                           |
-| `compliance_check`       | Obligation fulfilled / prohibition not violated                     |
-
-Example: a `deadline_check` oracle evaluates in pure Python — no LLM:
-
-```python
-# From lme_testing/oracles/deadline_check.py
-def _check_deadline(submission_time, deadline, tolerance_minutes, operator):
-    effective_deadline = deadline + timedelta(minutes=tolerance_minutes)
-    if operator == "before":
-        return submission_time <= effective_deadline
-    if operator == "between":
-        return window_start <= submission_time <= effective_deadline
-```
-
-**Code:** [`lme_testing/oracles/__init__.py`](../lme_testing/oracles/__init__.py) — each module registered via `@register_oracle`; [`lme_testing/oracles/__init__.py`](../lme_testing/oracles/__init__.py) `evaluate_assertion()` is the single entry point.
-
-***
-
-The gap between "BDD natural language step" and "working automation code" is large. Traditional BDD frameworks leave this gap entirely to humans — the automation engineer reads the `.feature` file and writes step definitions by hand.
-
-This system bridges that gap in two ways:
-
-1. **TEMPLATE\_REGISTRY**— encodes known LME patterns as working code. More patterns added = wider coverage.
-2. **Stub generation + pending** — ensures no step is silently skipped. If the registry doesn't cover it, the step gets a `pending` stub, and the step registry reports it as an **unmatched** step that needs implementation.
-
-The oracle framework goes further — it generates the **assertion code** that validates test outcomes, not just the step bindings. For deadline rules, this means the system can automatically judge whether a test passed or failed, without human interpretation.
-
-***
-
-#### End-to-End Example: From Rule to Executable Script
-
-```mermaid
-flowchart TD
-    A["SR-MR-004-02<br/>Deadline rule<br/>'15 min before deadline'"] --> B["Maker: Qwen<br/>generates scenario<br/>case_type: deadline"]
-    B --> C["maker_cases.jsonl<br/>scenario with deadline case_type"]
-    C --> D["BDD Pipeline: Qwen<br/>normalized BDD with step_pattern"]
-    D --> E["normalized_bdd.jsonl<br/>given_steps · when_steps · then_steps"]
-    E --> F["bdd-export<br/>template-based · no LLM"]
-    F --> G1["*.feature file<br/>Gherkin Scenario<br/>ready for Cucumber"]
-    F --> G2["matching_rules_steps.rb<br/>Ruby step definitions<br/>registry hits + pending stubs"]
-    G2 --> H["ExecutableScenario<br/>assertions[]"]
-    H --> I["deadline_check oracle<br/>deterministic evaluation"]
-    I --> J{"Result"}
-    J -->|pass| K["✅ result.status: pass<br/>submission was 10 min before deadline"]
-
-    style A fill:#e1eaf5
-    style G1 fill:#fde8b5
-    style G2 fill:#fde8b5
-    style I fill:#fde8b5
-    style K fill:#d4edda
-```
 
 ***
 
@@ -765,18 +475,7 @@ A: Three differences: (1) Every output is schema-validated JSON — no free-form
 A: Yes — the BDD export produces standard Gherkin `.feature` files compatible with Cucumber, Behave, or any Gherkin-capable framework. Step definitions can be auto-generated as Ruby/Python stubs.
 
 **Q: What does "great BDD skill" mean — why was this hard?**
-A: "BDD skill" is not about generating text that looks like BDD. It is about producing BDD that a machine can actually execute. Three things make it work: (1) The `BDD_SYSTEM_PROMPT` forces every step to have both a natural-language text AND a regex-extractable pattern, so the step registry can match it. (2) The `normalized_bdd.schema.json` schema enforces traceability fields (`semantic_rule_id`, `paragraph_ids`) so every scenario can be traced back to the exact rulebook paragraph. (3) The `TEMPLATE_REGISTRY` in `bdd_export.py` pre-loads known LME step patterns (login, order submission, price validation, exchange contact) with working Ruby code — so the AI learns the "style" of good LME step definitions rather than inventing inconsistent ones. Without all three layers, you get valid JSON that cannot be executed or matched to a real step library.
-
-**Q: Is BDD editing and Script viewing in the web portal? (Darcy's April 1 item)**
-A: Darcy's item #4 asked: *"In the same Web portal, the process should progress to BDD and Script stage respectively, and display BDDs generated by AI, and allow Human to directly edit the BDD. After human modification, we should save it. Again, this will be used for Audit Trail."*
-
-**✅ Done (2026/04/17):**
-
-- **BDD tab**: Displays normalized BDD scenarios per approved case with editable Given/When/Then textarea fields. Save writes `human_bdd_edits_latest.json` in the session snapshot, wired into rewrite pipeline.
-- **Scripts tab**: Displays step registry visibility with color-coded match quality badges (exact=green, parameterized=orange, candidate=blue, unmatched=red) and match counts.
-- **Stage progress bar**: 4-stage progression (Scenario Review → BDD Edit → Scripts → Finalize) with gate logic enforcing tab unlock order.
-
-**Code:** [`lme_testing/review_session.py`](../lme_testing/review_session.py) — BDD/Scripts tabs in `_render_review_session_shell()`, save routes + snapshot wiring; [`lme_testing/bdd_export.py`](../lme_testing/bdd_export.py) `apply_human_step_edits()` for edit application.
+A: "BDD skill" is not about generating text that looks like BDD. It is about producing BDD that a machine can actually execute. Two things make it work: (1) The `BDD_SYSTEM_PROMPT` forces every step to have both a natural-language text AND a regex-extractable pattern. (2) The `normalized_bdd.schema.json` schema enforces traceability fields (`semantic_rule_id`, `paragraph_ids`) so every scenario can be traced back to the exact rulebook paragraph.
 
 **Q: How does the Checker assign 1–5 scores? Is it a formula?**
 A: No formula — the Checker model (MiniMax) **reads each scenario against the rule and judges it qualitatively**. The `CHECKER_SYSTEM_PROMPT` defines four dimensions:
@@ -790,5 +489,5 @@ A: No formula — the Checker model (MiniMax) **reads each scenario against the 
 
 A score of **5** means "exceptional, no meaningful room for improvement." A **4** means "good, but with minor gaps." For example, a negative scenario getting 4/4 on coverage/design likely means it correctly maps to the rule but doesn't fully explore all boundary conditions or its given/when framing could be tighter.
 
-Because scoring is judgmental (not formulaic), different models may score the same scenario differently. The `checker_instability_rate` governance signal tracks how often the checker disagrees with itself or with the maker — not a quality defect, but an operational metric showing whether prompt versioning or model swapping is causing erratic output.
+Because scoring is judgmental (not formulaic), different models may score the same scenario differently. The `checker_instability_rate` tracks how often the checker disagrees with itself across runs — not a quality defect, but an operational metric showing whether prompt versioning or model swapping is causing erratic output.
 

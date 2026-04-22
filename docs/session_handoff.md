@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-22 00:49:59 UTC`
+- `2026-04-22 01:28:10 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `docs: trim demo_for_boss.md 鈥?remove out-of-scope improvements`
 - `docs: update demo_for_boss.md 鈥?S2-T01 results, LLM non-determinism section`
 - `docs: update TODO and session handoff 鈥?S2-T01 complete, S2-B1/B2 integrated`
 - `docs: refresh session handoff`
 - `feat: wire audit_trail and case_compare into review_session`
-- `docs: refresh session handoff with S2-T01 v1.5 results`
 
 ---
 
