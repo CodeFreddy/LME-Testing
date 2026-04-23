@@ -2,6 +2,7 @@
 
 import html
 import json
+import os
 from pathlib import Path
 
 from .storage import load_json, load_jsonl
@@ -136,6 +137,45 @@ def _render_rule_coverage_rows(status_by_rule: dict[str, dict]) -> str:
     return ''.join(rows)
 
 
+def _relative_or_uri(path: Path, base_dir: Path) -> str:
+    try:
+        return Path(os.path.relpath(path.resolve(), base_dir.resolve())).as_posix()
+    except OSError:
+        return path.resolve().as_uri()
+
+
+def _render_compare_links(compare_links: list[dict] | None, output_dir: Path) -> str:
+    links = []
+    for item in compare_links or []:
+        raw_path = item.get("path") or item.get("compare_path")
+        raw_url = item.get("url")
+        if not raw_path and not raw_url:
+            continue
+        if raw_url:
+            url = str(raw_url)
+        else:
+            path = Path(raw_path)
+            if not path.exists():
+                continue
+            url = _relative_or_uri(path, output_dir)
+        label = item.get("label") or f"Iteration {item.get('iteration', '')} Compare"
+        links.append(
+            '<a class="nav-link" target="_blank" '
+            f'href="{html.escape(url)}">{html.escape(str(label))}</a>'
+        )
+    if not links:
+        return ""
+    return (
+        '<div class="card">'
+        '<h2>Review History</h2>'
+        '<div class="toolbar">'
+        + ''.join(links)
+        + '</div>'
+        '<div class="muted">Open before/after compare pages generated during review-session rewrite cycles.</div>'
+        '</div>'
+    )
+
+
 def _build_report_metrics(
     maker_cases: list[dict],
     checker_reviews: list[dict],
@@ -168,12 +208,15 @@ def generate_html_report(
     coverage_report_path: Path,
     output_html_path: Path,
     audit_trail_path: Path | None = None,
+    audit_trail_url: str | None = None,
+    compare_links: list[dict] | None = None,
 ) -> dict:
     maker_cases = load_jsonl(maker_cases_path)
     checker_reviews = load_jsonl(checker_reviews_path)
     maker_summary = load_json(maker_summary_path)
     checker_summary = load_json(checker_summary_path)
     coverage_report = load_json(coverage_report_path)
+    output_dir = output_html_path.parent
     metrics = _build_report_metrics(
         maker_cases=maker_cases,
         checker_reviews=checker_reviews,
@@ -275,6 +318,7 @@ applyFilters();
       <div class="metric"><strong>覆盖率</strong><br/>{metrics['coverage_percent']}%</div>
     </div>
   </div>
+  {_render_compare_links(compare_links, output_dir)}
   <div class="card">
     <h2>Rule 级覆盖判定</h2>
     <table>
@@ -375,12 +419,9 @@ applyFilters();
     maker_html_path = output_html_path.with_name('maker_readable.html')
     checker_html_path = output_html_path.with_name('checker_readable.html')
 
-    audit_url: str | None = None
-    if audit_trail_path and audit_trail_path.exists():
-        try:
-            audit_url = audit_trail_path.relative_to(output_html_path.parent).as_posix()
-        except ValueError:
-            audit_url = audit_trail_path.as_uri()
+    audit_url: str | None = audit_trail_url
+    if not audit_url and audit_trail_path and audit_trail_path.exists():
+        audit_url = _relative_or_uri(audit_trail_path, output_dir)
 
     _write_text(output_html_path, _render_page('Maker Checker Report', combined_body, filter_script, active_nav='report', audit_trail_url=audit_url))
     _write_text(maker_html_path, _render_page('Maker Readable Report', maker_body, active_nav='maker', audit_trail_url=audit_url))

@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from lme_testing.audit_trail import build_audit_trail
 from lme_testing.config import ProjectConfig, ProviderConfig, RoleDefaults
 from lme_testing.case_compare import build_case_compare
 from lme_testing.human_review import generate_human_review_page
@@ -566,6 +567,60 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("Case Compare: Iteration 000", html_text)
         self.assertIn("Iteration 0 (before)", html_text)
         self.assertIn("Iteration 0 (after)", html_text)
+        self.assertIn("diff-del-text", html_text)
+        self.assertIn("diff-add-text", html_text)
+
+    def test_audit_trail_lists_only_human_checker_divergences(self) -> None:
+        session_dir = WORK_TMP / "audit_session"
+        iteration_dir = session_dir / "iterations" / "000" / "reviews"
+        iteration_dir.mkdir(parents=True, exist_ok=True)
+        checker_reviews_path = session_dir / "checker_reviews.jsonl"
+        human_reviews_path = iteration_dir / "human_reviews_latest.json"
+        output_html = session_dir / "audit_trail.html"
+
+        checker_reviews_path.write_text(
+            "\n".join(
+                [
+                    json.dumps({"case_id": "TC-1", "semantic_rule_id": "SR-1", "overall_status": "fail", "checker_blocking": True}, ensure_ascii=False),
+                    json.dumps({"case_id": "TC-2", "semantic_rule_id": "SR-2", "overall_status": "pass", "checker_blocking": False}, ensure_ascii=False),
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        human_reviews_path.write_text(
+            json.dumps(
+                {
+                    "reviews": [
+                        {"case_id": "TC-1", "semantic_rule_id": "SR-1", "review_decision": "approve", "human_comment": "human override"},
+                        {"case_id": "TC-2", "semantic_rule_id": "SR-2", "review_decision": "approve", "human_comment": "same as checker"},
+                    ]
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        (session_dir / "session_manifest.json").write_text(
+            json.dumps(
+                {
+                    "iterations": {
+                        "0": {
+                            "checker_reviews_path": str(checker_reviews_path),
+                            "human_reviews_latest_path": str(human_reviews_path),
+                        }
+                    }
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+
+        result = build_audit_trail(session_dir, output_html)
+        html_text = output_html.read_text(encoding="utf-8")
+        self.assertEqual(result["row_count"], 1)
+        self.assertEqual(result["divergent_count"], 1)
+        self.assertIn("TC-1", html_text)
+        self.assertNotIn("TC-2", html_text)
 
 
 if __name__ == "__main__":

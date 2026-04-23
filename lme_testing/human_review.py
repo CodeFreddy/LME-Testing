@@ -197,6 +197,7 @@ def _render_page(rows: str, seed_json: str, total_cases: int, checker_blocked: i
     <h2>Field Guide</h2>
     <ul>
       <li><strong>Decision</strong>: final human action. <code>approve</code> passes the case; <code>rewrite</code> sends it back to maker. Divergence vs. checker is captured in the audit trail.</li>
+      <li><strong>Block Recommendation Review</strong>: legacy audit label; current pages infer this from checker blocking and final human Decision.</li>
       <li><strong>Issue Types</strong>: open the panel and select one or more checkboxes. These tags are used for stats and targeted rewrite guidance.</li>
     </ul>
   </div>

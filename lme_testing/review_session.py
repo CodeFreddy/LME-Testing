@@ -196,6 +196,13 @@ class ReviewSessionManager:
             logger.exception("build_audit_trail failed; continuing without audit trail.")
             audit_trail_html = None
 
+        try:
+            final_report_path = self._render_iteration_report(int(state["current_iteration"]), state=state)
+            state["current_report_path"] = str(final_report_path)
+            state["iterations"][str(state["current_iteration"])]["report_path"] = str(final_report_path)
+        except Exception:
+            logger.exception("final report re-render failed; keeping existing report.")
+
         write_json(final_manifest, state)
         self._save_manifest(state)
         final_report_path = Path(state.get("current_report_path") or "")
@@ -444,8 +451,30 @@ class ReviewSessionManager:
             checker_summary_path=Path(checker_summary_path),
             coverage_report_path=Path(coverage_report_path),
             output_html_path=report_output,
+            audit_trail_path=Path(state["audit_trail_path"]) if state.get("audit_trail_path") else None,
+            audit_trail_url=self._file_url(Path(state["audit_trail_path"])) if state.get("audit_trail_path") else None,
+            compare_links=self._report_compare_links(state),
         )
         return report_output
+
+    def _report_compare_links(self, state: dict[str, Any]) -> list[dict[str, Any]]:
+        links: list[dict[str, Any]] = []
+        for item in state.get("history", []):
+            compare_path = item.get("compare_path")
+            if not compare_path:
+                continue
+            path = Path(compare_path)
+            if not path.exists():
+                continue
+            links.append(
+                {
+                    "iteration": item.get("iteration"),
+                    "label": f"Iteration {item.get('iteration')} Compare",
+                    "path": str(path),
+                    "url": self._file_url(path),
+                }
+            )
+        return links
 
     def _current_case_map(self, state: dict[str, Any]) -> dict[str, str]:
         return _case_map_from_maker_records(load_jsonl(Path(state["current_maker_cases_path"])))

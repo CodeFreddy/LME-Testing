@@ -136,11 +136,17 @@ class ReviewSessionTests(unittest.TestCase):
         self.assertTrue(session['metadata']['current_report_path'])
         self.assertIn('report_html', status['result']['links'])
         self.assertEqual(len(session['history']), 1)
+        report_text = Path(session['metadata']['current_report_path']).read_text(encoding='utf-8')
+        self.assertIn('Review History', report_text)
+        self.assertIn('Iteration 0 Compare', report_text)
 
     def test_finalize_locks_session(self) -> None:
         manager = self._build_manager()
         result = manager.finalize_session()
         self.assertEqual(result['status'], 'finalized')
+        report_text = Path(result['final_report_path']).read_text(encoding='utf-8')
+        self.assertIn('Audit Trail', report_text)
+        self.assertIn('/files?path=', report_text)
         with self.assertRaises(ValueError):
             manager.save_reviews(self._payload('pending', 'pending'))
 

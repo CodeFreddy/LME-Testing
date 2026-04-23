@@ -102,6 +102,10 @@ def _governance_defaults(result: dict) -> None:
     result["checker_blocking_category"] = result.get("blocking_category", "none")
     result["checker_blocking_reason"] = result.get("blocking_reason", "")
     result["checker_confidence"] = float(result.get("checker_confidence", 0.5))
+    result.setdefault(
+        "block_recommendation_review",
+        "pending_review" if result["checker_blocking"] else "not_applicable",
+    )
     result.setdefault("human_comment", "")
 
 
@@ -388,6 +392,19 @@ def run_checker_pipeline(
         }
 
         normalized_payload = parse_json_object(response.content)
+        if only_case_ids is not None and isinstance(normalized_payload.get("results"), list):
+            expected_case_ids = set(expected_case_map)
+            if len(expected_case_ids) == 1:
+                expected_case_id = next(iter(expected_case_ids))
+                for result in normalized_payload["results"]:
+                    returned_case_id = str(result.get("case_id", ""))
+                    if returned_case_id not in expected_case_ids and returned_case_id.startswith(expected_case_id):
+                        result["case_id"] = expected_case_id
+            normalized_payload["results"] = [
+                result
+                for result in normalized_payload["results"]
+                if result.get("case_id") in expected_case_ids
+            ]
         if isinstance(normalized_payload.get("results"), list):
             for result in normalized_payload["results"]:
                 scenario_item = indexed_batch.get(result.get("case_id", "")) or indexed_batch.get(
@@ -496,8 +513,10 @@ def _merge_rewritten_records(original_records: list[dict], rewritten_records: li
 def _merge_cases_in_records(
     original_records: list[dict],
     rewritten_scenarios_by_rule: dict[str, dict[str, dict]],
+    rewritten_features_by_rule: dict[str, str] | None = None,
 ) -> list[dict]:
     """Replace only targeted scenarios (by case_id) in original records; leave all others byte-identical."""
+    rewritten_features_by_rule = rewritten_features_by_rule or {}
     merged: list[dict] = []
     for record in original_records:
         rule_id = record.get("semantic_rule_id")
@@ -510,6 +529,8 @@ def _merge_cases_in_records(
                 case_id = scenario.get("scenario_id")
                 new_scenarios.append(case_map[case_id] if case_id and case_id in case_map else scenario)
             new_record = dict(record)
+            if rule_id in rewritten_features_by_rule:
+                new_record["feature"] = rewritten_features_by_rule[rule_id]
             new_record["scenarios"] = new_scenarios
             merged.append(new_record)
     return merged
@@ -575,6 +596,7 @@ def run_rewrite_pipeline(
         )
 
     rewritten_scenarios_by_rule: dict[str, dict[str, dict]] = {}
+    rewritten_features_by_rule: dict[str, str] = {}
     all_rewritten_case_ids: list[str] = []
     total_scenarios = 0
     for batch in _chunked(rewrite_items, batch_size) if rewrite_items else []:
@@ -595,11 +617,18 @@ def run_rewrite_pipeline(
             rule_id = result.get("semantic_rule_id", "")
             if not rule_id:
                 continue
+            target_case_ids = rewrite_targets.get(rule_id, [])
+            if isinstance(result.get("feature"), str):
+                rewritten_features_by_rule[rule_id] = result["feature"]
             case_map: dict[str, dict] = {}
-            for scenario in result.get("scenarios", []):
+            scenarios = [item for item in result.get("scenarios", []) if isinstance(item, dict)]
+            for index, scenario in enumerate(scenarios):
                 if not isinstance(scenario, dict):
                     continue
                 case_id = scenario.get("scenario_id")
+                if case_id not in target_case_ids and len(scenarios) == len(target_case_ids):
+                    case_id = target_case_ids[index]
+                    scenario["scenario_id"] = case_id
                 if case_id:
                     case_type = scenario.get("case_type") or scenario.get("scenario_type")
                     scenario["case_type"] = case_type
@@ -608,7 +637,7 @@ def run_rewrite_pipeline(
                     total_scenarios += 1
             rewritten_scenarios_by_rule[rule_id] = case_map
 
-    merged_records = _merge_cases_in_records(maker_records, rewritten_scenarios_by_rule)
+    merged_records = _merge_cases_in_records(maker_records, rewritten_scenarios_by_rule, rewritten_features_by_rule)
     if merged_records:
         append_jsonl(merged_path, merged_records)
     rewritten_records_for_log = [
