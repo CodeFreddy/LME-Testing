@@ -9,6 +9,12 @@ from unittest.mock import patch
 
 from lme_testing.config import ProjectConfig, ProviderConfig, RoleDefaults
 from lme_testing.review_session import ReviewSessionManager
+from lme_testing.step_registry import (
+    compute_step_matches,
+    extract_steps_from_normalized_bdd,
+    extract_steps_from_python_step_defs,
+    render_step_visibility_report,
+)
 
 
 WORK_TMP = Path('.tmp_review_session')
@@ -144,6 +150,86 @@ class ReviewSessionTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             manager.save_reviews(self._payload('pending', 'pending'))
 
+    def test_bdd_edits_export_reviewed_bdd_and_refresh_step_registry(self) -> None:
+        manager = self._build_manager(include_bdd=True)
+        result = manager.save_bdd_edits({
+            'edits': [
+                {
+                    'scenario_id': 'TC-1',
+                    'given_steps': [{'step_text': 'business is transacted on the Exchange'}],
+                    'when_steps': [],
+                    'then_steps': [],
+                }
+            ]
+        })
+
+        reviewed_path = Path(result['reviewed_bdd_path'])
+        registry_path = Path(result['refreshed_step_registry_path'])
+        self.assertTrue(reviewed_path.exists())
+        self.assertTrue(registry_path.exists())
+        reviewed = [json.loads(line) for line in reviewed_path.read_text(encoding='utf-8').splitlines() if line.strip()]
+        self.assertEqual(
+            reviewed[0]['scenarios'][0]['given_steps'][0]['step_text'],
+            'business is transacted on the Exchange',
+        )
+        registry = json.loads(registry_path.read_text(encoding='utf-8'))
+        self.assertGreaterEqual(registry['exact_matches'], 1)
+
+    def test_scripts_gap_edit_updates_reviewed_bdd_and_refreshes_matching(self) -> None:
+        manager = self._build_manager(include_bdd=True)
+        scripts_payload = manager.scripts_payload()
+        self.assertEqual(scripts_payload['summary']['unmatched'], 1)
+
+        result = manager.save_scripts_edits({
+            'edits': [
+                {
+                    'is_gap': True,
+                    'gap_index': 0,
+                    'step_text': 'business is transacted on the Exchange',
+                }
+            ]
+        })
+
+        reviewed_path = Path(result['reviewed_bdd_path'])
+        registry_path = Path(result['refreshed_step_registry_path'])
+        reviewed = [json.loads(line) for line in reviewed_path.read_text(encoding='utf-8').splitlines() if line.strip()]
+        self.assertEqual(
+            reviewed[0]['scenarios'][0]['given_steps'][0]['step_text'],
+            'business is transacted on the Exchange',
+        )
+        registry = json.loads(registry_path.read_text(encoding='utf-8'))
+        self.assertEqual(registry['unmatched'], 0)
+        self.assertGreaterEqual(registry['exact_matches'], 1)
+
+    def test_scripts_save_preserves_previous_bdd_edits(self) -> None:
+        manager = self._build_manager(include_bdd=True)
+        manager.save_bdd_edits({
+            'edits': [
+                {
+                    'scenario_id': 'TC-1',
+                    'given_steps': [{'step_text': 'Exchange defines matching rules'}],
+                    'when_steps': [],
+                    'then_steps': [],
+                }
+            ]
+        })
+
+        result = manager.save_scripts_edits({'edits': []})
+
+        latest_payload = json.loads(Path(result['latest_path']).read_text(encoding='utf-8'))
+        self.assertEqual(len(latest_payload['edits']), 1)
+        self.assertEqual(latest_payload['edits'][0]['scenario_id'], 'TC-1')
+
+        reviewed = [
+            json.loads(line)
+            for line in Path(result['reviewed_bdd_path']).read_text(encoding='utf-8').splitlines()
+            if line.strip()
+        ]
+        self.assertEqual(
+            reviewed[0]['scenarios'][0]['given_steps'][0]['step_text'],
+            'Exchange defines matching rules',
+        )
+
     def _payload(self, first_decision: str, second_decision: str) -> dict:
         return {
             'metadata': {},
@@ -167,13 +253,15 @@ class ReviewSessionTests(unittest.TestCase):
             ],
         }
 
-    def _build_manager(self) -> ReviewSessionManager:
+    def _build_manager(self, include_bdd: bool = False) -> ReviewSessionManager:
         rules_path = WORK_TMP / 'semantic_rules.json'
         maker_cases_path = WORK_TMP / 'maker_cases.jsonl'
         checker_reviews_path = WORK_TMP / 'checker_reviews.jsonl'
         maker_summary_path = WORK_TMP / 'maker_summary.json'
         checker_summary_path = WORK_TMP / 'checker_summary.json'
         coverage_report_path = WORK_TMP / 'coverage_report.json'
+        normalized_bdd_path = WORK_TMP / 'normalized_bdd.jsonl'
+        step_registry_path = WORK_TMP / 'step_visibility.json'
         rules = [
             {'semantic_rule_id': 'SR-1', 'source': {'atomic_rule_ids': ['AR-1']}, 'classification': {'rule_type': 'permission', 'coverage_eligible': True}, 'evidence': [{'atomic_rule_id': 'AR-1', 'page': 1, 'quote': 'q'}]},
             {'semantic_rule_id': 'SR-2', 'source': {'atomic_rule_ids': ['AR-2']}, 'classification': {'rule_type': 'permission', 'coverage_eligible': True}, 'evidence': [{'atomic_rule_id': 'AR-2', 'page': 1, 'quote': 'q2'}]},
@@ -195,6 +283,35 @@ class ReviewSessionTests(unittest.TestCase):
         maker_summary_path.write_text(json.dumps(maker_summary, ensure_ascii=False), encoding='utf-8')
         checker_summary_path.write_text(json.dumps(checker_summary, ensure_ascii=False), encoding='utf-8')
         coverage_report_path.write_text(json.dumps(coverage_report, ensure_ascii=False), encoding='utf-8')
+        if include_bdd:
+            normalized_bdd = {
+                'semantic_rule_id': 'SR-1',
+                'feature_title': 'Feature 1',
+                'scenarios': [
+                    {
+                        'scenario_id': 'TC-1',
+                        'case_type': 'positive',
+                        'priority': 'high',
+                        'given_steps': [
+                            {'step_text': 'custom unmatched setup', 'step_pattern': 'custom unmatched setup'},
+                        ],
+                        'when_steps': [],
+                        'then_steps': [],
+                    }
+                ],
+                'step_definitions': {
+                    'given': [
+                        {'step_text': 'custom unmatched setup', 'step_pattern': 'custom unmatched setup', 'code': ''},
+                    ],
+                    'when': [],
+                    'then': [],
+                },
+            }
+            normalized_bdd_path.write_text(json.dumps(normalized_bdd, ensure_ascii=False) + '\n', encoding='utf-8')
+            bdd_inventory = extract_steps_from_normalized_bdd(normalized_bdd_path)
+            library_inventory = extract_steps_from_python_step_defs(Path.cwd() / 'lme_testing' / 'step_library.py')
+            report = compute_step_matches(bdd_inventory, library_inventory)
+            render_step_visibility_report(bdd_inventory, report, step_registry_path)
         return ReviewSessionManager(
             config=make_config(),
             rules_path=rules_path,
@@ -207,6 +324,8 @@ class ReviewSessionTests(unittest.TestCase):
             initial_maker_summary_path=maker_summary_path,
             initial_checker_summary_path=checker_summary_path,
             initial_coverage_report_path=coverage_report_path,
+            normalized_bdd_path=normalized_bdd_path if include_bdd else None,
+            step_registry_path=step_registry_path if include_bdd else None,
         )
 
 

@@ -1,7 +1,7 @@
-# LME Testing — Architecture v3.0
+# LME Testing — Architecture v3.1
 
-**修订日期：** 2026-04-19  
-**变更说明：** 整合 master 分支合并分析。新增多人协作架构约束、vendor/ 目录职责、待实现模块规划（audit_trail、case_compare）。
+**修订日期：** 2026-04-23  
+**变更说明：** 整合 master 分支合并分析、S2-B1/B2 集成状态，新增 S2-C1 mock API execution bridge，并补充 browser-level review UI E2E 验证层。
 
 ---
 
@@ -97,6 +97,44 @@ semantic_rules.json
 [audit_trail.html] ◄──────────── audit_trail.py（来自 master 概念）
 [case_compare.html] ◄─────────── case_compare.py（来自 master 概念）
 ```
+
+### Mock API execution bridge（S2-C1）
+
+在真实 LME VM/API 不可用时，`deliverables/lme_mock_api/` 提供一个独立 HTTP mock API 和可执行 BDD sample：
+
+```
+BDD feature
+    │
+    ▼
+[Python step definitions]
+    │ HTTP
+    ▼
+[mock_lme_api.server]
+    │
+    ▼
+[deterministic rule checks]
+```
+
+该 bridge 用于证明 BDD/script 可以调用 API under test；它不替代 Stage 3 的真实 LME API 接入，也不改变主流水线 artifact contract。
+
+### Review UI automation assurance（S2-D1）
+
+`tests/test_review_session_browser.py` 启动真实 local review-session HTTP server，并通过 Chrome DevTools Protocol 驱动本机 Chrome/Edge，验证：
+
+```
+Scenario Review tab
+    │
+    ▼
+BDD Review tab
+    │  save BDD edits
+    ▼
+Scripts tab
+    │  refreshed visible match metrics
+    ▼
+Save Scripts edits
+```
+
+该测试层只验证现有 UI 与 governed artifacts 的浏览器交互，不新增产品 scope、不调用 live LLM provider、不改变 artifact contract。
 
 ---
 
@@ -227,6 +265,8 @@ Review Session 启动时传入 `--step-registry step_visibility.json`，Scripts 
 | `tests/` | 15 个测试文件（78 个测试）|
 | `evidence/` | 关键运行证据（versioned）：stability、baseline、governance signals |
 | `runs/` | pipeline 运行输出（gitignored）|
+| `deliverables/lme_mock_api/` | S2-C1 mock API execution bridge（独立交付物，不改变主包契约）|
+| `tests/test_review_session_browser.py` | S2-D1 browser-level review UI E2E（本机 Chrome/Edge，可 skip）|
 
 ---
 
@@ -266,7 +306,8 @@ charset = utf-8
 | 单用户 Web UI | 不支持团队并发 | 工具定位 |
 | Step library 基于模拟 API | step binding rate 无意义 | 待 Stage 3 |
 | Checker 是 LLM，概率性 | 判断不保证一致性 | 通过 stability 测量缓解 |
-| audit_trail/case_compare 待实现 | 缺少审计视图 | Stage 2 任务 |
+| audit_trail/case_compare 已集成但为本地 HTML 输出 | 只覆盖 review-session 本地审计视图 | 符合单用户工具定位 |
+| Mock API 不是真实 LME API | 只能验证脚本到 HTTP API 的闭环，不代表真实执行能力 | Stage 3 仍需 VM/API 权限 |
 | Windows PowerShell 工具链 | 跨平台受限 | 单人开发现状 |
 
 ---

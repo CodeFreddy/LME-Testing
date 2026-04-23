@@ -1,0 +1,77 @@
+{
+  "run_id": "mock-api-sample-001",
+  "bdd_version": "mock-api-handcrafted-1.0",
+  "results": [
+    {
+      "semantic_rule_id": "SR-MR-003-01",
+      "feature_title": "Price Validation Failure Contact",
+      "feature_description": "Members must contact the Exchange when an order or trade fails price validation.",
+      "paragraph_ids": ["MR-003-01"],
+      "scenarios": [
+        {
+          "scenario_id": "TC-SR-MR-003-01-positive-01",
+          "title": "Member contacts Exchange after price validation failure",
+          "case_type": "positive",
+          "priority": "medium",
+          "given_steps": [
+            {
+              "step_text": "an order or trade fails the price validation check",
+              "step_pattern": "an order or trade fails the price validation check"
+            }
+          ],
+          "when_steps": [
+            {
+              "step_text": "the Member contacts the Exchange to explain the rationale as to the price",
+              "step_pattern": "the Member contacts the Exchange to explain the rationale as to the price"
+            }
+          ],
+          "then_steps": [
+            {
+              "step_text": "the contact action is recorded as compliant",
+              "step_pattern": "the contact action is recorded as compliant"
+            }
+          ],
+          "paragraph_ids": ["MR-003-01"],
+          "semantic_rule_ref": "SR-MR-003-01",
+          "required_case_types": ["positive", "negative"]
+        }
+      ]
+    },
+    {
+      "semantic_rule_id": "SR-MR-004-01",
+      "feature_title": "Deadline Extension Request Timing",
+      "feature_description": "Requests must be made no later than 15 minutes before the relevant deadline.",
+      "paragraph_ids": ["MR-004-01"],
+      "scenarios": [
+        {
+          "scenario_id": "TC-SR-MR-004-01-positive-01",
+          "title": "Extension request is made at least 15 minutes before deadline",
+          "case_type": "positive",
+          "priority": "medium",
+          "given_steps": [
+            {
+              "step_text": "a post-trade request has a relevant deadline",
+              "step_pattern": "a post-trade request has a relevant deadline"
+            }
+          ],
+          "when_steps": [
+            {
+              "step_text": "the request is submitted 16 minutes before the relevant deadline",
+              "step_pattern": "the request is submitted (\\d+) minutes before the relevant deadline"
+            }
+          ],
+          "then_steps": [
+            {
+              "step_text": "the request is accepted as timely",
+              "step_pattern": "the request is accepted as timely"
+            }
+          ],
+          "paragraph_ids": ["MR-004-01"],
+          "semantic_rule_ref": "SR-MR-004-01",
+          "required_case_types": ["positive", "boundary", "negative"]
+        }
+      ]
+    }
+  ]
+}
+

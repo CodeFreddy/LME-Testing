@@ -56,6 +56,22 @@ If hooks are unavailable, update the handoff manually before committing:
 powershell -ExecutionPolicy Bypass -File scripts/update_session_handoff.ps1
 ```
 
+## Checkpoint Preservation Rule
+
+Whenever an agent generates a checkpoint and resume prompt, it must append or refresh the record in `docs/checkpoints.md`.
+
+The record must include:
+
+- current task goal,
+- confirmed key facts,
+- files modified or inspected,
+- remaining work,
+- next single action,
+- constraints that must not be violated,
+- a directly reusable resume prompt.
+
+Keep the latest checkpoint easy to find at the top of `docs/checkpoints.md`, and preserve older checkpoints below it unless a human explicitly asks to prune them.
+
 ## Current Phase Bias
 
 The current roadmap is biased toward:

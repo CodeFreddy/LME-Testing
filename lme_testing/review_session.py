@@ -15,10 +15,17 @@ from urllib.parse import parse_qs, quote, urlparse
 
 from .config import ProjectConfig
 from .human_review import _render_case_detail
+from .bdd_export import apply_human_step_edits
 from .pipelines import _case_map_from_maker_records, run_bdd_pipeline, run_checker_pipeline, run_rewrite_pipeline
 from .reporting import generate_html_report
 from .schemas import load_issue_type_options, validate_human_review_payload
 from .storage import atomic_write_json, ensure_dir, load_json, load_jsonl, timestamp_slug
+from .step_registry import (
+    compute_step_matches,
+    extract_steps_from_normalized_bdd,
+    extract_steps_from_python_step_defs,
+    render_step_visibility_report,
+)
 from .audit_trail import build_audit_trail
 from .case_compare import build_case_compare
 
@@ -267,14 +274,17 @@ class ReviewSessionManager:
         merged_edits = scripts_edits + flat_edits
         scripts_snapshot = bdd_dir / f"human_scripts_edits_{timestamp}.json"
         scripts_latest_path = bdd_dir / "human_scripts_edits_latest.json"
+        latest_path = bdd_dir / "human_bdd_edits_latest.json"
         atomic_write_json(scripts_snapshot, {"edits": merged_edits, "timestamp": timestamp})
         atomic_write_json(scripts_latest_path, {"edits": merged_edits, "timestamp": timestamp})
 
         # Persist the merged scripts path in state so _run_job passes it to the pipeline
         state["human_scripts_edits_latest_path"] = str(scripts_latest_path)
+        state["human_bdd_edits_latest_path"] = str(latest_path)
+        state["iterations"][str(iteration)]["human_scripts_edits_latest_path"] = str(scripts_latest_path)
+        state["iterations"][str(iteration)]["human_bdd_edits_latest_path"] = str(latest_path)
 
         # Keep human_bdd_edits_latest.json as an audit trail (BDD-tab-native format)
-        latest_path = bdd_dir / "human_bdd_edits_latest.json"
         atomic_write_json(snapshot_path, {"edits": edits, "timestamp": timestamp})
         atomic_write_json(latest_path, {"edits": edits, "timestamp": timestamp})
 
@@ -285,9 +295,16 @@ class ReviewSessionManager:
             if "stage_gates" not in state["iterations"][str(iteration)]:
                 state["iterations"][str(iteration)]["stage_gates"] = {"review_decided": False, "bdd_edited": False, "scripts_viewed": False}
             state["iterations"][str(iteration)]["stage_gates"]["bdd_edited"] = True
+        refresh_result = self._refresh_reviewed_bdd_and_step_registry(state, iteration)
         self._save_manifest(state)
         logger.info("Saved BDD edits. session_id=%s iteration=%s saved=%s latest=%s flat_edit_count=%s merged_edit_count=%s", state["session_id"], iteration, snapshot_path, latest_path, len(flat_edits), len(merged_edits))
-        return {"saved_path": str(snapshot_path), "latest_path": str(latest_path), "edit_count": len(flat_edits), "merged_edit_count": len(merged_edits)}
+        return {
+            "saved_path": str(snapshot_path),
+            "latest_path": str(latest_path),
+            "edit_count": len(flat_edits),
+            "merged_edit_count": len(merged_edits),
+            **refresh_result,
+        }
 
     def scripts_payload(self) -> dict[str, Any]:
         """Return step registry visibility data for the Scripts tab."""
@@ -395,17 +412,133 @@ class ReviewSessionManager:
             raise ValueError("Session is already finalized and cannot accept new edits.")
         iteration = int(state["current_iteration"])
         scripts_dir = ensure_dir(self._iteration_dir(iteration) / "scripts")
-        edits = payload.get("edits", [])
+        edits = self._enrich_script_edits(payload.get("edits", []), state, iteration)
+        preserved_bdd_edits = self._existing_bdd_flat_edits(state)
+        merged_edits = preserved_bdd_edits + edits
         timestamp = timestamp_slug()
         snapshot_path = scripts_dir / f"human_scripts_edits_{timestamp}.json"
         latest_path = scripts_dir / "human_scripts_edits_latest.json"
-        atomic_write_json(snapshot_path, {"edits": edits, "timestamp": timestamp})
-        atomic_write_json(latest_path, {"edits": edits, "timestamp": timestamp})
+        atomic_write_json(snapshot_path, {"edits": merged_edits, "timestamp": timestamp})
+        atomic_write_json(latest_path, {"edits": merged_edits, "timestamp": timestamp})
         # Persist path in state so rewrite jobs can find it
         state["human_scripts_edits_latest_path"] = str(latest_path)
+        state["iterations"][str(iteration)]["human_scripts_edits_latest_path"] = str(latest_path)
+        refresh_result = self._refresh_reviewed_bdd_and_step_registry(state, iteration)
         self._save_manifest(state)
-        logger.info("Saved scripts edits. session_id=%s iteration=%s saved=%s latest=%s edit_count=%s", state["session_id"], iteration, snapshot_path, latest_path, len(edits))
-        return {"saved_path": str(snapshot_path), "latest_path": str(latest_path), "edit_count": len(edits)}
+        logger.info("Saved scripts edits. session_id=%s iteration=%s saved=%s latest=%s edit_count=%s merged_edit_count=%s", state["session_id"], iteration, snapshot_path, latest_path, len(edits), len(merged_edits))
+        return {"saved_path": str(snapshot_path), "latest_path": str(latest_path), "edit_count": len(edits), "merged_edit_count": len(merged_edits), **refresh_result}
+
+    def _existing_bdd_flat_edits(self, state: dict[str, Any]) -> list[dict]:
+        """Preserve BDD-tab edits when Scripts-tab edits replace script edits."""
+        scripts_latest = state.get("human_scripts_edits_latest_path")
+        if not scripts_latest:
+            return []
+        scripts_path = Path(scripts_latest)
+        if not scripts_path.exists():
+            return []
+        existing = load_json(scripts_path)
+        if not isinstance(existing, dict):
+            return []
+        return [
+            edit
+            for edit in existing.get("edits", [])
+            if isinstance(edit, dict) and edit.get("scenario_id")
+        ]
+
+    def _enrich_script_edits(self, edits: list[dict], state: dict[str, Any], iteration: int) -> list[dict]:
+        """Attach registry metadata needed to apply Scripts-tab edits deterministically."""
+        step_registry_path = state.get("step_registry_path") or state["iterations"][str(iteration)].get("step_registry_path")
+        registry_data: dict[str, Any] = {}
+        if step_registry_path and Path(step_registry_path).exists():
+            registry_data = load_json(Path(step_registry_path))
+
+        enriched: list[dict] = []
+        for edit in edits:
+            item = dict(edit)
+            if item.get("is_gap"):
+                gap_index = item.get("gap_index")
+                gaps = registry_data.get("gaps", []) if isinstance(registry_data, dict) else []
+                if isinstance(gap_index, int) and 0 <= gap_index < len(gaps):
+                    gap = gaps[gap_index]
+                    item.setdefault("step_type", gap.get("step_type", ""))
+                    item.setdefault("source_scenario_ids", gap.get("source_scenario_ids", []))
+                    item.setdefault("original_step_text", gap.get("step_text", ""))
+                    item.setdefault("original_step_pattern", gap.get("step_pattern", ""))
+            else:
+                step_type = item.get("step_type", "")
+                step_index = item.get("step_index")
+                steps = registry_data.get(f"{step_type}_steps", []) if isinstance(registry_data, dict) else []
+                if isinstance(step_index, int) and 0 <= step_index < len(steps):
+                    step = steps[step_index]
+                    item.setdefault("source_scenario_ids", step.get("source_scenario_ids", []))
+                    item.setdefault("original_step_text", step.get("step_text", ""))
+                    item.setdefault("original_step_pattern", step.get("step_pattern", ""))
+            enriched.append(item)
+        return enriched
+
+    def _refresh_reviewed_bdd_and_step_registry(self, state: dict[str, Any], iteration: int) -> dict[str, Any]:
+        """Materialize reviewed BDD and refresh step matching after UI edits.
+
+        The original normalized BDD remains the governed source artifact. Review
+        edits are exported to an iteration-local reviewed artifact, and the
+        Scripts tab points at a refreshed step visibility report.
+        """
+        source_bdd_path = self._source_normalized_bdd_path(state, iteration)
+        human_scripts_path = state.get("human_scripts_edits_latest_path")
+        if not source_bdd_path or not Path(source_bdd_path).exists() or not human_scripts_path:
+            return {"reviewed_bdd_path": None, "refreshed_step_registry_path": None}
+        human_scripts_path_obj = Path(human_scripts_path)
+        if not human_scripts_path_obj.exists():
+            return {"reviewed_bdd_path": None, "refreshed_step_registry_path": None}
+
+        bdd_dir = ensure_dir(self._iteration_dir(iteration) / "bdd")
+        timestamp = timestamp_slug()
+        reviewed_snapshot = bdd_dir / f"reviewed_normalized_bdd_{timestamp}.jsonl"
+        reviewed_latest = bdd_dir / "reviewed_normalized_bdd_latest.jsonl"
+        registry_snapshot = bdd_dir / f"step_visibility_{timestamp}.json"
+        registry_latest = bdd_dir / "step_visibility_latest.json"
+
+        bdd_records = load_jsonl(Path(source_bdd_path))
+        reviewed_records = apply_human_step_edits(bdd_records, human_scripts_path_obj)
+        self._atomic_write_jsonl(reviewed_snapshot, reviewed_records)
+        self._atomic_write_jsonl(reviewed_latest, reviewed_records)
+
+        library_path = self.repo_root / "lme_testing" / "step_library.py"
+        bdd_inventory = extract_steps_from_normalized_bdd(reviewed_latest)
+        library_inventory = extract_steps_from_python_step_defs(library_path)
+        report = compute_step_matches(bdd_inventory, library_inventory)
+        render_step_visibility_report(bdd_inventory, report, registry_snapshot)
+        render_step_visibility_report(bdd_inventory, report, registry_latest)
+
+        state["normalized_bdd_path"] = str(reviewed_latest)
+        state["step_registry_path"] = str(registry_latest)
+        state["iterations"][str(iteration)]["normalized_bdd_path"] = str(reviewed_latest)
+        state["iterations"][str(iteration)]["step_registry_path"] = str(registry_latest)
+        return {
+            "reviewed_bdd_path": str(reviewed_latest),
+            "refreshed_step_registry_path": str(registry_latest),
+            "reviewed_bdd_snapshot_path": str(reviewed_snapshot),
+            "refreshed_step_registry_snapshot_path": str(registry_snapshot),
+        }
+
+    def _source_normalized_bdd_path(self, state: dict[str, Any], iteration: int) -> str | None:
+        iteration_state = state["iterations"][str(iteration)]
+        source_path = iteration_state.get("source_normalized_bdd_path") or state.get("source_normalized_bdd_path")
+        if source_path:
+            return source_path
+        current_path = state.get("normalized_bdd_path") or iteration_state.get("normalized_bdd_path")
+        if current_path:
+            state["source_normalized_bdd_path"] = current_path
+            iteration_state["source_normalized_bdd_path"] = current_path
+        return current_path
+
+    def _atomic_write_jsonl(self, path: Path, records: list[dict]) -> None:
+        tmp = path.with_suffix(".tmp")
+        with tmp.open("w", encoding="utf-8") as handle:
+            for record in records:
+                handle.write(json.dumps(record, ensure_ascii=False))
+                handle.write("\n")
+        tmp.replace(path)
 
     def submit_reviews(self, payload: dict[str, Any]) -> dict[str, Any]:
         # Un-finalize the session if the user returns after viewing the final report
@@ -1119,6 +1252,7 @@ let reviewMap = new Map();
 let pollTimer = null;
 let bddPayload = null;
 let scriptsPayload = null;
+let bddDirty = false;
 let currentStageGates = { review_decided: false, bdd_edited: false, scripts_viewed: false };
 function escapeHtml(value) { return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'); }
 const STAGE_ORDER = ['review', 'bdd', 'scripts', 'finalize'];
@@ -1174,7 +1308,7 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   document.querySelector('[data-tab="' + tab + '"]').classList.add('active');
-  if (tab === 'bdd') loadBddData();  // Always reload: bddPayload may be stale after a rewrite job
+  if (tab === 'bdd' && (!bddPayload || !bddDirty)) loadBddData();
   if (tab === 'scripts' && !scriptsPayload) loadScriptsData();
 }
 function loadBddData() {
@@ -1208,6 +1342,10 @@ function renderBddTab(data) {
       `).join('')}
     </div>
   `).join('');
+  bddDirty = false;
+  document.querySelectorAll('#bddContent textarea[data-scenario]').forEach(ta => {
+    ta.addEventListener('input', () => { bddDirty = true; });
+  });
 }
 async function saveBddEdits() {
   try {
@@ -1224,7 +1362,9 @@ async function saveBddEdits() {
     });
     const edits = Object.values(byScenario);
     const result = await postJson('/api/bdd/save', { edits });
-    document.getElementById('bddStatus').textContent = `已保存 ${result.edit_count} 条编辑到 ${escapeHtml(result.latest_path)}`;
+    document.getElementById('bddStatus').textContent = `已保存 ${result.edit_count} 条编辑到 ${escapeHtml(result.latest_path)}；reviewed BDD: ${escapeHtml(result.reviewed_bdd_path || '')}`;
+    scriptsPayload = null;
+    bddDirty = false;
     await loadStageData();
   } catch (err) {
     document.getElementById('bddStatus').textContent = `保存失败: ${err.message}`;
@@ -1287,7 +1427,7 @@ function renderScriptsTab(data) {
             <span class="step-item-badge badge-unmatched">GAP</span>
             ${g.source_scenario_ids && g.source_scenario_ids.length ? `<span class="muted" style="font-size:11px;">来源: ${escapeHtml(g.source_scenario_ids.join(', '))}</span>` : ''}
           </div>
-          <textarea class="step-textarea" data-gap-index="${idx}" rows="2" placeholder="step text (editable)">${escapeHtml(g.step_text || '')}</textarea>
+          <textarea class="step-textarea" data-gap-index="${idx}" data-step-type="${escapeHtml(g.step_type || '')}" rows="2" placeholder="step text (editable)">${escapeHtml(g.step_text || '')}</textarea>
           ${g.step_pattern ? `<div class="step-item-pattern">pattern: ${escapeHtml(g.step_pattern || '')}</div>` : ''}
         </div>`).join('')}
     </div>` : ''}
@@ -1295,7 +1435,7 @@ function renderScriptsTab(data) {
 }
 async function saveScriptsEdits() {
   const edits = [];
-  document.querySelectorAll('.step-textarea[data-step-type]').forEach(ta => {
+  document.querySelectorAll('.step-textarea[data-step-type]:not([data-gap-index])').forEach(ta => {
     edits.push({
       step_type: ta.dataset.stepType,
       step_index: parseInt(ta.dataset.stepIndex),
@@ -1306,11 +1446,14 @@ async function saveScriptsEdits() {
     edits.push({
       is_gap: true,
       gap_index: parseInt(ta.dataset.gapIndex),
+      step_type: ta.dataset.stepType,
       step_text: ta.value,
     });
   });
   const result = await postJson('/api/scripts/save', { edits });
-  document.getElementById('scriptsStatus').textContent = `已保存到 ${escapeHtml(result.latest_path)}`;
+  document.getElementById('scriptsStatus').textContent = `已保存到 ${escapeHtml(result.latest_path)}；匹配报告: ${escapeHtml(result.refreshed_step_registry_path || '')}`;
+  scriptsPayload = null;
+  await loadScriptsData();
   await loadStageData();
 }
 function issueOptionMap() { return new Map((sessionPayload.issue_type_options || []).map(item => [item.code, item])); }

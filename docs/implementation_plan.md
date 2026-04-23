@@ -1,8 +1,8 @@
-# LME Testing — Implementation Plan v3.0
+# LME Testing — Implementation Plan v3.1
 
-**修订日期：** 2026-04-19  
-**范围：** Stage M（合并）+ Stage 1（真实数据接入）  
-**说明：** Stage 2 任务在 Stage 1 完成后、基于真实数据另行制定。
+**修订日期：** 2026-04-23  
+**范围：** Stage M（合并）+ Stage 1（真实数据接入）+ Stage 2 已执行任务  
+**说明：** Stage 2 已基于真实数据展开：S2-T01 prompt 校准完成，S2-B1/B2 集成完成，S2-C1 mock API execution bridge 完成，S2-D1 browser-level review UI E2E 完成。
 
 ---
 ## 如何使用本文档
@@ -41,6 +41,8 @@ Stage 1（Stage M 完成后）
 Stage 2 规划（Stage 1 完成后展开）
 ├── S2-B1: audit_trail.py 实现
 └── S2-B2: case_compare.py 实现
+└── S2-C1: Mock API execution bridge
+└── S2-D1: Browser-level review UI E2E
 ```
 
 ---
@@ -239,6 +241,156 @@ MiniMax API 连接随机断开，全量 322-case 测量无法完成。参见 S2-
 - README.md Verification Status 表格已更新（S1.1 ✅, S1.2 ✅）
 - README.md 无 "All Phases Complete" 表述
 - acceptance.md S1.1/S1.2/S1.5 均标记 COMPLETE
+
+---
+
+## Stage 2 — 基于真实数据的质量提升与执行桥接
+
+### S2-T01 — Maker/Checker Coverage Calibration
+
+**状态：✅ DONE（2026-04-21）**
+
+**目标：** 基于全量 180 条可测试规则的真实 maker/checker 输出，提升覆盖率并确认 prompt 校准边界。
+
+**输入契约：**
+- Stage 1 全量 baseline：72.22%/72.78% coverage 区间的真实运行证据
+- `artifacts/lme_rules_v2_2/semantic_rules.json`
+- maker/checker run artifacts
+
+**输出契约：**
+- `docs/s2t01_coverage_analysis.md`
+- maker/checker prompt version notes
+- v1.5 run artifacts：`runs/maker/20260421T074319Z/`、`runs/checker/20260421T083003Z/`
+
+**验收：**
+- [x] 全量 180-rule run 完成
+- [x] 覆盖率从 v1.0 72.22% 提升至 v1.5 78.89%
+- [x] 剩余 gap 分为 evidence-constrained 与 LLM non-determinism
+- [x] 不再把 80% 作为 prompt-only 可保证目标
+
+**自评：** PASS。当前证据基础下 prompt 校准已达到实际天花板；剩余问题需要 richer evidence、stabilization strategy 或真实执行环境。
+
+---
+
+### S2-B1 — audit_trail.py 实现
+
+**状态：✅ DONE（2026-04-21）**
+
+**目标：** 生成 maker → checker → human decision chain 的审计 HTML。
+
+**输出契约：**
+- `lme_testing/audit_trail.py`
+- `review_session.py` finalize path 集成
+- `final/audit_trail.html` 输出
+
+**验收：**
+- [x] `build_audit_trail(session_dir, output_path) -> dict` 实现
+- [x] finalize 时自动生成 audit trail
+- [x] 生成失败不阻塞 session finalize
+
+**自评：** PASS。
+
+---
+
+### S2-B2 — case_compare.py 实现
+
+**状态：✅ DONE（2026-04-21）**
+
+**目标：** 在 rewrite 后生成相邻 iteration 的 case 对比 HTML。
+
+**输出契约：**
+- `lme_testing/case_compare.py`
+- `review_session.py` rewrite job 集成
+- `iter<N>/rewrite/case_compare.html` 输出
+
+**验收：**
+- [x] `build_case_compare(...) -> dict` 实现
+- [x] rewrite 后自动生成对比视图
+- [x] 生成失败不阻塞 rewrite job
+
+**自评：** PASS。
+
+---
+
+### S2-C1 — Mock API Execution Bridge
+
+**状态：✅ DONE（2026-04-23）**
+
+**目标：** 在真实 LME API/VM 不可用时，提供一个基于 `docs/materials/LME_Matching_Rules_Aug_2022.md` 的 mock API 服务，验证 BDD/script 可以真实调用 API under test。
+
+**为什么现在做：**
+- Stage 3 真实 LME API 接入仍阻塞于外部 VM 权限。
+- 现有 step library 多为 stub/模拟对象，无法证明脚本通过 HTTP 调用外部测试对象。
+- Mock API 可作为受控的 execution bridge，验证从需求文档到 BDD/script 的闭环形态。
+
+**输入契约：**
+- `docs/materials/LME_Matching_Rules_Aug_2022.md`
+- 已有 maker/checker/BDD/step integration 文档
+- 代表性可执行规则：MR-001、MR-002、MR-003、MR-004、MR-007、MR-008、MR-046、MR-064、MR-071、MR-075
+
+**输出契约：**
+- `deliverables/lme_mock_api/` 可运行源码
+- `deliverables/lme_mock_api.zip` 可下载压缩包
+- `docs/mock_api_validation_plan.md`
+- BDD feature + Python step definitions + lightweight runner + unittest
+
+**验收：**
+- [x] mock API 可本地启动：`python -m mock_lme_api.server --port 8766`
+- [x] BDD step definitions 使用 HTTP client 调用 mock API
+- [x] `python run_bdd.py` 通过：33 passed, 0 failed
+- [x] `python -m unittest tests.test_mock_api` 通过：2 tests OK
+- [x] README 和源码包含在 zip 中
+- [x] 文档明确 mock bridge 不代表真实 LME API readiness
+
+**不在范围：**
+- 不替代 Stage 3 真实 LME API 接入
+- 不模拟完整 matching engine、clearing、settlement 或真实 LME connectivity
+- 不改变主流水线 artifact schema、prompt、model default
+
+**自评：** PASS。
+
+---
+
+### S2-D1 — Browser-Level Review UI E2E
+
+**状态：✅ DONE（2026-04-23）**
+
+**目标：** 在 manager/API-backend 测试之外，用真实浏览器验证 review-session UI 的 BDD 和 Scripts 主路径。
+
+**为什么现在做：**
+- BDD/Scripts tab 的保存逻辑已经开始刷新 governed artifacts，必须验证浏览器层不会丢失 textarea edits 或展示 stale match metrics。
+- 该任务属于 UI assurance，不改变 artifact schema、prompt、model default 或新增 LLM stage。
+
+**输入契约：**
+- `lme_testing/review_session.py`
+- `tests/test_review_session.py` 中可复用的 deterministic fixture builder
+- 本机可用 Chrome 或 Edge；无浏览器时测试应 skip
+
+**输出契约：**
+- `tests/test_review_session_browser.py`
+- `docs/ui_test_plan.md` 标记 browser E2E 层已实现
+- `requirements.txt` 声明 full test discovery 需要的 `jsonschema>=4.0.0`
+
+**实现要点：**
+- 启动真实 local review-session HTTP server。
+- 使用纯 stdlib Chrome DevTools Protocol harness 驱动 installed Chrome/Edge；不引入 Playwright/Selenium 依赖。
+- 测试使用 deterministic fixture artifacts，不调用 live LLM provider。
+- BDD tab dirty-state 保护：未保存 textarea edits 在 tab navigation 后不能被自动 reload 覆盖。
+
+**验收：**
+- [x] 浏览器打开 review UI 并完成 Review -> BDD -> Scripts 导航
+- [x] BDD textarea 未保存内容在 tab navigation 后保留
+- [x] Save BDD Edits 后 Scripts tab 显示 refreshed exact/unmatched metrics
+- [x] Save Scripts Edits 后 visible match metrics 更新
+- [x] Full unittest discovery 通过：181 tests OK
+- [x] Governance baseline checks 通过
+
+**不在范围：**
+- 不覆盖 submit/finalize browser flow
+- 不引入 hosted/multi-user UI 自动化
+- 不改变 review-session artifact contracts
+
+**自评：** PASS。
 
 ---
 

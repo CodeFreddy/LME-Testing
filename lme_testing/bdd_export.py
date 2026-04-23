@@ -896,6 +896,9 @@ def apply_human_step_edits(
         step_text = edit.get("step_text", "").strip()
         is_gap = edit.get("is_gap", False)
         scenario_id = edit.get("scenario_id")  # Present for BDD tab edits
+        source_scenario_ids = edit.get("source_scenario_ids") or []
+        original_step_text = edit.get("original_step_text", "").strip()
+        original_step_pattern = edit.get("original_step_pattern", "").strip()
 
         if not step_text:
             continue
@@ -912,8 +915,21 @@ def apply_human_step_edits(
             code = generated or ""
 
         if is_gap:
-            # Append gap step as a new entry in step_definitions
+            # Scripts tab gap edit: update scenario step text when the registry
+            # preserved source_scenario_ids, then append a reviewed step
+            # definition entry. This keeps exported .feature files aligned with
+            # the reviewed step library text.
             for item in bdd_results:
+                if step_type and source_scenario_ids:
+                    _update_scenario_steps_for_review_edit(
+                        item=item,
+                        step_type=step_type,
+                        source_scenario_ids=source_scenario_ids,
+                        original_step_text=original_step_text,
+                        original_step_pattern=original_step_pattern,
+                        new_step_text=step_text,
+                        new_step_pattern=step_pattern,
+                    )
                 step_defs = item.setdefault("step_definitions", {})
                 type_steps = step_defs.setdefault(step_type, [])
                 type_steps.append({
@@ -957,6 +973,16 @@ def apply_human_step_edits(
         else:
             # Scripts tab edit (no scenario_id): update step_definitions only
             for item in bdd_results:
+                if step_type and source_scenario_ids:
+                    _update_scenario_steps_for_review_edit(
+                        item=item,
+                        step_type=step_type,
+                        source_scenario_ids=source_scenario_ids,
+                        original_step_text=original_step_text,
+                        original_step_pattern=original_step_pattern,
+                        new_step_text=step_text,
+                        new_step_pattern=step_pattern,
+                    )
                 step_defs = item.get("step_definitions", {})
                 type_steps = step_defs.get(step_type, [])
                 if step_index is not None and 0 <= step_index < len(type_steps):
@@ -970,6 +996,37 @@ def apply_human_step_edits(
                     break
 
     return bdd_results
+
+
+def _update_scenario_steps_for_review_edit(
+    item: dict,
+    step_type: str,
+    source_scenario_ids: list[str],
+    original_step_text: str,
+    original_step_pattern: str,
+    new_step_text: str,
+    new_step_pattern: str,
+) -> None:
+    """Update scenario steps referenced by a Scripts-tab review edit."""
+    steps_key = f"{step_type}_steps"
+    scenario_ids = set(source_scenario_ids)
+    for scenario in item.get("scenarios", []):
+        if scenario_ids and scenario.get("scenario_id") not in scenario_ids:
+            continue
+        steps = scenario.get(steps_key, [])
+        for idx, step in enumerate(steps):
+            if not isinstance(step, dict):
+                continue
+            current_text = step.get("step_text", "")
+            current_pattern = step.get("step_pattern", current_text)
+            text_matches = original_step_text and current_text == original_step_text
+            pattern_matches = original_step_pattern and current_pattern == original_step_pattern
+            if text_matches or pattern_matches:
+                steps[idx] = {
+                    **step,
+                    "step_text": new_step_text,
+                    "step_pattern": new_step_pattern,
+                }
 
 
 def _canonicalize_step_code(step_text: str, step_type: str, idx: int, feature_name: str, human_edited: bool, existing_code: str) -> str:

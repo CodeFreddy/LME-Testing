@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-22 09:22:35 UTC`
+- `2026-04-23 15:00:14 UTC`
 
 ---
 
@@ -22,10 +22,10 @@ Before making substantial changes, read these files in order:
 1. `AGENTS.md`
 2. `README.md`
 3. `docs/index.md`
-4. `docs/roadmap.md` (v3.0 鈥?Stage M complete, Stage 2 Direction A underway)
+4. `docs/roadmap.md` (v3.1 - Stage 2 complete, mock execution bridge added)
 5. `docs/implementation_plan.md` (v3.0)
 6. `docs/acceptance.md`
-7. `docs/architecture.md` (v3.0)
+7. `docs/architecture.md` (v3.1)
 
 If the task touches model or prompt behavior, also read:
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `add mock api and UI test`
 - `fix: BDD tab edits pipeline + behave-style grouping + step registry regex`
 - `docs: trim demo_for_boss.md 鈥?remove out-of-scope improvements`
 - `docs: update demo_for_boss.md 鈥?S2-T01 results, LLM non-determinism section`
 - `docs: update TODO and session handoff 鈥?S2-T01 complete, S2-B1/B2 integrated`
-- `docs: refresh session handoff`
 
 ---
 
@@ -66,7 +66,7 @@ Recent completed work:
   - Regression guardrail added: don't lower evidence_consistency for edge-case scenarios
   - Coverage: 78.89% (142 fully covered, 5 partial, 1 uncovered)
   - Net: +12 fully covered rules from baseline (130->142), +6.67pp (72.22%->78.89%)
-  - SR-MR-070-02 fully covered 鉁?(deadline negative calibration)
+  - SR-MR-070-02 fully covered (deadline negative calibration)
   - Remaining gaps: SR-MR-015-B3-4 (boundary, evidence-constrained), SR-MR-071-C-1 (LLM non-determinism)
   - Artifacts: `runs/maker/20260421T074319Z/`, `runs/checker/20260421T083003Z/`
 
@@ -76,6 +76,12 @@ Recent completed work:
   - Both gracefully degrade on failure (non-blocking)
   - audit_trail.py (267 lines) + case_compare.py (216 lines) now fully wired
 
+- **S2-C1 mock API execution bridge (2026-04-23)**
+  - Added standalone HTTP mock API based on `docs/materials/LME_Matching_Rules_Aug_2022.md`
+  - Added executable BDD feature, Python step definitions, lightweight runner, tests, README, and zip deliverable
+  - Deliverables: `deliverables/lme_mock_api/`, `deliverables/lme_mock_api.zip`
+  - Validation: `python run_bdd.py` -> 33 passed, 0 failed; `python -m unittest tests.test_mock_api` -> 2 tests OK
+
 - **S2-T01 v1.4 maker + checker run (2026-04-21)**
   - MAKER_PROMPT_VERSION 1.3 -> 1.4, CHECKER_PROMPT_VERSION 1.1 -> 1.2
   - Prohibition negative calibration: negative case for prohibition is DIRECT
@@ -84,22 +90,23 @@ Recent completed work:
   - Artifacts: `runs/maker/20260421T012618Z/`, `runs/checker/20260421T030325Z/`
 
 - **Cleanup (2026-04-19):** Evidence preserved in `evidence/` (~1.3MB). Deleted: `vendor/` (1.7MB), `logs-from-backup-run/` (37KB), `reports/` (2.1MB), stale runs/ artifacts (~4.3MB)
-- **Stage M COMPLETE (2026-04-19):** SM-T01~SM-T05 all done 鈥?UTC timestamps, workflow interrupt handling, retry config merged from master
+- **Stage M COMPLETE (2026-04-19):** SM-T01~SM-T05 all done - UTC timestamps, workflow interrupt handling, retry config merged from master
 
 ---
 
 ## Current Repo State
 
-**Stage M (master branch merge) COMPLETED 2026-04-19.** Stage 2 Direction A (S2-T01) COMPLETE. S2-B1/B2 INTEGRATED.
+**Stage M (master branch merge) COMPLETED 2026-04-19.** Stage 2 Direction A (S2-T01) COMPLETE. S2-B1/B2 INTEGRATED. S2-C1 MOCK API EXECUTION BRIDGE COMPLETE.
 
 Key repo state:
 
 - `prompts.py`: MAKER_PROMPT_VERSION 1.5, CHECKER_PROMPT_VERSION 1.3 with full coverage_relevance calibration
-- S2-T01 coverage: 78.89% (142/180 fully covered) 鈥?practical ceiling with current evidence
+- S2-T01 coverage: 78.89% (142/180 fully covered) - practical ceiling with current evidence
 - `audit_trail.py` + `case_compare.py`: fully wired into `review_session.py`
 - `pipelines.py` + `providers.py`: error surfacing and retry logic implemented
 - Evidence preserved in `evidence/` directory
-- Phase 1/2/3 acceptance gates all marked complete in `docs/acceptance.md`
+- Mock API bridge preserved in `deliverables/lme_mock_api/` and documented in `docs/mock_api_validation_plan.md`
+- Phase 1/2 acceptance gates are updated in `docs/acceptance.md`; Stage 3 real LME API remains blocked
 
 Governance checks available:
 
@@ -113,8 +120,9 @@ Governance checks available:
 
 **Stage 2 complete (S2-T01 at 78.89%, S2-B1/B2 integrated). Remaining:**
 
-1. **LLM non-determinism stabilization**: SR-MR-015-B3-4 boundary and SR-MR-071-C-1 negative still fluctuate 鈥?multi-run voting or consolidated scenario design
-2. **Stage 3**: Blocked on LME VM access (ETA unknown)
+1. **Decide whether to keep `deliverables/lme_mock_api/` as a long-lived sample or move it under a future `samples/`/`tools/` path.**
+2. **LLM non-determinism stabilization**: SR-MR-015-B3-4 boundary and SR-MR-071-C-1 negative still fluctuate - multi-run voting or consolidated scenario design.
+3. **Stage 3**: Blocked on LME VM access (ETA unknown); replace mock API target with real LME API when access is available.
 
 ---
 
@@ -131,8 +139,9 @@ Governance checks available:
 
 ## Reference Material
 
-- `docs/roadmap.md` 鈥?current Stage 2 priorities
-- `docs/architecture.md` 鈥?system architecture and module boundaries
-- `docs/references/Claude-roadmap-compare.md` 鈥?historical comparison
+- `docs/roadmap.md` - current Stage 2 priorities
+- `docs/architecture.md` - system architecture and module boundaries
+- `docs/mock_api_validation_plan.md` - S2-C1 mock execution bridge
+- `docs/references/Claude-roadmap-compare.md` - historical comparison
 
 Treat reference files as non-normative unless their content is promoted into the official docs.

@@ -135,6 +135,41 @@ Use this for the future bridge between generated BDD and existing executable ste
 This is not the current execution baseline.
 It is a later-phase bridge document.
 
+### 11. `docs/mock_api_validation_plan.md`
+
+Use this for the Stage 3 pre-access mock execution bridge.
+
+It defines:
+
+- the mock API deliverable,
+- representative LME rule coverage,
+- how BDD scripts call the mock API,
+- validation commands and evidence,
+- and the boundary between mock execution verification and real LME API readiness.
+
+### 12. `docs/checkpoints.md`
+
+Use this for preserving generated checkpoints and resume prompts across context compaction or fresh sessions.
+
+It records:
+
+- the latest recoverable task state,
+- the next single action,
+- non-negotiable constraints,
+- and a directly reusable resume prompt.
+
+### 13. `docs/ui_test_plan.md`
+
+Use this for the governed UI flow test plan from source artifacts through BDD and Scripts review.
+
+It defines:
+
+- BDD and Scripts tab save/reload expectations,
+- artifact refresh expectations,
+- manager-level, HTTP-level, and browser-level automation layers,
+- current UI test coverage limits,
+- and the implemented browser E2E coverage for the primary Review -> BDD -> Scripts path.
+
 ---
 
 ## Recommended Reading Order
@@ -156,6 +191,9 @@ Then read supporting docs only as needed:
 8. `docs/testing_governance.md`
 9. `docs/prompt_lifecycle.md`
 10. `docs/step_integration_plan.md`
+11. `docs/mock_api_validation_plan.md`
+12. `docs/checkpoints.md`
+13. `docs/ui_test_plan.md`
 
 ### If you are implementing a task
 
@@ -213,6 +251,8 @@ To avoid overlap and drift:
 - **testing_governance** should hold broader testing operations governance.
 - **prompt_lifecycle** should hold prompt lifecycle rules.
 - **step_integration_plan** should hold future BDD-to-step bridge logic.
+- **checkpoints** should hold recoverable checkpoints and resume prompts.
+- **ui_test_plan** should hold UI flow testing expectations and automation layers.
 
 If a document starts taking on another document's responsibility, refactor the boundary instead of letting drift accumulate.
 

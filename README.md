@@ -16,7 +16,9 @@
 | Schema signal real data | ✅ Complete | `failure_rate = 0.0`, real_validation source |
 | Governance signals coverage path | ✅ Complete | 23 runs scanned, 180 rules |
 | Stage M (master merge) | ✅ Complete | SM-T01~SM-T05 all done, 2026-04-19 |
-| Stage 2 Direction A prompt | ✅ Complete | Maker prompt v1.2 (improved boundary/exception guidance) |
+| Stage 2 prompt calibration | ✅ Complete | Maker/checker prompt v1.5/v1.3, 78.89% coverage |
+| Mock API execution bridge | ✅ Complete | `deliverables/lme_mock_api.zip`, BDD/script HTTP validation |
+| Review UI browser E2E | ✅ Complete | `tests/test_review_session_browser.py`, Chrome/Edge CDP harness |
 | Real LME API execution | ⏳ Blocked | Stage 3, LME VM access needed |
 
 ### Verification Type Key
@@ -27,15 +29,17 @@
 | `stub_verified` | StubProvider or POC (≤2 rules) verified |
 | `real_data_verified` | Real LLM API + real-scale data verified |
 
-### Current Stage: Stage M Complete → Stage 2 Direction A (Quality Improvement)
+### Current Stage: Stage 2 Complete → Stage 3 Blocked
 
 **Stage M (master branch merge)** completed 2026-04-19: UTC timestamps, workflow interrupt handling, retry config, vendor archive all merged.
 
-Stage 1 (real data access) is complete. Stage 2 Direction A (quality improvement) is underway:
-- **Maker prompt v1.2**: Strengthened boundary/exception/prohibition guidance based on coverage analysis
-- **Benchmark**: v1.2 confirmed no regression on poc_two_rules (100% coverage)
-- **Full 183-rule re-run**: Pending — blocked by MiniMax API reliability issues (60-71% instability observed)
-- **S2-T01 (maker quality)**: Blocked pending API reliability resolution
+Stage 1 (real data access) is complete. Stage 2 scoped work is complete:
+- **Maker/checker prompt v1.5/v1.3**: Coverage improved to 78.89% (142/180 fully covered)
+- **S2-T01**: Complete; remaining gaps are evidence-constrained or LLM non-determinism
+- **S2-B1/B2**: `audit_trail.py` and `case_compare.py` implemented and integrated
+- **S2-C1**: Mock API execution bridge complete; BDD/script can call a deterministic HTTP API under test
+- **S2-D1**: Review UI browser-level E2E test covers the primary BDD/Scripts human path
+- **Stage 3**: Still blocked pending real LME VM/API access
 
 See `docs/roadmap.md` and `TODO.md` for Stage 2 details.
 
@@ -279,6 +283,26 @@ runs/                     # Pipeline run outputs (gitignored)
 
 ## Extended Capabilities
 
+### Mock API Execution Bridge
+
+The repository includes a standalone mock API package for validating executable BDD scripts before real LME VM/API access is available:
+
+```powershell
+cd deliverables\lme_mock_api
+python -m mock_lme_api.server --port 8766
+```
+
+In a second shell:
+
+```powershell
+cd deliverables\lme_mock_api
+python run_bdd.py
+```
+
+Expected result: `33 passed, 0 failed`.
+
+See `docs/mock_api_validation_plan.md` and `deliverables/lme_mock_api/README.md`.
+
 ### Deterministic Oracles
 
 Eight oracle modules for structured rule categories:
@@ -400,6 +424,14 @@ python scripts/check_artifact_governance.py
 python scripts/check_release_governance.py
 python -m unittest discover -v tests/
 ```
+
+Browser-level review UI E2E is included in unittest discovery when Chrome or Edge is installed. To run only that browser path:
+
+```powershell
+python -m unittest tests.test_review_session_browser -v
+```
+
+The browser test skips when no Chromium-family browser is available.
 
 Enable auto-refresh of `session_handoff.md` on every commit:
 

@@ -202,9 +202,15 @@ Evidence：
 - `docs/acceptance.md` Gate 6 更新为真实数字
 - 若 instability > 5%：`model_governance.md` 有分析记录
 
-**当前 instability_rate：** TBD（待 S1-T03b）
+**当前 instability_rate：** 9.5%（6/63 comparable cases，v3 measurement）
 
-**状态：** ❌ NOT STARTED
+**Evidence（2026-04-19）：**
+- `runs/checker-stability/20260418T231915+0800-v3/stability_report.json`
+- `data_source: "real_api"`
+- `docs/model_governance.md` 记录超过 5% 阈值的分析
+- poc_two_rules 特定测量因 API 可靠性问题没有有效数据
+
+**状态：** ✅ COMPLETE（full rules v3；样本受 API disconnect 限制）
 
 ---
 
@@ -217,9 +223,14 @@ Evidence：
 - `docs/releases/BASELINE-183-RULES.md` 存在（含人工抽查记录）
 - coverage 数字如实记录（不掩盖低覆盖率）
 
-**当前 coverage（全量）：** TBD
+**当前 coverage（全量）：** 72.78% baseline（131/180 fully covered）；S2-T01 v1.5 后 78.89%（142/180 fully covered）
 
-**状态：** ❌ NOT STARTED
+**Evidence（2026-04-19 baseline）：**
+- `docs/releases/BASELINE-183-RULES.md`
+- `evidence/20260419_baseline_full/`
+- coverage_report 包含 180 条可测试规则
+
+**状态：** ✅ COMPLETE
 
 ---
 
@@ -414,6 +425,93 @@ Evidence：
 **已知限制：** benchmark evidence 基于 stub/poc_two_rules，全量质量基准待 Stage 1
 
 **状态：** ✅ COMPLETE（stub 验证）
+
+---
+
+## Stage 2 — Quality Improvement, Mock Execution Bridge, and UI Assurance
+
+### Gate S2.1：Maker/Checker Coverage Calibration
+
+**Verification Type：** `real_data_verified`
+
+**验收标准：**
+- 全量 180-rule maker/checker 运行完成
+- coverage 数字如实记录
+- prompt 变更有版本记录和 benchmark evidence
+- 剩余 gap 有 root-cause 分类
+
+**Evidence（2026-04-21）：**
+- `docs/s2t01_coverage_analysis.md`
+- v1.5 maker/checker runs：`runs/maker/20260421T074319Z/`、`runs/checker/20260421T083003Z/`
+- Coverage：78.89%（142/180 fully covered）
+- 结论：剩余 gap 为 evidence-constrained 或 LLM non-determinism
+
+**状态：** ✅ COMPLETE
+
+---
+
+### Gate S2.2：Audit Trail and Case Compare
+
+**Verification Type：** `code_implementation`
+
+**验收标准：**
+- `audit_trail.py` 生成 maker → checker → human decision chain HTML
+- `case_compare.py` 生成相邻 iteration case 对比 HTML
+- 两者集成到 `review_session.py`
+- 生成失败不隐藏，但不阻塞主 session 流程
+
+**Evidence（2026-04-21）：**
+- `lme_testing/audit_trail.py`
+- `lme_testing/case_compare.py`
+- `review_session.py` finalize/rewrite 集成
+
+**状态：** ✅ COMPLETE
+
+---
+
+### Gate S2.3：Mock API Execution Bridge
+
+**Verification Type：** `stub_verified`
+
+**验收标准：**
+- mock API 基于 `docs/materials/LME_Matching_Rules_Aug_2022.md` 的代表性规则
+- BDD step definitions 通过 HTTP 调用 mock API
+- feature suite 可本地运行并通过
+- README、源码、zip 交付物存在
+- 文档明确 mock bridge 不等于真实 LME API 接入
+
+**Evidence（2026-04-23）：**
+- `deliverables/lme_mock_api/`
+- `deliverables/lme_mock_api.zip`
+- `docs/mock_api_validation_plan.md`
+- `python run_bdd.py`：33 passed, 0 failed
+- `python -m unittest tests.test_mock_api`：2 tests OK
+
+**状态：** ✅ COMPLETE（mock/stub execution bridge；真实 Stage 3 仍阻塞）
+
+---
+
+### Gate S2.4：Review UI Browser E2E
+
+**Verification Type：** `stub_verified`
+
+**验收标准：**
+- Browser test 启动真实 local review-session HTTP server
+- Browser test 使用 deterministic fixture artifacts，不调用 live LLM provider
+- Review -> BDD -> Scripts 主路径可在真实浏览器中执行
+- BDD textarea 未保存内容在 tab navigation 后不丢失
+- Save BDD Edits 后 Scripts tab 可见 match metrics 刷新
+- Save Scripts Edits 后可见 exact/unmatched 指标更新
+- 无浏览器环境下测试应 skip，而不是伪造通过
+
+**Evidence（2026-04-23）：**
+- `tests/test_review_session_browser.py`
+- `docs/ui_test_plan.md`
+- `.venv\Scripts\python.exe -m unittest tests.test_review_session_browser -v`：1 browser test OK
+- `.venv\Scripts\python.exe -m unittest discover -v tests`：181 tests OK
+- Browser runner：installed Chrome/Edge via Chrome DevTools Protocol
+
+**状态：** ✅ COMPLETE（browser-level primary BDD/Scripts path；submit/finalize browser flow 未覆盖）
 
 ---
 

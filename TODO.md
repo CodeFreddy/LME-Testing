@@ -1,7 +1,7 @@
-# LME Testing — TODO v3.0
+# LME Testing — TODO v3.1
 
-**修订日期：** 2026-04-19  
-**说明：** 整合 master 分支合并分析，新增 Stage M 任务。
+**修订日期：** 2026-04-23  
+**说明：** 整合 master 分支合并分析、S2-T01 v1.5 结果、S2-B1/B2 集成状态、S2-C1 mock API execution bridge，以及 S2-D1 browser-level review UI E2E。
 
 ---
 
@@ -156,7 +156,14 @@
 
 ---
 
-## Stage 2（冻结，待 Stage 1 数据）
+## Stage 2 — 质量提升、审计补全、Mock 执行桥接
+
+**当前状态（2026-04-23）：**
+- ✅ S2-T01 已完成：v1.5 maker + checker 覆盖率 78.89%（142/180 fully covered），当前证据基础下的 prompt 校准实际天花板。
+- ✅ S2-B1/B2 已完成：`audit_trail.py` 与 `case_compare.py` 已实现并集成。
+- ✅ S2-C1 已完成：基于 `docs/materials/LME_Matching_Rules_Aug_2022.md` 的 mock API execution bridge 已交付，用于验证 BDD/script 可以真实调用 API under test。
+- ✅ S2-D1 已完成：browser-level review UI E2E 覆盖 Review -> BDD -> Scripts 主路径、BDD 未保存 edits 保留、可见 match metrics 刷新。
+- ⏳ Stage 3 仍阻塞于真实 LME VM/API 权限；mock API 不代表真实 LME execution readiness。
 
 ### S2-B1：audit_trail.py 实现（来自 master 概念）
 - [x] `lme_testing/audit_trail.py`：`build_audit_trail(session_dir, output_path)` 实现
@@ -183,17 +190,49 @@
 | S2-T01: 覆盖率分析 | ✅ COMPLETE | 见 `docs/s2t01_coverage_analysis.md` |
 | S2-T01: checker prompt v1.1 校准 | ✅ COMPLETE | 4 类 case type coverage_relevance 修复 |
 | S2-T01: SR-MR-064-A-1 coverage_eligible=false | ✅ COMPLETE | 源文档页19截断，无法修复 |
-| S2-T01: 重新运行验证覆盖率提升 | ⏳ PENDING | 预计 coverage 72.22% → ~82% |
-| Maker prompt 调优 | ⏳ PENDING | 可选，coverage 提升后评估 |
+| S2-T01: v1.5 重新运行验证覆盖率提升 | ✅ COMPLETE | 78.89%（142/180 fully covered），见 `docs/s2t01_coverage_analysis.md` |
+| Maker prompt 调优 | ✅ COMPLETE | v1.5 后剩余 gap 为证据约束或 LLM 非决定性 |
 | Oracle 实测验证 | ⏳ PENDING | 触发条件未满足 |
 
-**S2-T01 实测结果（2026-04-20）：**
+**S2-T01 最终实测结果（2026-04-21）：**
 - 180 rules → 322 scenarios → 322 reviews, 0 failures
-- Coverage: 72.22% (130 fully, 17 partial, 1 uncovered)
-- Partial root causes: 12 rules by checker strictness, 4 rules by maker skipping case types, 1 rule by source truncation
-- 根因修复后预计: ~82% coverage
+- Coverage: 78.89%（142 fully, 5 partial, 1 uncovered）
+- Net: +12 fully covered rules from baseline（130→142），+6.67 percentage points（72.22%→78.89%）
+- 剩余 gap：SR-MR-060-B-1、SR-MR-004-01、SR-MR-071-A-1 为证据约束；SR-MR-015-B3-4、SR-MR-071-C-1 为 LLM 非决定性/边界波动。
 
-**状态：** ✅ Phase 1 complete — API reliability fixed, full run complete, root causes identified and fixed
+**状态：** ✅ COMPLETE — prompt 校准达到当前证据基础下实际天花板；后续不继续靠 prompt 追求 80%。
+
+### S2-C1：Mock API Execution Bridge
+- [x] 基于 `docs/materials/LME_Matching_Rules_Aug_2022.md` 设计 mock API 服务
+- [x] 提供可运行 HTTP API：`deliverables/lme_mock_api/mock_lme_api/server.py`
+- [x] 将 BDD step scripts 更新为可通过 HTTP 调用 mock API：`deliverables/lme_mock_api/features/step_definitions/matching_rules_steps.py`
+- [x] 提供样例 feature：`deliverables/lme_mock_api/features/matching_rules/core_matching_rules.feature`
+- [x] 提供 lightweight BDD runner：`deliverables/lme_mock_api/run_bdd.py`
+- [x] 提供压缩包：`deliverables/lme_mock_api.zip`
+- [x] 文档化验证计划：`docs/mock_api_validation_plan.md`
+
+**验证：**
+- `python -m unittest tests.test_mock_api` 在 `deliverables/lme_mock_api` 中通过（2 tests OK）
+- `python run_bdd.py` 在 mock API 启动后通过（33 passed, 0 failed）
+
+**边界：** 这是 Stage 3 前置的 mock execution bridge，只证明 BDD/script 可以调用一个确定性 API under test；不代表真实 LME API 接入完成。
+
+---
+
+### S2-D1：Browser-Level Review UI E2E
+- [x] 启动真实 local review-session HTTP server
+- [x] 使用 deterministic fixture artifacts，不调用 live LLM provider
+- [x] 用 Chrome DevTools Protocol 驱动 installed Chrome/Edge
+- [x] 覆盖 Review -> BDD -> Scripts tab navigation
+- [x] 验证 BDD textarea 未保存内容在 tab navigation 后不丢失
+- [x] 验证 Save BDD Edits 后 Scripts match metrics 刷新
+- [x] 验证 Save Scripts Edits 后 visible exact/unmatched metrics 更新
+- [x] 无 browser 时自动 skip
+
+**状态：** ✅ COMPLETE  
+**证据：** `tests/test_review_session_browser.py`；`docs/ui_test_plan.md`；`.venv\Scripts\python.exe -m unittest tests.test_review_session_browser -v` 通过（1 browser test）；`.venv\Scripts\python.exe -m unittest discover -v tests` 通过（181 tests）
+
+**边界：** 当前 browser E2E 覆盖 BDD/Scripts 主路径，不覆盖 submit/finalize browser flow。
 
 ---
 
@@ -215,5 +254,7 @@
 - [x] ✅ S1-T02　定位全量运行数据目录
 - [x] ✅ S1-T04　全量基准运行（72.78%，已文档化）
 - [x] ✅ S2-B1　audit_trail.py 实现
+- [x] ✅ S2-C1　mock API execution bridge 创建并打包
+- [x] ✅ S2-D1　browser-level review UI E2E
 - [ ] ⏳ 真实 LME API 接入（Stage 3，待 VM 权限）
-- [ ] S2-A　Maker prompt v1.2 全量重跑（benchmark validated，需 API 预算）
+- [ ] S2-E　LLM 非决定性稳定化（SR-MR-015-B3-4、SR-MR-071-C-1；可选，需明确 benchmark 成本）

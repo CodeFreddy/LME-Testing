@@ -305,11 +305,12 @@ def compute_step_matches(
 
     # --- Exact and parameterized matching pass ---
     for key, bdd_step in seen.items():
-        norm = _normalize_pattern(bdd_step.step_pattern)
+        text_norm = _normalize_pattern(bdd_step.step_text)
+        pattern_norm = _normalize_pattern(bdd_step.step_pattern)
 
         # 1. Exact match
-        if norm in lib_index:
-            lib_step = lib_index[norm]
+        lib_step = lib_index.get(text_norm) or lib_index.get(pattern_norm)
+        if lib_step is not None:
             if lib_step.step_type == bdd_step.step_type:
                 matches.append(StepMatch(
                     bdd_step=bdd_step,
@@ -503,10 +504,12 @@ def compute_step_gaps(
     lib_grouped = _build_library_group_index(library_inventory)
 
     for key, bdd_step in seen.items():
-        norm = _normalize_pattern(bdd_step.step_pattern)
+        text_norm = _normalize_pattern(bdd_step.step_text)
+        pattern_norm = _normalize_pattern(bdd_step.step_pattern)
         is_matched = False
 
-        if norm in lib_index and lib_index[norm].step_type == bdd_step.step_type:
+        lib_step = lib_index.get(text_norm) or lib_index.get(pattern_norm)
+        if lib_step is not None and lib_step.step_type == bdd_step.step_type:
             is_matched = True
         else:
             bdd_groups = _extract_capture_groups(bdd_step.step_pattern)
