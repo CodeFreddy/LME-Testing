@@ -47,7 +47,7 @@ jobs:
         run: pip install jsonschema
 
       - name: Run schema validation
-        run: python scripts/validate_schemas.py --output-json runs/schema_validation_latest.json
+        run: python scripts/validate_schemas.py
 
   upstream-validation:
     name: Upstream Rule Validation
@@ -94,7 +94,24 @@ jobs:
       - name: Run end-to-end smoke
         run: python .github/workflows/smoke_test.py
 
-      - name: Upload smoke-test governance signals
+  governance-signals:
+    name: Governance Signals
+    runs-on: ubuntu-latest
+    needs: smoke-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install jsonschema
+
+      - name: Compute governance signals
+        run: python main.py governance-signals --output runs/governance_signals.json
+
+      - name: Upload governance signals
         uses: actions/upload-artifact@v4
         with:
           name: governance-signals
@@ -104,7 +121,7 @@ jobs:
   release-governance:
     name: Release Governance
     runs-on: ubuntu-latest
-    needs: smoke-test
+    needs: governance-signals
     steps:
       - uses: actions/checkout@v4
 
