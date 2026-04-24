@@ -12,7 +12,7 @@
             "api_format": "openai_chat_completions",
             "base_url": "https://coding.dashscope.aliyuncs.com/v1",
             "model": "glm-5",
-            "api_key_env": "sk-sp-6ee75795a7ea4fba82a053538fbf64ae",
+            "api_key_env": "",
             "timeout_seconds": 300,
             "temperature": 0.1,
             "max_output_tokens": 8000
@@ -22,7 +22,7 @@
             "api_format": "openai_chat_completions",
             "base_url": "https://coding.dashscope.aliyuncs.com/v1",
             "model": "qwen3.5-plus",
-            "api_key_env": "sk-sp-6ee75795a7ea4fba82a053538fbf64ae",
+            "api_key_env": "",
             "timeout_seconds": 300,
             "temperature": 0.0,
             "max_output_tokens": 6000

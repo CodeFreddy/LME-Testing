@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-24 14:36:40 UTC`
+- `2026-04-24 14:44:56 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `Security: Remove hardcoded API key from example config`
 - `Fix CI: Governance signals job with proper artifact sharing`
 - `add mock api and UI test`
 - `fix: BDD tab edits pipeline + behave-style grouping + step registry regex`
 - `docs: trim demo_for_boss.md 鈥?remove out-of-scope improvements`
-- `docs: update demo_for_boss.md 鈥?S2-T01 results, LLM non-determinism section`
 
 ---
 
