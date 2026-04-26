@@ -20,14 +20,22 @@ This index exists so the documentation set behaves like a system, not just a col
 The documentation set is intentionally layered.
 
 - `README.md` explains what the project is and what matters now.
-- `roadmap.md` defines strategic direction and phase boundaries.
-- `implementation_plan.md` defines how roadmap work is executed.
-- `acceptance.md` defines when phase work is considered done.
-- `architecture.md` defines system boundaries and artifact contracts.
-- `model_governance.md` defines model and prompt change controls.
-- `agent_guidelines.md` defines how AI agents are allowed to operate.
+- `docs/planning/roadmap.md` defines strategic direction and phase boundaries.
+- `docs/planning/implementation_plan.md` defines how roadmap work is executed.
+- `docs/governance/acceptance.md` defines when phase work is considered done.
+- `docs/architecture/architecture.md` defines system boundaries and artifact contracts.
+- `docs/governance/model_governance.md` defines model and prompt change controls.
+- `docs/governance/agent_guidelines.md` defines how AI agents are allowed to operate.
 
-Other docs may exist, but these are the core control documents.
+Those documents are the core control documents. Supporting documents are grouped by purpose:
+
+- `docs/governance/` for supporting governance policies.
+- `docs/planning/` for task plans, validation plans, and stage analysis.
+- `docs/architecture/` for the main architecture contract and architecture support references.
+- `docs/guides/` for operator and developer guides.
+- `docs/operations/` for session handoff and checkpoint state.
+- `docs/releases/` for release notes and baseline records.
+- `docs/materials/`, `docs/references/`, and `docs/archives/` for source material, historical references, and completed records.
 
 ---
 
@@ -45,7 +53,7 @@ It should answer:
 - what the current priorities are,
 - where the governed documentation lives.
 
-### 2. `docs/roadmap.md`
+### 2. `docs/planning/roadmap.md`
 
 Use this for strategic direction.
 
@@ -56,7 +64,7 @@ It defines:
 - phase scope and non-scope,
 - what is core versus deferred.
 
-### 3. `docs/implementation_plan.md`
+### 3. `docs/planning/implementation_plan.md`
 
 Use this for execution-oriented work planning.
 
@@ -70,7 +78,7 @@ It defines:
 
 This is the main "how to execute" document for developers and AI coding agents.
 
-### 4. `docs/acceptance.md`
+### 4. `docs/governance/acceptance.md`
 
 Use this for phase gates and release readiness.
 
@@ -82,7 +90,7 @@ It defines:
 - gate conditions,
 - what counts as completion.
 
-### 5. `docs/architecture.md`
+### 5. `docs/architecture/architecture.md`
 
 Use this for system boundaries and artifact design.
 
@@ -95,7 +103,7 @@ It defines:
 - traceability model,
 - validation architecture.
 
-### 6. `docs/model_governance.md`
+### 6. `docs/governance/model_governance.md`
 
 Use this for model, prompt, benchmark, rollout, and rollback governance.
 
@@ -107,7 +115,7 @@ It defines:
 - baseline benchmark requirements,
 - rollout and rollback control.
 
-### 7. `docs/agent_guidelines.md`
+### 7. `docs/governance/agent_guidelines.md`
 
 Use this for AI coding agent operating discipline.
 
@@ -120,22 +128,22 @@ It defines:
 - contract-first change behavior,
 - failure-handling expectations.
 
-### 8. `docs/testing_governance.md`
+### 8. `docs/governance/testing_governance.md`
 
 Use this for broader testing-governance topics that go beyond the core execution contract.
 
-### 9. `docs/prompt_lifecycle.md`
+### 9. `docs/governance/prompt_lifecycle.md`
 
 Use this for prompt asset lifecycle management.
 
-### 10. `docs/step_integration_plan.md`
+### 10. `docs/planning/step_integration_plan.md`
 
 Use this for the future bridge between generated BDD and existing executable step assets.
 
 This is not the current execution baseline.
 It is a later-phase bridge document.
 
-### 11. `docs/mock_api_validation_plan.md`
+### 11. `docs/planning/mock_api_validation_plan.md`
 
 Use this for the Stage 3 pre-access mock execution bridge.
 
@@ -147,7 +155,7 @@ It defines:
 - validation commands and evidence,
 - and the boundary between mock execution verification and real LME API readiness.
 
-### 12. `docs/checkpoints.md`
+### 12. `docs/operations/checkpoints.md`
 
 Use this for preserving generated checkpoints and resume prompts across context compaction or fresh sessions.
 
@@ -158,7 +166,7 @@ It records:
 - non-negotiable constraints,
 - and a directly reusable resume prompt.
 
-### 13. `docs/ui_test_plan.md`
+### 13. `docs/planning/ui_test_plan.md`
 
 Use this for the governed UI flow test plan from source artifacts through BDD and Scripts review.
 
@@ -170,6 +178,15 @@ It defines:
 - current UI test coverage limits,
 - and the implemented browser E2E coverage for the primary Review -> BDD -> Scripts path.
 
+### Supporting Guide And Reference Folders
+
+- `docs/guides/maker_checker_usage.md` explains the maker/checker CLI workflow.
+- `docs/guides/rule_extraction_script_guide.md` explains rule extraction operations.
+- `docs/archives/20260422_ai_test_generation_demo.md` preserves demo-oriented usage notes.
+- `docs/architecture/rule_model_and_parsing_design.md` captures rule model and parsing design detail.
+- `docs/architecture/run_directory_structure.md` documents run output layout.
+- `docs/archives/20260422_script_generation_investigation.md`, `docs/planning/stage2_planned_modules.md`, and `docs/planning/s2t01_coverage_analysis.md` preserve supporting Stage 2 planning and analysis.
+
 ---
 
 ## Recommended Reading Order
@@ -179,30 +196,30 @@ It defines:
 Read in this order:
 
 1. `README.md`
-2. `docs/roadmap.md`
-3. `docs/implementation_plan.md`
-4. `docs/acceptance.md`
-5. `docs/architecture.md`
-6. `docs/model_governance.md`
-7. `docs/agent_guidelines.md`
+2. `docs/planning/roadmap.md`
+3. `docs/planning/implementation_plan.md`
+4. `docs/governance/acceptance.md`
+5. `docs/architecture/architecture.md`
+6. `docs/governance/model_governance.md`
+7. `docs/governance/agent_guidelines.md`
 
 Then read supporting docs only as needed:
 
-8. `docs/testing_governance.md`
-9. `docs/prompt_lifecycle.md`
-10. `docs/step_integration_plan.md`
-11. `docs/mock_api_validation_plan.md`
-12. `docs/checkpoints.md`
-13. `docs/ui_test_plan.md`
+8. `docs/governance/testing_governance.md`
+9. `docs/governance/prompt_lifecycle.md`
+10. `docs/planning/step_integration_plan.md`
+11. `docs/planning/mock_api_validation_plan.md`
+12. `docs/operations/checkpoints.md`
+13. `docs/planning/ui_test_plan.md`
 
 ### If you are implementing a task
 
 Read in this order:
 
-1. `docs/roadmap.md`
-2. `docs/implementation_plan.md`
-3. `docs/acceptance.md`
-4. `docs/architecture.md`
+1. `docs/planning/roadmap.md`
+2. `docs/planning/implementation_plan.md`
+3. `docs/governance/acceptance.md`
+4. `docs/architecture/architecture.md`
 5. any domain-specific or integration-specific document relevant to the task
 
 ### If you are reviewing an AI-generated change
@@ -210,30 +227,30 @@ Read in this order:
 Read in this order:
 
 1. `../AGENTS.md`
-2. `docs/agent_guidelines.md`
-3. `docs/acceptance.md`
-4. `docs/model_governance.md`
-5. `docs/architecture.md`
-6. the relevant task in `docs/implementation_plan.md`
+2. `docs/governance/agent_guidelines.md`
+3. `docs/governance/acceptance.md`
+4. `docs/governance/model_governance.md`
+5. `docs/architecture/architecture.md`
+6. the relevant task in `docs/planning/implementation_plan.md`
 
 ### If you are working on model or prompt changes
 
 Read in this order:
 
-1. `docs/model_governance.md`
-2. `docs/prompt_lifecycle.md`
-3. `docs/acceptance.md`
-4. `docs/implementation_plan.md`
+1. `docs/governance/model_governance.md`
+2. `docs/governance/prompt_lifecycle.md`
+3. `docs/governance/acceptance.md`
+4. `docs/planning/implementation_plan.md`
 
 ### If you are working on future BDD / step integration
 
 Read in this order:
 
-1. `docs/architecture.md`
-2. `docs/roadmap.md`
-3. `docs/implementation_plan.md`
-4. `docs/step_integration_plan.md`
-5. `docs/acceptance.md`
+1. `docs/architecture/architecture.md`
+2. `docs/planning/roadmap.md`
+3. `docs/planning/implementation_plan.md`
+4. `docs/planning/step_integration_plan.md`
+5. `docs/governance/acceptance.md`
 
 ---
 
@@ -250,9 +267,11 @@ To avoid overlap and drift:
 - **agent_guidelines** should hold AI implementation rules.
 - **testing_governance** should hold broader testing operations governance.
 - **prompt_lifecycle** should hold prompt lifecycle rules.
-- **step_integration_plan** should hold future BDD-to-step bridge logic.
+- **planning docs** should hold future BDD-to-step bridge logic, validation plans, and stage-specific analyses.
+- **guides** should hold operational workflows.
+- **operations** should hold session continuity files such as handoff and checkpoints.
+- **architecture docs** should hold the main system contract plus supporting design detail that is too specific for the main architecture overview.
 - **checkpoints** should hold recoverable checkpoints and resume prompts.
-- **ui_test_plan** should hold UI flow testing expectations and automation layers.
 
 If a document starts taking on another document's responsibility, refactor the boundary instead of letting drift accumulate.
 
@@ -267,12 +286,12 @@ For agent entry, use:
 For repo and phase entry, use:
 
 - `README.md`
-- `docs/roadmap.md`
+- `docs/planning/roadmap.md`
 
 For implementation execution, use:
 
-- `docs/implementation_plan.md`
-- `docs/acceptance.md`
+- `docs/planning/implementation_plan.md`
+- `docs/governance/acceptance.md`
 
 ---
 

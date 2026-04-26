@@ -27,15 +27,15 @@ Use reference materials to:
 - identify ideas that may later be promoted into official docs.
 
 Do **not** use these files as a substitute for:
-- `docs/roadmap.md`
-- `docs/implementation_plan.md`
-- `docs/architecture.md`
-- `docs/acceptance.md`
-- `docs/model_governance.md`
-- `docs/agent_guidelines.md`
-- `docs/testing_governance.md`
-- `docs/prompt_lifecycle.md`
-- `docs/step_integration_plan.md`
+- `docs/planning/roadmap.md`
+- `docs/planning/implementation_plan.md`
+- `docs/architecture/architecture.md`
+- `docs/governance/acceptance.md`
+- `docs/governance/model_governance.md`
+- `docs/governance/agent_guidelines.md`
+- `docs/governance/testing_governance.md`
+- `docs/governance/prompt_lifecycle.md`
+- `docs/planning/step_integration_plan.md`
 
 ---
 
@@ -49,6 +49,10 @@ Examples of suitable files here:
 - stakeholder perspective writeups
 - exploratory governance proposals
 - archived reference analyses
+
+Current notable references:
+
+- `initial_user_requirement_prompt.md` — original user requirement prompt that motivated the maker/checker/human-review workflow.
 
 ---
 

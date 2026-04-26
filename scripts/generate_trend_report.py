@@ -21,8 +21,11 @@ import json
 import sys
 from pathlib import Path
 
-# Add scripts dir to path for governance_checks import
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+# Add local src-layout packages and scripts dir to path.
+SCRIPTS_DIR = Path(__file__).resolve().parent
+ROOT = SCRIPTS_DIR.parent
+sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(SCRIPTS_DIR))
 
 from governance_checks import REPO_ROOT
 
@@ -138,3 +141,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

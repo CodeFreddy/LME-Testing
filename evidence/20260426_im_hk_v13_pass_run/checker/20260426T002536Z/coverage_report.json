@@ -1,0 +1,1675 @@
+{
+  "total_requirements": 70,
+  "fully_covered": 89,
+  "partially_covered": 48,
+  "uncovered": 6,
+  "not_applicable": 21,
+  "coverage_percent": 127.14,
+  "status_by_rule": {
+    "SR-MR-001-01": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-01": {
+      "rule_type": "data_constraint",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "boundary"
+      ],
+      "present_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-003-B1-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-003-B2-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "positive"
+      ],
+      "missing_case_types": [
+        "data_validation"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-004-B1-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "positive"
+      ],
+      "missing_case_types": [
+        "data_validation"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-004-B2-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "positive"
+      ],
+      "missing_case_types": [
+        "data_validation"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-001-B1-1": {
+      "rule_type": "data_constraint",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "boundary"
+      ],
+      "present_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-001-B2-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "positive"
+      ],
+      "missing_case_types": [
+        "data_validation"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B1-1": {
+      "rule_type": "data_constraint",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "boundary"
+      ],
+      "present_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B1-2": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B2-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "positive"
+      ],
+      "missing_case_types": [
+        "data_validation"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B2-2": {
+      "rule_type": "obligation",
+      "required_case_types": [
+        "positive",
+        "negative"
+      ],
+      "optional_case_types": [
+        "boundary",
+        "exception"
+      ],
+      "present_case_types": [
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 2,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B3-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B4-1": {
+      "rule_type": "data_constraint",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "boundary"
+      ],
+      "present_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B5-1": {
+      "rule_type": "data_constraint",
+      "required_case_types": [
+        "positive",
+        "negative",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "boundary"
+      ],
+      "present_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B6-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B7-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B8-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B9-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B10-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B11-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B12-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B13-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B14-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B15-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B16-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B17-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B18-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B19-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-002-B20-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "positive"
+      ],
+      "missing_case_types": [
+        "data_validation"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-003-B3-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-003-B4-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "positive"
+      ],
+      "missing_case_types": [
+        "data_validation"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-003-B5-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-003-B6-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-003-B7-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "positive"
+      ],
+      "missing_case_types": [
+        "data_validation"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-003-B8-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-003-B9-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-003-B10-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-003-B11-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-003-B12-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "positive"
+      ],
+      "missing_case_types": [
+        "data_validation"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-003-B13-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-003-B14-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-012-A-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-012-B-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-012-C-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-012-D-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "positive"
+      ],
+      "missing_case_types": [
+        "data_validation"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-012-B-2": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-012-B-3": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-012-B-4": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": []
+    },
+    "SR-MR-012-A-2": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": []
+    },
+    "SR-MR-012-A-3": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-012-A-4": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-012-A-5": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-012-A-6": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": []
+    },
+    "SR-MR-012-A-7": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-012-A-8": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": []
+    },
+    "SR-MR-012-A-9": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "positive"
+      ],
+      "missing_case_types": [
+        "data_validation"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-012-A-10": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": []
+    },
+    "SR-MR-004-A-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-004-B-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-004-C-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "positive"
+      ],
+      "missing_case_types": [
+        "data_validation"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-004-D-1": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "positive"
+      ],
+      "missing_case_types": [
+        "data_validation"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-004-E-1": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 2,
+      "paragraph_ids": []
+    },
+    "SR-MR-004-E-2": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": []
+    },
+    "SR-MR-004-E-3": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "data_validation",
+        "negative",
+        "positive"
+      ],
+      "missing_case_types": [
+        "boundary"
+      ],
+      "rule_coverage_status": "partially_covered",
+      "rule_pass_status": "fail",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-004-E-4": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": []
+    },
+    "SR-MR-004-E-5": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-004-C-2": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    },
+    "SR-MR-004-C-3": {
+      "rule_type": "reference_only",
+      "required_case_types": [],
+      "optional_case_types": [],
+      "present_case_types": [],
+      "accepted_case_types": [],
+      "missing_case_types": [],
+      "rule_coverage_status": "not_applicable",
+      "rule_pass_status": "not_applicable",
+      "review_count": 0,
+      "paragraph_ids": []
+    },
+    "SR-MR-004-E-6": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": []
+    }
+  }
+}

@@ -19,8 +19,10 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-# Ensure lme_testing is importable
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Ensure local src-layout packages are importable when run as a script.
+ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT))
 
 from schemas import (
     validate_atomic_rule,
@@ -153,3 +155,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

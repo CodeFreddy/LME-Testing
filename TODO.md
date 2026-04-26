@@ -36,7 +36,7 @@
 ### SM-T02：UTC 时间戳 🍒（来自 master/storage.py）
 - [x] `storage.py`：`timestamp_slug()` 使用 `datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")`
 - [x] 保留 `atomic_write_json()`（Main 独有）
-- [x] `docs/run_directory_structure.md`：补充新时间戳格式说明
+- [x] `docs/architecture/run_directory_structure.md`：补充新时间戳格式说明
 - [x] CI unit test 通过（test_storage.py）
 
 **状态：** ✅ COMPLETE — Main 已实现此功能
@@ -58,7 +58,7 @@
 **状态：** 🧊 Frozen（标记为可选；功能已在 main 中实现）
 
 ### SM-T05：合并文档归档
-- [x] `docs/archives/MERGE_STRATEGY.md` 存在（已从 `docs/` 移至 archives）✅
+- [x] `docs/archives/20260419_master_merge_strategy.md` 存在（已从 `docs/` 移至 archives）✅
 - [x] `vendor/master-branch/README.md` 更新完成状态 ✅（vendor/ 已删除）
 
 **状态：** ✅ COMPLETE
@@ -69,8 +69,8 @@
 
 | 模块 | Master 状态 | Main 状态 | 计划 |
 |------|------------|---------|------|
-| `lme_testing/audit_trail.py` | 引用但不存在（broken import）| ✅ 已实现并集成入 `review_session.py` | S2-B1 ✅ |
-| `lme_testing/case_compare.py` | 引用但不存在（broken import）| ✅ 已实现并集成入 `review_session.py` | S2-B2 ✅ |
+| `src/lme_testing/audit_trail.py` | 引用但不存在（broken import）| ✅ 已实现并集成入 `review_session.py` | S2-B1 ✅ |
+| `src/lme_testing/case_compare.py` | 引用但不存在（broken import）| ✅ 已实现并集成入 `review_session.py` | S2-B2 ✅ |
 
 ---
 
@@ -88,30 +88,30 @@
 
 ### S1-T02：全量运行数据路径对齐
 - [x] 手动定位全量 183 条规则的实际运行输出目录
-- [x] 创建/更新 `docs/run_directory_structure.md`（含新旧时间戳格式区分）
+- [x] 创建/更新 `docs/architecture/run_directory_structure.md`（含新旧时间戳格式区分）
 - [x] `compute_governance_signals()` 扫描路径修复
 - [x] 新增 `--runs-dir` 参数
 - [x] 验证：`runs_analyzed > 0`，`total_rules ≥ 180`
 
 **状态：** ✅ COMPLETE  
-**证据：** `docs/run_directory_structure.md` 存在；`compute_governance_signals()` → `runs_analyzed=21`，`total_rules=180`；coverage=72.78%；`--runs-dir` 参数在 CI ci.yml 中使用
+**证据：** `docs/architecture/run_directory_structure.md` 存在；`compute_governance_signals()` → `runs_analyzed=21`，`total_rules=180`；coverage=72.78%；`--runs-dir` 参数在 CI ci.yml 中使用
 
 ### S1-T03：Session Snapshot 原子写入确认
 - [x] 确认 `review_session.py` 中所有 snapshot 写入使用 `atomic_write_json()`
   - `/api/reviews/save` 路径 ✅
   - `/api/bdd/save` 路径 ✅
   - `/api/scripts/save` 路径 ✅
-- [x] `docs/architecture.md` 声明单用户设计约束
+- [x] `docs/architecture/architecture.md` 声明单用户设计约束
 
 **状态：** ✅ COMPLETE  
-**证据：** `review_session.py` lines 151-232-354 全部使用 `atomic_write_json`；`docs/architecture.md` 第 10、20、254 行明确单用户设计
+**证据：** `review_session.py` lines 151-232-354 全部使用 `atomic_write_json`；`docs/architecture/architecture.md` 第 10、20、254 行明确单用户设计
 
 ### S1-T03b：Checker 真实稳定性测量
 - [x] poc_two_rules 双次真实 MiniMax API checker 运行 ⚠️（API 可靠性问题导致 0 valid data）
 - [x] Full rules v3 真实 API checker stability 测量
 - [x] `runs/checker-stability/20260418T231915+0800-v3/stability_report.json`（含 `data_source: "real_api"`）
-- [x] `docs/acceptance.md` Phase 1 Gate 6 更新为真实数字（instability_rate = 9.5%）
-- [x] 若 instability > 5%：`docs/model_governance.md` 分析记录
+- [x] `docs/governance/acceptance.md` Phase 1 Gate 6 更新为真实数字（instability_rate = 9.5%）
+- [x] 若 instability > 5%：`docs/governance/model_governance.md` 分析记录
 
 **实测值：** instability_rate = 9.5%（6/63 comparable cases，v3 measurement）  
 **状态：** ✅ COMPLETE — Gate 6 已更新；v3 stability data 超出 5% threshold 已记录；poc_two_rules 特定测量因 API 可靠性问题未能获得有效数据
@@ -131,7 +131,7 @@
 ### S1-T05：项目状态声明重写
 - [x] README Project Status 用真实数字重写（含 Stage M 合并状态）
 - [x] 消除所有无数据支撑的"100%"和"Complete"声明
-- [x] `docs/acceptance.md` 每个 gate 有 Verification Type
+- [x] `docs/governance/acceptance.md` 每个 gate 有 Verification Type
 
 **状态：** ✅ COMPLETE  
 **证据：** acceptance.md v2.0 每个 gate 有 Verification Type；README.md Verification Status 表格已更新；无"All Phases Complete"表述
@@ -166,20 +166,20 @@
 - ⏳ Stage 3 仍阻塞于真实 LME VM/API 权限；mock API 不代表真实 LME execution readiness。
 
 ### S2-B1：audit_trail.py 实现（来自 master 概念）
-- [x] `lme_testing/audit_trail.py`：`build_audit_trail(session_dir, output_path)` 实现
+- [x] `src/lme_testing/audit_trail.py`：`build_audit_trail(session_dir, output_path)` 实现
 - [x] HTML output shows maker → checker → human decision chain per rule
 - [x] Works with existing `review_session.py` without modification
 
 **状态：** ✅ COMPLETE  
-**证据：** `lme_testing/audit_trail.py` 完整实现（267行），`build_audit_trail(session_dir, output_path) -> dict`；`review_session.py` 的 `finalize_session()` 已集成调用，输出到 `final/audit_trail.html`；生成失败不影响 session（graceful degradation）
+**证据：** `src/lme_testing/audit_trail.py` 完整实现（267行），`build_audit_trail(session_dir, output_path) -> dict`；`review_session.py` 的 `finalize_session()` 已集成调用，输出到 `final/audit_trail.html`；生成失败不影响 session（graceful degradation）
 
 ### S2-B2：case_compare.py 实现（来自 master 概念）
-- [x] `lme_testing/case_compare.py`：`build_case_compare(...)` 实现
+- [x] `src/lme_testing/case_compare.py`：`build_case_compare(...)` 实现
 - [x] HTML output highlights differences between two iterations
 - [x] Works with existing `review_session.py` without modification
 
 **状态：** ✅ COMPLETE  
-**证据：** `lme_testing/case_compare.py` 完整实现（216行），`build_case_compare(...)`；`review_session.py` 的 `_run_job()` 已集成调用，输出到 `iter<N>/rewrite/case_compare.html`；生成失败不影响 session（graceful degradation）
+**证据：** `src/lme_testing/case_compare.py` 完整实现（216行），`build_case_compare(...)`；`review_session.py` 的 `_run_job()` 已集成调用，输出到 `iter<N>/rewrite/case_compare.html`；生成失败不影响 session（graceful degradation）
 
 ### S2-A 系列：质量提升（取决于 Stage 1 数据）
 
@@ -187,10 +187,10 @@
 |------|------|------|
 | S2-T01: API 可靠性修复 | ✅ COMPLETE | requests session pooling + 异常类型检测 |
 | S2-T01: 全量 180-rule maker+checker 运行 | ✅ COMPLETE | 322 cases, 0 failures, 72.22% coverage |
-| S2-T01: 覆盖率分析 | ✅ COMPLETE | 见 `docs/s2t01_coverage_analysis.md` |
+| S2-T01: 覆盖率分析 | ✅ COMPLETE | 见 `docs/planning/s2t01_coverage_analysis.md` |
 | S2-T01: checker prompt v1.1 校准 | ✅ COMPLETE | 4 类 case type coverage_relevance 修复 |
 | S2-T01: SR-MR-064-A-1 coverage_eligible=false | ✅ COMPLETE | 源文档页19截断，无法修复 |
-| S2-T01: v1.5 重新运行验证覆盖率提升 | ✅ COMPLETE | 78.89%（142/180 fully covered），见 `docs/s2t01_coverage_analysis.md` |
+| S2-T01: v1.5 重新运行验证覆盖率提升 | ✅ COMPLETE | 78.89%（142/180 fully covered），见 `docs/planning/s2t01_coverage_analysis.md` |
 | Maker prompt 调优 | ✅ COMPLETE | v1.5 后剩余 gap 为证据约束或 LLM 非决定性 |
 | Oracle 实测验证 | ⏳ PENDING | 触发条件未满足 |
 
@@ -209,7 +209,7 @@
 - [x] 提供样例 feature：`deliverables/lme_mock_api/features/matching_rules/core_matching_rules.feature`
 - [x] 提供 lightweight BDD runner：`deliverables/lme_mock_api/run_bdd.py`
 - [x] 提供压缩包：`deliverables/lme_mock_api.zip`
-- [x] 文档化验证计划：`docs/mock_api_validation_plan.md`
+- [x] 文档化验证计划：`docs/planning/mock_api_validation_plan.md`
 
 **验证：**
 - `python -m unittest tests.test_mock_api` 在 `deliverables/lme_mock_api` 中通过（2 tests OK）
@@ -230,7 +230,7 @@
 - [x] 无 browser 时自动 skip
 
 **状态：** ✅ COMPLETE  
-**证据：** `tests/test_review_session_browser.py`；`docs/ui_test_plan.md`；`.venv\Scripts\python.exe -m unittest tests.test_review_session_browser -v` 通过（1 browser test）；`.venv\Scripts\python.exe -m unittest discover -v tests` 通过（181 tests）
+**证据：** `tests/test_review_session_browser.py`；`docs/planning/ui_test_plan.md`；`.venv\Scripts\python.exe -m unittest tests.test_review_session_browser -v` 通过（1 browser test）；`.venv\Scripts\python.exe -m unittest discover -v tests` 通过（181 tests）
 
 **边界：** 当前 browser E2E 覆盖 BDD/Scripts 主路径，不覆盖 submit/finalize browser flow。
 
@@ -258,3 +258,4 @@
 - [x] ✅ S2-D1　browser-level review UI E2E
 - [ ] ⏳ 真实 LME API 接入（Stage 3，待 VM 权限）
 - [ ] S2-E　LLM 非决定性稳定化（SR-MR-015-B3-4、SR-MR-071-C-1；可选，需明确 benchmark 成本）
+

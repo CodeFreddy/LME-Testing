@@ -259,7 +259,12 @@ class ReviewSessionBrowserE2ETests(unittest.TestCase):
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
         try:
-            with ChromeCdp(_find_chromium() or "", url, self.browser_tmp) as browser:
+            try:
+                browser_context = ChromeCdp(_find_chromium() or "", url, self.browser_tmp)
+                browser = browser_context.__enter__()
+            except (RuntimeError, TimeoutError) as exc:
+                self.skipTest(f"Chrome DevTools not available: {exc}")
+            try:
                 browser.wait_for("!!document.querySelector('#reviewRows tr')")
                 browser.eval("document.querySelector('[data-tab=\"bdd\"]').click()")
                 browser.wait_for("!!document.querySelector('#bddContent textarea[data-scenario]')")
@@ -317,6 +322,8 @@ class ReviewSessionBrowserE2ETests(unittest.TestCase):
                 browser.wait_for("document.getElementById('scriptsStatus').textContent.includes('匹配报告')")
                 browser.wait_for("_e2eMetric('Unmatched (Gaps)') === 1")
                 self.assertEqual(browser.eval("_e2eMetric('Exact Matches')"), 0)
+            finally:
+                browser_context.__exit__(None, None, None)
         finally:
             server.shutdown()
             server.server_close()
@@ -325,3 +332,4 @@ class ReviewSessionBrowserE2ETests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

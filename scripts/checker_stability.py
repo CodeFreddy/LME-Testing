@@ -31,8 +31,10 @@ import tempfile
 import time
 from pathlib import Path
 
-# Ensure lme_testing is importable
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Ensure local src-layout packages are importable when run as a script.
+ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT))
 
 from lme_testing.config import ProjectConfig, ProviderConfig, RoleDefaults, load_project_config
 from lme_testing.pipelines import run_checker_pipeline
@@ -423,3 +425,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+

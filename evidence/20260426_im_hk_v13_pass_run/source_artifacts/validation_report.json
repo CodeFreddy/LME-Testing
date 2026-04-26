@@ -1,0 +1,1355 @@
+{
+  "input_path": "artifacts\\im_hk_v13\\atomic_rules.json",
+  "semantic_rules_path": "artifacts\\im_hk_v13\\semantic_rules.json",
+  "total_rules": 164,
+  "validation_passed": true,
+  "schema_validation": {
+    "valid": true,
+    "valid_count": 164,
+    "invalid_count": 0,
+    "errors": []
+  },
+  "rule_type_validation": {
+    "total_rules": 164,
+    "valid_count": 164,
+    "invalid_count": 0,
+    "invalid_rules": []
+  },
+  "required_field_validation": {
+    "total_rules": 164,
+    "missing_count": 0,
+    "missing": []
+  },
+  "paragraph_id_validation": {
+    "total_rules": 164,
+    "present_count": 164,
+    "missing_count": 0,
+    "missing": [],
+    "unique_count": 70,
+    "duplicate_count": 94,
+    "duplicates": [
+      {
+        "paragraph_id": "MR-002-01",
+        "first_index": 1,
+        "duplicate_indices": [
+          1,
+          8
+        ],
+        "rule_ids": [
+          "MR-002-01",
+          "MR-002-01"
+        ]
+      },
+      {
+        "paragraph_id": "MR-003-B1-1",
+        "first_index": 2,
+        "duplicate_indices": [
+          2,
+          31
+        ],
+        "rule_ids": [
+          "MR-003-B1-1",
+          "MR-003-B1-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-003-B2-1",
+        "first_index": 3,
+        "duplicate_indices": [
+          3,
+          32
+        ],
+        "rule_ids": [
+          "MR-003-B2-1",
+          "MR-003-B2-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-A-1",
+        "first_index": 45,
+        "duplicate_indices": [
+          45,
+          48
+        ],
+        "rule_ids": [
+          "MR-012-A-1",
+          "MR-012-A-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-B-1",
+        "first_index": 46,
+        "duplicate_indices": [
+          46,
+          49
+        ],
+        "rule_ids": [
+          "MR-012-B-1",
+          "MR-012-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-A-1",
+        "first_index": 45,
+        "duplicate_indices": [
+          45,
+          50
+        ],
+        "rule_ids": [
+          "MR-012-A-1",
+          "MR-012-A-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-B-1",
+        "first_index": 46,
+        "duplicate_indices": [
+          46,
+          51
+        ],
+        "rule_ids": [
+          "MR-012-B-1",
+          "MR-012-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-C-1",
+        "first_index": 47,
+        "duplicate_indices": [
+          47,
+          52
+        ],
+        "rule_ids": [
+          "MR-012-C-1",
+          "MR-012-C-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-A-1",
+        "first_index": 45,
+        "duplicate_indices": [
+          45,
+          54
+        ],
+        "rule_ids": [
+          "MR-012-A-1",
+          "MR-012-A-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-B-1",
+        "first_index": 46,
+        "duplicate_indices": [
+          46,
+          55
+        ],
+        "rule_ids": [
+          "MR-012-B-1",
+          "MR-012-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-C-1",
+        "first_index": 47,
+        "duplicate_indices": [
+          47,
+          56
+        ],
+        "rule_ids": [
+          "MR-012-C-1",
+          "MR-012-C-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-A-1",
+        "first_index": 45,
+        "duplicate_indices": [
+          45,
+          57
+        ],
+        "rule_ids": [
+          "MR-012-A-1",
+          "MR-012-A-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-B-1",
+        "first_index": 46,
+        "duplicate_indices": [
+          46,
+          58
+        ],
+        "rule_ids": [
+          "MR-012-B-1",
+          "MR-012-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-C-1",
+        "first_index": 47,
+        "duplicate_indices": [
+          47,
+          59
+        ],
+        "rule_ids": [
+          "MR-012-C-1",
+          "MR-012-C-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-A-1",
+        "first_index": 45,
+        "duplicate_indices": [
+          45,
+          60
+        ],
+        "rule_ids": [
+          "MR-012-A-1",
+          "MR-012-A-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-B-1",
+        "first_index": 46,
+        "duplicate_indices": [
+          46,
+          61
+        ],
+        "rule_ids": [
+          "MR-012-B-1",
+          "MR-012-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-A-1",
+        "first_index": 45,
+        "duplicate_indices": [
+          45,
+          65
+        ],
+        "rule_ids": [
+          "MR-012-A-1",
+          "MR-012-A-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-B-1",
+        "first_index": 46,
+        "duplicate_indices": [
+          46,
+          66
+        ],
+        "rule_ids": [
+          "MR-012-B-1",
+          "MR-012-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-C-1",
+        "first_index": 47,
+        "duplicate_indices": [
+          47,
+          67
+        ],
+        "rule_ids": [
+          "MR-012-C-1",
+          "MR-012-C-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-D-1",
+        "first_index": 53,
+        "duplicate_indices": [
+          53,
+          68
+        ],
+        "rule_ids": [
+          "MR-012-D-1",
+          "MR-012-D-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-A-1",
+        "first_index": 45,
+        "duplicate_indices": [
+          45,
+          69
+        ],
+        "rule_ids": [
+          "MR-012-A-1",
+          "MR-012-A-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-B-1",
+        "first_index": 46,
+        "duplicate_indices": [
+          46,
+          70
+        ],
+        "rule_ids": [
+          "MR-012-B-1",
+          "MR-012-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-C-1",
+        "first_index": 47,
+        "duplicate_indices": [
+          47,
+          71
+        ],
+        "rule_ids": [
+          "MR-012-C-1",
+          "MR-012-C-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-A-1",
+        "first_index": 45,
+        "duplicate_indices": [
+          45,
+          72
+        ],
+        "rule_ids": [
+          "MR-012-A-1",
+          "MR-012-A-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-B-1",
+        "first_index": 46,
+        "duplicate_indices": [
+          46,
+          73
+        ],
+        "rule_ids": [
+          "MR-012-B-1",
+          "MR-012-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-C-1",
+        "first_index": 47,
+        "duplicate_indices": [
+          47,
+          74
+        ],
+        "rule_ids": [
+          "MR-012-C-1",
+          "MR-012-C-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-B-1",
+        "first_index": 46,
+        "duplicate_indices": [
+          46,
+          75
+        ],
+        "rule_ids": [
+          "MR-012-B-1",
+          "MR-012-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-012-A-1",
+        "first_index": 45,
+        "duplicate_indices": [
+          45,
+          76
+        ],
+        "rule_ids": [
+          "MR-012-A-1",
+          "MR-012-A-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-B-1",
+        "first_index": 87,
+        "duplicate_indices": [
+          87,
+          93
+        ],
+        "rule_ids": [
+          "MR-004-B-1",
+          "MR-004-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-C-1",
+        "first_index": 88,
+        "duplicate_indices": [
+          88,
+          94
+        ],
+        "rule_ids": [
+          "MR-004-C-1",
+          "MR-004-C-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-A-1",
+        "first_index": 86,
+        "duplicate_indices": [
+          86,
+          95
+        ],
+        "rule_ids": [
+          "MR-004-A-1",
+          "MR-004-A-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-B-1",
+        "first_index": 87,
+        "duplicate_indices": [
+          87,
+          96
+        ],
+        "rule_ids": [
+          "MR-004-B-1",
+          "MR-004-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-C-1",
+        "first_index": 88,
+        "duplicate_indices": [
+          88,
+          97
+        ],
+        "rule_ids": [
+          "MR-004-C-1",
+          "MR-004-C-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-D-1",
+        "first_index": 89,
+        "duplicate_indices": [
+          89,
+          98
+        ],
+        "rule_ids": [
+          "MR-004-D-1",
+          "MR-004-D-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-1",
+        "first_index": 90,
+        "duplicate_indices": [
+          90,
+          99
+        ],
+        "rule_ids": [
+          "MR-004-E-1",
+          "MR-004-E-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-2",
+        "first_index": 91,
+        "duplicate_indices": [
+          91,
+          100
+        ],
+        "rule_ids": [
+          "MR-004-E-2",
+          "MR-004-E-2"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-3",
+        "first_index": 92,
+        "duplicate_indices": [
+          92,
+          101
+        ],
+        "rule_ids": [
+          "MR-004-E-3",
+          "MR-004-E-3"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-D-1",
+        "first_index": 89,
+        "duplicate_indices": [
+          89,
+          104
+        ],
+        "rule_ids": [
+          "MR-004-D-1",
+          "MR-004-D-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-1",
+        "first_index": 90,
+        "duplicate_indices": [
+          90,
+          105
+        ],
+        "rule_ids": [
+          "MR-004-E-1",
+          "MR-004-E-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-A-1",
+        "first_index": 86,
+        "duplicate_indices": [
+          86,
+          106
+        ],
+        "rule_ids": [
+          "MR-004-A-1",
+          "MR-004-A-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-B-1",
+        "first_index": 87,
+        "duplicate_indices": [
+          87,
+          107
+        ],
+        "rule_ids": [
+          "MR-004-B-1",
+          "MR-004-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-C-1",
+        "first_index": 88,
+        "duplicate_indices": [
+          88,
+          108
+        ],
+        "rule_ids": [
+          "MR-004-C-1",
+          "MR-004-C-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-D-1",
+        "first_index": 89,
+        "duplicate_indices": [
+          89,
+          109
+        ],
+        "rule_ids": [
+          "MR-004-D-1",
+          "MR-004-D-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-1",
+        "first_index": 90,
+        "duplicate_indices": [
+          90,
+          110
+        ],
+        "rule_ids": [
+          "MR-004-E-1",
+          "MR-004-E-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-2",
+        "first_index": 91,
+        "duplicate_indices": [
+          91,
+          111
+        ],
+        "rule_ids": [
+          "MR-004-E-2",
+          "MR-004-E-2"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-3",
+        "first_index": 92,
+        "duplicate_indices": [
+          92,
+          112
+        ],
+        "rule_ids": [
+          "MR-004-E-3",
+          "MR-004-E-3"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-4",
+        "first_index": 102,
+        "duplicate_indices": [
+          102,
+          113
+        ],
+        "rule_ids": [
+          "MR-004-E-4",
+          "MR-004-E-4"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-5",
+        "first_index": 103,
+        "duplicate_indices": [
+          103,
+          114
+        ],
+        "rule_ids": [
+          "MR-004-E-5",
+          "MR-004-E-5"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-A-1",
+        "first_index": 86,
+        "duplicate_indices": [
+          86,
+          115
+        ],
+        "rule_ids": [
+          "MR-004-A-1",
+          "MR-004-A-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-B-1",
+        "first_index": 87,
+        "duplicate_indices": [
+          87,
+          116
+        ],
+        "rule_ids": [
+          "MR-004-B-1",
+          "MR-004-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-C-1",
+        "first_index": 88,
+        "duplicate_indices": [
+          88,
+          117
+        ],
+        "rule_ids": [
+          "MR-004-C-1",
+          "MR-004-C-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-D-1",
+        "first_index": 89,
+        "duplicate_indices": [
+          89,
+          118
+        ],
+        "rule_ids": [
+          "MR-004-D-1",
+          "MR-004-D-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-1",
+        "first_index": 90,
+        "duplicate_indices": [
+          90,
+          119
+        ],
+        "rule_ids": [
+          "MR-004-E-1",
+          "MR-004-E-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-2",
+        "first_index": 91,
+        "duplicate_indices": [
+          91,
+          120
+        ],
+        "rule_ids": [
+          "MR-004-E-2",
+          "MR-004-E-2"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-3",
+        "first_index": 92,
+        "duplicate_indices": [
+          92,
+          121
+        ],
+        "rule_ids": [
+          "MR-004-E-3",
+          "MR-004-E-3"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-4",
+        "first_index": 102,
+        "duplicate_indices": [
+          102,
+          122
+        ],
+        "rule_ids": [
+          "MR-004-E-4",
+          "MR-004-E-4"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-5",
+        "first_index": 103,
+        "duplicate_indices": [
+          103,
+          123
+        ],
+        "rule_ids": [
+          "MR-004-E-5",
+          "MR-004-E-5"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-A-1",
+        "first_index": 86,
+        "duplicate_indices": [
+          86,
+          124
+        ],
+        "rule_ids": [
+          "MR-004-A-1",
+          "MR-004-A-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-B-1",
+        "first_index": 87,
+        "duplicate_indices": [
+          87,
+          125
+        ],
+        "rule_ids": [
+          "MR-004-B-1",
+          "MR-004-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-C-1",
+        "first_index": 88,
+        "duplicate_indices": [
+          88,
+          126
+        ],
+        "rule_ids": [
+          "MR-004-C-1",
+          "MR-004-C-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-D-1",
+        "first_index": 89,
+        "duplicate_indices": [
+          89,
+          127
+        ],
+        "rule_ids": [
+          "MR-004-D-1",
+          "MR-004-D-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-1",
+        "first_index": 90,
+        "duplicate_indices": [
+          90,
+          128
+        ],
+        "rule_ids": [
+          "MR-004-E-1",
+          "MR-004-E-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-2",
+        "first_index": 91,
+        "duplicate_indices": [
+          91,
+          129
+        ],
+        "rule_ids": [
+          "MR-004-E-2",
+          "MR-004-E-2"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-3",
+        "first_index": 92,
+        "duplicate_indices": [
+          92,
+          130
+        ],
+        "rule_ids": [
+          "MR-004-E-3",
+          "MR-004-E-3"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-4",
+        "first_index": 102,
+        "duplicate_indices": [
+          102,
+          131
+        ],
+        "rule_ids": [
+          "MR-004-E-4",
+          "MR-004-E-4"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-B-1",
+        "first_index": 87,
+        "duplicate_indices": [
+          87,
+          132
+        ],
+        "rule_ids": [
+          "MR-004-B-1",
+          "MR-004-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-C-1",
+        "first_index": 88,
+        "duplicate_indices": [
+          88,
+          133
+        ],
+        "rule_ids": [
+          "MR-004-C-1",
+          "MR-004-C-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-D-1",
+        "first_index": 89,
+        "duplicate_indices": [
+          89,
+          134
+        ],
+        "rule_ids": [
+          "MR-004-D-1",
+          "MR-004-D-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-1",
+        "first_index": 90,
+        "duplicate_indices": [
+          90,
+          135
+        ],
+        "rule_ids": [
+          "MR-004-E-1",
+          "MR-004-E-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-A-1",
+        "first_index": 86,
+        "duplicate_indices": [
+          86,
+          136
+        ],
+        "rule_ids": [
+          "MR-004-A-1",
+          "MR-004-A-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-B-1",
+        "first_index": 87,
+        "duplicate_indices": [
+          87,
+          137
+        ],
+        "rule_ids": [
+          "MR-004-B-1",
+          "MR-004-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-C-1",
+        "first_index": 88,
+        "duplicate_indices": [
+          88,
+          138
+        ],
+        "rule_ids": [
+          "MR-004-C-1",
+          "MR-004-C-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-D-1",
+        "first_index": 89,
+        "duplicate_indices": [
+          89,
+          139
+        ],
+        "rule_ids": [
+          "MR-004-D-1",
+          "MR-004-D-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-1",
+        "first_index": 90,
+        "duplicate_indices": [
+          90,
+          140
+        ],
+        "rule_ids": [
+          "MR-004-E-1",
+          "MR-004-E-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-2",
+        "first_index": 91,
+        "duplicate_indices": [
+          91,
+          141
+        ],
+        "rule_ids": [
+          "MR-004-E-2",
+          "MR-004-E-2"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-3",
+        "first_index": 92,
+        "duplicate_indices": [
+          92,
+          142
+        ],
+        "rule_ids": [
+          "MR-004-E-3",
+          "MR-004-E-3"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-4",
+        "first_index": 102,
+        "duplicate_indices": [
+          102,
+          143
+        ],
+        "rule_ids": [
+          "MR-004-E-4",
+          "MR-004-E-4"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-B-1",
+        "first_index": 87,
+        "duplicate_indices": [
+          87,
+          144
+        ],
+        "rule_ids": [
+          "MR-004-B-1",
+          "MR-004-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-C-1",
+        "first_index": 88,
+        "duplicate_indices": [
+          88,
+          145
+        ],
+        "rule_ids": [
+          "MR-004-C-1",
+          "MR-004-C-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-A-1",
+        "first_index": 86,
+        "duplicate_indices": [
+          86,
+          148
+        ],
+        "rule_ids": [
+          "MR-004-A-1",
+          "MR-004-A-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-B-1",
+        "first_index": 87,
+        "duplicate_indices": [
+          87,
+          149
+        ],
+        "rule_ids": [
+          "MR-004-B-1",
+          "MR-004-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-C-1",
+        "first_index": 88,
+        "duplicate_indices": [
+          88,
+          150
+        ],
+        "rule_ids": [
+          "MR-004-C-1",
+          "MR-004-C-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-D-1",
+        "first_index": 89,
+        "duplicate_indices": [
+          89,
+          151
+        ],
+        "rule_ids": [
+          "MR-004-D-1",
+          "MR-004-D-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-A-1",
+        "first_index": 86,
+        "duplicate_indices": [
+          86,
+          152
+        ],
+        "rule_ids": [
+          "MR-004-A-1",
+          "MR-004-A-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-1",
+        "first_index": 90,
+        "duplicate_indices": [
+          90,
+          153
+        ],
+        "rule_ids": [
+          "MR-004-E-1",
+          "MR-004-E-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-B-1",
+        "first_index": 87,
+        "duplicate_indices": [
+          87,
+          154
+        ],
+        "rule_ids": [
+          "MR-004-B-1",
+          "MR-004-B-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-C-1",
+        "first_index": 88,
+        "duplicate_indices": [
+          88,
+          155
+        ],
+        "rule_ids": [
+          "MR-004-C-1",
+          "MR-004-C-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-D-1",
+        "first_index": 89,
+        "duplicate_indices": [
+          89,
+          156
+        ],
+        "rule_ids": [
+          "MR-004-D-1",
+          "MR-004-D-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-1",
+        "first_index": 90,
+        "duplicate_indices": [
+          90,
+          157
+        ],
+        "rule_ids": [
+          "MR-004-E-1",
+          "MR-004-E-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-1",
+        "first_index": 90,
+        "duplicate_indices": [
+          90,
+          158
+        ],
+        "rule_ids": [
+          "MR-004-E-1",
+          "MR-004-E-1"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-2",
+        "first_index": 91,
+        "duplicate_indices": [
+          91,
+          159
+        ],
+        "rule_ids": [
+          "MR-004-E-2",
+          "MR-004-E-2"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-3",
+        "first_index": 92,
+        "duplicate_indices": [
+          92,
+          160
+        ],
+        "rule_ids": [
+          "MR-004-E-3",
+          "MR-004-E-3"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-4",
+        "first_index": 102,
+        "duplicate_indices": [
+          102,
+          161
+        ],
+        "rule_ids": [
+          "MR-004-E-4",
+          "MR-004-E-4"
+        ]
+      },
+      {
+        "paragraph_id": "MR-004-E-5",
+        "first_index": 103,
+        "duplicate_indices": [
+          103,
+          162
+        ],
+        "rule_ids": [
+          "MR-004-E-5",
+          "MR-004-E-5"
+        ]
+      }
+    ]
+  },
+  "duplicate_detection": {
+    "total_rules": 164,
+    "duplicate_group_count": 8,
+    "duplicate_groups": [
+      {
+        "canonical_text": "4. appendix.........................................................................................",
+        "rule_ids": [
+          "MR-004-B1-1",
+          "MR-004-B2-1"
+        ],
+        "clause_ids": [
+          "MR-004"
+        ],
+        "count": 2
+      },
+      {
+        "canonical_text": "2. the layout of the file is shown below: rpf01: this file includes instrument price returns for his",
+        "rule_ids": [
+          "MR-002-B3-1",
+          "MR-002-B6-1",
+          "MR-002-B7-1",
+          "MR-002-B8-1",
+          "MR-002-B9-1",
+          "MR-002-B10-1",
+          "MR-002-B11-1",
+          "MR-002-B12-1",
+          "MR-002-B13-1",
+          "MR-002-B14-1",
+          "MR-002-B15-1",
+          "MR-002-B16-1",
+          "MR-002-B17-1",
+          "MR-002-B18-1",
+          "MR-002-B19-1",
+          "MR-002-B20-1"
+        ],
+        "clause_ids": [
+          "MR-002"
+        ],
+        "count": 16
+      },
+      {
+        "canonical_text": "3. calculation of total mtm and margin requirement 3.1 required inputs 3.1.1 risk parameters and mar",
+        "rule_ids": [
+          "MR-003-B2-1",
+          "MR-003-B3-1",
+          "MR-003-B4-1",
+          "MR-003-B5-1",
+          "MR-003-B6-1",
+          "MR-003-B7-1",
+          "MR-003-B8-1",
+          "MR-003-B9-1",
+          "MR-003-B10-1",
+          "MR-003-B11-1",
+          "MR-003-B12-1",
+          "MR-003-B13-1"
+        ],
+        "clause_ids": [
+          "MR-003"
+        ],
+        "count": 12
+      },
+      {
+        "canonical_text": "12. when using the information in the “marginable position report”, please note that: 6 mtm refers t",
+        "rule_ids": [
+          "MR-012-A-1",
+          "MR-012-B-1",
+          "MR-012-C-1",
+          "MR-012-A-1",
+          "MR-012-B-1",
+          "MR-012-A-1",
+          "MR-012-B-1",
+          "MR-012-C-1",
+          "MR-012-D-1",
+          "MR-012-A-1",
+          "MR-012-B-1",
+          "MR-012-C-1",
+          "MR-012-A-1",
+          "MR-012-B-1",
+          "MR-012-C-1",
+          "MR-012-A-1",
+          "MR-012-A-1",
+          "MR-012-B-1",
+          "MR-012-C-1",
+          "MR-012-D-1",
+          "MR-012-A-1",
+          "MR-012-B-1",
+          "MR-012-C-1",
+          "MR-012-A-1",
+          "MR-012-B-1",
+          "MR-012-C-1",
+          "MR-012-B-1"
+        ],
+        "clause_ids": [
+          "MR-012"
+        ],
+        "count": 27
+      },
+      {
+        "canonical_text": "hkscc will notify cps before the implementation.",
+        "rule_ids": [
+          "MR-012-A-2",
+          "MR-012-A-10"
+        ],
+        "clause_ids": [
+          "MR-012"
+        ],
+        "count": 2
+      },
+      {
+        "canonical_text": "4. appendix 4.1 detailed calculation on position limit add-on position limit add-on assumes hypothet",
+        "rule_ids": [
+          "MR-004-A-1",
+          "MR-004-B-1",
+          "MR-004-C-1",
+          "MR-004-D-1",
+          "MR-004-B-1",
+          "MR-004-C-1",
+          "MR-004-A-1",
+          "MR-004-B-1",
+          "MR-004-C-1",
+          "MR-004-D-1",
+          "MR-004-D-1",
+          "MR-004-E-1",
+          "MR-004-A-1",
+          "MR-004-B-1",
+          "MR-004-C-1",
+          "MR-004-D-1",
+          "MR-004-A-1",
+          "MR-004-B-1",
+          "MR-004-C-1",
+          "MR-004-D-1",
+          "MR-004-A-1",
+          "MR-004-B-1",
+          "MR-004-C-1",
+          "MR-004-D-1",
+          "MR-004-B-1",
+          "MR-004-C-1",
+          "MR-004-D-1",
+          "MR-004-E-1",
+          "MR-004-A-1",
+          "MR-004-B-1",
+          "MR-004-C-1",
+          "MR-004-D-1",
+          "MR-004-B-1",
+          "MR-004-A-1",
+          "MR-004-B-1",
+          "MR-004-C-1",
+          "MR-004-D-1",
+          "MR-004-A-1",
+          "MR-004-E-1",
+          "MR-004-B-1",
+          "MR-004-D-1",
+          "MR-004-E-1"
+        ],
+        "clause_ids": [
+          "MR-004"
+        ],
+        "count": 42
+      },
+      {
+        "canonical_text": "for positions that require the adjustment, the new position quantity after adjustment will be equal ",
+        "rule_ids": [
+          "MR-004-E-2",
+          "MR-004-E-3"
+        ],
+        "clause_ids": [
+          "MR-004"
+        ],
+        "count": 2
+      },
+      {
+        "canonical_text": "supposing a cp trades instrument(stock) with corporate action announcement, the original traded posi",
+        "rule_ids": [
+          "MR-004-E-2",
+          "MR-004-E-2"
+        ],
+        "clause_ids": [
+          "MR-004"
+        ],
+        "count": 2
+      }
+    ]
+  },
+  "semantic_schema_validation": {
+    "valid": true,
+    "valid_count": 164,
+    "invalid_count": 0,
+    "errors": []
+  },
+  "summary": {
+    "total_invalid": 0,
+    "validation_passed": true,
+    "blocked": false
+  }
+}

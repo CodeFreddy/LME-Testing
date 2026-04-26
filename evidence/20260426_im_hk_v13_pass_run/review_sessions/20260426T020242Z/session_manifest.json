@@ -1,0 +1,37 @@
+{
+  "session_id": "20260426T020242Z",
+  "status": "finalized",
+  "rules_path": "C:\\Codes\\GenAI\\LME-Testing\\artifacts\\im_hk_v13\\semantic_rules.json",
+  "current_iteration": 0,
+  "current_maker_cases_path": "C:\\Codes\\GenAI\\LME-Testing\\runs\\im_hk_v13\\maker\\20260425T221152Z\\maker_cases.jsonl",
+  "current_checker_reviews_path": "C:\\Codes\\GenAI\\LME-Testing\\runs\\im_hk_v13\\checker\\20260426T002536Z\\checker_reviews.jsonl",
+  "current_report_path": "runs\\im_hk_v13\\review_sessions\\20260426T020242Z\\iterations\\000\\report\\report.html",
+  "normalized_bdd_path": "C:\\Codes\\GenAI\\LME-Testing\\runs\\im_hk_v13\\bdd_deterministic\\20260426T015751Z\\normalized_bdd.jsonl",
+  "step_registry_path": "C:\\Codes\\GenAI\\LME-Testing\\runs\\im_hk_v13\\step-registry\\20260426T015803Z\\step_visibility.json",
+  "history": [],
+  "iterations": {
+    "0": {
+      "iteration": 0,
+      "maker_cases_path": "C:\\Codes\\GenAI\\LME-Testing\\runs\\im_hk_v13\\maker\\20260425T221152Z\\maker_cases.jsonl",
+      "checker_reviews_path": "C:\\Codes\\GenAI\\LME-Testing\\runs\\im_hk_v13\\checker\\20260426T002536Z\\checker_reviews.jsonl",
+      "report_path": "runs\\im_hk_v13\\review_sessions\\20260426T020242Z\\iterations\\000\\report\\report.html",
+      "human_reviews_latest_path": "runs\\im_hk_v13\\review_sessions\\20260426T020242Z\\iterations\\000\\reviews\\human_reviews_latest.json",
+      "rewrite_summary_path": null,
+      "checker_summary_path": "C:\\Codes\\GenAI\\LME-Testing\\runs\\im_hk_v13\\checker\\20260426T002536Z\\summary.json",
+      "maker_summary_path": "C:\\Codes\\GenAI\\LME-Testing\\runs\\im_hk_v13\\maker\\20260425T221152Z\\summary.json",
+      "coverage_report_path": "C:\\Codes\\GenAI\\LME-Testing\\runs\\im_hk_v13\\checker\\20260426T002536Z\\coverage_report.json",
+      "normalized_bdd_path": "C:\\Codes\\GenAI\\LME-Testing\\runs\\im_hk_v13\\bdd_deterministic\\20260426T015751Z\\normalized_bdd.jsonl",
+      "step_registry_path": "C:\\Codes\\GenAI\\LME-Testing\\runs\\im_hk_v13\\step-registry\\20260426T015803Z\\step_visibility.json",
+      "stage_gates": {
+        "review_decided": false,
+        "bdd_edited": false,
+        "scripts_viewed": false
+      }
+    }
+  },
+  "stage_gates": {
+    "review_decided": false,
+    "bdd_edited": false,
+    "scripts_viewed": false
+  }
+}

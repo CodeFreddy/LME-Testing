@@ -12,6 +12,7 @@ from schemas import (
     validate_checker_output,
     validate_executable_scenario,
 )
+from lme_testing.schemas import SchemaError, validate_maker_payload
 
 
 def _fixture_path(name: str) -> Path:
@@ -307,6 +308,44 @@ class MakerOutputSchemaTests(unittest.TestCase):
             errors = validate_maker_output(artifact)
             self.assertGreater(len(errors), 0)
 
+    def test_testable_maker_payload_rejects_empty_scenarios(self) -> None:
+        payload = {
+            "results": [
+                {
+                    "semantic_rule_id": "SR-MR-001-01",
+                    "requirement_ids": ["MR-001-01"],
+                    "feature": "Calculation rule",
+                    "scenarios": [],
+                }
+            ]
+        }
+        with self.assertRaises(SchemaError):
+            validate_maker_payload(
+                payload,
+                expected_rule_ids=["SR-MR-001-01"],
+                expected_required_case_types={"SR-MR-001-01": ["positive", "boundary", "data_validation"]},
+                reference_only_rules=set(),
+            )
+
+    def test_reference_only_maker_payload_allows_empty_scenarios(self) -> None:
+        payload = {
+            "results": [
+                {
+                    "semantic_rule_id": "SR-MR-001-01",
+                    "requirement_ids": ["MR-001-01"],
+                    "feature": "Reference only",
+                    "scenarios": [],
+                }
+            ]
+        }
+        result = validate_maker_payload(
+            payload,
+            expected_rule_ids=["SR-MR-001-01"],
+            expected_required_case_types={"SR-MR-001-01": []},
+            reference_only_rules={"SR-MR-001-01"},
+        )
+        self.assertEqual(result, payload)
+
 
 class CheckerOutputSchemaTests(unittest.TestCase):
     def test_valid_checker_output_passes(self) -> None:
@@ -328,3 +367,4 @@ class CheckerOutputSchemaTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

@@ -1,0 +1,1069 @@
+[
+  {
+    "semantic_rule_id": "SR-MR-001-01",
+    "version": "1.0",
+    "source": {
+      "doc_id": "im_hk_v13",
+      "doc_title": "Initial Margin Calculation Guide HKv13",
+      "doc_version": "HKv13",
+      "section": "Initial Margin Calculation Guide HKv13",
+      "clause_refs": [
+        "1"
+      ],
+      "atomic_rule_ids": [
+        "MR-001-01"
+      ],
+      "pages": [
+        2
+      ]
+    },
+    "classification": {
+      "rule_type": "reference_only",
+      "rule_tags": [
+        "matching"
+      ],
+      "testability": "non_testable",
+      "priority": "high",
+      "coverage_eligible": false
+    },
+    "statement": {
+      "actor": {
+        "value": "unspecified_actor",
+        "source_type": "inferred"
+      },
+      "action": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "object": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "conditions": [],
+      "constraints": [],
+      "outcome": {
+        "kind": "informational_only",
+        "expected_state": null,
+        "details": {}
+      },
+      "exceptions": []
+    },
+    "type_payload": {
+      "reference_only": {
+        "reason": "contextual_explanation_only"
+      }
+    },
+    "execution_mapping": {
+      "business_inputs": [],
+      "observable_outputs": [],
+      "system_events": [],
+      "preconditions_for_execution": [],
+      "postconditions_for_execution": [
+        "reference_only"
+      ],
+      "dsl_assertions": []
+    },
+    "evidence": [
+      {
+        "target": "statement",
+        "quote": "1. INTRODUCTION............................................................................................................... 4",
+        "page": 2,
+        "atomic_rule_id": "MR-001-01"
+      }
+    ],
+    "review": {
+      "confidence": 0.5,
+      "inference_flags": [
+        "first_pass_semantic_generation"
+      ],
+      "ambiguities": []
+    },
+    "test_design_hints": {
+      "gherkin_intent": "1. INTRODUCTION............................................................................................................... 4",
+      "positive_scenarios": [
+        "happy path for reference_only"
+      ],
+      "negative_scenarios": [],
+      "boundary_scenarios": [],
+      "data_requirements": [
+        "matching"
+      ],
+      "oracle_notes": [
+        "First-pass machine-generated semantic rule."
+      ]
+    }
+  },
+  {
+    "semantic_rule_id": "SR-MR-002-B1-2",
+    "version": "1.0",
+    "source": {
+      "doc_id": "im_hk_v13",
+      "doc_title": "Initial Margin Calculation Guide HKv13",
+      "doc_version": "HKv13",
+      "section": "Initial Margin Calculation Guide HKv13",
+      "clause_refs": [
+        "2"
+      ],
+      "atomic_rule_ids": [
+        "MR-002-B1-2"
+      ],
+      "pages": [
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    "classification": {
+      "rule_type": "reference_only",
+      "rule_tags": [
+        "matching"
+      ],
+      "testability": "non_testable",
+      "priority": "high",
+      "coverage_eligible": false
+    },
+    "statement": {
+      "actor": {
+        "value": "unspecified_actor",
+        "source_type": "inferred"
+      },
+      "action": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "object": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "conditions": [],
+      "constraints": [],
+      "outcome": {
+        "kind": "informational_only",
+        "expected_state": null,
+        "details": {}
+      },
+      "exceptions": []
+    },
+    "type_payload": {
+      "reference_only": {
+        "reason": "contextual_explanation_only"
+      }
+    },
+    "execution_mapping": {
+      "business_inputs": [],
+      "observable_outputs": [],
+      "system_events": [],
+      "preconditions_for_execution": [],
+      "postconditions_for_execution": [
+        "reference_only"
+      ],
+      "dsl_assertions": []
+    },
+    "evidence": [
+      {
+        "target": "statement",
+        "quote": "HKSCC will notify CPs before any change is made in accordance with applicable General Rules of CCASS/CCASS Operational Procedures. 2 The dissemination time is around 9:00 p.m.",
+        "page": 5,
+        "atomic_rule_id": "MR-002-B1-2"
+      }
+    ],
+    "review": {
+      "confidence": 0.5,
+      "inference_flags": [
+        "first_pass_semantic_generation"
+      ],
+      "ambiguities": []
+    },
+    "test_design_hints": {
+      "gherkin_intent": "HKSCC will notify CPs before any change is made in accordance with applicable General Rules of CCASS/CCASS Operational Procedures. 2 The dissemination time is around 9:00 p.m.",
+      "positive_scenarios": [
+        "happy path for reference_only"
+      ],
+      "negative_scenarios": [],
+      "boundary_scenarios": [],
+      "data_requirements": [
+        "matching"
+      ],
+      "oracle_notes": [
+        "First-pass machine-generated semantic rule."
+      ]
+    }
+  },
+  {
+    "semantic_rule_id": "SR-MR-012-B-4",
+    "version": "1.0",
+    "source": {
+      "doc_id": "im_hk_v13",
+      "doc_title": "Initial Margin Calculation Guide HKv13",
+      "doc_version": "HKv13",
+      "section": "Initial Margin Calculation Guide HKv13",
+      "clause_refs": [
+        "12"
+      ],
+      "atomic_rule_ids": [
+        "MR-012-B-4"
+      ],
+      "pages": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "classification": {
+      "rule_type": "reference_only",
+      "rule_tags": [
+        "matching"
+      ],
+      "testability": "non_testable",
+      "priority": "high",
+      "coverage_eligible": false
+    },
+    "statement": {
+      "actor": {
+        "value": "unspecified_actor",
+        "source_type": "inferred"
+      },
+      "action": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "object": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "conditions": [],
+      "constraints": [],
+      "outcome": {
+        "kind": "informational_only",
+        "expected_state": null,
+        "details": {}
+      },
+      "exceptions": []
+    },
+    "type_payload": {
+      "reference_only": {
+        "reason": "contextual_explanation_only"
+      }
+    },
+    "execution_mapping": {
+      "business_inputs": [],
+      "observable_outputs": [],
+      "system_events": [],
+      "preconditions_for_execution": [],
+      "postconditions_for_execution": [
+        "reference_only"
+      ],
+      "dsl_assertions": []
+    },
+    "evidence": [
+      {
+        "target": "statement",
+        "quote": "HKSCC will notify the market before any change is made.",
+        "page": 8,
+        "atomic_rule_id": "MR-012-B-4"
+      }
+    ],
+    "review": {
+      "confidence": 0.5,
+      "inference_flags": [
+        "first_pass_semantic_generation"
+      ],
+      "ambiguities": []
+    },
+    "test_design_hints": {
+      "gherkin_intent": "HKSCC will notify the market before any change is made.",
+      "positive_scenarios": [
+        "happy path for reference_only"
+      ],
+      "negative_scenarios": [],
+      "boundary_scenarios": [],
+      "data_requirements": [
+        "matching"
+      ],
+      "oracle_notes": [
+        "First-pass machine-generated semantic rule."
+      ]
+    }
+  },
+  {
+    "semantic_rule_id": "SR-MR-012-A-2",
+    "version": "1.0",
+    "source": {
+      "doc_id": "im_hk_v13",
+      "doc_title": "Initial Margin Calculation Guide HKv13",
+      "doc_version": "HKv13",
+      "section": "Initial Margin Calculation Guide HKv13",
+      "clause_refs": [
+        "12"
+      ],
+      "atomic_rule_ids": [
+        "MR-012-A-2"
+      ],
+      "pages": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "classification": {
+      "rule_type": "reference_only",
+      "rule_tags": [
+        "matching"
+      ],
+      "testability": "non_testable",
+      "priority": "high",
+      "coverage_eligible": false
+    },
+    "statement": {
+      "actor": {
+        "value": "unspecified_actor",
+        "source_type": "inferred"
+      },
+      "action": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "object": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "conditions": [],
+      "constraints": [],
+      "outcome": {
+        "kind": "informational_only",
+        "expected_state": null,
+        "details": {}
+      },
+      "exceptions": []
+    },
+    "type_payload": {
+      "reference_only": {
+        "reason": "contextual_explanation_only"
+      }
+    },
+    "execution_mapping": {
+      "business_inputs": [],
+      "observable_outputs": [],
+      "system_events": [],
+      "preconditions_for_execution": [],
+      "postconditions_for_execution": [
+        "reference_only"
+      ],
+      "dsl_assertions": []
+    },
+    "evidence": [
+      {
+        "target": "statement",
+        "quote": "HKSCC will notify CPs before the implementation.",
+        "page": 8,
+        "atomic_rule_id": "MR-012-A-2"
+      }
+    ],
+    "review": {
+      "confidence": 0.5,
+      "inference_flags": [
+        "first_pass_semantic_generation"
+      ],
+      "ambiguities": []
+    },
+    "test_design_hints": {
+      "gherkin_intent": "HKSCC will notify CPs before the implementation.",
+      "positive_scenarios": [
+        "happy path for reference_only"
+      ],
+      "negative_scenarios": [],
+      "boundary_scenarios": [],
+      "data_requirements": [
+        "matching"
+      ],
+      "oracle_notes": [
+        "First-pass machine-generated semantic rule."
+      ]
+    }
+  },
+  {
+    "semantic_rule_id": "SR-MR-012-A-6",
+    "version": "1.0",
+    "source": {
+      "doc_id": "im_hk_v13",
+      "doc_title": "Initial Margin Calculation Guide HKv13",
+      "doc_version": "HKv13",
+      "section": "Initial Margin Calculation Guide HKv13",
+      "clause_refs": [
+        "12"
+      ],
+      "atomic_rule_ids": [
+        "MR-012-A-6"
+      ],
+      "pages": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "classification": {
+      "rule_type": "reference_only",
+      "rule_tags": [
+        "matching"
+      ],
+      "testability": "non_testable",
+      "priority": "high",
+      "coverage_eligible": false
+    },
+    "statement": {
+      "actor": {
+        "value": "unspecified_actor",
+        "source_type": "inferred"
+      },
+      "action": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "object": {
+        "value": "trade",
+        "source_type": "normalized"
+      },
+      "conditions": [],
+      "constraints": [],
+      "outcome": {
+        "kind": "informational_only",
+        "expected_state": null,
+        "details": {}
+      },
+      "exceptions": []
+    },
+    "type_payload": {
+      "reference_only": {
+        "reason": "contextual_explanation_only"
+      }
+    },
+    "execution_mapping": {
+      "business_inputs": [
+        "trade"
+      ],
+      "observable_outputs": [],
+      "system_events": [],
+      "preconditions_for_execution": [],
+      "postconditions_for_execution": [
+        "reference_only"
+      ],
+      "dsl_assertions": []
+    },
+    "evidence": [
+      {
+        "target": "statement",
+        "quote": "HKSCC will notify CPs in advance. 44 Please refer to the session “Risk Management of CNS Trades in Hong Kong Market” in HKEX website.",
+        "page": 8,
+        "atomic_rule_id": "MR-012-A-6"
+      }
+    ],
+    "review": {
+      "confidence": 0.5,
+      "inference_flags": [
+        "first_pass_semantic_generation"
+      ],
+      "ambiguities": []
+    },
+    "test_design_hints": {
+      "gherkin_intent": "HKSCC will notify CPs in advance. 44 Please refer to the session “Risk Management of CNS Trades in Hong Kong Market” in HKEX website.",
+      "positive_scenarios": [
+        "happy path for reference_only"
+      ],
+      "negative_scenarios": [],
+      "boundary_scenarios": [],
+      "data_requirements": [
+        "matching"
+      ],
+      "oracle_notes": [
+        "First-pass machine-generated semantic rule."
+      ]
+    }
+  },
+  {
+    "semantic_rule_id": "SR-MR-012-A-8",
+    "version": "1.0",
+    "source": {
+      "doc_id": "im_hk_v13",
+      "doc_title": "Initial Margin Calculation Guide HKv13",
+      "doc_version": "HKv13",
+      "section": "Initial Margin Calculation Guide HKv13",
+      "clause_refs": [
+        "12"
+      ],
+      "atomic_rule_ids": [
+        "MR-012-A-8"
+      ],
+      "pages": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "classification": {
+      "rule_type": "reference_only",
+      "rule_tags": [
+        "matching"
+      ],
+      "testability": "non_testable",
+      "priority": "high",
+      "coverage_eligible": false
+    },
+    "statement": {
+      "actor": {
+        "value": "unspecified_actor",
+        "source_type": "inferred"
+      },
+      "action": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "object": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "conditions": [],
+      "constraints": [],
+      "outcome": {
+        "kind": "informational_only",
+        "expected_state": null,
+        "details": {}
+      },
+      "exceptions": []
+    },
+    "type_payload": {
+      "reference_only": {
+        "reason": "contextual_explanation_only"
+      }
+    },
+    "execution_mapping": {
+      "business_inputs": [],
+      "observable_outputs": [],
+      "system_events": [],
+      "preconditions_for_execution": [],
+      "postconditions_for_execution": [
+        "reference_only"
+      ],
+      "dsl_assertions": []
+    },
+    "evidence": [
+      {
+        "target": "statement",
+        "quote": "For illustration purpose, credit risk add -on for the sample portfolio is assumed to be 12,000,000. 3.2.6.4 Ad-hoc Add-on Ad-hoc add -on is only applicable to specific CPs who will be notified by HKSCC individually.",
+        "page": 8,
+        "atomic_rule_id": "MR-012-A-8"
+      }
+    ],
+    "review": {
+      "confidence": 0.5,
+      "inference_flags": [
+        "first_pass_semantic_generation"
+      ],
+      "ambiguities": []
+    },
+    "test_design_hints": {
+      "gherkin_intent": "For illustration purpose, credit risk add -on for the sample portfolio is assumed to be 12,000,000. 3.2.6.4 Ad-hoc Add-on Ad-hoc add -on is only applicable to specific CPs who will be notified by HKSCC individually.",
+      "positive_scenarios": [
+        "happy path for reference_only"
+      ],
+      "negative_scenarios": [],
+      "boundary_scenarios": [],
+      "data_requirements": [
+        "matching"
+      ],
+      "oracle_notes": [
+        "First-pass machine-generated semantic rule."
+      ]
+    }
+  },
+  {
+    "semantic_rule_id": "SR-MR-012-A-10",
+    "version": "1.0",
+    "source": {
+      "doc_id": "im_hk_v13",
+      "doc_title": "Initial Margin Calculation Guide HKv13",
+      "doc_version": "HKv13",
+      "section": "Initial Margin Calculation Guide HKv13",
+      "clause_refs": [
+        "12"
+      ],
+      "atomic_rule_ids": [
+        "MR-012-A-10"
+      ],
+      "pages": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "classification": {
+      "rule_type": "reference_only",
+      "rule_tags": [
+        "matching"
+      ],
+      "testability": "non_testable",
+      "priority": "high",
+      "coverage_eligible": false
+    },
+    "statement": {
+      "actor": {
+        "value": "unspecified_actor",
+        "source_type": "inferred"
+      },
+      "action": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "object": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "conditions": [],
+      "constraints": [],
+      "outcome": {
+        "kind": "informational_only",
+        "expected_state": null,
+        "details": {}
+      },
+      "exceptions": []
+    },
+    "type_payload": {
+      "reference_only": {
+        "reason": "contextual_explanation_only"
+      }
+    },
+    "execution_mapping": {
+      "business_inputs": [],
+      "observable_outputs": [],
+      "system_events": [],
+      "preconditions_for_execution": [],
+      "postconditions_for_execution": [
+        "reference_only"
+      ],
+      "dsl_assertions": []
+    },
+    "evidence": [
+      {
+        "target": "statement",
+        "quote": "HKSCC will notify CPs before the implementation.",
+        "page": 8,
+        "atomic_rule_id": "MR-012-A-10"
+      }
+    ],
+    "review": {
+      "confidence": 0.5,
+      "inference_flags": [
+        "first_pass_semantic_generation"
+      ],
+      "ambiguities": []
+    },
+    "test_design_hints": {
+      "gherkin_intent": "HKSCC will notify CPs before the implementation.",
+      "positive_scenarios": [
+        "happy path for reference_only"
+      ],
+      "negative_scenarios": [],
+      "boundary_scenarios": [],
+      "data_requirements": [
+        "matching"
+      ],
+      "oracle_notes": [
+        "First-pass machine-generated semantic rule."
+      ]
+    }
+  },
+  {
+    "semantic_rule_id": "SR-MR-004-E-2",
+    "version": "1.0",
+    "source": {
+      "doc_id": "im_hk_v13",
+      "doc_title": "Initial Margin Calculation Guide HKv13",
+      "doc_version": "HKv13",
+      "section": "Initial Margin Calculation Guide HKv13",
+      "clause_refs": [
+        "4"
+      ],
+      "atomic_rule_ids": [
+        "MR-004-E-2"
+      ],
+      "pages": [
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ]
+    },
+    "classification": {
+      "rule_type": "reference_only",
+      "rule_tags": [
+        "matching"
+      ],
+      "testability": "non_testable",
+      "priority": "high",
+      "coverage_eligible": false
+    },
+    "statement": {
+      "actor": {
+        "value": "unspecified_actor",
+        "source_type": "inferred"
+      },
+      "action": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "object": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "conditions": [],
+      "constraints": [],
+      "outcome": {
+        "kind": "informational_only",
+        "expected_state": null,
+        "details": {}
+      },
+      "exceptions": []
+    },
+    "type_payload": {
+      "reference_only": {
+        "reason": "contextual_explanation_only"
+      }
+    },
+    "execution_mapping": {
+      "business_inputs": [],
+      "observable_outputs": [],
+      "system_events": [],
+      "preconditions_for_execution": [],
+      "postconditions_for_execution": [
+        "reference_only"
+      ],
+      "dsl_assertions": []
+    },
+    "evidence": [
+      {
+        "target": "statement",
+        "quote": "For positions that require the adjustment, the new position quantity after adjustment will be equal to the original position quantity times the quantity conversion ratio.",
+        "page": 23,
+        "atomic_rule_id": "MR-004-E-2"
+      }
+    ],
+    "review": {
+      "confidence": 0.5,
+      "inference_flags": [
+        "first_pass_semantic_generation"
+      ],
+      "ambiguities": []
+    },
+    "test_design_hints": {
+      "gherkin_intent": "For positions that require the adjustment, the new position quantity after adjustment will be equal to the original position quantity times the quantity conversion ratio.",
+      "positive_scenarios": [
+        "happy path for reference_only"
+      ],
+      "negative_scenarios": [],
+      "boundary_scenarios": [],
+      "data_requirements": [
+        "matching"
+      ],
+      "oracle_notes": [
+        "First-pass machine-generated semantic rule."
+      ]
+    }
+  },
+  {
+    "semantic_rule_id": "SR-MR-004-E-4",
+    "version": "1.0",
+    "source": {
+      "doc_id": "im_hk_v13",
+      "doc_title": "Initial Margin Calculation Guide HKv13",
+      "doc_version": "HKv13",
+      "section": "Initial Margin Calculation Guide HKv13",
+      "clause_refs": [
+        "4"
+      ],
+      "atomic_rule_ids": [
+        "MR-004-E-4"
+      ],
+      "pages": [
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ]
+    },
+    "classification": {
+      "rule_type": "reference_only",
+      "rule_tags": [
+        "matching"
+      ],
+      "testability": "non_testable",
+      "priority": "high",
+      "coverage_eligible": false
+    },
+    "statement": {
+      "actor": {
+        "value": "unspecified_actor",
+        "source_type": "inferred"
+      },
+      "action": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "object": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "conditions": [],
+      "constraints": [],
+      "outcome": {
+        "kind": "informational_only",
+        "expected_state": null,
+        "details": {}
+      },
+      "exceptions": []
+    },
+    "type_payload": {
+      "reference_only": {
+        "reason": "contextual_explanation_only"
+      }
+    },
+    "execution_mapping": {
+      "business_inputs": [],
+      "observable_outputs": [],
+      "system_events": [],
+      "preconditions_for_execution": [],
+      "postconditions_for_execution": [
+        "reference_only"
+      ],
+      "dsl_assertions": []
+    },
+    "evidence": [
+      {
+        "target": "statement",
+        "quote": "The position quantity will be set as 0.",
+        "page": 23,
+        "atomic_rule_id": "MR-004-E-4"
+      }
+    ],
+    "review": {
+      "confidence": 0.5,
+      "inference_flags": [
+        "first_pass_semantic_generation"
+      ],
+      "ambiguities": []
+    },
+    "test_design_hints": {
+      "gherkin_intent": "The position quantity will be set as 0.",
+      "positive_scenarios": [
+        "happy path for reference_only"
+      ],
+      "negative_scenarios": [],
+      "boundary_scenarios": [],
+      "data_requirements": [
+        "matching"
+      ],
+      "oracle_notes": [
+        "First-pass machine-generated semantic rule."
+      ]
+    }
+  },
+  {
+    "semantic_rule_id": "SR-MR-004-C-3",
+    "version": "1.0",
+    "source": {
+      "doc_id": "im_hk_v13",
+      "doc_title": "Initial Margin Calculation Guide HKv13",
+      "doc_version": "HKv13",
+      "section": "Initial Margin Calculation Guide HKv13",
+      "clause_refs": [
+        "4"
+      ],
+      "atomic_rule_ids": [
+        "MR-004-C-3"
+      ],
+      "pages": [
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ]
+    },
+    "classification": {
+      "rule_type": "reference_only",
+      "rule_tags": [
+        "venue"
+      ],
+      "testability": "non_testable",
+      "priority": "low",
+      "coverage_eligible": false
+    },
+    "statement": {
+      "actor": {
+        "value": "unspecified_actor",
+        "source_type": "inferred"
+      },
+      "action": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "object": {
+        "value": null,
+        "source_type": "explicit"
+      },
+      "conditions": [],
+      "constraints": [],
+      "outcome": {
+        "kind": "informational_only",
+        "expected_state": null,
+        "details": {}
+      },
+      "exceptions": []
+    },
+    "type_payload": {
+      "reference_only": {
+        "reason": "contextual_explanation_only"
+      }
+    },
+    "execution_mapping": {
+      "business_inputs": [
+        "venue_code"
+      ],
+      "observable_outputs": [],
+      "system_events": [],
+      "preconditions_for_execution": [],
+      "postconditions_for_execution": [
+        "reference_only"
+      ],
+      "dsl_assertions": []
+    },
+    "evidence": [
+      {
+        "target": "statement",
+        "quote": "Please note that all cross -day position netting should be performed after considering SSC / SCC and corporate action adjustments.",
+        "page": 23,
+        "atomic_rule_id": "MR-004-C-3"
+      }
+    ],
+    "review": {
+      "confidence": 0.5,
+      "inference_flags": [
+        "first_pass_semantic_generation"
+      ],
+      "ambiguities": []
+    },
+    "test_design_hints": {
+      "gherkin_intent": "Please note that all cross -day position netting should be performed after considering SSC / SCC and corporate action adjustments.",
+      "positive_scenarios": [
+        "happy path for reference_only"
+      ],
+      "negative_scenarios": [],
+      "boundary_scenarios": [],
+      "data_requirements": [
+        "venue"
+      ],
+      "oracle_notes": [
+        "First-pass machine-generated semantic rule."
+      ]
+    }
+  }
+]

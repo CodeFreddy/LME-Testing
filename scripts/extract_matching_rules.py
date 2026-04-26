@@ -9,8 +9,10 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Iterable
 
-# Ensure lme_testing and schemas are importable
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Ensure local src-layout packages and schemas are importable when run as a script.
+ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT))
 
 from schemas import validate_atomic_rule, validate_artifact_list
 
@@ -61,7 +63,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--document-class",
-        choices=["rulebook", "api_spec", "policy", "workflow"],
+        choices=["rulebook", "api_spec", "policy", "workflow", "calculation_guide"],
         default="rulebook",
         help="Document class for extraction strategy and rule type inference.",
     )
@@ -586,6 +588,9 @@ def main() -> None:
     else:
         pages = extract_pages_from_markdown(input_path)
         clauses = split_clauses_from_markdown(pages)
+    for clause in clauses:
+        if clause.section is None:
+            clause.section = args.doc_title
 
     atomic_rules = [rule for clause in clauses for rule in split_atomic_rules(clause, document_class=args.document_class)]
     metadata = {
@@ -629,3 +634,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

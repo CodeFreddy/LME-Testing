@@ -132,5 +132,4 @@ python run_bdd.py features\matching_rules\core_matching_rules.feature
 - No external Python packages are required.
 - The mock uses UTC timestamps for deterministic tests.
 - The mock exposes deterministic rule checks only; it does not simulate matching engine state, clearing, settlement, or real LME connectivity.
-- This package is intentionally separate from the main `lme_testing` package so it does not alter existing artifact schemas or governance gates.
-
+- This package is intentionally separate from the main `rule_testing` package so it does not alter existing artifact schemas or governance gates.

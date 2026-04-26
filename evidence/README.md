@@ -66,3 +66,24 @@ Preserved run artifacts that document key results. These are snapshots of eviden
 **Key findings:** Coverage 72.22% -> 75.0% (+2.78%). 9 rules improved (partial->full), 4 rules regressed (full->partial). Net +5 fully covered rules.
 
 **Source:** `runs/checker/20260420T062527Z/`
+
+---
+
+## evidence/20260426_im_hk_v13_pass_run/
+
+**Purpose:** Backup of the latest completed Initial Margin Calculation Guide HKv13 run.
+
+**Source document:** `docs/materials/Initial Margin Calculation Guide HKv13.pdf`
+
+**Contents:**
+- `maker/20260425T221152Z/` — maker cases and run metadata
+- `checker/20260426T002536Z/` — checker reviews, coverage report, and run metadata
+- `bdd_deterministic/20260426T015751Z/` — normalized BDD, generated feature files, and step definitions
+- `step-registry/20260426T015803Z/` — step visibility report
+- `review_sessions/20260426T020242Z/` — finalized review session and audit trail
+- `reports/` — final HTML/CSV and readable maker/checker reports
+- `source_artifacts/` — governed HKv13 semantic rules and source extraction metadata
+
+**Key completion signals:** review session finalized; checker `remaining_after_resume = 0`; 178 maker scenarios; 178 checker reviews; 60 BDD feature files.
+
+**Source:** `runs/im_hk_v13/`

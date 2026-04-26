@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
-$handoffPath = Join-Path $repoRoot 'docs\session_handoff.md'
+$handoffPath = Join-Path $repoRoot 'docs\operations\session_handoff.md'
 
 $branch = (git -C $repoRoot branch --show-current).Trim()
 if (-not $branch) {
@@ -42,21 +42,21 @@ Before making substantial changes, read these files in order:
 1. `AGENTS.md`
 2. `README.md`
 3. `docs/index.md`
-4. `docs/roadmap.md` (v3.1 - Stage 2 complete, mock execution bridge added)
-5. `docs/implementation_plan.md` (v3.0)
-6. `docs/acceptance.md`
-7. `docs/architecture.md` (v3.1)
+4. `docs/planning/roadmap.md` (v3.1 - Stage 2 complete, mock execution bridge added)
+5. `docs/planning/implementation_plan.md` (v3.0)
+6. `docs/governance/acceptance.md`
+7. `docs/architecture/architecture.md` (v3.1)
 
 If the task touches model or prompt behavior, also read:
 
-- `docs/model_governance.md`
-- `docs/prompt_lifecycle.md`
-- `docs/agent_guidelines.md`
+- `docs/governance/model_governance.md`
+- `docs/governance/prompt_lifecycle.md`
+- `docs/governance/agent_guidelines.md`
 
 If the task touches extraction or rule artifacts, also read:
 
-- `docs/rule_extraction_script_guide.md`
-- `docs/rule_model_and_parsing_design.md`
+- `docs/guides/rule_extraction_script_guide.md`
+- `docs/architecture/rule_model_and_parsing_design.md`
 
 ---
 
@@ -121,8 +121,8 @@ Key repo state:
 - `audit_trail.py` + `case_compare.py`: fully wired into `review_session.py`
 - `pipelines.py` + `providers.py`: error surfacing and retry logic implemented
 - Evidence preserved in `evidence/` directory
-- Mock API bridge preserved in `deliverables/lme_mock_api/` and documented in `docs/mock_api_validation_plan.md`
-- Phase 1/2 acceptance gates are updated in `docs/acceptance.md`; Stage 3 real LME API remains blocked
+- Mock API bridge preserved in `deliverables/lme_mock_api/` and documented in `docs/planning/mock_api_validation_plan.md`
+- Phase 1/2 acceptance gates are updated in `docs/governance/acceptance.md`; Stage 3 real LME API remains blocked
 
 Governance checks available:
 
@@ -149,15 +149,15 @@ Governance checks available:
 - Do not treat `semantic_rule` as a substitute for planner outputs, normalized BDD, or execution-ready artifacts.
 - Do not reintroduce absolute local paths in Markdown files.
 - Do not mix future enterprise or platform assumptions into current baseline work unless explicitly requested.
-- Every commit should refresh `docs/session_handoff.md`; if hooks are unavailable, run the update script manually before committing.
+- Every commit should refresh `docs/operations/session_handoff.md`; if hooks are unavailable, run the update script manually before committing.
 
 ---
 
 ## Reference Material
 
-- `docs/roadmap.md` - current Stage 2 priorities
-- `docs/architecture.md` - system architecture and module boundaries
-- `docs/mock_api_validation_plan.md` - S2-C1 mock execution bridge
+- `docs/planning/roadmap.md` - current Stage 2 priorities
+- `docs/architecture/architecture.md` - system architecture and module boundaries
+- `docs/planning/mock_api_validation_plan.md` - S2-C1 mock execution bridge
 - `docs/references/Claude-roadmap-compare.md` - historical comparison
 
 Treat reference files as non-normative unless their content is promoted into the official docs.

@@ -84,7 +84,7 @@
 
 ### 会带来架构耦合或维护负担的地方
 
-**9 个 `docs/` 文档** 如果一开始就全部建立并维护同步，代价极高。`docs/architecture.md`、`docs/implementation_plan.md`、`docs/model_governance.md` 三个文档之间有大量重叠内容，会出现"修改了 schema 但只更新了两个文档"的漂移问题。
+**9 个 `docs/` 文档** 如果一开始就全部建立并维护同步，代价极高。`docs/architecture/architecture.md`、`docs/planning/implementation_plan.md`、`docs/governance/model_governance.md` 三个文档之间有大量重叠内容，会出现"修改了 schema 但只更新了两个文档"的漂移问题。
 
 **BDD contract layer 作为独立中间表示** 是正确的架构方向，但它没有定义这个中间格式的 schema。如果没有 schema，这个"稳定中间态"本身就是不稳定的。引入它之前必须先定义它的 JSON schema，否则反而会增加一层不受控的转换。
 
@@ -109,7 +109,7 @@
 1. **确定性/LLM 职责分离原则** 应该成为现有 roadmap 的 Principle 0，而不是隐含的。`schemas.py` 的定位从"验证器"升级为"确定性职责边界的物化"。
 2. **Checker 稳定性信号** 应该并入 Phase 1 Milestone 1.1——在 convergence controller 里加一个 `StabilityMonitor`，对 poc 基准集每次 checker 跑完后记录一次，两次结果不一致的 case 自动标记。
 3. **AI Agent 贡献规则（5条）** 应该直接写进 `AGENTS.md` 或 `CLAUDE.md`，现在就做，不用等到任何 phase。
-4. **模型兼容性政策** 应该并入 Phase 1 的 `docs/model_governance.md`——新 provider 上线前必须过 poc 基准集的 schema 合规检测。
+4. **模型兼容性政策** 应该并入 Phase 1 的 `docs/governance/model_governance.md`——新 provider 上线前必须过 poc 基准集的 schema 合规检测。
 5. **源锚点（paragraph_id）作为 Phase 1 必交付物** 而非 Phase 2——把它从现有方案的 Milestone 2.1 提前到 Phase 1 的 Milestone 1.3 附近（但作为提取脚本的输出增强，而非全新模块）。
 
 **Phase 2 重要吸收：**
@@ -155,8 +155,8 @@
 
 **Phase 1 新增/增强：**
 - `AGENTS.md`：立即创建，直接采用上传方案的 5 条 Agent 贡献规则
-- `docs/model_governance.md`：Phase 1 必交付，内容来自上传方案的 Cross-Model Governance 章节
-- `docs/acceptance.md`：把现有方案的 acceptance gate 表格独立成文档
+- `docs/governance/model_governance.md`：Phase 1 必交付，内容来自上传方案的 Cross-Model Governance 章节
+- `docs/governance/acceptance.md`：把现有方案的 acceptance gate 表格独立成文档
 - **Checker 稳定性监控**：并入 Milestone 1.1 的 convergence controller，但仅对 poc 基准集（≤ 10 条规则）采样运行两次
 - **源锚点（paragraph_id）提前到 Phase 1**：作为提取脚本的增量增强，不新建模块
 

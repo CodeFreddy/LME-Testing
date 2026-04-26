@@ -18,8 +18,10 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-# Ensure lme_testing is importable
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+# Ensure local src-layout packages are importable in CI.
+ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT))
 
 from lme_testing.config import ProjectConfig, ProviderConfig, RoleDefaults
 from lme_testing.pipelines import RULE_TYPE_CASE_REQUIREMENTS, run_checker_pipeline, run_maker_pipeline
@@ -319,3 +321,4 @@ if __name__ == "__main__":
     finally:
         shutil.rmtree(WORK, ignore_errors=True)
     sys.exit(0 if ok else 1)
+

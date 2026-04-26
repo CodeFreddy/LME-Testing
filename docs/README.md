@@ -60,7 +60,7 @@ The current execution order is:
 4. expose checker instability on a small baseline set,
 5. only then expand upstream ingestion and downstream BDD normalization.
 
-See `docs/roadmap.md` for the full phased direction.
+See `docs/planning/roadmap.md` for the full phased direction.
 
 ---
 
@@ -68,25 +68,25 @@ See `docs/roadmap.md` for the full phased direction.
 
 If you are new to the repo, start here:
 
-1. `docs/roadmap.md`
-2. `docs/implementation_plan.md`
-3. `docs/acceptance.md`
-4. `docs/architecture.md`
-5. `docs/model_governance.md`
-6. `docs/agent_guidelines.md`
+1. `docs/planning/roadmap.md`
+2. `docs/planning/implementation_plan.md`
+3. `docs/governance/acceptance.md`
+4. `docs/architecture/architecture.md`
+5. `docs/governance/model_governance.md`
+6. `docs/governance/agent_guidelines.md`
 
 If you are an AI coding agent, read:
 
 1. `../AGENTS.md`
-2. `docs/roadmap.md`
-3. `docs/implementation_plan.md`
-4. `docs/acceptance.md`
-5. `docs/architecture.md`
+2. `docs/planning/roadmap.md`
+3. `docs/planning/implementation_plan.md`
+4. `docs/governance/acceptance.md`
+5. `docs/architecture/architecture.md`
 
 If you are working on model or prompt changes, also read:
 
-- `docs/model_governance.md`
-- `docs/prompt_lifecycle.md`
+- `docs/governance/model_governance.md`
+- `docs/governance/prompt_lifecycle.md`
 
 If you need the documentation map, read:
 
@@ -94,25 +94,43 @@ If you need the documentation map, read:
 
 ---
 
+## Folder Layout
+
+- `docs/` keeps the documentation entry points and session state.
+- `docs/governance/` holds acceptance gates, model governance, agent rules, and supporting governance policies.
+- `docs/planning/` holds roadmap, implementation plan, task plans, validation plans, and Stage 2 analysis.
+- `docs/architecture/` holds the main architecture contract and architecture support references.
+- `docs/guides/` holds operator and developer guides.
+- `docs/operations/` holds session handoff and checkpoint state.
+- `docs/releases/` holds release and baseline notes.
+- `docs/materials/` holds source materials used by the project.
+- `docs/references/` holds historical or external reference notes.
+- `docs/archives/` holds completed or superseded planning records.
+
+---
+
 ## Core Documents
 
-- `docs/roadmap.md`
+- `docs/planning/roadmap.md`
   Strategic execution contract and phase boundaries.
 
-- `docs/implementation_plan.md`
+- `docs/planning/implementation_plan.md`
   Task-oriented execution plan with prerequisites, contracts, and validation expectations.
 
-- `docs/acceptance.md`
+- `docs/governance/acceptance.md`
   Phase gates, release readiness, and evidence requirements.
 
-- `docs/architecture.md`
+- `docs/architecture/architecture.md`
   System boundaries, artifact contracts, traceability, and deterministic vs LLM-assisted responsibilities.
 
-- `docs/model_governance.md`
+- `docs/governance/model_governance.md`
   Rules for model APIs, prompt versioning, baseline regression, rollout, and rollback.
 
-- `docs/agent_guidelines.md`
+- `docs/governance/agent_guidelines.md`
   Operating rules for AI coding agents contributing to this repo.
+
+Supporting governance documents live under `docs/governance/`.
+Supporting task plans and guides live under `docs/planning/` and `docs/guides/`.
 
 ---
 

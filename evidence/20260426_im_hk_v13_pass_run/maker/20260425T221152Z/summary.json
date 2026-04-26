@@ -1,0 +1,20 @@
+{
+  "run_id": "20260425T221152Z",
+  "role": "maker",
+  "pipeline_version": "2.1",
+  "prompt_version": "1.5",
+  "provider": "maker_qwen",
+  "model": "glm-5",
+  "input_path": "artifacts\\im_hk_v13\\semantic_rules.json",
+  "source_artifact_hash": "584b401811218743",
+  "output_dir": "runs\\im_hk_v13\\maker\\20260425T221152Z",
+  "processed_rule_count": 60,
+  "input_rule_count": 70,
+  "excluded_rule_count": 10,
+  "batch_count": 20,
+  "scenario_count": 178,
+  "results_path": "runs\\im_hk_v13\\maker\\20260425T221152Z\\maker_cases.jsonl",
+  "raw_path": "runs\\im_hk_v13\\maker\\20260425T221152Z\\maker_raw_responses.jsonl",
+  "quality_report_path": "runs\\im_hk_v13\\maker\\20260425T221152Z\\maker_input_quality.json",
+  "excluded_rules_path": "runs\\im_hk_v13\\maker\\20260425T221152Z\\maker_excluded_rules.json"
+}

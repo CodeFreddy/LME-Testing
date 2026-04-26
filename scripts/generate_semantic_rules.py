@@ -6,8 +6,10 @@ import re
 import sys
 from pathlib import Path
 
-# Ensure lme_testing and schemas are importable
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Ensure local src-layout packages and schemas are importable when run as a script.
+ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT))
 
 from schemas import validate_semantic_rule, validate_artifact_list
 
@@ -463,3 +465,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

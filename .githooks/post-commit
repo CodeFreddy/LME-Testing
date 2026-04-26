@@ -9,9 +9,9 @@ repo_root=$(git rev-parse --show-toplevel)
 
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$repo_root/scripts/update_session_handoff.ps1"
 
-git -C "$repo_root" add docs/session_handoff.md
+git -C "$repo_root" add docs/operations/session_handoff.md
 
-if git -C "$repo_root" diff --cached --quiet -- docs/session_handoff.md; then
+if git -C "$repo_root" diff --cached --quiet -- docs/operations/session_handoff.md; then
   exit 0
 fi
 

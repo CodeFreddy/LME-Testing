@@ -8,7 +8,7 @@
 
 | Dimension | Status | Data |
 |-----------|--------|------|
-| Framework implementation | ✅ Complete | Code in `lme_testing/`, `schemas/`, `pipelines.py` |
+| Framework implementation | ✅ Complete | Code in `src/lme_testing/`, `schemas/`, `pipelines.py` |
 | Schema contracts (7 schemas) | ✅ Complete | CI `schema-validation` job passes |
 | POC E2E (2 rules) | ✅ Complete | `poc_two_rules` E2E verified |
 | Full 183-rule quality baseline | ✅ Complete | 72.78% coverage (131/180), BASELINE-183-RULES.md |
@@ -41,7 +41,7 @@ Stage 1 (real data access) is complete. Stage 2 scoped work is complete:
 - **S2-D1**: Review UI browser-level E2E test covers the primary BDD/Scripts human path
 - **Stage 3**: Still blocked pending real LME VM/API access
 
-See `docs/roadmap.md` and `TODO.md` for Stage 2 details.
+See `docs/planning/roadmap.md` and `TODO.md` for Stage 2 details.
 
 ---
 
@@ -101,7 +101,7 @@ python scripts/check_release_governance.py
 
 | Script | What it checks | Expectation |
 |--------|----------------|-------------|
-| `check_docs_governance.py` | No absolute local paths in any `*.md` file link (e.g. `C:\path`, `/Users/name`, or `file:///C:/`). Links like `[Guide](docs/architecture.md)` (relative) are fine; absolute paths (starting with a drive letter) break when shared across machines or cloned in a different environment. | **Pass**: zero violations reported |
+| `check_docs_governance.py` | No absolute local paths in any `*.md` file link (e.g. `C:\path`, `/Users/name`, or `file:///C:/`). Links like `[Guide](docs/architecture/architecture.md)` (relative) are fine; absolute paths (starting with a drive letter) break when shared across machines or cloned in a different environment. | **Pass**: zero violations reported |
 | `check_artifact_governance.py` | `atomic_rules.json` and `semantic_rules.json` have all required fields (`rule_id`, `semantic_rule_id`, `source`, `classification`, `evidence`); every `rule_type` value appears in the approved enum | **Pass**: zero violations reported |
 | `check_release_governance.py` | Release artifacts (e.g. in `docs/releases/`) are complete and well-formed per the release governance contract | **Pass**: zero violations reported |
 
@@ -213,31 +213,26 @@ Each `rule_type` maps to a set of `required_case_types`. A rule is **fully_cover
 ## Directory Overview
 
 ```
-lme_testing/              # Core Python package
-  cli.py                  # CLI entry, registers all 12 commands
-  config.py               # Provider config loader
-  providers.py            # OpenAI-compatible LLM adapter
-  prompts.py              # Maker/Checker system prompts
-  schemas.py              # JSON validation for all artifacts
-  pipelines.py            # maker, checker, rewrite, planner, bdd pipelines
-  storage.py              # JSON/JSONL read/write
-  reporting.py            # HTML report generation
-  review_session.py       # HTTP review web server
-  workflow_session.py     # End-to-end orchestrator
-  human_review.py         # Static HTML review page generator
-  logging_utils.py        # Terminal + file logging
-  bdd_export.py           # Gherkin .feature renderer
-  step_registry.py       # Step-to-definition matching
-  oracles/                # 8 deterministic assertion modules
-    field_validation.py
-    state_validation.py
-    calculation_validation.py
-    deadline_check.py
-    event_sequence.py
-    pass_fail_accounting.py
-    null_check.py
-    compliance_check.py
-  signals/                # Governance signal computation
+src/
+  lme_testing/            # LME matching-rule core package
+    cli.py                # CLI entry, registers all 12 commands
+    config.py             # Provider config loader
+    providers.py          # OpenAI-compatible LLM adapter
+    prompts.py            # Maker/Checker system prompts
+    schemas.py            # JSON validation for all artifacts
+    pipelines.py          # maker, checker, rewrite, planner, bdd pipelines
+    storage.py            # JSON/JSONL read/write
+    reporting.py          # HTML report generation
+    review_session.py     # HTTP review web server
+    workflow_session.py   # End-to-end orchestrator
+    human_review.py       # Static HTML review page generator
+    logging_utils.py      # Terminal + file logging
+    bdd_export.py         # Gherkin .feature renderer
+    step_registry.py      # Step-to-definition matching
+    oracles/              # 8 deterministic assertion modules
+    signals/              # Governance signal computation
+  hkex_testing/           # HKEX Initial Margin domain namespace
+  rule_testing/           # Backward-compatible import alias
 
 scripts/                  # Extraction and governance scripts
   extract_matching_rules.py      # PDF/TXT → atomic_rules.json
@@ -301,7 +296,7 @@ python run_bdd.py
 
 Expected result: `33 passed, 0 failed`.
 
-See `docs/mock_api_validation_plan.md` and `deliverables/lme_mock_api/README.md`.
+See `docs/planning/mock_api_validation_plan.md` and `deliverables/lme_mock_api/README.md`.
 
 ### Deterministic Oracles
 
@@ -410,7 +405,7 @@ The HTML report includes:
 - Color-coded case-type pills (gray=Required, green=Present, blue=Accepted, red=Missing)
 - Coverage Status + Rule Type dropdown filters with rule count
 
-See `docs/architecture.md` for the full pipeline diagram and artifact contracts.
+See `docs/architecture/architecture.md` for the full pipeline diagram and artifact contracts.
 
 ---
 
@@ -422,7 +417,7 @@ Run before and after substantial changes:
 python scripts/check_docs_governance.py
 python scripts/check_artifact_governance.py
 python scripts/check_release_governance.py
-python -m unittest discover -v tests/
+python -m unittest discover -s tests -t . -v
 ```
 
 Browser-level review UI E2E is included in unittest discovery when Chrome or Edge is installed. To run only that browser path:
@@ -446,7 +441,8 @@ powershell -ExecutionPolicy Bypass -File scripts/setup_git_hooks.ps1
 Read in order:
 
 1. `README.md` ← you are here
-2. `docs/maker_checker_usage.md` — detailed CLI usage
-3. `docs/architecture.md` — pipeline stages and module boundaries
-4. `lme_testing/pipelines.py` — core pipeline logic
-5. `lme_testing/schemas.py` — artifact contracts
+2. `docs/guides/maker_checker_usage.md` — detailed CLI usage
+3. `docs/architecture/architecture.md` — pipeline stages and module boundaries
+4. `src/lme_testing/pipelines.py` — core pipeline logic
+5. `src/lme_testing/schemas.py` — artifact contracts
+

@@ -1,28 +1,25 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import os
-import shutil
+import tempfile
 import unittest
 from pathlib import Path
 
 from lme_testing.config import ConfigError, load_project_config
 
 
-WORK_TMP = Path('.tmp_test')
-
-
 class ConfigTests(unittest.TestCase):
     def setUp(self) -> None:
-        WORK_TMP.mkdir(exist_ok=True)
+        self.tmpdir = tempfile.TemporaryDirectory()
+        self.work_tmp = Path(self.tmpdir.name)
 
     def tearDown(self) -> None:
-        if WORK_TMP.exists():
-            shutil.rmtree(WORK_TMP)
+        self.tmpdir.cleanup()
 
     def test_load_config_with_env_keys(self) -> None:
         os.environ["MAKER_API_KEY"] = "maker-secret"
         os.environ["CHECKER_API_KEY"] = "checker-secret"
-        config_path = WORK_TMP / "config.json"
+        config_path = self.work_tmp / "config.json"
         config_path.write_text(
             """
             {
@@ -53,7 +50,7 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(config.provider_for_role("checker").api_key, "checker-secret")
 
     def test_missing_key_raises(self) -> None:
-        config_path = WORK_TMP / "config.json"
+        config_path = self.work_tmp / "config.json"
         config_path.write_text(
             """
             {
@@ -84,3 +81,4 @@ class ConfigTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

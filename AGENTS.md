@@ -9,12 +9,12 @@ Agents may implement the roadmap, but must not silently redefine it through code
 
 For substantial work, read these files in order:
 
-1. `docs/roadmap.md`
-2. `docs/implementation_plan.md`
-3. `docs/acceptance.md`
-4. `docs/architecture.md`
-5. `docs/model_governance.md`
-6. `docs/agent_guidelines.md`
+1. `docs/planning/roadmap.md`
+2. `docs/planning/implementation_plan.md`
+3. `docs/governance/acceptance.md`
+4. `docs/architecture/architecture.md`
+5. `docs/governance/model_governance.md`
+6. `docs/governance/agent_guidelines.md`
 
 ## Non-Negotiable Rules
 
@@ -43,7 +43,7 @@ These checks are the minimum governance baseline:
 
 ## Commit Handoff Rule
 
-Every commit should refresh `docs/session_handoff.md`.
+Every commit should refresh `docs/operations/session_handoff.md`.
 
 Preferred path:
 
@@ -58,7 +58,7 @@ powershell -ExecutionPolicy Bypass -File scripts/update_session_handoff.ps1
 
 ## Checkpoint Preservation Rule
 
-Whenever an agent generates a checkpoint and resume prompt, it must append or refresh the record in `docs/checkpoints.md`.
+Whenever an agent generates a checkpoint and resume prompt, it must append or refresh the record in `docs/operations/checkpoints.md`.
 
 The record must include:
 
@@ -70,7 +70,7 @@ The record must include:
 - constraints that must not be violated,
 - a directly reusable resume prompt.
 
-Keep the latest checkpoint easy to find at the top of `docs/checkpoints.md`, and preserve older checkpoints below it unless a human explicitly asks to prune them.
+Keep the latest checkpoint easy to find at the top of `docs/operations/checkpoints.md`, and preserve older checkpoints below it unless a human explicitly asks to prune them.
 
 ## Current Phase Bias
 
@@ -112,6 +112,6 @@ Stop and surface the issue if:
 
 Detailed agent operating rules live in:
 
-- `docs/agent_guidelines.md`
-- `docs/model_governance.md`
-- `docs/acceptance.md`
+- `docs/governance/agent_guidelines.md`
+- `docs/governance/model_governance.md`
+- `docs/governance/acceptance.md`

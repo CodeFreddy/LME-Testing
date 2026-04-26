@@ -79,7 +79,7 @@ python scripts/check_artifact_governance.py # Enforces minimum artifact structur
 
 ## Git Hooks (Session Handoff)
 
-Enable the post-commit hook to auto-refresh `docs/session_handoff.md`:
+Enable the post-commit hook to auto-refresh `docs/operations/session_handoff.md`:
 
 ```bash
 powershell -ExecutionPolicy Bypass -File scripts/setup_git_hooks.ps1
@@ -93,7 +93,7 @@ powershell -ExecutionPolicy Bypass -File scripts/update_session_handoff.ps1
 
 ## Architecture
 
-See `docs/architecture.md` for the full system architecture, artifact contracts, and module boundaries.
+See `docs/architecture/architecture.md` for the full system architecture, artifact contracts, and module boundaries.
 
 ### Pipeline Flow
 1. **Extraction** (scripts): Parse source documents into `atomic_rules.json`
@@ -106,24 +106,24 @@ See `docs/architecture.md` for the full system architecture, artifact contracts,
 ### Core Modules
 | Module | Responsibility |
 |--------|---------------|
-| `lme_testing/pipelines.py` | Orchestrates maker/checker pipelines, coverage calculation |
-| `lme_testing/schemas.py` | JSON validation for all artifacts; defines CASE_TYPES, COVERAGE_STATUSES |
-| `lme_testing/config.py` | ProjectConfig/ProviderConfig/RoleDefaults; loads `config/llm_profiles.example.json` |
-| `lme_testing/providers.py` | LLM provider abstraction (OpenAI-compatible API) |
-| `lme_testing/prompts.py` | MAKER_SYSTEM_PROMPT, CHECKER_SYSTEM_PROMPT, and prompt builders |
-| `lme_testing/reporting.py` | HTML report generation |
-| `lme_testing/storage.py` | JSON/JSONL read/write utilities; `timestamp_slug()` for run IDs |
+| `src/lme_testing/pipelines.py` | Orchestrates maker/checker pipelines, coverage calculation |
+| `src/lme_testing/schemas.py` | JSON validation for all artifacts; defines CASE_TYPES, COVERAGE_STATUSES |
+| `src/lme_testing/config.py` | ProjectConfig/ProviderConfig/RoleDefaults; loads `config/llm_profiles.example.json` |
+| `src/lme_testing/providers.py` | LLM provider abstraction (OpenAI-compatible API) |
+| `src/lme_testing/prompts.py` | MAKER_SYSTEM_PROMPT, CHECKER_SYSTEM_PROMPT, and prompt builders |
+| `src/lme_testing/reporting.py` | HTML report generation |
+| `src/lme_testing/storage.py` | JSON/JSONL read/write utilities; `timestamp_slug()` for run IDs |
 
 ### Key Governance Documents
 
 | Document | Purpose |
 |----------|---------|
-| `docs/roadmap.md` | Phase-based execution contract (Phase 1/2/3), scope boundaries, priorities |
-| `docs/architecture.md` | Pipeline stages, artifact contracts, module boundaries |
-| `docs/implementation_plan.md` | Task breakdowns with input/output contracts |
-| `docs/acceptance.md` | Formal phase acceptance criteria and release gates |
-| `docs/model_governance.md` | Provider abstraction, model onboarding, prompt versioning |
-| `docs/agent_guidelines.md` | How AI agents may modify the repo |
+| `docs/planning/roadmap.md` | Phase-based execution contract (Phase 1/2/3), scope boundaries, priorities |
+| `docs/architecture/architecture.md` | Pipeline stages, artifact contracts, module boundaries |
+| `docs/planning/implementation_plan.md` | Task breakdowns with input/output contracts |
+| `docs/governance/acceptance.md` | Formal phase acceptance criteria and release gates |
+| `docs/governance/model_governance.md` | Provider abstraction, model onboarding, prompt versioning |
+| `docs/governance/agent_guidelines.md` | How AI agents may modify the repo |
 
 ### Key Data Structures
 - **semantic_rules.json**: List of rule objects with `semantic_rule_id`, `classification.rule_type`, `evidence`, `source.atomic_rule_ids`
@@ -166,7 +166,8 @@ Do not expand scope across phases without explicit approval.
 ## Phase Completion Tracking
 
 **Rule**: After completing any roadmap phase or acceptance gate:
-1. Update `docs/acceptance.md` to mark the gate as done with date and evidence
+1. Update `docs/governance/acceptance.md` to mark the gate as done with date and evidence
 2. Commit the doc change and push before moving to new work
 
 This keeps the doc current and ensures tracking is preserved in git history, not lost in ephemeral context.
+
