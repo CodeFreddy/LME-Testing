@@ -1,8 +1,8 @@
 # LME Testing — Implementation Plan v3.1
 
-**修订日期：** 2026-04-23  
+**修订日期：** 2026-04-26  
 **范围：** Stage M（合并）+ Stage 1（真实数据接入）+ Stage 2 已执行任务  
-**说明：** Stage 2 已基于真实数据展开：S2-T01 prompt 校准完成，S2-B1/B2 集成完成，S2-C1 mock API execution bridge 完成，S2-D1 browser-level review UI E2E 完成。
+**说明：** Stage 2 已基于真实数据展开：S2-T01 prompt 校准完成，S2-B1/B2 集成完成，S2-C1 mock API execution bridge 完成，S2-C2 IM HKv13 mock bridge 完成，S2-C3 IM HKv14 POC document workflow and modular mock bridge 完成，S2-D1 browser-level review UI E2E 完成。
 
 ---
 ## 如何使用本文档
@@ -43,6 +43,7 @@ Stage 2 规划（Stage 1 完成后展开）
 └── S2-B2: case_compare.py 实现
 └── S2-C1: Mock API execution bridge
 └── S2-C2: Initial Margin HKv13 mock API execution bridge
+└── S2-C3: Initial Margin HKv14 POC document workflow and modular mock API bridge
 └── S2-D1: Browser-level review UI E2E
 ```
 
@@ -396,6 +397,58 @@ MiniMax API 连接随机断开，全量 322-case 测量无法完成。参见 S2-
 - 不改变 artifact schema、prompt、model default
 
 **自评：** PASS。Mock bridge 已独立交付并通过静态编译、HTTP-backed BDD runner 和 unittest discovery；不改变主流水线 schemas、prompts、models 或 artifact contracts。
+
+---
+
+### S2-C3 — Initial Margin HKv14 POC Document Workflow And Modular Mock API Bridge
+
+**状态：✅ DONE（2026-04-26）**
+
+**目标：** 在不覆盖 HKv13 preservation baseline 的前提下，将 `Initial Margin Calculation Guide HKv14` 纳入 governed intake，生成 HKv13→HKv14 deterministic diff evidence，并用 shared common package + thin HKv14 wrapper 验证 mock/stub execution bridge reuse。
+
+**为什么现在做：**
+- HKv13 mock API bridge 已完成，可作为 preservation baseline。
+- HKv14 PDF input is available under `docs/materials/Initial Margin Calculation Guide HKv14.pdf`.
+- The POC needed deterministic diff evidence and a bounded downstream decision note before any wrapper work.
+
+**输入契约：**
+- `docs/materials/Initial Margin Calculation Guide HKv14.pdf`
+- `artifacts/im_hk_v13/`
+- Existing HKv13 mock API behavior as preservation baseline
+
+**输出契约：**
+- `artifacts/im_hk_v14/`
+- `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json`
+- `docs/planning/im_hk_v14_diff_report.md`
+- `docs/planning/im_hk_v14_downstream_decision.md`
+- `docs/planning/im_hk_v14_mock_api_validation_plan.md`
+- `deliverables/im_hk_mock_api_common/`
+- `deliverables/im_hk_v14_mock_api/`
+- `deliverables/im_hk_v14_mock_api.zip`
+- `scripts/compare_initial_margin_versions.py`
+
+**实现要点：**
+- `scripts/extract_matching_rules.py` uses `pypdf` as the primary PDF extractor for PDF inputs and writes full extracted `source_from_pdf.md`.
+- `scripts/compare_initial_margin_versions.py` compares governed artifact directories generically despite the Initial Margin filename.
+- HKv14 wrapper reuses shared code in `deliverables/im_hk_mock_api_common/` instead of rebuilding a separate implementation.
+- HKv13 deliverable remains the preservation baseline and must not be overwritten by HKv14 work.
+
+**验收：**
+- [x] HKv14 governed artifacts generated: 38 pages, 10 clauses, 164 atomic rules, 164 semantic rules
+- [x] Deterministic HKv13→HKv14 diff generated and summarized: 10 changed candidates, 0 added, 0 removed, 1 ID drift candidate, 0 source-anchor warnings
+- [x] POC downstream decision note records accepted deterministic candidates
+- [x] HKv14 mock API health/rules labels are HKv14-specific while implementation is shared
+- [x] HKv14 BDD runner passes included feature steps: 37 passed, 0 failed
+- [x] Full unittest discovery passed after package refresh: 193 tests, 1 browser E2E skip when Chrome DevTools unavailable
+- [x] Docs and artifact governance checks passed
+
+**不在范围：**
+- 不声明 HKv14 downstream automation production-ready
+- 不改变 schemas、prompts、default models or roadmap phase boundaries
+- 不实现 future role-friendly decision UI
+- 不替代 Stage 3 real execution environment
+
+**自评：** PASS。HKv14 POC artifacts, deterministic diff evidence, decision note, shared mock implementation, thin wrapper, tests, and governance checks are present. The work remains explicitly bounded to POC/mock/stub bridge validation.
 
 ---
 

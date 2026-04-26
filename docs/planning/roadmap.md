@@ -1,7 +1,7 @@
 # LME Testing — Roadmap v3.1
 
-**修订日期：** 2026-04-23  
-**变更说明：** 在 v3.0 基础上，对齐 S2-T01 v1.5、S2-B1/B2 集成状态，新增 S2-C1 mock API execution bridge，并补充 S2-D1 review UI browser E2E 测试收尾。
+**修订日期：** 2026-04-26  
+**变更说明：** 在 v3.1 基础上，记录 HKv14 POC document intake、HKv13→HKv14 deterministic diff、POC downstream decision note, and modular HKv14 mock API bridge。
 
 ---
 
@@ -18,6 +18,7 @@
 | Stage 2 质量提升 | ✅ v1.5 coverage=78.89%（142/180 fully covered）；剩余 gap 为证据约束或 LLM 非决定性 |
 | Mock API execution bridge | ✅ 已交付 `deliverables/lme_mock_api.zip`；BDD/script 可通过 HTTP 调 mock API |
 | Initial Margin HKv13 mock API bridge | ✅ 已交付 `deliverables/im_hk_v13_mock_api/`；用于验证 IM HKv13 BDD/script 到 HTTP mock API 的闭环 |
+| Initial Margin HKv14 POC bridge | ✅ 已交付 `artifacts/im_hk_v14/`、`evidence/im_hk_v14_diff/`、`deliverables/im_hk_v14_mock_api/`；HKv14 保持 POC/mock/stub 边界 |
 | Review UI browser E2E | ✅ `tests/test_review_session_browser.py` 覆盖 Review→BDD→Scripts 主路径与可见匹配指标刷新 |
 | 真实 LME API 接入 | ⏳ ETA 未知（需内部 VM 权限）|
 
@@ -199,7 +200,8 @@
 3. ✅ S2-B1 audit_trail.py + S2-B2 case_compare.py 已实现并集成
 4. ✅ S2-C1 mock API execution bridge 已完成，用于 Stage 3 前验证 BDD/script 调 API 的闭环
 5. ✅ S2-C2 Initial Margin HKv13 mock API execution bridge 已完成，用于验证计算指南领域的 BDD/script 调 API 闭环
-6. ✅ S2-D1 review UI browser E2E 已完成，用于验证 BDD/Scripts tab 的真实浏览器交互与可见指标刷新
+6. ✅ S2-C3 Initial Margin HKv14 POC document workflow and modular mock API bridge 已完成，用于验证 HKv14 governed intake、diff evidence and wrapper reuse
+7. ✅ S2-D1 review UI browser E2E 已完成，用于验证 BDD/Scripts tab 的真实浏览器交互与可见指标刷新
 
 详见：`docs/planning/s2t01_coverage_analysis.md`
 
@@ -263,6 +265,35 @@
 - Section 3.2.4.2 Flat Rate Margin POC：`15,180,000` expected margin reproduced
 
 **边界：** 这是 mock/stub execution bridge，不代表真实 VaR Platform、HKSCC/HKEX 初始保证金引擎或 Stage 3 execution readiness。
+
+---
+
+### 方向 C3：Initial Margin HKv14 POC Document Workflow And Modular Mock API Bridge（新增，已完成）
+
+**S2-C3 — `artifacts/im_hk_v14` + `deliverables/im_hk_v14_mock_api`**
+
+基于 `docs/materials/Initial Margin Calculation Guide HKv14.pdf` 完成 HKv14 governed intake，并用 deterministic comparator 生成 HKv13→HKv14 diff evidence。POC downstream decision note 接受全部 deterministic diff candidates，并通过 shared common package 复用 HKv13 mock bridge 逻辑，输出 thin HKv14 wrapper。
+
+**输出：**
+- `artifacts/im_hk_v14/`
+- `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json`
+- `docs/planning/im_hk_v14_diff_report.md`
+- `docs/planning/im_hk_v14_downstream_decision.md`
+- `docs/planning/im_hk_v14_mock_api_validation_plan.md`
+- `deliverables/im_hk_mock_api_common/`
+- `deliverables/im_hk_v14_mock_api/`
+- `deliverables/im_hk_v14_mock_api.zip`
+
+**验证：**
+- HKv14 extraction: 38 pages, 10 clauses, 164 atomic rules, 164 semantic rules
+- HKv13→HKv14 diff: 10 changed candidates, 0 added, 0 removed, 1 ID drift candidate, 0 source-anchor warnings
+- `python -m unittest tests.test_compare_initial_margin_versions -v`：passed
+- `python -m unittest tests.test_extract_matching_rules -v`：passed
+- `python -m unittest discover -s deliverables\im_hk_v14_mock_api\tests -t deliverables\im_hk_v14_mock_api -v`：3 tests OK；BDD summary 37 passed, 0 failed
+- Full unittest discovery after package refresh: 193 tests OK, 1 browser E2E skip when Chrome DevTools unavailable
+- `python scripts/check_docs_governance.py` and `python scripts/check_artifact_governance.py`：passed
+
+**边界：** 这是 HKv14 POC/mock/stub bridge work，不代表 HKv14 production downstream automation readiness，不改变 schemas、prompts、default models or roadmap phase boundaries。HKv13 mock API deliverable remains the preservation baseline.
 
 ---
 

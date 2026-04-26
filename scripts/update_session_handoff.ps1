@@ -42,8 +42,8 @@ Before making substantial changes, read these files in order:
 1. `AGENTS.md`
 2. `README.md`
 3. `docs/index.md`
-4. `docs/planning/roadmap.md` (v3.1 - Stage 2 complete, mock execution bridge added)
-5. `docs/planning/implementation_plan.md` (v3.0)
+4. `docs/planning/roadmap.md` (v3.1 - Stage 2 current through HKv14 POC mock bridge)
+5. `docs/planning/implementation_plan.md` (v3.1)
 6. `docs/governance/acceptance.md`
 7. `docs/architecture/architecture.md` (v3.1)
 
@@ -112,7 +112,7 @@ Recent completed work:
 
 ## Current Repo State
 
-**Stage M (master branch merge) COMPLETED 2026-04-19.** Stage 2 Direction A (S2-T01) COMPLETE. S2-B1/B2 INTEGRATED. S2-C1 MOCK API EXECUTION BRIDGE COMPLETE.
+**Stage M (master branch merge) COMPLETED 2026-04-19.** Stage 2 Direction A (S2-T01) COMPLETE. S2-B1/B2 INTEGRATED. S2-C1 MOCK API EXECUTION BRIDGE COMPLETE. S2-C2 IM HKv13 MOCK API BRIDGE COMPLETE. S2-C3 IM HKv14 POC DOCUMENT WORKFLOW AND MODULAR MOCK API BRIDGE COMPLETE.
 
 Key repo state:
 
@@ -122,6 +122,8 @@ Key repo state:
 - `pipelines.py` + `providers.py`: error surfacing and retry logic implemented
 - Evidence preserved in `evidence/` directory
 - Mock API bridge preserved in `deliverables/lme_mock_api/` and documented in `docs/planning/mock_api_validation_plan.md`
+- Initial Margin HKv14 POC evidence preserved in `artifacts/im_hk_v14/`, `evidence/im_hk_v14_diff/`, `docs/planning/im_hk_v14_diff_report.md`, `docs/planning/im_hk_v14_downstream_decision.md`, and `docs/planning/im_hk_v14_mock_api_validation_plan.md`
+- Modular HKv14 mock bridge preserved in `deliverables/im_hk_mock_api_common/` and `deliverables/im_hk_v14_mock_api/`; HKv13 deliverable remains the preservation baseline
 - Phase 1/2 acceptance gates are updated in `docs/governance/acceptance.md`; Stage 3 real LME API remains blocked
 
 Governance checks available:
@@ -134,11 +136,12 @@ Governance checks available:
 
 ## Recommended Next Step
 
-**Stage 2 complete (S2-T01 at 78.89%, S2-B1/B2 integrated). Remaining:**
+**Stage 2 is current through S2-C3 HKv14 POC documentation and mock/stub bridge work. Remaining:**
 
-1. **Decide whether to keep `deliverables/lme_mock_api/` as a long-lived sample or move it under a future `samples/`/`tools/` path.**
-2. **LLM non-determinism stabilization**: SR-MR-015-B3-4 boundary and SR-MR-071-C-1 negative still fluctuate - multi-run voting or consolidated scenario design.
-3. **Stage 3**: Blocked on LME VM access (ETA unknown); replace mock API target with real LME API when access is available.
+1. **Review/approve whether HKv14 remains POC-only or should be promoted into a formally scoped next implementation slice.** Promotion requires explicit human approval and updated contracts/evidence.
+2. **Decide whether long-lived mock API samples stay under `deliverables/` or move under a future `samples/`/`tools/` path.**
+3. **LLM non-determinism stabilization**: SR-MR-015-B3-4 boundary and SR-MR-071-C-1 negative still fluctuate - multi-run voting or consolidated scenario design.
+4. **Stage 3**: Blocked on LME VM access (ETA unknown); replace mock API target with real LME API only when access is available.
 
 ---
 

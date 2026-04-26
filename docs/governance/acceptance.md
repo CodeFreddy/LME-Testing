@@ -538,6 +538,39 @@ Evidence：
 
 ---
 
+### Gate S2.6：Initial Margin HKv14 POC Document Workflow And Modular Mock API Bridge
+
+**Verification Type：** `stub_verified`
+
+**验收标准：**
+- HKv14 PDF input produces governed artifacts without weakening artifact contracts
+- HKv13→HKv14 deterministic diff evidence is generated and reviewable
+- POC downstream decision note records accepted deterministic diff candidates
+- HKv14 mock bridge reuses shared common implementation and keeps HKv13 deliverable preserved
+- BDD step definitions call the HKv14 mock API through HTTP
+- README、源码、zip 交付物存在
+- 文档明确 HKv14 POC bridge 不等于 production downstream automation readiness
+
+**Evidence（2026-04-26）：**
+- `artifacts/im_hk_v14/`
+- `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json`
+- `docs/planning/im_hk_v14_diff_report.md`
+- `docs/planning/im_hk_v14_downstream_decision.md`
+- `docs/planning/im_hk_v14_mock_api_validation_plan.md`
+- `deliverables/im_hk_mock_api_common/`
+- `deliverables/im_hk_v14_mock_api/`
+- `deliverables/im_hk_v14_mock_api.zip`
+- `.venv\Scripts\python.exe -m unittest tests.test_compare_initial_margin_versions -v`：passed
+- `.venv\Scripts\python.exe -m unittest tests.test_extract_matching_rules -v`：passed
+- `.venv\Scripts\python.exe -m unittest discover -s deliverables\im_hk_v14_mock_api\tests -t deliverables\im_hk_v14_mock_api -v`：3 tests OK；BDD summary 37 passed, 0 failed
+- `.venv\Scripts\python.exe -m unittest discover -s tests -t . -v`：193 tests OK, 1 skipped when Chrome DevTools unavailable
+- `.venv\Scripts\python.exe scripts/check_docs_governance.py`：passed
+- `.venv\Scripts\python.exe scripts/check_artifact_governance.py`：passed
+
+**状态：** ✅ COMPLETE（HKv14 POC/mock/stub bridge；真实 Stage 3 和 production downstream automation 仍不声明完成）
+
+---
+
 ## 证据模板
 
 每个完成的 roadmap 项应提供：
