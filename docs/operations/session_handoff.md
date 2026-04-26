@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-26 10:43:58 UTC`
+- `2026-04-26 10:52:28 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `Add mock API deliverables policy and update roadmap`
 - `Complete HKv14 promoted downstream mapping`
 - `Update Phase 2-3 roadmap and acceptance documentation`
 - `Add HKv14 POC: Document intake, diff analysis, modular mock API bridge`
 - `add zip and pdf for now`
-- `Add Phase 3 planning docs and architecture updates`
 
 ---
 

@@ -19,6 +19,7 @@
 | Mock API execution bridge | ✅ 已交付 `deliverables/lme_mock_api.zip`；BDD/script 可通过 HTTP 调 mock API |
 | Initial Margin HKv13 mock API bridge | ✅ 已交付 `deliverables/im_hk_v13_mock_api/`；用于验证 IM HKv13 BDD/script 到 HTTP mock API 的闭环 |
 | Initial Margin HKv14 promoted slice | ✅ `docs/planning/im_hk_v14_downstream_treatment_mapping.md` 已完成；HKv14 flat-rate validation data 已对齐三项公式 |
+| Mock API deliverables location | ✅ 当前 Stage 2 保持在 `deliverables/`；新增 bridge 前按 `docs/planning/mock_api_deliverables_policy.md` 复审 |
 | Review UI browser E2E | ✅ `tests/test_review_session_browser.py` 覆盖 Review→BDD→Scripts 主路径与可见匹配指标刷新 |
 | 真实 LME API 接入 | ⏳ ETA 未知（需内部 VM 权限）|
 

@@ -45,6 +45,7 @@ Stage 2 规划（Stage 1 完成后展开）
 └── S2-C2: Initial Margin HKv13 mock API execution bridge
 └── S2-C3: Initial Margin HKv14 POC document workflow and modular mock API bridge
 └── S2-C4: Initial Margin HKv14 promoted downstream slice
+└── S2-C5: Mock API deliverables location policy
 └── S2-D1: Browser-level review UI E2E
 ```
 
@@ -499,6 +500,32 @@ MiniMax API 连接随机断开，全量 322-case 测量无法完成。参见 S2-
 - 不实现 future role-friendly decision UI
 
 **自评：** PASS. Promotion contract, deterministic treatment mapping, HKv14 validation data refresh, side-by-side HKv13/HKv14 validation, and governance checks are complete. The slice remains bounded to mock/stub downstream baseline candidacy.
+
+---
+
+### S2-C5 — Mock API Deliverables Location Policy
+
+**状态：✅ DONE（2026-04-26）**
+
+**目标：** Decide whether current long-lived mock API samples remain under `deliverables/` or move under a future `samples/` or `tools/` path.
+
+**Decision:** Keep current mock API source folders and packaged zips under `deliverables/` for Stage 2.
+
+**Output contract:**
+- `docs/planning/mock_api_deliverables_policy.md`
+
+**Implementation notes:**
+- No directories are moved.
+- Existing validation commands and zip paths remain stable.
+- Revisit before adding a new mock API bridge or promoting mock APIs into maintained internal tooling.
+
+**验收：**
+- [x] Human decision captured
+- [x] No file move authorized
+- [x] Revisit trigger documented
+- [x] Schema/prompt/model/artifact-contract impact documented as none
+
+**自评：** PASS.
 
 ---
 
