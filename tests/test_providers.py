@@ -63,6 +63,13 @@ class StubProviderRoleDetectionTests(unittest.TestCase):
             "maker",
         )
         self.assertEqual(
+            p._detect_role(
+                "You are the maker model for an LME test design workflow. "
+                "The checker will rate coverage_relevance later."
+            ),
+            "maker",
+        )
+        self.assertEqual(
             p._detect_role("Generate a scenario based on the rule."),
             "maker",
         )
@@ -136,6 +143,7 @@ class StubProviderGenerateTests(unittest.TestCase):
         self.assertIn("results", payload)
         self.assertEqual(len(payload["results"]), 1)
         self.assertEqual(payload["results"][0]["semantic_rule_id"], "SR-001")
+        self.assertIn("feature", payload["results"][0])
         self.assertIn("scenarios", payload["results"][0])
         self.assertTrue(resp.raw_response["stub"])
 
@@ -144,7 +152,7 @@ class StubProviderGenerateTests(unittest.TestCase):
         system = "You are a CHECKER"
         user = (
             'Input semantic rules:\n{"semantic_rule_id": "SR-001"}\n'
-            '{"scenario_id": "TC-SR-001-1"}\n'
+            '{"scenario_id": "TC-SR-001-1", "case_type": "negative"}\n'
         )
         resp = p.generate(system, user)
         payload = json.loads(resp.content)
@@ -152,6 +160,7 @@ class StubProviderGenerateTests(unittest.TestCase):
         self.assertGreaterEqual(len(payload["results"]), 1)
         self.assertIn("case_id", payload["results"][0])
         self.assertIn("scores", payload["results"][0])
+        self.assertEqual(payload["results"][0]["case_type"], "negative")
 
     def test_planner_response_structure(self) -> None:
         p = self._provider()
@@ -204,3 +213,4 @@ class BuildProviderTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
