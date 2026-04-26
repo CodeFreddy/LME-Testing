@@ -26,3 +26,6 @@ artifacts/**/coverage_report.json
 # OS / misc
 Thumbs.db
 .DS_Store
+
+# Config files
+config/llm_profiles.json

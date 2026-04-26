@@ -24,7 +24,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--config",
-        default="config/llm_profiles.example.json",
+        default="config/llm_profiles.json",
         help="Path to the project LLM config file.",
     )
 

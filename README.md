@@ -110,7 +110,7 @@ See [Governance Checks](#governance-checks) below for details.
 ### Step 2 — Generate test cases (start with POC sample, 2 rules)
 
 ```powershell
-python main.py --config config/llm_profiles.example.json maker `
+python main.py --config config/llm_profiles.json maker `
   --input artifacts/poc_two_rules/semantic_rules.json `
   --output-dir runs/maker `
   --batch-size 2
@@ -121,7 +121,7 @@ Find the run ID in the output, e.g. `runs/maker/20260414T143000+0800/` (local ti
 ### Step 3 — Assess quality and coverage
 
 ```powershell
-python main.py --config config/llm_profiles.example.json checker `
+python main.py --config config/llm_profiles.json checker `
   --rules artifacts/poc_two_rules/semantic_rules.json `
   --cases runs/maker/<run_id>/maker_cases.jsonl `
   --output-dir runs/checker
@@ -146,7 +146,7 @@ Open `reports/<run_id>.html` in a browser.
 > **Note:** `review-session` requires pre-existing maker and checker output files. It does **not** run the pipeline. To start from scratch and auto-launch the GUI when the pipeline finishes, use Step 6 instead.
 
 ```powershell
-python main.py --config config/llm_profiles.example.json review-session `
+python main.py --config config/llm_profiles.json review-session `
   --rules artifacts/poc_two_rules/semantic_rules.json `
   --cases runs/maker/<run_id>/maker_cases.jsonl `
   --checker-reviews runs/checker/<run_id>/checker_reviews.jsonl `
@@ -160,7 +160,7 @@ Open `http://127.0.0.1:8765` in a browser. Approve/rewrite/reject cases directly
 Runs the full pipeline from any start step, then **automatically launches the review-session web UI** when the checker completes:
 
 ```powershell
-python main.py --config config/llm_profiles.example.json workflow-session --start-step maker
+python main.py --config config/llm_profiles.json workflow-session --start-step maker
 ```
 
 This is the recommended way to start the GUI from scratch — it runs maker → checker → then starts the web UI at `http://127.0.0.1:8765` automatically.
@@ -258,7 +258,7 @@ schemas/                   # JSON Schema files
   fixtures/                 # Valid/invalid test fixtures
 
 config/
-  llm_profiles.example.json    # Provider config template
+  llm_profiles.json    # Provider config template
   approved_providers.json        # Tier-1/2/3 model分级
   compatibility_matrix.json     # Model × phase compatibility
   benchmark_thresholds.json     # Numeric governance gates
@@ -348,7 +348,7 @@ semantic_rules → maker → bdd → bdd-export → step-registry
 
 ```powershell
 # Already in the basic loop; generates given/when/then scenarios
-python main.py --config config/llm_profiles.example.json maker `
+python main.py --config config/llm_profiles.json maker `
   --input artifacts/poc_two_rules/semantic_rules.json `
   --output-dir runs/maker --batch-size 4
 ```
@@ -358,7 +358,7 @@ python main.py --config config/llm_profiles.example.json maker `
 Refines maker output into a structured normalized BDD artifact (`normalized_bdd.jsonl`):
 
 ```powershell
-python main.py --config config/llm_profiles.example.json bdd `
+python main.py --config config/llm_profiles.json bdd `
   --cases runs/maker/<run_id>/maker_cases.jsonl `
   --output-dir runs/bdd --batch-size 4
 ```

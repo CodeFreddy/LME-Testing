@@ -30,10 +30,10 @@ python -m unittest tests.test_pipelines.PipelineTests.test_maker_pipeline_persis
 ### CLI (maker/checker/report)
 ```bash
 # Maker: generate test cases from semantic rules
-python main.py maker --input artifacts/lme_rules_v2_2/semantic_rules.json --output-dir runs/maker --config config/llm_profiles.example.json
+python main.py maker --input artifacts/lme_rules_v2_2/semantic_rules.json --output-dir runs/maker --config config/llm_profiles.json
 
 # Checker: evaluate scenario quality and coverage
-python main.py checker --rules artifacts/lme_rules_v2_2/semantic_rules.json --cases runs/maker/<run_id>/maker_cases.jsonl --output-dir runs/checker --config config/llm_profiles.example.json
+python main.py checker --rules artifacts/lme_rules_v2_2/semantic_rules.json --cases runs/maker/<run_id>/maker_cases.jsonl --output-dir runs/checker --config config/llm_profiles.json
 
 # Report: generate HTML report
 python main.py report --maker-cases <path> --checker-reviews <path> --maker-summary <path> --checker-summary <path> --coverage-report <path> --output-html <path>
@@ -108,7 +108,7 @@ See `docs/architecture/architecture.md` for the full system architecture, artifa
 |--------|---------------|
 | `src/lme_testing/pipelines.py` | Orchestrates maker/checker pipelines, coverage calculation |
 | `src/lme_testing/schemas.py` | JSON validation for all artifacts; defines CASE_TYPES, COVERAGE_STATUSES |
-| `src/lme_testing/config.py` | ProjectConfig/ProviderConfig/RoleDefaults; loads `config/llm_profiles.example.json` |
+| `src/lme_testing/config.py` | ProjectConfig/ProviderConfig/RoleDefaults; loads `config/llm_profiles.json` |
 | `src/lme_testing/providers.py` | LLM provider abstraction (OpenAI-compatible API) |
 | `src/lme_testing/prompts.py` | MAKER_SYSTEM_PROMPT, CHECKER_SYSTEM_PROMPT, and prompt builders |
 | `src/lme_testing/reporting.py` | HTML report generation |
@@ -142,7 +142,7 @@ Each `rule_type` in `RULE_TYPE_CASE_REQUIREMENTS` (pipelines.py) defines which c
 
 ## Configuration
 
-Provider configuration uses `config/llm_profiles.example.json`:
+Provider configuration uses `config/llm_profiles.json`:
 - `providers`: Named provider configs (type, model, base_url, api_key, temperature, etc.)
 - `roles`: Maps `maker` and `checker` to provider names
 - Supports `${ENV_VAR}` template substitution for api_key

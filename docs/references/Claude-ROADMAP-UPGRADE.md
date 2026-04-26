@@ -74,7 +74,7 @@ class ConvergenceController:
 
 **Acceptance criteria:**
 - [ ] Workflow stops automatically when block count reduction falls below 5% between rounds.
-- [ ] Maximum rounds cap (default 5) is configurable in `config/llm_profiles.example.json`.
+- [ ] Maximum rounds cap (default 5) is configurable in `config/llm_profiles.json`.
 - [ ] `summary.json` records `termination_reason: "convergence" | "max_rounds" | "manual"`.
 - [ ] Unit tests cover all three termination paths.
 

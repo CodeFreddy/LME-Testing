@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-26 04:02:41 UTC`
+- `2026-04-26 04:08:11 UTC`
 
 ---
 
@@ -48,11 +48,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `Update: Config env var name, docs, and gitignore`
 - `Update repo structure and POC validation and HKEX Risk rules v1.3`
 - `Fix stub POC coverage path`
 - `Security: Remove hardcoded API key from example config`
 - `Fix CI: Governance signals job with proper artifact sharing`
-- `add mock api and UI test`
 
 ---
 

@@ -18,14 +18,14 @@
 - 结果读写：`src/lme_testing/storage.py`
 - 全量规则输入：`artifacts/lme_rules_v2_2/semantic_rules.json`
 - POC 小样本输入：`artifacts/poc_two_rules/semantic_rules.json`
-- 模型配置样例：`config/llm_profiles.example.json`
+- 模型配置样例：`config/llm_profiles.json`
 
 ## 2. 配置文件说明
 
 默认配置文件：
 
 ```text
-config/llm_profiles.example.json
+config/llm_profiles.json
 ```
 
 ## 2.1 运行前提与治理约束
@@ -49,7 +49,7 @@ config/llm_profiles.example.json
 ### 3.1 小样本联调
 
 ```powershell
-python main.py --config config/llm_profiles.example.json maker `
+python main.py --config config/llm_profiles.json maker `
   --input artifacts/poc_two_rules/semantic_rules.json `
   --output-dir runs/poc/maker `
   --batch-size 2
@@ -58,7 +58,7 @@ python main.py --config config/llm_profiles.example.json maker `
 ### 3.2 全量执行
 
 ```powershell
-python main.py --config config/llm_profiles.example.json maker `
+python main.py --config config/llm_profiles.json maker `
   --input artifacts/lme_rules_v2_2/semantic_rules.json `
   --output-dir runs/maker `
   --batch-size 3
@@ -86,7 +86,7 @@ python main.py --config config/llm_profiles.example.json maker `
 ### 4.1 小样本联调
 
 ```powershell
-python main.py --config config/llm_profiles.example.json checker `
+python main.py --config config/llm_profiles.json checker `
   --rules artifacts/poc_two_rules/semantic_rules.json `
   --cases runs/poc/maker/<run_id>/maker_cases.jsonl `
   --output-dir runs/poc/checker `
@@ -96,7 +96,7 @@ python main.py --config config/llm_profiles.example.json checker `
 ### 4.2 全量执行
 
 ```powershell
-python main.py --config config/llm_profiles.example.json checker `
+python main.py --config config/llm_profiles.json checker `
   --rules artifacts/lme_rules_v2_2/semantic_rules.json `
   --cases runs/maker/<run_id>/maker_cases.jsonl `
   --output-dir runs/checker `
