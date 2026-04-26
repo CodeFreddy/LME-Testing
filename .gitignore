@@ -5,8 +5,7 @@
 __pycache__/
 
 # Binary archives
-*.zip
-*.pdf
+
 
 # Local agent / editor state
 .codex/
