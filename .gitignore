@@ -1,7 +1,11 @@
 # Python virtual environments
 .venv/
-__pycache__/
+# Build outputs
 *.pyc
+__pycache__/
+
+# Binary archives
+*.zip
 
 # Local agent / editor state
 .codex/

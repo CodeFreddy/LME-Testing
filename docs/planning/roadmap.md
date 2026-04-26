@@ -17,6 +17,7 @@
 | Checker 真实稳定性 | ⚠️ 9.5% instability（63 cases，v3）；API 随机断开阻止全量 322-case 测量 |
 | Stage 2 质量提升 | ✅ v1.5 coverage=78.89%（142/180 fully covered）；剩余 gap 为证据约束或 LLM 非决定性 |
 | Mock API execution bridge | ✅ 已交付 `deliverables/lme_mock_api.zip`；BDD/script 可通过 HTTP 调 mock API |
+| Initial Margin HKv13 mock API bridge | ✅ 已交付 `deliverables/im_hk_v13_mock_api/`；用于验证 IM HKv13 BDD/script 到 HTTP mock API 的闭环 |
 | Review UI browser E2E | ✅ `tests/test_review_session_browser.py` 覆盖 Review→BDD→Scripts 主路径与可见匹配指标刷新 |
 | 真实 LME API 接入 | ⏳ ETA 未知（需内部 VM 权限）|
 
@@ -197,7 +198,8 @@
 2. ⏳ LLM非决定性应对：多轮投票或场景设计稳定化（SR-MR-015-B3-4 boundary、SR-MR-071-C-1 negative）
 3. ✅ S2-B1 audit_trail.py + S2-B2 case_compare.py 已实现并集成
 4. ✅ S2-C1 mock API execution bridge 已完成，用于 Stage 3 前验证 BDD/script 调 API 的闭环
-5. ✅ S2-D1 review UI browser E2E 已完成，用于验证 BDD/Scripts tab 的真实浏览器交互与可见指标刷新
+5. ✅ S2-C2 Initial Margin HKv13 mock API execution bridge 已完成，用于验证计算指南领域的 BDD/script 调 API 闭环
+6. ✅ S2-D1 review UI browser E2E 已完成，用于验证 BDD/Scripts tab 的真实浏览器交互与可见指标刷新
 
 详见：`docs/planning/s2t01_coverage_analysis.md`
 
@@ -241,6 +243,26 @@
 - `python -m unittest tests.test_mock_api`：2 tests OK
 
 **边界：** 这是 mock/stub execution bridge，不代表 Stage 3 真实 LME API 接入完成，也不替代真实 step binding rate 重测。
+
+### 方向 C2：Initial Margin HKv13 Mock API Execution Bridge（新增，已完成）
+
+**S2-C2 — `deliverables/im_hk_v13_mock_api`**
+
+提供一个基于 `docs/materials/Initial Margin Calculation Guide HKv13.pdf` 和 `artifacts/im_hk_v13/` 的确定性 HTTP mock API，用于验证：
+
+`Initial Margin guide -> governed rules -> BDD -> script -> API under test`
+
+**输出：**
+- `deliverables/im_hk_v13_mock_api/`
+- `deliverables/im_hk_v13_mock_api.zip`
+- `docs/planning/im_hk_v13_mock_api_validation_plan.md`
+
+**验证：**
+- `python -m compileall deliverables/im_hk_v13_mock_api`：passed
+- `python -m unittest discover -s deliverables\im_hk_v13_mock_api\tests -t deliverables\im_hk_v13_mock_api -v`：4 tests OK；BDD summary 37 passed, 0 failed
+- Section 3.2.4.2 Flat Rate Margin POC：`15,180,000` expected margin reproduced
+
+**边界：** 这是 mock/stub execution bridge，不代表真实 VaR Platform、HKSCC/HKEX 初始保证金引擎或 Stage 3 execution readiness。
 
 ---
 

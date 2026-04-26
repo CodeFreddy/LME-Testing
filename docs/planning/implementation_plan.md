@@ -42,6 +42,7 @@ Stage 2 规划（Stage 1 完成后展开）
 ├── S2-B1: audit_trail.py 实现
 └── S2-B2: case_compare.py 实现
 └── S2-C1: Mock API execution bridge
+└── S2-C2: Initial Margin HKv13 mock API execution bridge
 └── S2-D1: Browser-level review UI E2E
 ```
 
@@ -348,6 +349,53 @@ MiniMax API 连接随机断开，全量 322-case 测量无法完成。参见 S2-
 - 不改变主流水线 artifact schema、prompt、model default
 
 **自评：** PASS。
+
+---
+
+### S2-C2 — Initial Margin HKv13 Mock API Execution Bridge
+
+**状态：✅ DONE（2026-04-26）**
+
+**目标：** 在真实执行环境不可用时，提供一个基于 `Initial Margin Calculation Guide HKv13` 的 mock API 服务，验证 IM HKv13 领域从 governed rules 到 BDD/script 再到 HTTP API under test 的闭环形态。
+
+**为什么现在做：**
+- `artifacts/im_hk_v13/` 已存在并通过 schema validation，共 164 条 semantic rules。
+- S2-C1 已证明 matching rules 领域的 mock execution bridge 形态可行。
+- IM HKv13 是计算指南领域，适合用确定性接口验证脚本可执行性，而不改变主流水线 contract。
+
+**输入契约：**
+- `docs/materials/Initial Margin Calculation Guide HKv13.pdf`
+- `artifacts/im_hk_v13/semantic_rules.json`
+- `artifacts/im_hk_v13/source_from_pdf.md`
+- `artifacts/im_hk_v13/validation_report.json`
+
+**输出契约：**
+- `deliverables/im_hk_v13_mock_api/` 可运行源码
+- `deliverables/im_hk_v13_mock_api.zip` 可下载压缩包
+- `docs/planning/im_hk_v13_mock_api_validation_plan.md`
+- BDD feature + Python step definitions + lightweight runner + unittest
+
+**实现要点：**
+- 独立包 `mock_im_api`，不加入主包 import path。
+- 使用确定性小公式覆盖 RPF validation、position normalization、market risk components、MTM split、rounding/aggregation、corporate actions、cross-day netting、cross-currency netting、intraday MTM treatment。
+- 不改变 schemas、prompts、provider defaults 或主 pipeline contracts。
+
+**验收：**
+- [x] mock API 源码和 README 存在
+- [x] BDD step definitions 使用 HTTP client 调用 mock API
+- [x] positive/negative scenarios 覆盖代表性 API responses
+- [x] `python -m compileall deliverables/im_hk_v13_mock_api` 通过
+- [x] `python -m unittest discover -s deliverables\im_hk_v13_mock_api\tests -t deliverables\im_hk_v13_mock_api -v` 通过：4 tests OK；BDD summary 37 passed, 0 failed
+- [x] Section 3.2.4.2 Flat Rate Margin POC 覆盖 guide example：`(1,300,000 x 30% + 60,000,000 x 12%) x 2 = 15,180,000`
+- [x] 文档明确 mock bridge 不代表真实 Initial Margin execution readiness
+
+**不在范围：**
+- 不实现完整 VaR Platform 或生产 Initial Margin engine
+- 不替代 Stage 3 真实执行环境接入
+- 不把 164 条 semantic rules 全量转换为 executable BDD
+- 不改变 artifact schema、prompt、model default
+
+**自评：** PASS。Mock bridge 已独立交付并通过静态编译、HTTP-backed BDD runner 和 unittest discovery；不改变主流水线 schemas、prompts、models 或 artifact contracts。
 
 ---
 

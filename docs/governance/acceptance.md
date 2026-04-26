@@ -515,6 +515,29 @@ Evidence：
 
 ---
 
+### Gate S2.5：Initial Margin HKv13 Mock API Execution Bridge
+
+**Verification Type：** `stub_verified`
+
+**验收标准：**
+- mock API 基于 `docs/materials/Initial Margin Calculation Guide HKv13.pdf` 与 `artifacts/im_hk_v13/` 的代表性计算/数据规则
+- BDD step definitions 通过 HTTP 调用 mock API
+- feature suite 可本地运行并通过
+- README、源码、zip 交付物存在
+- 文档明确 mock bridge 不等于真实 Initial Margin execution readiness
+
+**Evidence（2026-04-26）：**
+- `deliverables/im_hk_v13_mock_api/`
+- `deliverables/im_hk_v13_mock_api.zip`
+- `docs/planning/im_hk_v13_mock_api_validation_plan.md`
+- `python -m compileall deliverables/im_hk_v13_mock_api`：passed
+- `python -m unittest discover -s deliverables\im_hk_v13_mock_api\tests -t deliverables\im_hk_v13_mock_api -v`：4 tests OK；BDD summary 37 passed, 0 failed
+- Section 3.2.4.2 Flat Rate Margin POC：expected flat rate margin `15,180,000`
+
+**状态：** ✅ COMPLETE（mock/stub execution bridge；真实 Stage 3 仍阻塞）
+
+---
+
 ## 证据模板
 
 每个完成的 roadmap 项应提供：

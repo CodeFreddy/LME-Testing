@@ -117,6 +117,25 @@ BDD feature
 
 该 bridge 用于证明 BDD/script 可以调用 API under test；它不替代 Stage 3 的真实 LME API 接入，也不改变主流水线 artifact contract。
 
+### Initial Margin HKv13 mock API execution bridge（S2-C2）
+
+`deliverables/im_hk_v13_mock_api/` 提供一个独立 HTTP mock API 和可执行 BDD sample，用于 Initial Margin HKv13 计算指南领域：
+
+```
+BDD feature
+    │
+    ▼
+[Python step definitions]
+    │ HTTP
+    ▼
+[mock_im_api.server]
+    │
+    ▼
+[deterministic calculation and validation checks]
+```
+
+该 bridge 覆盖 RPF validation、position normalization、market risk components、MTM split、margin aggregation、corporate actions、cross-day netting、cross-currency netting 和 intraday MTM treatment。它只验证脚本到 HTTP mock API 的闭环，不代表真实 VaR Platform/HKSCC/HKEX execution readiness，也不改变主流水线 artifact contract。
+
 ### Review UI automation assurance（S2-D1）
 
 `tests/test_review_session_browser.py` 启动真实 local review-session HTTP server，并通过 Chrome DevTools Protocol 驱动本机 Chrome/Edge，验证：
@@ -277,6 +296,7 @@ Review Session 启动时传入 `--step-registry step_visibility.json`，Scripts 
 | `evidence/` | 关键运行证据（versioned）：stability、baseline、governance signals |
 | `runs/` | pipeline 运行输出（gitignored）|
 | `deliverables/lme_mock_api/` | S2-C1 mock API execution bridge（独立交付物，不改变主包契约）|
+| `deliverables/im_hk_v13_mock_api/` | S2-C2 Initial Margin HKv13 mock API execution bridge（独立交付物，不改变主包契约）|
 | `tests/test_review_session_browser.py` | S2-D1 browser-level review UI E2E（本机 Chrome/Edge，可 skip）|
 
 ---
@@ -319,6 +339,7 @@ charset = utf-8
 | Checker 是 LLM，概率性 | 判断不保证一致性 | 通过 stability 测量缓解 |
 | audit_trail/case_compare 已集成但为本地 HTML 输出 | 只覆盖 review-session 本地审计视图 | 符合单用户工具定位 |
 | Mock API 不是真实 LME API | 只能验证脚本到 HTTP API 的闭环，不代表真实执行能力 | Stage 3 仍需 VM/API 权限 |
+| Initial Margin HKv13 mock API 不是真实 VaR Platform | 只能验证 IM BDD/script 到 HTTP API 的闭环，不代表真实保证金计算能力 | Stage 3 仍需真实执行环境 |
 | Windows PowerShell 工具链 | 跨平台受限 | 单人开发现状 |
 
 ---
