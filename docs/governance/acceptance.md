@@ -571,6 +571,37 @@ Evidence：
 
 ---
 
+### Gate S2.7：Initial Margin HKv14 Promoted Downstream Slice
+
+**Verification Type：** `stub_verified`
+
+**验收标准：**
+- promotion scope exists and records explicit human approval
+- 10 HKv13→HKv14 changed candidates and 1 ID drift candidate are mapped to downstream treatment categories
+- required HKv14-specific BDD/data/test changes are identified before implementation
+- HKv13 deliverable remains preserved
+- HKv13 and HKv14 validation commands pass after any implementation change
+- docs and artifact governance checks pass
+- schema, prompt, and model impact remains none unless a separate governed task is opened
+
+**Evidence（2026-04-26）：**
+- `docs/planning/im_hk_v14_promotion_scope.md`
+- `docs/planning/im_hk_v14_downstream_treatment_mapping.md`
+- `docs/planning/im_hk_v14_mock_api_validation_plan.md`
+- updated `deliverables/im_hk_v14_mock_api/data/flat_rate_margin_poc.json`
+- updated `deliverables/im_hk_v14_mock_api/tests/test_mock_api.py`
+- updated `deliverables/im_hk_v14_mock_api/features/initial_margin/flat_rate_margin_poc.feature`
+- refreshed `deliverables/im_hk_v14_mock_api.zip`
+- `.venv\Scripts\python.exe -m unittest discover -s deliverables\im_hk_v14_mock_api\tests -t deliverables\im_hk_v14_mock_api -v`：passed, 3 tests OK；BDD summary 37 passed, 0 failed
+- `.venv\Scripts\python.exe deliverables\im_hk_v14_mock_api\poc_flat_rate_margin.py`：passed
+- `.venv\Scripts\python.exe -m unittest discover -s deliverables\im_hk_v13_mock_api\tests -t deliverables\im_hk_v13_mock_api -v`：passed, 4 tests OK；BDD summary 37 passed, 0 failed
+- `.venv\Scripts\python.exe scripts/check_docs_governance.py`：passed
+- `.venv\Scripts\python.exe scripts/check_artifact_governance.py`：passed
+
+**状态：** ✅ COMPLETE（promoted mock/stub downstream baseline candidate；真实 Stage 3 和 production downstream automation 仍不声明完成）
+
+---
+
 ## 证据模板
 
 每个完成的 roadmap 项应提供：

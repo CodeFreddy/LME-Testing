@@ -178,6 +178,19 @@ It defines:
 - current UI test coverage limits,
 - and the implemented browser E2E coverage for the primary Review -> BDD -> Scripts path.
 
+### 14. `docs/planning/im_hk_v14_promotion_scope.md`
+
+Use this for the promoted HKv14 downstream implementation slice.
+
+It defines:
+
+- the human promotion decision,
+- allowed HKv14 downstream scope,
+- contracts and non-outputs,
+- acceptance gates,
+- rollback boundaries,
+- and the next deterministic candidate-mapping action.
+
 ### Supporting Guide And Reference Folders
 
 - `docs/guides/maker_checker_usage.md` explains the maker/checker CLI workflow.
@@ -186,6 +199,7 @@ It defines:
 - `docs/architecture/rule_model_and_parsing_design.md` captures rule model and parsing design detail.
 - `docs/architecture/run_directory_structure.md` documents run output layout.
 - `docs/archives/20260422_script_generation_investigation.md`, `docs/planning/stage2_planned_modules.md`, and `docs/planning/s2t01_coverage_analysis.md` preserve supporting Stage 2 planning and analysis.
+- `docs/planning/im_hk_v14_downstream_treatment_mapping.md` preserves the S2-C4 deterministic treatment mapping for HKv14 diff candidates.
 
 ---
 
@@ -211,6 +225,7 @@ Then read supporting docs only as needed:
 11. `docs/planning/mock_api_validation_plan.md`
 12. `docs/operations/checkpoints.md`
 13. `docs/planning/ui_test_plan.md`
+14. `docs/planning/im_hk_v14_promotion_scope.md`
 
 ### If you are implementing a task
 

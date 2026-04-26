@@ -1,41 +1,41 @@
 {
   "source_anchor": {
-    "document": "Initial Margin Calculation Guide HKv13",
+    "document": "Initial Margin Calculation Guide HKv14",
     "section": "3.2.4.2 Flat Rate Margin",
-    "source_file": "artifacts/im_hk_v13/source_from_pdf.md",
-    "source_lines": "802-880",
-    "expected_formula": "(1,300,000 x 30% + 60,000,000 x 12%) x 2 = 15,180,000"
+    "source_file": "artifacts/im_hk_v14/source_from_pdf.md",
+    "source_lines": "75-77",
+    "expected_formula": "(60,000,000 x 12% + 750,000 x 30% + 300,000 x 55%) x 2 = 15,180,000"
   },
   "request": {
     "positions": [
       {
-        "instrument_id": "3457",
-        "quantity": -1,
-        "market_value": -1000000,
-        "flat_rate_subcategory": "1"
-      },
-      {
-        "instrument_id": "3456",
-        "quantity": 10000,
-        "market_value": 1300000,
-        "flat_rate_subcategory": "1"
-      },
-      {
         "instrument_id": "658",
         "quantity": -10000000,
         "market_value": -60000000,
-        "flat_rate_subcategory": "2"
+        "flat_rate_subcategory": "1"
       },
       {
         "instrument_id": "3606",
         "quantity": 1000000,
         "market_value": 30000000,
+        "flat_rate_subcategory": "1"
+      },
+      {
+        "instrument_id": "3456",
+        "quantity": 10000,
+        "market_value": 750000,
         "flat_rate_subcategory": "2"
+      },
+      {
+        "instrument_id": "3457",
+        "quantity": -50000,
+        "market_value": -300000,
+        "flat_rate_subcategory": "3"
       }
     ],
     "flat_rates": {
       "3456": 0.30,
-      "3457": 0.30,
+      "3457": 0.55,
       "658": 0.12,
       "3606": 0.12
     },
@@ -45,16 +45,19 @@
     "status": "calculated",
     "subcategories": {
       "1": {
+        "included_side": "short",
+        "included_instruments": ["658"]
+      },
+      "2": {
         "included_side": "long",
         "included_instruments": ["3456"]
       },
-      "2": {
+      "3": {
         "included_side": "short",
-        "included_instruments": ["658"]
+        "included_instruments": ["3457"]
       }
     },
     "pre_multiplier_margin": 7590000,
     "flat_rate_margin": 15180000
   }
 }
-

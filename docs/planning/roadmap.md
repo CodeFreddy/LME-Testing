@@ -18,7 +18,7 @@
 | Stage 2 质量提升 | ✅ v1.5 coverage=78.89%（142/180 fully covered）；剩余 gap 为证据约束或 LLM 非决定性 |
 | Mock API execution bridge | ✅ 已交付 `deliverables/lme_mock_api.zip`；BDD/script 可通过 HTTP 调 mock API |
 | Initial Margin HKv13 mock API bridge | ✅ 已交付 `deliverables/im_hk_v13_mock_api/`；用于验证 IM HKv13 BDD/script 到 HTTP mock API 的闭环 |
-| Initial Margin HKv14 POC bridge | ✅ 已交付 `artifacts/im_hk_v14/`、`evidence/im_hk_v14_diff/`、`deliverables/im_hk_v14_mock_api/`；HKv14 保持 POC/mock/stub 边界 |
+| Initial Margin HKv14 promoted slice | ✅ `docs/planning/im_hk_v14_downstream_treatment_mapping.md` 已完成；HKv14 flat-rate validation data 已对齐三项公式 |
 | Review UI browser E2E | ✅ `tests/test_review_session_browser.py` 覆盖 Review→BDD→Scripts 主路径与可见匹配指标刷新 |
 | 真实 LME API 接入 | ⏳ ETA 未知（需内部 VM 权限）|
 
@@ -201,7 +201,8 @@
 4. ✅ S2-C1 mock API execution bridge 已完成，用于 Stage 3 前验证 BDD/script 调 API 的闭环
 5. ✅ S2-C2 Initial Margin HKv13 mock API execution bridge 已完成，用于验证计算指南领域的 BDD/script 调 API 闭环
 6. ✅ S2-C3 Initial Margin HKv14 POC document workflow and modular mock API bridge 已完成，用于验证 HKv14 governed intake、diff evidence and wrapper reuse
-7. ✅ S2-D1 review UI browser E2E 已完成，用于验证 BDD/Scripts tab 的真实浏览器交互与可见指标刷新
+7. ✅ S2-C4 Initial Margin HKv14 promoted downstream slice 已完成，deterministic treatment mapping and HKv14 validation data refresh passed
+8. ✅ S2-D1 review UI browser E2E 已完成，用于验证 BDD/Scripts tab 的真实浏览器交互与可见指标刷新
 
 详见：`docs/planning/s2t01_coverage_analysis.md`
 
@@ -294,6 +295,20 @@
 - `python scripts/check_docs_governance.py` and `python scripts/check_artifact_governance.py`：passed
 
 **边界：** 这是 HKv14 POC/mock/stub bridge work，不代表 HKv14 production downstream automation readiness，不改变 schemas、prompts、default models or roadmap phase boundaries。HKv13 mock API deliverable remains the preservation baseline.
+
+---
+
+### 方向 C4：Initial Margin HKv14 Promoted Downstream Slice（新增，已批准）
+
+**S2-C4 — `docs/planning/im_hk_v14_promotion_scope.md`**
+
+HKv14 已由 human project owner 明确批准从 POC-only continuation promoted into a governed Stage 2 implementation slice。该 slice 的目标是让 HKv14 成为 reviewable downstream baseline candidate for the Initial Margin mock/stub bridge。
+
+**当前状态：** complete.
+
+**完成内容：** deterministic mapping of 10 changed candidates and 1 ID drift candidate from `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json` into downstream treatment categories. The only immediate HKv14 wrapper update required was the flat-rate validation data refresh to the HKv14 three-term example.
+
+**边界：** Promotion does not authorize production readiness claims, Stage 3 real execution claims, prompt/model changes, schema changes, or replacement of the HKv13 preservation baseline.
 
 ---
 

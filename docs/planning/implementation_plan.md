@@ -2,7 +2,7 @@
 
 **修订日期：** 2026-04-26  
 **范围：** Stage M（合并）+ Stage 1（真实数据接入）+ Stage 2 已执行任务  
-**说明：** Stage 2 已基于真实数据展开：S2-T01 prompt 校准完成，S2-B1/B2 集成完成，S2-C1 mock API execution bridge 完成，S2-C2 IM HKv13 mock bridge 完成，S2-C3 IM HKv14 POC document workflow and modular mock bridge 完成，S2-D1 browser-level review UI E2E 完成。
+**说明：** Stage 2 已基于真实数据展开：S2-T01 prompt 校准完成，S2-B1/B2 集成完成，S2-C1 mock API execution bridge 完成，S2-C2 IM HKv13 mock bridge 完成，S2-C3 IM HKv14 POC document workflow and modular mock bridge 完成，S2-C4 IM HKv14 promoted downstream slice 完成，S2-D1 browser-level review UI E2E 完成。
 
 ---
 ## 如何使用本文档
@@ -44,6 +44,7 @@ Stage 2 规划（Stage 1 完成后展开）
 └── S2-C1: Mock API execution bridge
 └── S2-C2: Initial Margin HKv13 mock API execution bridge
 └── S2-C3: Initial Margin HKv14 POC document workflow and modular mock API bridge
+└── S2-C4: Initial Margin HKv14 promoted downstream slice
 └── S2-D1: Browser-level review UI E2E
 ```
 
@@ -449,6 +450,55 @@ MiniMax API 连接随机断开，全量 322-case 测量无法完成。参见 S2-
 - 不替代 Stage 3 real execution environment
 
 **自评：** PASS。HKv14 POC artifacts, deterministic diff evidence, decision note, shared mock implementation, thin wrapper, tests, and governance checks are present. The work remains explicitly bounded to POC/mock/stub bridge validation.
+
+---
+
+### S2-C4 — Initial Margin HKv14 Promoted Downstream Slice
+
+**状态：✅ DONE（2026-04-26）**
+
+**目标：** Promote HKv14 from POC-only continuation into a governed Stage 2 downstream candidate while preserving HKv13 as the stable baseline.
+
+**为什么现在做：**
+- Human project owner explicitly approved promotion.
+- S2-C3 produced governed HKv14 artifacts, deterministic diff evidence, decision note, and a thin HKv14 mock wrapper.
+- Promotion requires a scoped contract before further implementation.
+
+**输入契约：**
+- `docs/planning/im_hk_v14_promotion_scope.md`
+- `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json`
+- `docs/planning/im_hk_v14_downstream_decision.md`
+- `artifacts/im_hk_v14/`
+- `deliverables/im_hk_mock_api_common/`
+- `deliverables/im_hk_v14_mock_api/`
+- `deliverables/im_hk_v13_mock_api/`
+
+**输出契约：**
+- `docs/planning/im_hk_v14_downstream_treatment_mapping.md`
+- updated `docs/planning/im_hk_v14_mock_api_validation_plan.md`
+- updated HKv14 flat-rate validation data/test/BDD label
+- refreshed `deliverables/im_hk_v14_mock_api.zip`
+
+**实现要点：**
+- First implementation action must be deterministic diff candidate mapping.
+- Do not change mock behavior before each accepted diff candidate has a treatment category.
+- Keep HKv13 and HKv14 validation runnable side by side.
+- Keep schema, prompt, and model impact at none unless a separate governed task is opened.
+
+**验收：**
+- [x] 10 changed candidates and 1 ID drift candidate mapped to downstream treatment categories
+- [x] Required HKv14-specific BDD/data/test updates identified and applied
+- [x] HKv13 deliverable remains preserved
+- [x] HKv13 and HKv14 validation commands pass after implementation change
+- [x] Docs and artifact governance checks pass
+
+**不在范围：**
+- 不声明 HKv14 production downstream automation readiness
+- 不替代 Stage 3 real execution environment
+- 不改变 schemas、prompts、default models
+- 不实现 future role-friendly decision UI
+
+**自评：** PASS. Promotion contract, deterministic treatment mapping, HKv14 validation data refresh, side-by-side HKv13/HKv14 validation, and governance checks are complete. The slice remains bounded to mock/stub downstream baseline candidacy.
 
 ---
 

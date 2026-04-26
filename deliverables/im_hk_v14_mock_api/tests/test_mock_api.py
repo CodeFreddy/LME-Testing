@@ -49,12 +49,12 @@ class MockInitialMarginHKv14APITest(unittest.TestCase):
             "/margin/flat-rate",
             {
                 "positions": [
-                    {"instrument_id": "3457", "quantity": -1, "market_value": -1000000, "flat_rate_subcategory": "1"},
-                    {"instrument_id": "3456", "quantity": 10000, "market_value": 1300000, "flat_rate_subcategory": "1"},
-                    {"instrument_id": "658", "quantity": -10000000, "market_value": -60000000, "flat_rate_subcategory": "2"},
-                    {"instrument_id": "3606", "quantity": 1000000, "market_value": 30000000, "flat_rate_subcategory": "2"},
+                    {"instrument_id": "658", "quantity": -10000000, "market_value": -60000000, "flat_rate_subcategory": "1"},
+                    {"instrument_id": "3606", "quantity": 1000000, "market_value": 30000000, "flat_rate_subcategory": "1"},
+                    {"instrument_id": "3456", "quantity": 10000, "market_value": 750000, "flat_rate_subcategory": "2"},
+                    {"instrument_id": "3457", "quantity": -50000, "market_value": -300000, "flat_rate_subcategory": "3"},
                 ],
-                "flat_rates": {"3456": 0.30, "3457": 0.30, "658": 0.12, "3606": 0.12},
+                "flat_rates": {"3456": 0.30, "3457": 0.55, "658": 0.12, "3606": 0.12},
                 "flat_rate_margin_multiplier": 2,
             },
         )
