@@ -6,6 +6,129 @@ Keep the latest checkpoint at the top. Preserve prior checkpoints below it unles
 
 ---
 
+## 2026-04-26 - HKv14 POC Document Workflow And Modular Mock API Bridge
+
+### Current Task Goal
+
+Continue the HKv14 POC document workflow from a fresh chat, preserving HKv13 as the baseline while carrying forward governed HKv14 artifacts, deterministic diff evidence, the POC decision note, and the modular HKv14 mock API bridge.
+
+### Confirmed Key Facts
+
+- `AGENTS.md` governs this repo; substantial changes must respect contracts, phase boundaries, acceptance gates, and governance checks.
+- The original private design file `docs/architecture/工程知识工作流设计.md` was deleted after its summary was folded into governed planning docs.
+- `docs/architecture/Executable_Engineering_Knowledge_Contract.md` is labeled as `Proposal Package / Not Current Baseline Architecture`.
+- `docs/planning/document_library_and_capability_workflow_proposal.md` and `docs/planning/document_library_and_capability_workflow_implementation_plan.md` describe the incoming big plan.
+- A future role-friendly decision UI requirement is recorded as planning scope: BA, QA Lead, and Automation Lead should eventually have a friendly interface for accepting/rejecting/deferring decisions. The HKv14 POC currently uses Markdown decision notes.
+- `scripts/extract_matching_rules.py` now uses `pypdf` as the primary PDF extractor for PDF inputs and always writes a full extracted `source_from_pdf.md` into the output folder for PDF input.
+- The direct PDF extractor previously produced 0 pages for HKv14 because the old extractor was specific to LME Matching Rules page headers and used a limited legacy PDF stream parser.
+- `requirements.txt` includes `pypdf>=4.0.0`; the local `.venv` installed `pypdf 6.10.2`.
+- HKv14 governed artifacts were generated under `artifacts/im_hk_v14/` from `docs/materials/Initial Margin Calculation Guide HKv14.pdf`.
+- HKv14 extraction output contains 38 pages, 10 clauses, 164 atomic rules, and 164 semantic rules.
+- `scripts/compare_initial_margin_versions.py` is a generic governed artifact directory comparator despite the Initial Margin filename.
+- HKv13-to-HKv14 diff evidence was generated at `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json` and summarized in `docs/planning/im_hk_v14_diff_report.md`.
+- Diff result: 164 HKv13 atomic rules, 164 HKv14 atomic rules, 10 changed candidates, 0 added, 0 removed, 1 ID drift candidate, and 0 source-anchor warnings.
+- `docs/planning/im_hk_v14_downstream_decision.md` records the POC decision to accept all deterministic diff candidates and proceed to downstream HKv14 impact work.
+- Existing `deliverables/im_hk_v13_mock_api/` remains the baseline and must not be overwritten.
+- Shared mock API code now lives in `deliverables/im_hk_mock_api_common/`.
+- The HKv14 wrapper lives in `deliverables/im_hk_v14_mock_api/` and reuses the common package rather than rebuilding the bridge.
+- `deliverables/im_hk_v14_mock_api.zip` was generated and excludes Python cache files.
+
+### Files Modified Or Inspected
+
+Planning and governance:
+
+- `AGENTS.md`
+- `docs/architecture/Executable_Engineering_Knowledge_Contract.md`
+- `docs/planning/document_library_and_capability_workflow_proposal.md`
+- `docs/planning/document_library_and_capability_workflow_implementation_plan.md`
+- `docs/planning/im_hk_v14_diff_report.md`
+- `docs/planning/im_hk_v14_downstream_decision.md`
+- `docs/planning/im_hk_v14_mock_api_validation_plan.md`
+- `docs/operations/checkpoints.md`
+
+Extraction, comparison, and tests:
+
+- `requirements.txt`
+- `scripts/extract_matching_rules.py`
+- `scripts/compare_initial_margin_versions.py`
+- `tests/test_extract_matching_rules.py`
+- `tests/test_compare_initial_margin_versions.py`
+- `artifacts/im_hk_v14/`
+- `evidence/im_hk_v14_diff/`
+
+Mock API POC deliverables:
+
+- `deliverables/im_hk_mock_api_common/`
+- `deliverables/im_hk_v14_mock_api/`
+- `deliverables/im_hk_v14_mock_api.zip`
+- `deliverables/im_hk_v13_mock_api/`
+
+### Remaining Work
+
+- Run `git status --short` and prepare a review or commit package when the human asks.
+- If committing, refresh `docs/operations/session_handoff.md` according to `AGENTS.md`.
+- Optionally update roadmap, implementation plan, and acceptance docs to mark the completed HKv14 POC slices, but only as documentation of already-approved work.
+- Do not implement the role-friendly decision UI unless explicitly requested; it is a future requirement, not current baseline architecture.
+- Optional cleanup: remove generated `__pycache__` directories if needed before packaging or commit, using approved safe PowerShell path checks.
+
+### Next Single Action
+
+Run `git status --short`, then either prepare the current HKv14 POC package for review/commit or ask the human whether to proceed to the next approved implementation slice.
+
+### Constraints That Must Not Be Violated
+
+- Do not overwrite or mutate the HKv13 mock API baseline while advancing HKv14 work.
+- Do not claim HKv14 downstream automation is production-ready; it is POC/mock/stub bridge work.
+- Do not change schemas, prompts, default models, or roadmap phase boundaries without explicit approval, evidence, and rollback notes.
+- Do not hide duplicate/advisory warnings from deterministic validation.
+- Do not introduce a new LLM-driven stage without contract, validation, traceability, and reviewable outputs.
+- Keep `docs/architecture/Executable_Engineering_Knowledge_Contract.md` clearly labeled as proposal package, not current baseline architecture.
+
+### Resume Prompt
+
+```text
+Continue working in C:\Codes\GenAI\LME-Testing. First read and follow AGENTS.md, then read the latest entry in docs/operations/checkpoints.md.
+
+Current task state:
+- HKv14 POC document workflow and modular mock API bridge have been implemented.
+- HKv14 governed artifacts exist in artifacts/im_hk_v14/ from docs/materials/Initial Margin Calculation Guide HKv14.pdf.
+- scripts/extract_matching_rules.py now uses pypdf as the primary PDF extractor and writes source_from_pdf.md for PDF inputs.
+- scripts/compare_initial_margin_versions.py compares governed artifact directories generically.
+- HKv13-to-HKv14 diff evidence exists at evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json and docs/planning/im_hk_v14_diff_report.md.
+- docs/planning/im_hk_v14_downstream_decision.md accepts all deterministic diff candidates for POC.
+- deliverables/im_hk_mock_api_common/ contains shared mock API bridge code.
+- deliverables/im_hk_v14_mock_api/ is the thin HKv14 wrapper.
+- deliverables/im_hk_v13_mock_api/ is the baseline and must not be overwritten.
+
+Validation already run:
+- .venv\Scripts\python.exe -m pip install -r requirements.txt: passed, installed pypdf
+- .venv\Scripts\python.exe scripts/extract_matching_rules.py --document-class calculation_guide --input "docs/materials/Initial Margin Calculation Guide HKv14.pdf" --input-format pdf --output-dir artifacts/im_hk_v14 --doc-id im_hk_v14 --doc-title "Initial Margin Calculation Guide HKv14" --doc-version HKv14 --write-page-text: passed, 164 atomic rules
+- .venv\Scripts\python.exe scripts/generate_semantic_rules.py --input artifacts/im_hk_v14/atomic_rules.json --output artifacts/im_hk_v14/semantic_rules.json --metadata artifacts/im_hk_v14/metadata.json: passed, 164 semantic rules
+- .venv\Scripts\python.exe scripts/validate_rules.py --input artifacts/im_hk_v14/atomic_rules.json --semantic-rules artifacts/im_hk_v14/semantic_rules.json --output artifacts/im_hk_v14/validation_report.json --fail-on-error: passed with non-blocking duplicate advisories
+- .venv\Scripts\python.exe -m unittest tests.test_compare_initial_margin_versions -v: passed
+- .venv\Scripts\python.exe -m unittest tests.test_extract_matching_rules -v: passed
+- .venv\Scripts\python.exe scripts/compare_initial_margin_versions.py --previous artifacts/im_hk_v13 --current artifacts/im_hk_v14 --json-output evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json --markdown-output docs/planning/im_hk_v14_diff_report.md: passed
+- .venv\Scripts\python.exe -m unittest discover -s deliverables\im_hk_v13_mock_api\tests -t deliverables\im_hk_v13_mock_api -v: passed, 4 tests and 37 BDD scenarios
+- .venv\Scripts\python.exe -m unittest discover -s deliverables\im_hk_v14_mock_api\tests -t deliverables\im_hk_v14_mock_api -v: passed, 3 tests and 37 BDD scenarios
+- .venv\Scripts\python.exe deliverables\im_hk_v14_mock_api\poc_flat_rate_margin.py: passed, flat rate margin 15180000
+- .venv\Scripts\python.exe -m unittest discover -s tests -t . -v: passed, 193 tests, 1 skipped
+- .venv\Scripts\python.exe scripts/check_docs_governance.py: passed
+- .venv\Scripts\python.exe scripts/check_artifact_governance.py: passed
+
+Next single action:
+Run git status --short, then prepare the current package for review/commit or ask the human whether to proceed to the next approved implementation slice.
+
+Must follow:
+- Do not overwrite or mutate deliverables/im_hk_v13_mock_api/ while advancing HKv14.
+- Do not claim HKv14 downstream automation is production-ready.
+- Do not change schemas, prompts, default models, or roadmap phase boundaries without explicit approval, evidence, and rollback notes.
+- Do not hide deterministic validation advisories.
+- Do not implement the future role-friendly decision UI unless explicitly requested.
+- If committing, refresh docs/operations/session_handoff.md according to AGENTS.md.
+```
+
+---
+
 ## 2026-04-23 - Browser E2E Documentation Refresh
 
 ### Current Task Goal

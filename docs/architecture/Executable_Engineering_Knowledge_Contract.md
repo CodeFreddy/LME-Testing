@@ -423,6 +423,7 @@ The MVP should prove one core value:
 12. Run maker/checker workflow.
 13. Capture human review and approval.
 14. Store approved artifacts.
+15. Provide a role-friendly review and decision UI so BA, QA Lead and Automation Lead can record decisions without editing Markdown or raw YAML.
 ```
 
 ### Out of Scope for MVP
@@ -554,6 +555,37 @@ Feature: Spec Change to Test Impact Workflow
 | Efficiency | Manual spec comparison effort is reduced |
 | Transparency | PM / SVP can see status, owner, artifact and pending decision |
 | Governance | No LLM output becomes approved knowledge without human approval |
+
+---
+
+## 9. Role-Friendly Review and Decision UI Requirement
+
+Human approval should not depend on BA, QA Lead, Automation Lead or PM editing Markdown files directly.
+
+The platform should provide a friendly review UI for role owners to:
+
+```text
+- view source evidence and deterministic diff candidates,
+- review checker findings and open ambiguities,
+- classify candidate changes,
+- approve, reject, defer or request rework,
+- add decision rationale and comments,
+- record reviewer role, reviewer name and timestamp,
+- export the approved decision record into the governed artifact repository.
+```
+
+The UI should support at least:
+
+| Role | Primary decisions captured |
+|---|---|
+| BA | Requirement meaning, ambiguity, business interpretation |
+| QA Lead | Test impact, test plan gap, coverage risk |
+| Automation Lead | Regression impact, automation backlog scope |
+| PM / Release Owner | Readiness risk and unresolved dependency |
+
+The UI is an interaction layer over governed artifacts. It must not become the source of truth by itself. Decisions captured through the UI must be persisted as structured review records and linked back to source evidence, checker reports and generated artifacts.
+
+For early MVP, this can be implemented as a local, single-user review form or table view. Full role-based access control, hosted workflow collaboration and enterprise permissions remain later-phase work.
 
 ---
 

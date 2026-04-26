@@ -210,6 +210,40 @@ def extract_pages_from_pdf(pdf_path: Path) -> list[PageText]:
     return sorted(pages, key=lambda item: item.page_number)
 
 
+def extract_pages_from_pdf_with_pypdf(pdf_path: Path) -> list[PageText]:
+    """Extract document-neutral page text from a PDF using pypdf when available."""
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        return []
+
+    reader = PdfReader(str(pdf_path))
+    pages: list[PageText] = []
+    for index, page in enumerate(reader.pages, start=1):
+        raw_text = page.extract_text() or ""
+        raw_text = raw_text.replace("\r\n", "\n").replace("\r", "\n")
+        lines = normalize_markdown_page_lines(raw_text)
+        pages.append(PageText(page_number=index, text="\n".join(lines)))
+    return pages
+
+
+def pages_to_markdown(title: str, pages: list[PageText]) -> str:
+    lines = [f"# {title}", ""]
+    for page in pages:
+        lines.append(f"## Page {page.page_number}")
+        if page.text:
+            lines.append(page.text)
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def write_pdf_source_markdown(output_dir: Path, title: str, pages: list[PageText]) -> Path:
+    output_path = output_dir / "source_from_pdf.md"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(pages_to_markdown(title, pages), encoding="utf-8")
+    return output_path
+
+
 def normalize_markdown_page_lines(raw_text: str) -> list[str]:
     """Collapse wrapped Markdown lines while preserving headings, bullets, and clauses."""
     raw_text = clean_unicode_noise(raw_text)
@@ -581,10 +615,20 @@ def main() -> None:
     input_path = Path(args.input)
     output_dir = Path(args.output_dir)
     input_format = detect_input_format(input_path, args.input_format)
+    extraction_method = "markdown_page_headings_v1" if input_format == "md" else None
+    extracted_source_path: Path | None = None
 
     if input_format == "pdf":
-        pages = extract_pages_from_pdf(input_path)
-        clauses = split_clauses_from_pdf(pages)
+        pages = extract_pages_from_pdf_with_pypdf(input_path)
+        if pages:
+            extraction_method = "pypdf_page_text_v1"
+            extracted_source_path = write_pdf_source_markdown(output_dir, args.doc_title, pages)
+            clauses = split_clauses_from_markdown(pages)
+        else:
+            pages = extract_pages_from_pdf(input_path)
+            extraction_method = "legacy_lme_pdf_stream_v1"
+            extracted_source_path = write_pdf_source_markdown(output_dir, args.doc_title, pages)
+            clauses = split_clauses_from_pdf(pages)
     else:
         pages = extract_pages_from_markdown(input_path)
         clauses = split_clauses_from_markdown(pages)
@@ -599,11 +643,14 @@ def main() -> None:
         "doc_version": args.doc_version,
         "source_path": str(input_path),
         "source_format": input_format,
+        "extraction_method": extraction_method,
         "document_class": args.document_class,
         "page_count": len(pages),
         "clause_count": len(clauses),
         "atomic_rule_count": len(atomic_rules),
     }
+    if extracted_source_path is not None:
+        metadata["extracted_source_path"] = str(extracted_source_path)
 
     write_json(output_dir / "metadata.json", metadata)
     write_json(output_dir / "pages.json", [asdict(page) for page in pages])

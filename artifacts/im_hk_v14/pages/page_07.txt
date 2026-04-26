@@ -1,0 +1,17 @@
+HKSCC - VaR Platform Initial Margin Calculation Guide Page 7 of 38 Field Name Description Format FieldType Label to indicate the record type: 1 – HVaR Scenarios 2 – SVaR Scenarios 3 – Flat Rate Scenarios 4 – Beta hedge information for liquidation risk add-on 5 – Instrument delta information for liquidation risk add-on 6 – Price threshold and add-on% for structured product add-on 7 – Corporate action position margin scenarios INTEGER (X,0) FieldType 1 Columns Scenario returns for each instrument in HVaR component On the right of “FieldType 1”:
+- total number of scenarios should be same as “HVaR_Scen_Count” DECIMALS (X,10) FieldType 2 Columns Scenario returns for each instrument in SVaR component On the right of “FieldType 2”:
+- total number of scenarios should be same as “SVaR_Scen_Count” DECIMALS (X,10) FieldType 3 Columns Return for each instrument in flat rate margin component DECIMALS (X,10) FieldType 4 Columns On the right of “FieldType 4”:
+- 1st column: Bucket rate DECIMALS (X,10)
+- 2nd column: Instrument beta DECIMALS (X,10)
+- 3rd column: Delta equivalent position market value threshold INTEGER (X,0)
+- 4th column: Cash delta per quantity (i.e., market price) DECIMALS (X,10) FieldType 5 Columns On the right of “FieldType 5”:
+- 1st column: Underlying group TEXT
+- 2nd column: Delta DECIMALS (X,10)
+- 3rd column: Conversion ratio DECIMALS (X,10)
+- 4th column: Cash delta per quantity DECIMALS (X,10) FieldType 6 Columns On the right of “FieldType 6”:
+- 1st column: Price threshold DECIMALS (X,10)
+- 2nd column: One-tenth of tick size multiplier DECIMALS (X,10) FieldType 7 Columns On the right of “FieldType 7”:
+- 1st column: Benefit entitlement type INTEGER (X,0) 1 – Distribution in specie 2 – Rights issue 3 – Cash dividend
+- 2nd column: Price of the benefit entitlement (Shows 1 for cash dividend) DECIMALS (X,10)
+- 3rd column: Short position add- on% DECIMALS (X,10)
+- 4th column: Long position add- on% DECIMALS (X,10) Numbers next to “FieldType” Scenario numbers INTEGER (X,0)
