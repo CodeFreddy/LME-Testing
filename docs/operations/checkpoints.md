@@ -6,6 +6,171 @@ Keep the latest checkpoint at the top. Preserve prior checkpoints below it unles
 
 ---
 
+## 2026-04-27 - S2-F1 HKv14 Role-Friendly Impact Decision Review Package Complete
+
+### Current Task Goal
+
+Implement the approved S2-F1 local role-friendly impact decision review package for HKv13 -> HKv14 deterministic diff candidates.
+
+### Confirmed Key Facts
+
+- S2-F1 is implemented as a deterministic package generator, not a new LLM stage.
+- CLI command: `python main.py im-hk-v14-role-review`.
+- Default inputs:
+  - `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json`
+  - `docs/planning/im_hk_v14_downstream_treatment_mapping.md`
+- Default outputs:
+  - `runs/im_hk_v14/review_decisions/<timestamp>/decision_record.json`
+  - `runs/im_hk_v14/review_decisions/<timestamp>/decision_summary.md`
+  - `runs/im_hk_v14/review_decisions/<timestamp>/review.html`
+- `decision_record.json` is canonical; Markdown and HTML are derived/review artifacts.
+- The implementation links 10 changed candidates and 1 ID drift candidate to downstream treatment mapping.
+- The ID drift arrow mismatch between diff JSON (`->`) and mapping Markdown (`→`) is normalized deterministically.
+- No schemas, prompts, default models, maker/checker pipeline behavior, or Stage 3 readiness claims were introduced.
+- HKv13 mock API deliverable remains the preservation baseline.
+
+### Files Modified Or Inspected
+
+- `src/lme_testing/im_hk_v14_role_review.py`
+- `src/lme_testing/cli.py`
+- `tests/test_im_hk_v14_role_review.py`
+- `README.md`
+- `TODO.md`
+- `docs/planning/im_hk_v14_role_review_plan.md`
+- `docs/planning/roadmap.md`
+- `docs/planning/implementation_plan.md`
+- `docs/governance/acceptance.md`
+- `docs/architecture/Executable_Engineering_Knowledge_Contract.md`
+- `docs/operations/session_handoff.md`
+- `docs/operations/checkpoints.md`
+
+### Validation
+
+- `.venv\Scripts\python.exe -m unittest tests.test_im_hk_v14_role_review -v`: passed, 5 tests OK.
+- `.venv\Scripts\python.exe main.py im-hk-v14-role-review --output-dir .tmp_test\s2f1_review --reviewer-name Test --rationale "Planning validation"`: passed, generated 11 candidates.
+- `.venv\Scripts\python.exe -m compileall src\lme_testing tests`: passed.
+- `.venv\Scripts\python.exe -m unittest discover -s tests -t . -v`: passed, 198 tests OK, 1 skipped because Chrome DevTools was unavailable.
+- `.venv\Scripts\python.exe scripts/check_docs_governance.py`: passed.
+- `.venv\Scripts\python.exe scripts/check_artifact_governance.py`: passed.
+- `.venv\Scripts\python.exe scripts/check_release_governance.py`: failed on known threshold only, coverage 72.78% below required 80.0%.
+
+### Remaining Work
+
+- If role owners are ready, generate an actual review package under `runs/im_hk_v14/review_decisions/` and collect decisions.
+- Optional future improvement: replace static generated review HTML with a server-backed save flow if users need in-browser persistence rather than package generation.
+- Stage 3 remains blocked on real LME VM/API access.
+
+### Next Single Action
+
+Report S2-F1 implementation, validation results, release-governance limitation, and rollback considerations to the user.
+
+### Constraints That Must Not Be Violated
+
+- Do not treat S2-F1 output as production downstream automation readiness.
+- Do not add a new LLM-driven stage without contract, validation, traceability, and reviewable outputs.
+- Do not change schemas, prompts, default models, or roadmap phase boundaries without explicit approval and evidence.
+- Do not overwrite or mutate `deliverables/im_hk_v13_mock_api/`.
+- Keep deterministic evidence visible; do not hide source-anchor or validation advisories.
+
+### Resume Prompt
+
+```text
+Continue working in C:\Codes\GenAI\LME-Testing. First read and follow AGENTS.md, then read the latest entry in docs/operations/checkpoints.md.
+
+Current task state:
+- S2-F1 HKv14 role-friendly impact decision review package is implemented.
+- Run it with: python main.py im-hk-v14-role-review
+- It reads evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json and docs/planning/im_hk_v14_downstream_treatment_mapping.md by default.
+- It writes decision_record.json, decision_summary.md, and review.html under runs/im_hk_v14/review_decisions/<timestamp>/.
+- decision_record.json is canonical; Markdown and HTML are derived/review artifacts.
+- Focused tests and full unittest discovery passed; release governance still fails only because coverage 72.78% is below the 80.0% release threshold.
+
+Next single action:
+Report status or, if explicitly requested, generate an actual role-review package for the human reviewers.
+
+Must follow:
+- Do not claim HKv14 production downstream automation or Stage 3 real execution readiness.
+- Do not change schemas, prompts, default models, or add a new LLM stage.
+- Do not overwrite deliverables/im_hk_v13_mock_api/.
+```
+
+---
+
+## 2026-04-27 - S2-F1 HKv14 Role-Friendly Impact Decision Review Plan Promoted
+
+### Current Task Goal
+
+Promote a small MVP slice from `docs/architecture/Executable_Engineering_Knowledge_Contract.md` into governed roadmap scope before implementation starts.
+
+### Confirmed Key Facts
+
+- The broad proposal remains labeled Proposal Package / Not Current Baseline Architecture.
+- Human approved promotion of a narrow S2-F1 planning slice only.
+- Approved slice: `Initial Margin HKv13 -> HKv14 -> Deterministic Diff -> Role Review -> Structured Decision Record`.
+- `docs/planning/im_hk_v14_role_review_plan.md` defines the S2-F1 scope, input contract, output contract, acceptance gates, non-goals, and rollback considerations.
+- S2-F1 implementation has not started.
+- The structured `decision_record.json` is intended to be canonical; `decision_summary.md` is a derived export.
+- No schemas, prompts, default models, pipeline behavior, review-session behavior, or artifact contracts were changed by this planning promotion.
+- HKv13 mock API deliverable remains the preservation baseline.
+- HKv14 remains POC/mock/stub downstream baseline candidate work.
+
+### Files Modified Or Inspected
+
+- `README.md`
+- `TODO.md`
+- `docs/planning/roadmap.md`
+- `docs/planning/implementation_plan.md`
+- `docs/governance/acceptance.md`
+- `docs/index.md`
+- `docs/planning/im_hk_v14_role_review_plan.md`
+- `docs/operations/session_handoff.md`
+- `docs/operations/checkpoints.md`
+
+### Remaining Work
+
+- Run docs and artifact governance checks after the planning refresh.
+- If implementation is requested next, start from `docs/planning/im_hk_v14_role_review_plan.md`.
+- Implement only the local, single-user role-friendly review surface and structured decision record flow described in S2-F1.
+- Add focused tests for load, save, validation failure, and Markdown export.
+
+### Next Single Action
+
+Run docs/artifact governance checks, then report the S2-F1 planning promotion and validation results.
+
+### Constraints That Must Not Be Violated
+
+- Do not implement a generic document platform or workflow engine under S2-F1.
+- Do not add a new LLM-driven stage.
+- Do not change schemas, prompts, default models, or roadmap phase boundaries without explicit approval and evidence.
+- Do not claim HKv14 production downstream automation or Stage 3 real execution readiness.
+- Do not overwrite or mutate `deliverables/im_hk_v13_mock_api/`.
+- Keep deterministic evidence visible; do not hide source-anchor or validation advisories.
+- Markdown decision summaries must be derived exports, not the canonical decision source.
+
+### Resume Prompt
+
+```text
+Continue working in C:\Codes\GenAI\LME-Testing. First read and follow AGENTS.md, then read the latest entry in docs/operations/checkpoints.md.
+
+Current task state:
+- S2-F1 HKv14 role-friendly impact decision review has been promoted into governed planning scope, but implementation has not started.
+- The approved plan is docs/planning/im_hk_v14_role_review_plan.md.
+- The approved slice is: Initial Margin HKv13 -> HKv14 -> Deterministic Diff -> Role Review -> Structured Decision Record.
+- Required inputs are evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json, docs/planning/im_hk_v14_downstream_treatment_mapping.md, artifacts/im_hk_v13/, and artifacts/im_hk_v14/.
+- Intended outputs are runs/im_hk_v14/review_decisions/<timestamp>/decision_record.json and decision_summary.md.
+- decision_record.json is canonical; decision_summary.md is derived export.
+
+Next single action:
+Run docs/artifact governance checks, then either report the planning promotion or begin implementation only if explicitly requested.
+
+Must follow:
+- Do not implement a generic document platform, workflow engine, role permission system, new LLM stage, prompt/model/schema change, automatic test update, automatic code generation, or Stage 3 readiness claim.
+- Do not overwrite deliverables/im_hk_v13_mock_api/.
+- Keep HKv14 as POC/mock/stub downstream baseline candidate work.
+```
+
+---
+
 ## 2026-04-27 - HKv14 Promotion Complete And Mock API Deliverables Policy Current
 
 ### Current Task Goal

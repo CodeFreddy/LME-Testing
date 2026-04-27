@@ -352,6 +352,42 @@ Evidence：
 
 ---
 
+## Stage 2 Extension — Governed HKv14 Role Review Slice
+
+### Gate S2-F1：HKv14 Role-Friendly Impact Decision Review
+
+**Verification Type 目标：** `stub_verified` for local UI/review surface and deterministic validation; no real execution readiness claim.
+
+**状态：** ✅ COMPLETE（local deterministic package generator）
+
+**Source plan：**
+- `docs/planning/im_hk_v14_role_review_plan.md`
+
+**验收标准：**
+- Existing HKv13 baseline artifacts and deliverables remain untouched. ✅
+- HKv14 remains scoped as POC/mock/stub downstream baseline candidate work. ✅
+- Every reviewed candidate links back to deterministic HKv13→HKv14 diff evidence or documented downstream treatment mapping. ✅
+- Structured decision record JSON is canonical and validates deterministically. ✅
+- Markdown decision summary is derived from the structured decision record. ✅
+- Reviewer role, reviewer name, decision, rationale, comments, and timestamp are captured. ✅
+- Allowed role and decision values are enforced. ✅
+- Focused tests cover load, save, validation failure, and Markdown export. ✅
+- Docs governance and artifact governance checks pass. ✅
+
+**Evidence（2026-04-27）：**
+- `src/lme_testing/im_hk_v14_role_review.py`
+- `tests/test_im_hk_v14_role_review.py`
+- CLI command: `python main.py im-hk-v14-role-review`
+- Generated review package contains canonical `decision_record.json`, derived `decision_summary.md`, and local `review.html`.
+- `.venv\Scripts\python.exe -m unittest tests.test_im_hk_v14_role_review -v`: passed, 5 tests OK.
+
+**Non-acceptance boundaries：**
+- No new LLM-driven stage is accepted under this gate.
+- No prompt, schema, or default model change is accepted under this gate.
+- No automatic test case update, automatic code generation, generic document platform, or Stage 3 real execution claim is accepted under this gate.
+
+---
+
 ## Phase 3 — Execution Readiness
 
 **完成日期：** 2026-04-14（代码实现）  

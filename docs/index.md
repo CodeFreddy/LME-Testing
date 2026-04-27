@@ -191,6 +191,19 @@ It defines:
 - rollback boundaries,
 - and the next deterministic candidate-mapping action.
 
+### 15. `docs/planning/im_hk_v14_role_review_plan.md`
+
+Use this for the implemented S2-F1 slice promoted from the broader Executable Engineering Knowledge Contract MVP proposal.
+
+It defines:
+
+- the HKv13 -> HKv14 role-friendly impact decision review scope,
+- structured decision record inputs and outputs,
+- BA / QA Lead / Automation Lead / PM review boundaries,
+- acceptance gates,
+- implementation boundaries,
+- and explicit non-goals.
+
 ### Supporting Guide And Reference Folders
 
 - `docs/guides/maker_checker_usage.md` explains the maker/checker CLI workflow.
@@ -200,6 +213,7 @@ It defines:
 - `docs/architecture/run_directory_structure.md` documents run output layout.
 - `docs/archives/20260422_script_generation_investigation.md`, `docs/planning/stage2_planned_modules.md`, and `docs/planning/s2t01_coverage_analysis.md` preserve supporting Stage 2 planning and analysis.
 - `docs/planning/im_hk_v14_downstream_treatment_mapping.md` preserves the S2-C4 deterministic treatment mapping for HKv14 diff candidates.
+- `docs/planning/im_hk_v14_role_review_plan.md` preserves the implemented S2-F1 role-friendly impact decision review plan and package boundaries.
 
 ---
 
@@ -226,6 +240,7 @@ Then read supporting docs only as needed:
 12. `docs/operations/checkpoints.md`
 13. `docs/planning/ui_test_plan.md`
 14. `docs/planning/im_hk_v14_promotion_scope.md`
+15. `docs/planning/im_hk_v14_role_review_plan.md`
 
 ### If you are implementing a task
 

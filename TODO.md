@@ -1,7 +1,7 @@
 # LME Testing — TODO v3.1
 
 **修订日期：** 2026-04-27  
-**说明：** 整合 master 分支合并分析、S2-T01 v1.5 结果、S2-B1/B2 集成状态、S2-C1/S2-C2/S2-C3/S2-C4/S2-C5 mock API bridge and deliverables policy work，以及 S2-D1 browser-level review UI E2E。
+**说明：** 整合 master 分支合并分析、S2-T01 v1.5 结果、S2-B1/B2 集成状态、S2-C1/S2-C2/S2-C3/S2-C4/S2-C5 mock API bridge and deliverables policy work，S2-D1 browser-level review UI E2E，以及 S2-F1 role-friendly HKv14 impact decision review package generator。
 
 ---
 
@@ -167,6 +167,7 @@
 - ✅ S2-C4 已完成：HKv14 promoted downstream treatment mapping 已完成，HKv14 flat-rate validation data 已对齐三项公式。
 - ✅ S2-C5 已完成：mock API deliverables location policy 已记录，当前 Stage 2 bridge sources and zips 保持在 `deliverables/`。
 - ✅ S2-D1 已完成：browser-level review UI E2E 覆盖 Review -> BDD -> Scripts 主路径、BDD 未保存 edits 保留、可见 match metrics 刷新。
+- ✅ S2-F1 已完成：HKv13→HKv14 role-friendly impact decision review package generator；canonical JSON + derived Markdown + local review HTML。
 - ⏳ Stage 3 仍阻塞于真实 LME VM/API 权限；mock API 不代表真实 LME execution readiness。
 
 ### S2-B1：audit_trail.py 实现（来自 master 概念）
@@ -297,6 +298,21 @@
 
 ---
 
+### S2-F1：HKv14 Role-Friendly Impact Decision Review
+- [x] 将 `Executable_Engineering_Knowledge_Contract.md` 的 MVP human-control slice 提升为小范围 governed plan
+- [x] 记录 plan：`docs/planning/im_hk_v14_role_review_plan.md`
+- [x] 实现 local single-user review surface: generated `review.html`
+- [x] 输出 canonical `decision_record.json`
+- [x] 输出 derived `decision_summary.md`
+- [x] 加 focused validation/tests: load, save, validation failure, Markdown export
+- [x] 运行 docs/artifact governance checks
+
+**状态：** ✅ COMPLETE
+
+**边界：** 不新增 LLM stage，不改变 schemas/prompts/default models，不实现 generic document platform，不声明 Stage 3 readiness；HKv13 mock API deliverable remains preservation baseline。
+
+---
+
 ## Stage 3（阻塞于外部）
 
 - ⏳ LME VM 访问权限（ETA：未知）
@@ -321,6 +337,7 @@
 - [x] ✅ S2-C4　HKv14 promoted downstream treatment mapping
 - [x] ✅ S2-C5　mock API deliverables location policy
 - [x] ✅ S2-D1　browser-level review UI E2E
+- [x] ✅ S2-F1　HKv14 role-friendly impact decision review package generator
 - [ ] ⏳ 真实 LME API 接入（Stage 3，待 VM 权限）
 - [ ] 🧊 S2-E　LLM 非决定性稳定化（SR-MR-015-B3-4、SR-MR-071-C-1；已明确暂跳过，未来需 benchmark 成本/收益批准）
 

@@ -2,7 +2,7 @@
 
 **修订日期：** 2026-04-26  
 **范围：** Stage M（合并）+ Stage 1（真实数据接入）+ Stage 2 已执行任务  
-**说明：** Stage 2 已基于真实数据展开：S2-T01 prompt 校准完成，S2-B1/B2 集成完成，S2-C1 mock API execution bridge 完成，S2-C2 IM HKv13 mock bridge 完成，S2-C3 IM HKv14 POC document workflow and modular mock bridge 完成，S2-C4 IM HKv14 promoted downstream slice 完成，S2-D1 browser-level review UI E2E 完成。
+**说明：** Stage 2 已基于真实数据展开：S2-T01 prompt 校准完成，S2-B1/B2 集成完成，S2-C1 mock API execution bridge 完成，S2-C2 IM HKv13 mock bridge 完成，S2-C3 IM HKv14 POC document workflow and modular mock bridge 完成，S2-C4 IM HKv14 promoted downstream slice 完成，S2-D1 browser-level review UI E2E 完成。S2-F1 role-friendly HKv14 impact decision review package generator 已实现。
 
 ---
 ## 如何使用本文档
@@ -47,6 +47,7 @@ Stage 2 规划（Stage 1 完成后展开）
 └── S2-C4: Initial Margin HKv14 promoted downstream slice
 └── S2-C5: Mock API deliverables location policy
 └── S2-D1: Browser-level review UI E2E
+└── S2-F1: HKv14 role-friendly impact decision review
 ```
 
 ---
@@ -569,6 +570,70 @@ MiniMax API 连接随机断开，全量 322-case 测量无法完成。参见 S2-
 - 不改变 review-session artifact contracts
 
 **自评：** PASS。
+
+---
+
+### S2-F1 — HKv14 Role-Friendly Impact Decision Review
+
+**状态：✅ DONE（2026-04-27）**
+
+**目标：** 将 `docs/architecture/Executable_Engineering_Knowledge_Contract.md` 中 "MVP Scope and Delivery Plan" 的 human-control slice 提升为当前 repo 的小范围 governed implementation path。
+
+Approved slice:
+
+```text
+Initial Margin HKv13 -> HKv14 -> Deterministic Diff -> Role Review -> Structured Decision Record
+```
+
+**为什么现在做：**
+- HKv14 deterministic diff、downstream treatment mapping, and mock/stub bridge decision evidence already exist.
+- Current HKv14 decision handling is Markdown-based; the proposal requires role-friendly review and structured decisions.
+- This slice can improve human review traceability without adding a generic document platform or new LLM stage.
+
+**输入契约：**
+- `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json`
+- `docs/planning/im_hk_v14_downstream_treatment_mapping.md`
+- `artifacts/im_hk_v13/`
+- `artifacts/im_hk_v14/`
+- `docs/planning/im_hk_v14_role_review_plan.md`
+
+**输出契约：**
+- `runs/im_hk_v14/review_decisions/<timestamp>/decision_record.json`
+- `runs/im_hk_v14/review_decisions/<timestamp>/decision_summary.md`
+- `runs/im_hk_v14/review_decisions/<timestamp>/review.html`
+- focused tests for load, save, validation failure, and Markdown export
+
+**实现要点：**
+- Keep the decision record JSON canonical; Markdown is derived export only.
+- Capture reviewer role, reviewer name, decision, rationale, comments, and timestamp.
+- Allowed roles and decisions must be validated deterministically.
+- Prefer existing local review-session patterns where practical.
+- Use atomic writes for structured decision records.
+- Keep deterministic evidence visible.
+
+**验收：**
+- [x] Existing HKv13 baseline artifacts and deliverables are untouched
+- [x] HKv14 remains POC/mock/stub downstream baseline candidate work
+- [x] Every candidate decision links back to deterministic diff evidence or downstream treatment mapping
+- [x] Structured decision record validates deterministically
+- [x] Markdown summary is derived from structured JSON
+- [x] Focused tests cover load, save, validation failure, and export
+- [x] Docs and artifact governance checks pass
+
+**不在范围：**
+- Generic document upload or document library
+- Full workflow engine or role-based permission system
+- New LLM-driven stage
+- Prompt, schema, or default model changes
+- Automatic test case updates or code generation
+- Stage 3 real execution readiness claims
+
+**验证：**
+- `.venv\Scripts\python.exe -m unittest tests.test_im_hk_v14_role_review -v`: passed, 5 tests OK.
+- `.venv\Scripts\python.exe main.py im-hk-v14-role-review --output-dir .tmp_test\s2f1_review --reviewer-name Test --rationale "Planning validation"`: passed, generated 11 candidates.
+- `.venv\Scripts\python.exe -m compileall src\lme_testing tests`: passed.
+
+**自评：** PASS. S2-F1 is implemented as a deterministic local review package generator with canonical JSON, derived Markdown, and local HTML review surface. It remains bounded to HKv14 POC/mock/stub decision review.
 
 ---
 

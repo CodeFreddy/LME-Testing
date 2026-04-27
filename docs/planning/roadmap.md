@@ -1,7 +1,7 @@
 # LME Testing — Roadmap v3.1
 
 **修订日期：** 2026-04-26  
-**变更说明：** 在 v3.1 基础上，记录 HKv14 POC document intake、HKv13→HKv14 deterministic diff、POC downstream decision note, and modular HKv14 mock API bridge。
+**变更说明：** 在 v3.1 基础上，记录 HKv14 POC document intake、HKv13→HKv14 deterministic diff、POC downstream decision note, modular HKv14 mock API bridge, and approved S2-F1 role-friendly impact decision review planning slice。
 
 ---
 
@@ -21,6 +21,7 @@
 | Initial Margin HKv14 promoted slice | ✅ `docs/planning/im_hk_v14_downstream_treatment_mapping.md` 已完成；HKv14 flat-rate validation data 已对齐三项公式 |
 | Mock API deliverables location | ✅ 当前 Stage 2 保持在 `deliverables/`；新增 bridge 前按 `docs/planning/mock_api_deliverables_policy.md` 复审 |
 | Review UI browser E2E | ✅ `tests/test_review_session_browser.py` 覆盖 Review→BDD→Scripts 主路径与可见匹配指标刷新 |
+| HKv14 role-friendly decision review | ✅ S2-F1 local package generator implemented; canonical decision JSON, Markdown summary, and review HTML |
 | 真实 LME API 接入 | ⏳ ETA 未知（需内部 VM 权限）|
 
 ---
@@ -204,6 +205,7 @@
 6. ✅ S2-C3 Initial Margin HKv14 POC document workflow and modular mock API bridge 已完成，用于验证 HKv14 governed intake、diff evidence and wrapper reuse
 7. ✅ S2-C4 Initial Margin HKv14 promoted downstream slice 已完成，deterministic treatment mapping and HKv14 validation data refresh passed
 8. ✅ S2-D1 review UI browser E2E 已完成，用于验证 BDD/Scripts tab 的真实浏览器交互与可见指标刷新
+9. ✅ S2-F1 role-friendly HKv14 impact decision review package generator 已实现；canonical JSON is source of truth, Markdown and HTML are derived/review surfaces
 
 详见：`docs/planning/s2t01_coverage_analysis.md`
 
@@ -333,6 +335,29 @@ HKv14 已由 human project owner 明确批准从 POC-only continuation promoted 
 - `python scripts/check_artifact_governance.py`：passed
 
 **边界：** browser E2E 当前覆盖 BDD/Scripts 主路径，不覆盖 submit/finalize 浏览器流程；测试需要本机安装 Chrome 或 Edge，无浏览器时自动 skip。
+
+---
+
+### 方向 F：Role-Friendly Impact Decision Review（新增，已批准规划）
+
+**S2-F1 — HKv13 → HKv14 Role-Friendly Impact Decision Review**
+
+从 `docs/architecture/Executable_Engineering_Knowledge_Contract.md` 的 "MVP Scope and Delivery Plan" 中提升一个小范围 MVP slice 到当前 governed roadmap。
+
+Approved slice:
+
+`Initial Margin HKv13 -> HKv14 -> Deterministic Diff -> Role Review -> Structured Decision Record`
+
+**输出：**
+- `docs/planning/im_hk_v14_role_review_plan.md`
+- `src/lme_testing/im_hk_v14_role_review.py`
+- `tests/test_im_hk_v14_role_review.py`
+- CLI command `python main.py im-hk-v14-role-review`
+- generated review packages under `runs/im_hk_v14/review_decisions/<timestamp>/`
+
+**状态：** implemented as local deterministic review package generator.
+
+**边界：** This implementation does not authorize a generic document platform, new LLM stage, prompt/model change, schema change, automatic test/code updates, Stage 3 readiness claim, or replacement of the HKv13 preservation baseline. The structured decision record is canonical; Markdown summaries and review HTML are derived/review surfaces.
 
 ---
 

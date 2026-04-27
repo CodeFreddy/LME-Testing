@@ -22,6 +22,7 @@
 | Initial Margin HKv14 promoted bridge | ✅ Complete | HKv14 governed intake, diff mapping, three-term flat-rate validation |
 | Mock API deliverables policy | ✅ Complete | Current Stage 2 bridge sources and zips remain under `deliverables/` |
 | Review UI browser E2E | ✅ Complete | `tests/test_review_session_browser.py`, Chrome/Edge CDP harness |
+| HKv14 role-friendly impact review | ✅ Stub | S2-F1 CLI generates canonical decision JSON, Markdown summary, and local review HTML |
 | Real LME API execution | ⏳ Blocked | Stage 3, LME VM access needed |
 
 ### Verification Type Key
@@ -45,6 +46,7 @@ Stage 1 (real data access) is complete. Stage 2 scoped work is complete:
 - **S2-C3/S2-C4**: HKv14 governed intake, deterministic diff mapping, promoted downstream validation, and modular mock bridge complete
 - **S2-C5**: Mock API deliverables policy complete; current bridge sources and zips stay under `deliverables/`
 - **S2-D1**: Review UI browser-level E2E test covers the primary BDD/Scripts human path
+- **S2-F1**: Role-friendly HKv14 impact decision review package generation complete; local HTML review surface plus canonical structured JSON
 - **Stage 3**: Still blocked pending real LME VM/API access
 
 See `docs/planning/roadmap.md` and `TODO.md` for Stage 2 details.
@@ -191,6 +193,7 @@ All commands: `python main.py <command> [options]`
 | `review-session` | **Web GUI** — interactive review at `http://127.0.0.1:8765` |
 | `workflow-session` | Run E2E pipeline, auto-start `review-session` after checker |
 | `governance-signals` | Compute operational metrics from run artifacts |
+| `im-hk-v14-role-review` | Generate the S2-F1 HKv14 role-friendly impact decision review package |
 
 Show help for any command:
 
@@ -221,7 +224,7 @@ Each `rule_type` maps to a set of `required_case_types`. A rule is **fully_cover
 ```
 src/
   lme_testing/            # LME matching-rule core package
-    cli.py                # CLI entry, registers all 12 commands
+    cli.py                # CLI entry, registers all 13 commands
     config.py             # Provider config loader
     providers.py          # OpenAI-compatible LLM adapter
     prompts.py            # Maker/Checker system prompts
@@ -230,6 +233,7 @@ src/
     storage.py            # JSON/JSONL read/write
     reporting.py          # HTML report generation
     review_session.py     # HTTP review web server
+    im_hk_v14_role_review.py # HKv14 role review package generation
     workflow_session.py   # End-to-end orchestrator
     human_review.py       # Static HTML review page generator
     logging_utils.py      # Terminal + file logging

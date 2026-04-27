@@ -13,6 +13,7 @@ from .reporting import generate_html_report
 from .step_registry import extract_steps_from_normalized_bdd, extract_steps_from_python_step_defs, extract_steps_from_step_defs, compute_step_gaps, compute_step_matches, render_step_visibility_report, StepInventory, MatchReport
 from .signals import compute_governance_signals, write_signals_report
 from .human_review import generate_human_review_page
+from .im_hk_v14_role_review import write_review_package
 from .logging_utils import configure_logging
 from .review_session import ReviewSessionManager, serve_review_session
 from .workflow_session import choose_start_step, discover_workflow_artifacts, start_workflow_session
@@ -215,6 +216,41 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_session.add_argument("--port", type=int, default=8765)
     workflow_session.add_argument("--write-page-text", action="store_true")
 
+    im_hk_v14_role_review = subparsers.add_parser(
+        "im-hk-v14-role-review",
+        help="Generate the S2-F1 HKv14 role-friendly impact decision review package.",
+    )
+    im_hk_v14_role_review.add_argument(
+        "--diff-report",
+        default="evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json",
+        help="Path to HKv13 -> HKv14 deterministic diff JSON.",
+    )
+    im_hk_v14_role_review.add_argument(
+        "--mapping",
+        default="docs/planning/im_hk_v14_downstream_treatment_mapping.md",
+        help="Path to HKv14 downstream treatment mapping Markdown.",
+    )
+    im_hk_v14_role_review.add_argument(
+        "--output-dir",
+        default="runs/im_hk_v14/review_decisions",
+        help="Output root for decision_record.json, decision_summary.md, and review.html.",
+    )
+    im_hk_v14_role_review.add_argument(
+        "--reviewer-role",
+        default="BA",
+        choices=["BA", "QA Lead", "Automation Lead", "PM / Release Owner"],
+        help="Default reviewer role to seed into the decision record.",
+    )
+    im_hk_v14_role_review.add_argument("--reviewer-name", default="")
+    im_hk_v14_role_review.add_argument(
+        "--decision",
+        default="defer",
+        choices=["approve", "reject", "defer", "request_rework"],
+        help="Default decision to seed into the decision record.",
+    )
+    im_hk_v14_role_review.add_argument("--rationale", default="")
+    im_hk_v14_role_review.add_argument("--comments", default="")
+
     return parser
 
 
@@ -248,6 +284,20 @@ def main() -> int:
             "step_binding_rate": signals.step_binding_signals.binding_rate,
             "coverage_trend": signals.coverage_signals.coverage_trend,
         }
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+
+    if args.command == "im-hk-v14-role-review":
+        result = write_review_package(
+            diff_report_path=Path(args.diff_report),
+            mapping_path=Path(args.mapping),
+            output_dir=Path(args.output_dir),
+            reviewer_role=args.reviewer_role,
+            reviewer_name=args.reviewer_name,
+            decision=args.decision,
+            rationale=args.rationale,
+            comments=args.comments,
+        )
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
 

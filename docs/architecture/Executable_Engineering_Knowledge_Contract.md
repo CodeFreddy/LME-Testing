@@ -390,6 +390,8 @@ Audit Log = execution and review history
 
 # 03 MVP Scope and Delivery Plan
 
+> Promotion note (2026-04-27): A narrow repository-specific slice of this MVP has been promoted and implemented as S2-F1 in `docs/planning/im_hk_v14_role_review_plan.md`. The full MVP below remains proposal material and is not current baseline architecture.
+
 ## Title
 
 **MVP: Spec Change to Test Impact Workflow**
