@@ -1,7 +1,7 @@
 # LME Testing — TODO v3.1
 
 **修订日期：** 2026-04-27  
-**说明：** 整合 master 分支合并分析、S2-T01 v1.5 结果、S2-B1/B2 集成状态、S2-C1/S2-C2/S2-C3/S2-C4/S2-C5 mock API bridge and deliverables policy work，S2-D1 browser-level review UI E2E，以及 S2-F1 role-friendly HKv14 impact decision review package generator。
+**说明：** 整合 master 分支合并分析、S2-T01 v1.5 结果、S2-B1/B2 集成状态、S2-C1/S2-C2/S2-C3/S2-C4/S2-C5 mock API bridge and deliverables policy work，S2-D1 browser-level review UI E2E，S2-F1 role-friendly HKv14 impact decision review package generator，以及 S2-F2 MVP document readiness registry planning slice。
 
 ---
 
@@ -168,6 +168,7 @@
 - ✅ S2-C5 已完成：mock API deliverables location policy 已记录，当前 Stage 2 bridge sources and zips 保持在 `deliverables/`。
 - ✅ S2-D1 已完成：browser-level review UI E2E 覆盖 Review -> BDD -> Scripts 主路径、BDD 未保存 edits 保留、可见 match metrics 刷新。
 - ✅ S2-F1 已完成：HKv13→HKv14 role-friendly impact decision review package generator；canonical JSON + derived Markdown + local review HTML。
+- 🔄 S2-F2 已批准规划：MVP document readiness registry；implementation not started。
 - ⏳ Stage 3 仍阻塞于真实 LME VM/API 权限；mock API 不代表真实 LME execution readiness。
 
 ### S2-B1：audit_trail.py 实现（来自 master 概念）
@@ -313,6 +314,21 @@
 
 ---
 
+### S2-F2：MVP Document Readiness Registry
+- [x] 将 `Executable_Engineering_Knowledge_Contract.md` 的 MVP document registration/readiness slice 提升为小范围 governed plan
+- [x] 记录 plan：`docs/planning/mvp_document_readiness_plan.md`
+- [ ] 实现 deterministic document readiness registry generator
+- [ ] 输出 `document_readiness.json`
+- [ ] 输出 derived `document_readiness_summary.md`
+- [ ] 加 focused validation/tests: valid registry, missing source, placeholder handling, validation failure
+- [ ] 运行 docs/artifact governance checks
+
+**状态：** 🔄 PLANNING APPROVED；implementation not started
+
+**边界：** 不新增 LLM stage，不实现 generic document upload/platform，不做 requirement-to-test/regression mapping，不声明 Stage 3 readiness。
+
+---
+
 ## Stage 3（阻塞于外部）
 
 - ⏳ LME VM 访问权限（ETA：未知）
@@ -338,6 +354,7 @@
 - [x] ✅ S2-C5　mock API deliverables location policy
 - [x] ✅ S2-D1　browser-level review UI E2E
 - [x] ✅ S2-F1　HKv14 role-friendly impact decision review package generator
+- [ ] 🔄 S2-F2　MVP document readiness registry（plan approved，implementation not started）
 - [ ] ⏳ 真实 LME API 接入（Stage 3，待 VM 权限）
 - [ ] 🧊 S2-E　LLM 非决定性稳定化（SR-MR-015-B3-4、SR-MR-071-C-1；已明确暂跳过，未来需 benchmark 成本/收益批准）
 

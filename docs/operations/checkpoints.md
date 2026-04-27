@@ -6,6 +6,81 @@ Keep the latest checkpoint at the top. Preserve prior checkpoints below it unles
 
 ---
 
+## 2026-04-27 - S2-F2 MVP Document Readiness Registry Plan Promoted
+
+### Current Task Goal
+
+Promote the next small MVP slice from `docs/architecture/Executable_Engineering_Knowledge_Contract.md` into governed roadmap scope before implementation starts.
+
+### Confirmed Key Facts
+
+- The broad proposal remains labeled Proposal Package / Not Current Baseline Architecture.
+- Human approved promotion of a narrow S2-F2 planning slice only.
+- Approved slice: `Register MVP documents -> validate metadata/readiness -> produce document_readiness.json`.
+- `docs/planning/mvp_document_readiness_plan.md` defines the S2-F2 scope, artifact contract, input/output expectations, acceptance gates, non-goals, and rollback considerations.
+- S2-F2 implementation has not started.
+- Initial implementation should treat HKv13/HKv14 Initial Margin guides as the repo-specific old/new Function Spec stand-in.
+- Test Plan and Regression Pack Index should be explicit placeholders or blockers, not invented inputs.
+- No schemas, prompts, default models, pipeline behavior, review-session behavior, or artifact contracts were changed by this planning promotion.
+- S2-F1 review evidence remains preserved at `evidence/im_hk_v14_role_review/20260427T134948Z/`.
+- Stage 3 remains blocked on real LME VM/API access.
+
+### Files Modified Or Inspected
+
+- `docs/planning/mvp_document_readiness_plan.md`
+- `docs/planning/roadmap.md`
+- `docs/planning/implementation_plan.md`
+- `docs/governance/acceptance.md`
+- `docs/index.md`
+- `TODO.md`
+- `scripts/update_session_handoff.ps1`
+- `docs/operations/session_handoff.md`
+- `docs/operations/checkpoints.md`
+
+### Remaining Work
+
+- Run docs governance check after the planning refresh.
+- If implementation is requested next, start from `docs/planning/mvp_document_readiness_plan.md`.
+- Implement only deterministic document readiness registry generation and validation.
+- Add focused tests for valid registry generation, missing source handling, placeholder handling, and validation failure.
+
+### Next Single Action
+
+Run docs governance check, then report the S2-F2 planning promotion and current next-action state.
+
+### Constraints That Must Not Be Violated
+
+- Do not implement a generic document upload UI or document platform under S2-F2.
+- Do not add a new LLM-driven stage.
+- Do not change schemas, prompts, default models, or roadmap phase boundaries without explicit approval and evidence.
+- Do not invent Test Plan or Regression Pack Index inputs; mark them as placeholders or blockers.
+- Do not claim Stage 3 real execution readiness.
+- Keep missing inputs visible in `blockers`; do not hide readiness failures.
+
+### Resume Prompt
+
+```text
+Continue working in C:\Codes\GenAI\LME-Testing. First read and follow AGENTS.md, then read the latest entry in docs/operations/checkpoints.md.
+
+Current task state:
+- S2-F2 MVP document readiness registry has been promoted into governed planning scope, but implementation has not started.
+- The approved plan is docs/planning/mvp_document_readiness_plan.md.
+- The approved slice is: Register MVP documents -> validate metadata/readiness -> produce document_readiness.json.
+- Initial old/new documents are docs/materials/Initial Margin Calculation Guide HKv13.pdf and docs/materials/Initial Margin Calculation Guide HKv14.pdf.
+- Test Plan and Regression Pack Index should be explicit placeholder or blocker records, not fabricated inputs.
+- Intended outputs are evidence/mvp_document_readiness/<timestamp>/document_readiness.json and document_readiness_summary.md.
+
+Next single action:
+Run docs governance check, then either report the planning promotion or begin implementation only if explicitly requested.
+
+Must follow:
+- Do not implement a generic document upload UI, document platform, new LLM stage, prompt/model/schema change, requirement-to-test mapping, regression-pack mapping, automation backlog generation, external tool integration, or Stage 3 readiness claim.
+- Keep missing inputs visible in blockers.
+- Preserve S2-F1 evidence at evidence/im_hk_v14_role_review/20260427T134948Z/.
+```
+
+---
+
 ## 2026-04-27 - S2-F1 HKv14 Role-Friendly Impact Decision Review Package Complete
 
 ### Current Task Goal

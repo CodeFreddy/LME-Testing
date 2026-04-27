@@ -388,6 +388,34 @@ Evidence：
 
 ---
 
+## Stage 2 Extension — MVP Document Readiness Slice
+
+### Gate S2-F2：MVP Document Readiness Registry
+
+**Verification Type 目标：** `stub_verified` for deterministic local artifact generation and validation; no document platform or real execution readiness claim.
+
+**状态：** 🔄 PLANNING APPROVED（implementation not started）
+
+**Source plan：**
+- `docs/planning/mvp_document_readiness_plan.md`
+
+**验收标准：**
+- `document_readiness.json` is generated deterministically.
+- HKv13 and HKv14 Initial Margin source files are registered with source-exists checks and hashes.
+- Placeholder Test Plan and Regression Pack Index records are explicit and marked `placeholder` or `blocked`.
+- Missing inputs are visible in `blockers`.
+- HKv14 superseding HKv13 is represented.
+- Deterministic validation rejects unsupported document roles, unsupported readiness states, missing required metadata, and missing sources marked as ready.
+- Focused tests cover valid registry generation, missing source handling, placeholder handling, and validation failure.
+- Docs governance and artifact governance checks pass.
+
+**Non-acceptance boundaries：**
+- No generic upload UI or document platform is accepted under this gate.
+- No new LLM-driven stage, prompt change, schema change, or default model change is accepted under this gate.
+- No requirement-to-test mapping, regression-pack mapping, automation backlog generation, external tool integration, or Stage 3 real execution claim is accepted under this gate.
+
+---
+
 ## Phase 3 — Execution Readiness
 
 **完成日期：** 2026-04-14（代码实现）  

@@ -204,6 +204,19 @@ It defines:
 - implementation boundaries,
 - and explicit non-goals.
 
+### 16. `docs/planning/mvp_document_readiness_plan.md`
+
+Use this for the approved S2-F2 planning slice promoted from the broader Executable Engineering Knowledge Contract MVP proposal.
+
+It defines:
+
+- the MVP document readiness registry scope,
+- document readiness inputs and outputs,
+- HKv13/HKv14 old/new document registration boundaries,
+- placeholder handling for Test Plan and Regression Pack Index,
+- acceptance gates,
+- and explicit non-goals before implementation starts.
+
 ### Supporting Guide And Reference Folders
 
 - `docs/guides/maker_checker_usage.md` explains the maker/checker CLI workflow.
@@ -214,6 +227,7 @@ It defines:
 - `docs/archives/20260422_script_generation_investigation.md`, `docs/planning/stage2_planned_modules.md`, and `docs/planning/s2t01_coverage_analysis.md` preserve supporting Stage 2 planning and analysis.
 - `docs/planning/im_hk_v14_downstream_treatment_mapping.md` preserves the S2-C4 deterministic treatment mapping for HKv14 diff candidates.
 - `docs/planning/im_hk_v14_role_review_plan.md` preserves the implemented S2-F1 role-friendly impact decision review plan and package boundaries.
+- `docs/planning/mvp_document_readiness_plan.md` preserves the approved S2-F2 MVP document readiness registry plan before implementation starts.
 
 ---
 
@@ -241,6 +255,7 @@ Then read supporting docs only as needed:
 13. `docs/planning/ui_test_plan.md`
 14. `docs/planning/im_hk_v14_promotion_scope.md`
 15. `docs/planning/im_hk_v14_role_review_plan.md`
+16. `docs/planning/mvp_document_readiness_plan.md`
 
 ### If you are implementing a task
 

@@ -2,7 +2,7 @@
 
 **修订日期：** 2026-04-26  
 **范围：** Stage M（合并）+ Stage 1（真实数据接入）+ Stage 2 已执行任务  
-**说明：** Stage 2 已基于真实数据展开：S2-T01 prompt 校准完成，S2-B1/B2 集成完成，S2-C1 mock API execution bridge 完成，S2-C2 IM HKv13 mock bridge 完成，S2-C3 IM HKv14 POC document workflow and modular mock bridge 完成，S2-C4 IM HKv14 promoted downstream slice 完成，S2-D1 browser-level review UI E2E 完成。S2-F1 role-friendly HKv14 impact decision review package generator 已实现。
+**说明：** Stage 2 已基于真实数据展开：S2-T01 prompt 校准完成，S2-B1/B2 集成完成，S2-C1 mock API execution bridge 完成，S2-C2 IM HKv13 mock bridge 完成，S2-C3 IM HKv14 POC document workflow and modular mock bridge 完成，S2-C4 IM HKv14 promoted downstream slice 完成，S2-D1 browser-level review UI E2E 完成。S2-F1 role-friendly HKv14 impact decision review package generator 已实现。S2-F2 MVP document readiness registry 已批准为规划 slice，implementation not started。
 
 ---
 ## 如何使用本文档
@@ -48,6 +48,7 @@ Stage 2 规划（Stage 1 完成后展开）
 └── S2-C5: Mock API deliverables location policy
 └── S2-D1: Browser-level review UI E2E
 └── S2-F1: HKv14 role-friendly impact decision review
+└── S2-F2: MVP document readiness registry
 ```
 
 ---
@@ -634,6 +635,64 @@ Initial Margin HKv13 -> HKv14 -> Deterministic Diff -> Role Review -> Structured
 - `.venv\Scripts\python.exe -m compileall src\lme_testing tests`: passed.
 
 **自评：** PASS. S2-F1 is implemented as a deterministic local review package generator with canonical JSON, derived Markdown, and local HTML review surface. It remains bounded to HKv14 POC/mock/stub decision review.
+
+---
+
+### S2-F2 — MVP Document Readiness Registry
+
+**状态：🔄 PLANNING APPROVED（2026-04-27）；implementation not started**
+
+**目标：** 将 `docs/architecture/Executable_Engineering_Knowledge_Contract.md` 中 "MVP Scope and Delivery Plan" 的 document registration/readiness slice 提升为当前 repo 的小范围 governed implementation path。
+
+Approved slice:
+
+```text
+Register MVP documents -> validate metadata/readiness -> produce document_readiness.json
+```
+
+**为什么现在做：**
+- Full MVP scope starts with registering Function Spec old/new, Test Plan, and Regression Pack Index before any LLM-assisted mapping.
+- S2-F1 produced reviewed impact decisions; S2-F2 should make the upstream document set explicit and deterministic.
+- A readiness registry gives later MVP work a stable input contract without adding a generic document platform.
+
+**输入契约：**
+- `docs/materials/Initial Margin Calculation Guide HKv13.pdf`
+- `docs/materials/Initial Margin Calculation Guide HKv14.pdf`
+- placeholder entries for Test Plan and Regression Pack Index
+- `docs/planning/mvp_document_readiness_plan.md`
+
+**输出契约：**
+- `evidence/mvp_document_readiness/<timestamp>/document_readiness.json`
+- `evidence/mvp_document_readiness/<timestamp>/document_readiness_summary.md`
+- focused tests for valid registry generation, missing source handling, placeholder handling, and validation failure
+
+**实现要点：**
+- Treat Initial Margin HKv13/HKv14 guides as the repo-specific stand-in for the broader proposal's Function Spec old/new pair.
+- Record deterministic file existence and content hash for available source files.
+- Mark unavailable Test Plan and Regression Pack Index as explicit placeholders or blockers.
+- Represent HKv14 superseding HKv13.
+- Keep missing inputs visible in `blockers`; do not silently ignore them.
+
+**验收：**
+- [ ] `document_readiness.json` is generated deterministically
+- [ ] HKv13 and HKv14 source files are registered with existing-source checks and hashes
+- [ ] Placeholder Test Plan and Regression Pack Index records are explicit
+- [ ] Missing inputs are visible in `blockers`
+- [ ] HKv13 -> HKv14 supersedes relationship is represented
+- [ ] Deterministic validation rejects unsupported roles/states and ready records with missing sources
+- [ ] Focused tests cover valid registry generation, missing source handling, placeholder handling, and validation failure
+- [ ] Docs and artifact governance checks pass
+
+**不在范围：**
+- Generic document upload UI
+- Document storage platform
+- OCR or new parser work
+- New LLM-driven stages, summaries, or maker/checker changes
+- Requirement-to-test mapping, regression-pack mapping, or automation backlog generation
+- JIRA, Zephyr, Git, CI, Confluence, or SharePoint integration
+- Stage 3 real execution readiness claims
+
+**自评：** PASS for plan promotion. Implementation is not started.
 
 ---
 
