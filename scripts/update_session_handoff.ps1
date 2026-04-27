@@ -42,7 +42,7 @@ Before making substantial changes, read these files in order:
 1. `AGENTS.md`
 2. `README.md`
 3. `docs/index.md`
-4. `docs/planning/roadmap.md` (v3.1 - Stage 2 current through HKv14 POC mock bridge)
+4. `docs/planning/roadmap.md` (v3.1 - Stage 2 current through HKv14 and mock deliverables policy)
 5. `docs/planning/implementation_plan.md` (v3.1)
 6. `docs/governance/acceptance.md`
 7. `docs/architecture/architecture.md` (v3.1)
@@ -112,7 +112,7 @@ Recent completed work:
 
 ## Current Repo State
 
-**Stage M (master branch merge) COMPLETED 2026-04-19.** Stage 2 Direction A (S2-T01) COMPLETE. S2-B1/B2 INTEGRATED. S2-C1 MOCK API EXECUTION BRIDGE COMPLETE. S2-C2 IM HKv13 MOCK API BRIDGE COMPLETE. S2-C3 IM HKv14 POC DOCUMENT WORKFLOW AND MODULAR MOCK API BRIDGE COMPLETE. S2-C4 IM HKv14 PROMOTED DOWNSTREAM SLICE COMPLETE.
+**Stage M (master branch merge) COMPLETED 2026-04-19.** Stage 2 Direction A (S2-T01) COMPLETE. S2-B1/B2 INTEGRATED. S2-C1 MOCK API EXECUTION BRIDGE COMPLETE. S2-C2 IM HKv13 MOCK API BRIDGE COMPLETE. S2-C3 IM HKv14 POC DOCUMENT WORKFLOW AND MODULAR MOCK API BRIDGE COMPLETE. S2-C4 IM HKv14 PROMOTED DOWNSTREAM SLICE COMPLETE. S2-C5 MOCK API DELIVERABLES LOCATION POLICY COMPLETE.
 
 Key repo state:
 
@@ -126,6 +126,7 @@ Key repo state:
 - Initial Margin HKv14 promotion scope is documented in `docs/planning/im_hk_v14_promotion_scope.md`
 - Initial Margin HKv14 downstream treatment mapping is documented in `docs/planning/im_hk_v14_downstream_treatment_mapping.md`
 - Modular HKv14 mock bridge preserved in `deliverables/im_hk_mock_api_common/` and `deliverables/im_hk_v14_mock_api/`; HKv13 deliverable remains the preservation baseline
+- Mock API deliverables policy is documented in `docs/planning/mock_api_deliverables_policy.md`; current Stage 2 bridge samples stay under `deliverables/` and this policy should be revisited before adding a new mock bridge or promoting the bridges into maintained tools
 - Phase 1/2 acceptance gates are updated in `docs/governance/acceptance.md`; Stage 3 real LME API remains blocked
 
 Governance checks available:
@@ -138,11 +139,11 @@ Governance checks available:
 
 ## Recommended Next Step
 
-**Stage 2 is current through completed S2-C4 HKv14 promoted downstream slice. Remaining:**
+**Stage 2 is current through completed S2-C5 mock API deliverables policy. Remaining:**
 
-1. **Decide whether long-lived mock API samples stay under `deliverables/` or move under a future `samples/`/`tools/` path.**
-2. **LLM non-determinism stabilization**: SR-MR-015-B3-4 boundary and SR-MR-071-C-1 negative still fluctuate - multi-run voting or consolidated scenario design.
-3. **Stage 3**: Blocked on LME VM access (ETA unknown); replace mock API target with real LME API only when access is available.
+1. **LLM non-determinism stabilization**: SR-MR-015-B3-4 boundary and SR-MR-071-C-1 negative still fluctuate - multi-run voting or consolidated scenario design.
+2. **Stage 3**: Blocked on LME VM access (ETA unknown); replace mock API target with real LME API only when access is available.
+3. **Before adding any new mock API bridge**, revisit `docs/planning/mock_api_deliverables_policy.md` and decide whether `deliverables/` remains the right long-lived location.
 
 ---
 
@@ -162,6 +163,7 @@ Governance checks available:
 - `docs/planning/roadmap.md` - current Stage 2 priorities
 - `docs/architecture/architecture.md` - system architecture and module boundaries
 - `docs/planning/mock_api_validation_plan.md` - S2-C1 mock execution bridge
+- `docs/planning/mock_api_deliverables_policy.md` - current policy for mock bridge source and zip locations
 - `docs/references/Claude-roadmap-compare.md` - historical comparison
 
 Treat reference files as non-normative unless their content is promoted into the official docs.

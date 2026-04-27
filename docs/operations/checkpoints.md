@@ -6,6 +6,116 @@ Keep the latest checkpoint at the top. Preserve prior checkpoints below it unles
 
 ---
 
+## 2026-04-27 - HKv14 Promotion Complete And Mock API Deliverables Policy Current
+
+### Current Task Goal
+
+Continue from the completed HKv14 promoted downstream slice and completed mock API deliverables location policy, preserving HKv13 as the baseline and keeping Stage 2 mock/stub boundaries explicit.
+
+### Confirmed Key Facts
+
+- `AGENTS.md` governs this repo; substantial changes must respect contracts, phase boundaries, acceptance gates, and governance checks.
+- Latest committed work on `main` includes:
+  - `bc4732e Add mock API deliverables policy and update roadmap`
+  - `b82c628 Complete HKv14 promoted downstream mapping`
+  - `143d2df Update Phase 2-3 roadmap and acceptance documentation`
+  - `1a3fc36 Add HKv14 POC: Document intake, diff analysis, modular mock API bridge`
+- HKv14 governed intake exists under `artifacts/im_hk_v14/` from `docs/materials/Initial Margin Calculation Guide HKv14.pdf`.
+- HKv13→HKv14 deterministic diff evidence exists under `evidence/im_hk_v14_diff/` and is summarized in `docs/planning/im_hk_v14_diff_report.md`.
+- HKv14 promotion scope is documented in `docs/planning/im_hk_v14_promotion_scope.md`.
+- HKv14 downstream treatment mapping is documented in `docs/planning/im_hk_v14_downstream_treatment_mapping.md`.
+- The HKv14 wrapper flat-rate validation now uses the HKv14 three-term example: `(60,000,000 x 12% + 750,000 x 30% + 300,000 x 55%) x 2 = 15,180,000`.
+- `deliverables/im_hk_mock_api_common/` remains the shared deterministic implementation package.
+- `deliverables/im_hk_v14_mock_api/` remains the thin HKv14 wrapper and `deliverables/im_hk_v14_mock_api.zip` was refreshed after the HKv14 validation data update.
+- `deliverables/im_hk_v13_mock_api/` remains the preservation baseline and must not be overwritten by HKv14 work.
+- Mock API deliverables location policy is documented in `docs/planning/mock_api_deliverables_policy.md`: current Stage 2 bridge source folders and zip handoffs stay under `deliverables/`; revisit the policy before adding a new mock bridge or promoting the bridges into maintained tools.
+- The future role-friendly decision UI requirement remains planning scope only; do not implement it unless explicitly requested.
+
+### Files Modified Or Inspected
+
+Recently committed HKv14 and mock deliverables policy work:
+
+- `docs/planning/im_hk_v14_promotion_scope.md`
+- `docs/planning/im_hk_v14_downstream_treatment_mapping.md`
+- `docs/planning/im_hk_v14_mock_api_validation_plan.md`
+- `docs/planning/mock_api_deliverables_policy.md`
+- `docs/planning/roadmap.md`
+- `docs/planning/implementation_plan.md`
+- `docs/governance/acceptance.md`
+- `docs/index.md`
+- `docs/operations/session_handoff.md`
+- `scripts/update_session_handoff.ps1`
+- `deliverables/im_hk_v14_mock_api/data/flat_rate_margin_poc.json`
+- `deliverables/im_hk_v14_mock_api/features/initial_margin/flat_rate_margin_poc.feature`
+- `deliverables/im_hk_v14_mock_api/tests/test_mock_api.py`
+- `deliverables/im_hk_v14_mock_api.zip`
+
+Current refresh work:
+
+- `docs/operations/session_handoff.md`
+- `docs/operations/checkpoints.md`
+- `scripts/update_session_handoff.ps1`
+
+### Remaining Work
+
+- Run `git status --short` and prepare this continuity refresh for review/commit when the human asks.
+- If committing, refresh `docs/operations/session_handoff.md` according to `AGENTS.md`.
+- Run docs and artifact governance checks after this continuity refresh.
+- Remaining optional roadmap items:
+  - LLM non-determinism stabilization for SR-MR-015-B3-4 and SR-MR-071-C-1, if explicitly approved with benchmark cost/benefit.
+  - Stage 3 real execution environment work remains blocked on LME VM/API access.
+  - Revisit `docs/planning/mock_api_deliverables_policy.md` before adding any new mock API bridge.
+
+### Next Single Action
+
+Run docs/artifact governance checks, then commit this continuity refresh if clean.
+
+### Constraints That Must Not Be Violated
+
+- Do not overwrite or mutate `deliverables/im_hk_v13_mock_api/` while advancing HKv14 work.
+- Do not claim HKv14 downstream automation is production-ready; current work remains mock/stub bridge validation.
+- Do not claim Stage 3 or real execution readiness without real LME VM/API access and new acceptance evidence.
+- Do not change schemas, prompts, default models, or roadmap phase boundaries without explicit approval, evidence, and rollback notes.
+- Do not hide deterministic validation advisories or extraction/table drift candidates to make flows look cleaner.
+- Do not introduce a new LLM-driven stage without contract, validation, traceability, and reviewable outputs.
+- Do not move mock API deliverables out of `deliverables/` unless `docs/planning/mock_api_deliverables_policy.md` is explicitly revisited and the move updates tests, docs, validation plans, packaging commands, and handoff guidance.
+
+### Resume Prompt
+
+```text
+Continue working in C:\Codes\GenAI\LME-Testing. First read and follow AGENTS.md, then read the latest entry in docs/operations/checkpoints.md.
+
+Current task state:
+- HKv14 POC document workflow, promoted downstream mapping, and mock API deliverables policy are complete.
+- HKv14 governed artifacts exist in artifacts/im_hk_v14/ from docs/materials/Initial Margin Calculation Guide HKv14.pdf.
+- HKv13-to-HKv14 diff evidence exists at evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json and docs/planning/im_hk_v14_diff_report.md.
+- docs/planning/im_hk_v14_promotion_scope.md records the human-approved promoted Stage 2 slice.
+- docs/planning/im_hk_v14_downstream_treatment_mapping.md maps the 10 changed candidates and 1 ID drift candidate.
+- deliverables/im_hk_v14_mock_api/ uses the HKv14 three-term flat-rate example and reuses deliverables/im_hk_mock_api_common/.
+- deliverables/im_hk_v13_mock_api/ is the preservation baseline and must not be overwritten.
+- docs/planning/mock_api_deliverables_policy.md keeps current mock API bridge sources and zips under deliverables/ for Stage 2.
+
+Validation already run for the committed HKv14 S2-C4 work:
+- .venv\Scripts\python.exe -m unittest discover -s deliverables\im_hk_v14_mock_api\tests -t deliverables\im_hk_v14_mock_api -v: passed, 3 tests; BDD summary 37 passed, 0 failed
+- .venv\Scripts\python.exe deliverables\im_hk_v14_mock_api\poc_flat_rate_margin.py: passed
+- .venv\Scripts\python.exe -m unittest discover -s deliverables\im_hk_v13_mock_api\tests -t deliverables\im_hk_v13_mock_api -v: passed, 4 tests; BDD summary 37 passed, 0 failed
+- .venv\Scripts\python.exe -m unittest discover -s tests -t . -v: passed, 193 tests, 1 skipped
+- .venv\Scripts\python.exe scripts/check_docs_governance.py: passed
+- .venv\Scripts\python.exe scripts/check_artifact_governance.py: passed
+
+Next single action:
+Run git status --short, run docs/artifact governance checks for the continuity refresh, then prepare the refresh for review/commit if clean.
+
+Must follow:
+- Do not overwrite or mutate deliverables/im_hk_v13_mock_api/.
+- Do not claim HKv14 production downstream automation or Stage 3 real execution readiness.
+- Do not change schemas, prompts, default models, or roadmap phase boundaries without explicit approval and evidence.
+- Keep deterministic validation warnings visible.
+- Revisit docs/planning/mock_api_deliverables_policy.md before any future mock API bridge relocation.
+```
+
+---
+
 ## 2026-04-26 - HKv14 POC Document Workflow And Modular Mock API Bridge
 
 ### Current Task Goal
