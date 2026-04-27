@@ -18,6 +18,9 @@
 | Stage M (master merge) | ✅ Complete | SM-T01~SM-T05 all done, 2026-04-19 |
 | Stage 2 prompt calibration | ✅ Complete | Maker/checker prompt v1.5/v1.3, 78.89% coverage |
 | Mock API execution bridge | ✅ Complete | `deliverables/lme_mock_api.zip`, BDD/script HTTP validation |
+| Initial Margin HKv13 mock bridge | ✅ Complete | `deliverables/im_hk_v13_mock_api/`, HTTP-backed BDD validation |
+| Initial Margin HKv14 promoted bridge | ✅ Complete | HKv14 governed intake, diff mapping, three-term flat-rate validation |
+| Mock API deliverables policy | ✅ Complete | Current Stage 2 bridge sources and zips remain under `deliverables/` |
 | Review UI browser E2E | ✅ Complete | `tests/test_review_session_browser.py`, Chrome/Edge CDP harness |
 | Real LME API execution | ⏳ Blocked | Stage 3, LME VM access needed |
 
@@ -38,6 +41,9 @@ Stage 1 (real data access) is complete. Stage 2 scoped work is complete:
 - **S2-T01**: Complete; remaining gaps are evidence-constrained or LLM non-determinism
 - **S2-B1/B2**: `audit_trail.py` and `case_compare.py` implemented and integrated
 - **S2-C1**: Mock API execution bridge complete; BDD/script can call a deterministic HTTP API under test
+- **S2-C2**: Initial Margin HKv13 mock API bridge complete; HKv13 remains the preservation baseline
+- **S2-C3/S2-C4**: HKv14 governed intake, deterministic diff mapping, promoted downstream validation, and modular mock bridge complete
+- **S2-C5**: Mock API deliverables policy complete; current bridge sources and zips stay under `deliverables/`
 - **S2-D1**: Review UI browser-level E2E test covers the primary BDD/Scripts human path
 - **Stage 3**: Still blocked pending real LME VM/API access
 
@@ -280,7 +286,11 @@ runs/                     # Pipeline run outputs (gitignored)
 
 ### Mock API Execution Bridge
 
-The repository includes a standalone mock API package for validating executable BDD scripts before real LME VM/API access is available:
+The repository includes standalone mock API packages for validating executable BDD scripts before real LME VM/API access is available.
+
+Current policy: Stage 2 mock API bridge source folders and packaged zips remain under `deliverables/`. Revisit `docs/planning/mock_api_deliverables_policy.md` before adding a new mock bridge or promoting the bridges into maintained internal tools.
+
+#### LME Matching Rules
 
 ```powershell
 cd deliverables\lme_mock_api
@@ -297,6 +307,29 @@ python run_bdd.py
 Expected result: `33 passed, 0 failed`.
 
 See `docs/planning/mock_api_validation_plan.md` and `deliverables/lme_mock_api/README.md`.
+
+#### Initial Margin HKv13
+
+```powershell
+cd deliverables\im_hk_v13_mock_api
+python run_bdd.py
+```
+
+Expected result: `37 passed, 0 failed`.
+
+The HKv13 package is the preservation baseline for Initial Margin mock bridge work. See `docs/planning/im_hk_v13_mock_api_validation_plan.md`.
+
+#### Initial Margin HKv14
+
+```powershell
+cd deliverables\im_hk_v14_mock_api
+python poc_flat_rate_margin.py
+python run_bdd.py
+```
+
+Expected result: flat-rate margin `15,180,000`; BDD summary `37 passed, 0 failed`.
+
+HKv14 reuses `deliverables/im_hk_mock_api_common/` and validates the HKv14 three-term flat-rate example. See `docs/planning/im_hk_v14_promotion_scope.md`, `docs/planning/im_hk_v14_downstream_treatment_mapping.md`, and `docs/planning/im_hk_v14_mock_api_validation_plan.md`.
 
 ### Deterministic Oracles
 
@@ -445,4 +478,3 @@ Read in order:
 3. `docs/architecture/architecture.md` — pipeline stages and module boundaries
 4. `src/lme_testing/pipelines.py` — core pipeline logic
 5. `src/lme_testing/schemas.py` — artifact contracts
-

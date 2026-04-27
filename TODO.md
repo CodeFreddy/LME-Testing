@@ -1,7 +1,7 @@
 # LME Testing — TODO v3.1
 
-**修订日期：** 2026-04-23  
-**说明：** 整合 master 分支合并分析、S2-T01 v1.5 结果、S2-B1/B2 集成状态、S2-C1 mock API execution bridge，以及 S2-D1 browser-level review UI E2E。
+**修订日期：** 2026-04-27  
+**说明：** 整合 master 分支合并分析、S2-T01 v1.5 结果、S2-B1/B2 集成状态、S2-C1/S2-C2/S2-C3/S2-C4/S2-C5 mock API bridge and deliverables policy work，以及 S2-D1 browser-level review UI E2E。
 
 ---
 
@@ -158,10 +158,14 @@
 
 ## Stage 2 — 质量提升、审计补全、Mock 执行桥接
 
-**当前状态（2026-04-23）：**
+**当前状态（2026-04-27）：**
 - ✅ S2-T01 已完成：v1.5 maker + checker 覆盖率 78.89%（142/180 fully covered），当前证据基础下的 prompt 校准实际天花板。
 - ✅ S2-B1/B2 已完成：`audit_trail.py` 与 `case_compare.py` 已实现并集成。
 - ✅ S2-C1 已完成：基于 `docs/materials/LME_Matching_Rules_Aug_2022.md` 的 mock API execution bridge 已交付，用于验证 BDD/script 可以真实调用 API under test。
+- ✅ S2-C2 已完成：Initial Margin HKv13 mock API execution bridge 已交付，作为 Initial Margin preservation baseline。
+- ✅ S2-C3 已完成：HKv14 governed intake、HKv13→HKv14 deterministic diff evidence、POC decision note、modular HKv14 mock wrapper 已交付。
+- ✅ S2-C4 已完成：HKv14 promoted downstream treatment mapping 已完成，HKv14 flat-rate validation data 已对齐三项公式。
+- ✅ S2-C5 已完成：mock API deliverables location policy 已记录，当前 Stage 2 bridge sources and zips 保持在 `deliverables/`。
 - ✅ S2-D1 已完成：browser-level review UI E2E 覆盖 Review -> BDD -> Scripts 主路径、BDD 未保存 edits 保留、可见 match metrics 刷新。
 - ⏳ Stage 3 仍阻塞于真实 LME VM/API 权限；mock API 不代表真实 LME execution readiness。
 
@@ -219,6 +223,63 @@
 
 ---
 
+### S2-C2：Initial Margin HKv13 Mock API Execution Bridge
+- [x] 基于 `docs/materials/Initial Margin Calculation Guide HKv13.pdf` 和 `artifacts/im_hk_v13/` 创建 Initial Margin mock API
+- [x] 提供可运行源码：`deliverables/im_hk_v13_mock_api/`
+- [x] 提供压缩包：`deliverables/im_hk_v13_mock_api.zip`
+- [x] 文档化验证计划：`docs/planning/im_hk_v13_mock_api_validation_plan.md`
+- [x] 覆盖 Section 3.2.4.2 Flat Rate Margin POC，expected margin `15,180,000`
+
+**验证：**
+- `.venv\Scripts\python.exe -m unittest discover -s deliverables\im_hk_v13_mock_api\tests -t deliverables\im_hk_v13_mock_api -v` 通过（4 tests OK；BDD summary 37 passed, 0 failed）
+
+**边界：** HKv13 是 Initial Margin mock/stub preservation baseline，不代表真实 VaR Platform、HKSCC/HKEX execution readiness。
+
+---
+
+### S2-C3：Initial Margin HKv14 POC Document Workflow And Modular Mock API Bridge
+- [x] 使用 `pypdf` 从 `docs/materials/Initial Margin Calculation Guide HKv14.pdf` 生成 governed intake：`artifacts/im_hk_v14/`
+- [x] 生成 HKv13→HKv14 deterministic diff evidence：`evidence/im_hk_v14_diff/`
+- [x] 生成 diff report：`docs/planning/im_hk_v14_diff_report.md`
+- [x] 记录 POC downstream decision：`docs/planning/im_hk_v14_downstream_decision.md`
+- [x] 抽取 shared implementation：`deliverables/im_hk_mock_api_common/`
+- [x] 创建 HKv14 thin wrapper：`deliverables/im_hk_v14_mock_api/`
+- [x] 提供压缩包：`deliverables/im_hk_v14_mock_api.zip`
+
+**验证：**
+- HKv14 extraction: 38 pages, 10 clauses, 164 atomic rules, 164 semantic rules
+- HKv13→HKv14 diff: 10 changed candidates, 0 added, 0 removed, 1 ID drift candidate, 0 source-anchor warnings
+- HKv14 wrapper tests and BDD runner passed
+
+**边界：** S2-C3 是 POC/mock/stub bridge work；不声明 HKv14 production downstream automation readiness。
+
+---
+
+### S2-C4：Initial Margin HKv14 Promoted Downstream Slice
+- [x] 记录 human-approved promotion scope：`docs/planning/im_hk_v14_promotion_scope.md`
+- [x] 将 10 changed candidates 和 1 ID drift candidate 映射到 downstream treatment categories：`docs/planning/im_hk_v14_downstream_treatment_mapping.md`
+- [x] 将 HKv14 flat-rate validation data 对齐为三项公式：`(60,000,000 x 12% + 750,000 x 30% + 300,000 x 55%) x 2 = 15,180,000`
+- [x] 刷新 HKv14 wrapper tests、BDD label 和 zip package
+
+**验证：**
+- `.venv\Scripts\python.exe -m unittest discover -s deliverables\im_hk_v14_mock_api\tests -t deliverables\im_hk_v14_mock_api -v` 通过（3 tests OK；BDD summary 37 passed, 0 failed）
+- `.venv\Scripts\python.exe deliverables\im_hk_v14_mock_api\poc_flat_rate_margin.py` 通过
+- HKv13 side-by-side validation passed
+
+**边界：** promoted downstream slice 是 mock/stub baseline candidate；不替代 Stage 3 real execution environment。
+
+---
+
+### S2-C5：Mock API Deliverables Location Policy
+- [x] 选择当前 Stage 2 policy：mock API bridge source folders and packaged zips stay under `deliverables/`
+- [x] 记录 policy：`docs/planning/mock_api_deliverables_policy.md`
+- [x] 明确 no directory move authorized
+- [x] 明确 revisit trigger: before adding a new mock API bridge or turning the bridges into maintained tools
+
+**状态：** ✅ COMPLETE
+
+---
+
 ### S2-D1：Browser-Level Review UI E2E
 - [x] 启动真实 local review-session HTTP server
 - [x] 使用 deterministic fixture artifacts，不调用 live LLM provider
@@ -255,7 +316,11 @@
 - [x] ✅ S1-T04　全量基准运行（72.78%，已文档化）
 - [x] ✅ S2-B1　audit_trail.py 实现
 - [x] ✅ S2-C1　mock API execution bridge 创建并打包
+- [x] ✅ S2-C2　Initial Margin HKv13 mock API bridge
+- [x] ✅ S2-C3　Initial Margin HKv14 POC modular mock bridge
+- [x] ✅ S2-C4　HKv14 promoted downstream treatment mapping
+- [x] ✅ S2-C5　mock API deliverables location policy
 - [x] ✅ S2-D1　browser-level review UI E2E
 - [ ] ⏳ 真实 LME API 接入（Stage 3，待 VM 权限）
-- [ ] S2-E　LLM 非决定性稳定化（SR-MR-015-B3-4、SR-MR-071-C-1；可选，需明确 benchmark 成本）
+- [ ] 🧊 S2-E　LLM 非决定性稳定化（SR-MR-015-B3-4、SR-MR-071-C-1；已明确暂跳过，未来需 benchmark 成本/收益批准）
 
