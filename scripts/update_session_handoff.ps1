@@ -42,7 +42,7 @@ Before making substantial changes, read these files in order:
 1. `AGENTS.md`
 2. `README.md`
 3. `docs/index.md`
-4. `docs/planning/roadmap.md` (v3.1 - Stage 2 current through HKv14 and mock deliverables policy)
+4. `docs/planning/roadmap.md` (v3.1 - Stage 2 current through HKv14, mock deliverables policy, and S2-F1 role review package)
 5. `docs/planning/implementation_plan.md` (v3.1)
 6. `docs/governance/acceptance.md`
 7. `docs/architecture/architecture.md` (v3.1)
@@ -57,6 +57,10 @@ If the task touches extraction or rule artifacts, also read:
 
 - `docs/guides/rule_extraction_script_guide.md`
 - `docs/architecture/rule_model_and_parsing_design.md`
+
+If the task touches HKv14 role-friendly impact decision review, also read:
+
+- `docs/planning/im_hk_v14_role_review_plan.md`
 
 ---
 
@@ -75,6 +79,14 @@ Recent commit subjects:
 ## What Was Just Done
 
 Recent completed work:
+
+- **S2-F1 role-friendly HKv14 impact decision review package (2026-04-27)**
+  - Added deterministic package generator `src/lme_testing/im_hk_v14_role_review.py`
+  - Added CLI command `python main.py im-hk-v14-role-review`
+  - Generated actual review package under `runs/im_hk_v14/review_decisions/20260427T134948Z/`
+  - Copied review evidence to `evidence/im_hk_v14_role_review/20260427T134948Z/`
+  - Human POC decisions: 11 approved, 11 recorded, 0 open items
+  - Validation: full unittest discovery passed with 198 tests, 1 browser skip; docs/artifact governance passed
 
 - **S2-T01 v1.5 maker + checker run (2026-04-21)**
   - MAKER_PROMPT_VERSION 1.4 -> 1.5, CHECKER_PROMPT_VERSION 1.2 -> 1.3
@@ -112,7 +124,7 @@ Recent completed work:
 
 ## Current Repo State
 
-**Stage M (master branch merge) COMPLETED 2026-04-19.** Stage 2 Direction A (S2-T01) COMPLETE. S2-B1/B2 INTEGRATED. S2-C1 MOCK API EXECUTION BRIDGE COMPLETE. S2-C2 IM HKv13 MOCK API BRIDGE COMPLETE. S2-C3 IM HKv14 POC DOCUMENT WORKFLOW AND MODULAR MOCK API BRIDGE COMPLETE. S2-C4 IM HKv14 PROMOTED DOWNSTREAM SLICE COMPLETE. S2-C5 MOCK API DELIVERABLES LOCATION POLICY COMPLETE.
+**Stage M (master branch merge) COMPLETED 2026-04-19.** Stage 2 Direction A (S2-T01) COMPLETE. S2-B1/B2 INTEGRATED. S2-C1 MOCK API EXECUTION BRIDGE COMPLETE. S2-C2 IM HKv13 MOCK API BRIDGE COMPLETE. S2-C3 IM HKv14 POC DOCUMENT WORKFLOW AND MODULAR MOCK API BRIDGE COMPLETE. S2-C4 IM HKv14 PROMOTED DOWNSTREAM SLICE COMPLETE. S2-C5 MOCK API DELIVERABLES LOCATION POLICY COMPLETE. S2-F1 HKV14 ROLE-FRIENDLY IMPACT DECISION REVIEW PACKAGE COMPLETE.
 
 Key repo state:
 
@@ -125,6 +137,8 @@ Key repo state:
 - Initial Margin HKv14 POC evidence preserved in `artifacts/im_hk_v14/`, `evidence/im_hk_v14_diff/`, `docs/planning/im_hk_v14_diff_report.md`, `docs/planning/im_hk_v14_downstream_decision.md`, and `docs/planning/im_hk_v14_mock_api_validation_plan.md`
 - Initial Margin HKv14 promotion scope is documented in `docs/planning/im_hk_v14_promotion_scope.md`
 - Initial Margin HKv14 downstream treatment mapping is documented in `docs/planning/im_hk_v14_downstream_treatment_mapping.md`
+- Initial Margin HKv14 role-friendly impact decision review is implemented in `src/lme_testing/im_hk_v14_role_review.py`; `decision_record.json` is canonical and Markdown/HTML are derived review artifacts
+- S2-F1 review evidence is preserved in `evidence/im_hk_v14_role_review/20260427T134948Z/`; all 11 candidates are approved and recorded for POC purpose with 0 open items
 - Modular HKv14 mock bridge preserved in `deliverables/im_hk_mock_api_common/` and `deliverables/im_hk_v14_mock_api/`; HKv13 deliverable remains the preservation baseline
 - Mock API deliverables policy is documented in `docs/planning/mock_api_deliverables_policy.md`; current Stage 2 bridge samples stay under `deliverables/` and this policy should be revisited before adding a new mock bridge or promoting the bridges into maintained tools
 - Phase 1/2 acceptance gates are updated in `docs/governance/acceptance.md`; Stage 3 real LME API remains blocked
@@ -139,10 +153,10 @@ Governance checks available:
 
 ## Recommended Next Step
 
-**Stage 2 is current through completed S2-C5 mock API deliverables policy. Remaining:**
+**Stage 2 is current through completed S2-F1 role-friendly impact decision review package. Remaining:**
 
-1. **LLM non-determinism stabilization**: SR-MR-015-B3-4 boundary and SR-MR-071-C-1 negative still fluctuate - multi-run voting or consolidated scenario design.
-2. **Stage 3**: Blocked on LME VM access (ETA unknown); replace mock API target with real LME API only when access is available.
+1. **Stage 3**: Blocked on LME VM access (ETA unknown); replace mock API target with real LME API only when access is available.
+2. **LLM non-determinism stabilization**: SR-MR-015-B3-4 boundary and SR-MR-071-C-1 negative still fluctuate - multi-run voting or consolidated scenario design, if separately approved with benchmark cost/benefit.
 3. **Before adding any new mock API bridge**, revisit `docs/planning/mock_api_deliverables_policy.md` and decide whether `deliverables/` remains the right long-lived location.
 
 ---
