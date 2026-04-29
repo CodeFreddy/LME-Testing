@@ -2,7 +2,7 @@
 
 **修订日期：** 2026-04-26  
 **范围：** Stage M（合并）+ Stage 1（真实数据接入）+ Stage 2 已执行任务  
-**说明：** Stage 2 已基于真实数据展开：S2-T01 prompt 校准完成，S2-B1/B2 集成完成，S2-C1 mock API execution bridge 完成，S2-C2 IM HKv13 mock bridge 完成，S2-C3 IM HKv14 POC document workflow and modular mock bridge 完成，S2-C4 IM HKv14 promoted downstream slice 完成，S2-D1 browser-level review UI E2E 完成。S2-F1 role-friendly HKv14 impact decision review package generator 已实现。S2-F2 MVP document readiness registry 已批准为规划 slice，implementation not started。
+**说明：** Stage 2 已基于真实数据展开：S2-T01 prompt 校准完成，S2-B1/B2 集成完成，S2-C1 mock API execution bridge 完成，S2-C2 IM HKv13 mock bridge 完成，S2-C3 IM HKv14 POC document workflow and modular mock bridge 完成，S2-C4 IM HKv14 promoted downstream slice 完成，S2-D1 browser-level review UI E2E 完成。S2-F1 role-friendly HKv14 impact decision review package generator 已实现。S2-F2 MVP document readiness registry 已实现为 deterministic readiness package。
 
 ---
 ## 如何使用本文档
@@ -640,7 +640,7 @@ Initial Margin HKv13 -> HKv14 -> Deterministic Diff -> Role Review -> Structured
 
 ### S2-F2 — MVP Document Readiness Registry
 
-**状态：🔄 PLANNING APPROVED（2026-04-27）；implementation not started**
+**状态：✅ IMPLEMENTED（2026-04-29）；deterministic package generated**
 
 **目标：** 将 `docs/architecture/Executable_Engineering_Knowledge_Contract.md` 中 "MVP Scope and Delivery Plan" 的 document registration/readiness slice 提升为当前 repo 的小范围 governed implementation path。
 
@@ -666,6 +666,12 @@ Register MVP documents -> validate metadata/readiness -> produce document_readin
 - `evidence/mvp_document_readiness/<timestamp>/document_readiness_summary.md`
 - focused tests for valid registry generation, missing source handling, placeholder handling, and validation failure
 
+**实现证据：**
+- generator: `src/lme_testing/mvp_document_readiness.py`
+- CLI: `python main.py mvp-document-readiness`
+- evidence: `evidence/mvp_document_readiness/20260429T075702Z/`
+- tests: `tests/test_mvp_document_readiness.py`
+
 **实现要点：**
 - Treat Initial Margin HKv13/HKv14 guides as the repo-specific stand-in for the broader proposal's Function Spec old/new pair.
 - Record deterministic file existence and content hash for available source files.
@@ -674,14 +680,14 @@ Register MVP documents -> validate metadata/readiness -> produce document_readin
 - Keep missing inputs visible in `blockers`; do not silently ignore them.
 
 **验收：**
-- [ ] `document_readiness.json` is generated deterministically
-- [ ] HKv13 and HKv14 source files are registered with existing-source checks and hashes
-- [ ] Placeholder Test Plan and Regression Pack Index records are explicit
-- [ ] Missing inputs are visible in `blockers`
-- [ ] HKv13 -> HKv14 supersedes relationship is represented
-- [ ] Deterministic validation rejects unsupported roles/states and ready records with missing sources
-- [ ] Focused tests cover valid registry generation, missing source handling, placeholder handling, and validation failure
-- [ ] Docs and artifact governance checks pass
+- [x] `document_readiness.json` is generated deterministically
+- [x] HKv13 and HKv14 source files are registered with existing-source checks and hashes
+- [x] Placeholder Test Plan and Regression Pack Index records are explicit
+- [x] Missing inputs are visible in `blockers`
+- [x] HKv13 -> HKv14 supersedes relationship is represented
+- [x] Deterministic validation rejects unsupported roles/states and ready records with missing sources
+- [x] Focused tests cover valid registry generation, missing source handling, placeholder handling, and validation failure
+- [x] Docs and artifact governance checks pass
 
 **不在范围：**
 - Generic document upload UI
@@ -692,7 +698,7 @@ Register MVP documents -> validate metadata/readiness -> produce document_readin
 - JIRA, Zephyr, Git, CI, Confluence, or SharePoint integration
 - Stage 3 real execution readiness claims
 
-**自评：** PASS for plan promotion. Implementation is not started.
+**自评：** PASS. S2-F2 is implemented as deterministic document readiness registry generation. Workflow readiness intentionally remains `blocked` until real Test Plan and Regression Pack Index inputs are provided.
 
 ---
 

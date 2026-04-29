@@ -14,6 +14,7 @@ from .step_registry import extract_steps_from_normalized_bdd, extract_steps_from
 from .signals import compute_governance_signals, write_signals_report
 from .human_review import generate_human_review_page
 from .im_hk_v14_role_review import write_review_package
+from .mvp_document_readiness import write_document_readiness_package
 from .logging_utils import configure_logging
 from .review_session import ReviewSessionManager, serve_review_session
 from .workflow_session import choose_start_step, discover_workflow_artifacts, start_workflow_session
@@ -251,6 +252,26 @@ def build_parser() -> argparse.ArgumentParser:
     im_hk_v14_role_review.add_argument("--rationale", default="")
     im_hk_v14_role_review.add_argument("--comments", default="")
 
+    mvp_document_readiness = subparsers.add_parser(
+        "mvp-document-readiness",
+        help="Generate the S2-F2 deterministic MVP document readiness registry.",
+    )
+    mvp_document_readiness.add_argument(
+        "--previous-spec",
+        default="docs/materials/Initial Margin Calculation Guide HKv13.pdf",
+        help="Path to the previous Function Spec stand-in document.",
+    )
+    mvp_document_readiness.add_argument(
+        "--current-spec",
+        default="docs/materials/Initial Margin Calculation Guide HKv14.pdf",
+        help="Path to the current Function Spec stand-in document.",
+    )
+    mvp_document_readiness.add_argument(
+        "--output-dir",
+        default="evidence/mvp_document_readiness",
+        help="Output root for document_readiness.json and document_readiness_summary.md.",
+    )
+
     return parser
 
 
@@ -297,6 +318,15 @@ def main() -> int:
             decision=args.decision,
             rationale=args.rationale,
             comments=args.comments,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+
+    if args.command == "mvp-document-readiness":
+        result = write_document_readiness_package(
+            output_dir=Path(args.output_dir),
+            previous_spec_path=Path(args.previous_spec),
+            current_spec_path=Path(args.current_spec),
         )
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0

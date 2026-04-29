@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-27 14:17:42 UTC`
+- `2026-04-29 08:17:28 UTC`
 
 ---
 
@@ -56,11 +56,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `Add MVP document readiness workflow implementation and evidence tracking`
 - `Add MVP document readiness plan and update Phase 3 roadmap`
 - `Update session handoff with role review workflow checkpoint`
 - `Add HKv14 role-based review workflow and evidence tracking`
 - `Update README project overview and TODO priority list`
-- `Update session handoff and checkpoints for HKv14 POC completion`
 
 ---
 

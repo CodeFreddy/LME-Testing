@@ -6,6 +6,85 @@ Keep the latest checkpoint at the top. Preserve prior checkpoints below it unles
 
 ---
 
+## 2026-04-29 - S2-F2 MVP Document Readiness Registry Implemented
+
+### Current Task Goal
+
+Implement the approved S2-F2 deterministic document readiness registry slice.
+
+### Confirmed Key Facts
+
+- S2-F2 is implemented as deterministic registry generation, not a new LLM stage.
+- CLI command: `python main.py mvp-document-readiness`.
+- Default Function Spec stand-ins:
+  - `docs/materials/Initial Margin Calculation Guide HKv13.pdf`
+  - `docs/materials/Initial Margin Calculation Guide HKv14.pdf`
+- Test Plan and Regression Pack Index are explicit placeholder records.
+- Missing placeholder inputs remain visible in `blockers`.
+- HKv14 supersedes HKv13 through both document metadata and the `relationships` section.
+- `document_readiness.json` is canonical; `document_readiness_summary.md` is derived.
+- Overall workflow readiness is intentionally `blocked` until real Test Plan and Regression Pack Index sources are provided.
+- No schemas, prompts, default models, maker/checker pipeline behavior, review-session behavior, or Stage 3 readiness claims were changed.
+
+### Files Modified Or Inspected
+
+- `src/lme_testing/mvp_document_readiness.py`
+- `src/lme_testing/cli.py`
+- `tests/test_mvp_document_readiness.py`
+- `evidence/mvp_document_readiness/20260429T075702Z/document_readiness.json`
+- `evidence/mvp_document_readiness/20260429T075702Z/document_readiness_summary.md`
+- `docs/planning/mvp_document_readiness_plan.md`
+- `docs/planning/roadmap.md`
+- `docs/planning/implementation_plan.md`
+- `README.md`
+- `TODO.md`
+- `docs/operations/session_handoff.md`
+- `docs/operations/checkpoints.md`
+
+### Remaining Work
+
+- Review and commit the S2-F2 implementation package if approved.
+- Stage 3 remains blocked on real LME VM/API access.
+- Future MVP work must provide real Test Plan and Regression Pack Index inputs before readiness can move from `blocked`.
+
+### Next Single Action
+
+Review the S2-F2 diff and prepare a commit if it looks good.
+
+### Constraints That Must Not Be Violated
+
+- Do not implement a generic document upload UI or document platform under S2-F2.
+- Do not add a new LLM-driven stage.
+- Do not change schemas, prompts, default models, or roadmap phase boundaries without explicit approval and evidence.
+- Do not invent Test Plan or Regression Pack Index inputs; keep them as placeholders/blockers until real sources are provided.
+- Do not claim Stage 3 real execution readiness.
+- Keep missing inputs visible in `blockers`; do not hide readiness failures.
+
+### Resume Prompt
+
+```text
+Continue working in C:\Codes\GenAI\LME-Testing. First read and follow AGENTS.md, then read the latest entry in docs/operations/checkpoints.md.
+
+Current task state:
+- S2-F2 MVP document readiness registry has been implemented as deterministic package generation.
+- CLI command: python main.py mvp-document-readiness.
+- Canonical evidence is evidence/mvp_document_readiness/20260429T075702Z/document_readiness.json.
+- Derived summary is evidence/mvp_document_readiness/20260429T075702Z/document_readiness_summary.md.
+- HKv13/HKv14 Initial Margin guides are registered as Function Spec previous/current stand-ins with hashes.
+- Test Plan and Regression Pack Index remain explicit placeholder blockers.
+- Overall workflow readiness remains blocked by design.
+
+Next single action:
+Review the S2-F2 diff and prepare a commit if approved.
+
+Must follow:
+- Do not implement generic document upload UI, document platform, new LLM stage, prompt/model/schema change, requirement-to-test mapping, regression-pack mapping, automation backlog generation, external tool integration, or Stage 3 readiness claim.
+- Keep missing inputs visible in blockers.
+- Preserve S2-F1 evidence at evidence/im_hk_v14_role_review/20260427T134948Z/.
+```
+
+---
+
 ## 2026-04-27 - S2-F2 MVP Document Readiness Registry Plan Promoted
 
 ### Current Task Goal

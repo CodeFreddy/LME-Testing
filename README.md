@@ -23,6 +23,7 @@
 | Mock API deliverables policy | ✅ Complete | Current Stage 2 bridge sources and zips remain under `deliverables/` |
 | Review UI browser E2E | ✅ Complete | `tests/test_review_session_browser.py`, Chrome/Edge CDP harness |
 | HKv14 role-friendly impact review | ✅ Stub | S2-F1 CLI generates canonical decision JSON, Markdown summary, and local review HTML |
+| MVP document readiness registry | ✅ Stub | S2-F2 CLI generates canonical readiness JSON and derived Markdown summary |
 | Real LME API execution | ⏳ Blocked | Stage 3, LME VM access needed |
 
 ### Verification Type Key
@@ -47,6 +48,7 @@ Stage 1 (real data access) is complete. Stage 2 scoped work is complete:
 - **S2-C5**: Mock API deliverables policy complete; current bridge sources and zips stay under `deliverables/`
 - **S2-D1**: Review UI browser-level E2E test covers the primary BDD/Scripts human path
 - **S2-F1**: Role-friendly HKv14 impact decision review package generation complete; local HTML review surface plus canonical structured JSON
+- **S2-F2**: MVP document readiness registry generation complete; Test Plan and Regression Pack Index remain explicit placeholders/blockers
 - **Stage 3**: Still blocked pending real LME VM/API access
 
 See `docs/planning/roadmap.md` and `TODO.md` for Stage 2 details.
@@ -194,6 +196,7 @@ All commands: `python main.py <command> [options]`
 | `workflow-session` | Run E2E pipeline, auto-start `review-session` after checker |
 | `governance-signals` | Compute operational metrics from run artifacts |
 | `im-hk-v14-role-review` | Generate the S2-F1 HKv14 role-friendly impact decision review package |
+| `mvp-document-readiness` | Generate the S2-F2 MVP document readiness registry |
 
 Show help for any command:
 
@@ -234,6 +237,7 @@ src/
     reporting.py          # HTML report generation
     review_session.py     # HTTP review web server
     im_hk_v14_role_review.py # HKv14 role review package generation
+    mvp_document_readiness.py # MVP document readiness registry generation
     workflow_session.py   # End-to-end orchestrator
     human_review.py       # Static HTML review page generator
     logging_utils.py      # Terminal + file logging

@@ -1,10 +1,11 @@
 # MVP Document Readiness Registry Plan
 
-**Status:** Approved planning slice / not yet implemented  
+**Status:** Implemented deterministic S2-F2 slice  
 **Created:** 2026-04-27  
+**Implemented:** 2026-04-29  
 **Task ID:** S2-F2  
 **Source proposal:** `docs/architecture/Executable_Engineering_Knowledge_Contract.md` section "03 MVP Scope and Delivery Plan"  
-**Baseline impact:** Planning only. This document does not change schemas, prompts, default models, pipeline behavior, review-session behavior, or acceptance completion claims.
+**Baseline impact:** This slice adds deterministic registry generation only. It does not change schemas, prompts, default models, pipeline behavior, review-session behavior, or Stage 3 readiness claims.
 
 ---
 
@@ -174,8 +175,15 @@ The slice should be rollback-safe:
 
 ---
 
+## Implementation Evidence
+
+- Generator: `src/lme_testing/mvp_document_readiness.py`
+- CLI: `python main.py mvp-document-readiness`
+- Evidence: `evidence/mvp_document_readiness/20260429T075702Z/`
+- Tests: `tests/test_mvp_document_readiness.py`
+
 ## Self-Evaluation Target
 
-Current plan promotion status: PASS.
+Current implementation status: PASS.
 
-Implementation status: not started.
+Workflow readiness remains blocked because Test Plan and Regression Pack Index are explicit placeholders.
