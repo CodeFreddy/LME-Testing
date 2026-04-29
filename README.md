@@ -196,7 +196,7 @@ All commands: `python main.py <command> [options]`
 | `workflow-session` | Run E2E pipeline, auto-start `review-session` after checker |
 | `governance-signals` | Compute operational metrics from run artifacts |
 | `im-hk-v14-role-review` | Generate the S2-F1 HKv14 role-friendly impact decision review package |
-| `mvp-document-readiness` | Generate the S2-F2 MVP document readiness registry |
+| `mvp-document-readiness` | Generate the S2-F2/S2-F3 MVP document readiness registry, optionally with real Test Plan and Regression Pack Index inputs |
 
 Show help for any command:
 

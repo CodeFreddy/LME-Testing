@@ -6,6 +6,89 @@ Keep the latest checkpoint at the top. Preserve prior checkpoints below it unles
 
 ---
 
+## 2026-04-29 - S2-F3 MVP Input Document Contract Implemented
+
+### Current Task Goal
+
+Implement the S2-F3 deterministic optional-input readiness behavior for real Test Plan and Regression Pack Index files.
+
+### Confirmed Key Facts
+
+- S2-F3 is implemented as deterministic optional-input validation, not a new LLM stage.
+- CLI command remains `python main.py mvp-document-readiness`.
+- New optional inputs:
+  - `--test-plan`
+  - `--test-plan-title`
+  - `--test-plan-version`
+  - `--regression-pack-index`
+  - `--regression-pack-index-title`
+  - `--regression-pack-index-version`
+- When real inputs are omitted, placeholder blockers remain visible.
+- When real inputs are provided, they must exist, be UTF-8 text, hash successfully, and satisfy minimum human-readable content expectation groups.
+- Incomplete real inputs are marked `blocked`, not coerced to `ready`.
+- Default evidence preserving blockers was generated at `evidence/mvp_document_readiness/20260429T083211Z/`.
+- No schemas, prompts, default models, maker/checker pipeline behavior, review-session behavior, detailed mapping, regression impact analysis, automation backlog generation, or Stage 3 readiness claims were changed.
+
+### Files Modified Or Inspected
+
+- `src/lme_testing/mvp_document_readiness.py`
+- `src/lme_testing/cli.py`
+- `tests/test_mvp_document_readiness.py`
+- `evidence/mvp_document_readiness/20260429T083211Z/document_readiness.json`
+- `evidence/mvp_document_readiness/20260429T083211Z/document_readiness_summary.md`
+- `docs/planning/mvp_input_document_contract_plan.md`
+- `docs/planning/roadmap.md`
+- `docs/planning/implementation_plan.md`
+- `docs/index.md`
+- `README.md`
+- `TODO.md`
+- `docs/operations/session_handoff.md`
+- `docs/operations/checkpoints.md`
+
+### Remaining Work
+
+- Review and commit the S2-F3 implementation package if approved.
+- Provide real Test Plan and Regression Pack Index files if the workflow should move to `ready`.
+- Stage 3 remains blocked on real LME VM/API access.
+
+### Next Single Action
+
+Review the S2-F3 implementation diff and prepare a commit if it looks good.
+
+### Constraints That Must Not Be Violated
+
+- Do not create or fabricate Test Plan or Regression Pack Index source documents.
+- Do not implement generic document upload UI or document platform.
+- Do not add a new LLM-driven stage.
+- Do not change schemas, prompts, default models, or roadmap phase boundaries without explicit approval and evidence.
+- Do not implement requirement-to-test mapping, regression impact mapping, automation backlog generation, or external integrations under S2-F3.
+- Do not claim Stage 3 real execution readiness.
+- Keep missing or incomplete inputs visible in `blockers`; do not hide readiness failures.
+
+### Resume Prompt
+
+```text
+Continue working in C:\Codes\GenAI\LME-Testing. First read and follow AGENTS.md, then read the latest entry in docs/operations/checkpoints.md.
+
+Current task state:
+- S2-F3 MVP optional input readiness validation is implemented.
+- CLI command remains python main.py mvp-document-readiness.
+- Optional real inputs are --test-plan and --regression-pack-index plus title/version metadata args.
+- Default evidence preserving placeholder blockers is evidence/mvp_document_readiness/20260429T083211Z/.
+- Full tests passed: .venv\Scripts\python.exe -m unittest discover -s tests -t . -v -> 206 tests, 1 browser skip.
+- Docs and artifact governance checks passed.
+
+Next single action:
+Review the S2-F3 implementation diff and prepare a commit if approved.
+
+Must follow:
+- Do not create or fabricate real Test Plan or Regression Pack Index documents.
+- Do not implement generic document upload UI, document platform, new LLM stage, prompt/model/schema change, requirement-to-test mapping, regression impact mapping, automation backlog generation, external tool integration, or Stage 3 readiness claim.
+- Keep missing or incomplete inputs visible in blockers.
+```
+
+---
+
 ## 2026-04-29 - S2-F3 MVP Input Document Contract Plan Promoted
 
 ### Current Task Goal

@@ -38,6 +38,26 @@ REQUIRED_DOCUMENT_FIELDS = {
     "notes",
 }
 
+TEST_PLAN_EXPECTATION_GROUPS = {
+    "test_objective_or_scope": ("objective", "scope", "purpose"),
+    "target_system_or_domain": ("system", "domain", "application"),
+    "applicable_spec_version": ("spec", "specification", "function spec", "hkv13", "hkv14", "version"),
+    "in_scope_test_levels_or_types": ("in scope", "in-scope", "test level", "test type", "regression", "functional"),
+    "out_of_scope_or_exclusions": ("out of scope", "out-of-scope", "exclusion", "excluded"),
+    "qa_owner_or_approver": ("qa", "owner", "approver", "approval"),
+    "revision_or_version_marker": ("revision", "version", "baseline"),
+}
+
+REGRESSION_PACK_EXPECTATION_GROUPS = {
+    "regression_pack_identifier": ("regression pack", "pack id", "suite", "identifier"),
+    "target_system_or_domain": ("system", "domain", "application"),
+    "applicable_spec_version_or_release": ("spec", "specification", "release", "baseline", "hkv13", "hkv14", "version"),
+    "suite_scenario_script_or_case_list": ("suite", "scenario", "script", "case", "test id"),
+    "owner_or_maintaining_role": ("owner", "maintainer", "automation lead", "automation"),
+    "revision_or_version_marker": ("revision", "version", "baseline"),
+    "automation_coverage_note": ("coverage", "partial", "unknown", "automated", "manual"),
+}
+
 
 class DocumentReadinessValidationError(ValueError):
     """Raised when the S2-F2 document readiness registry violates its contract."""
@@ -108,10 +128,131 @@ def build_document_record(
     }
 
 
+def _read_text_source(path: Path) -> str | None:
+    try:
+        return path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return None
+
+
+def _missing_content_expectations(text: str | None, expectation_groups: dict[str, tuple[str, ...]]) -> list[str]:
+    if text is None:
+        return ["utf8_text_source"]
+    normalized = text.casefold()
+    missing = []
+    for expectation, keywords in expectation_groups.items():
+        if not any(keyword.casefold() in normalized for keyword in keywords):
+            missing.append(expectation)
+    return sorted(missing)
+
+
+def build_contract_document_record(
+    *,
+    document_id: str,
+    title: str,
+    version: str,
+    document_class: str,
+    document_role: str,
+    source_path: Path,
+    owner_role: str,
+    notes: str,
+    expectation_groups: dict[str, tuple[str, ...]],
+) -> dict[str, Any]:
+    source_exists = source_path.exists()
+    content_missing = _missing_content_expectations(_read_text_source(source_path) if source_exists else "", expectation_groups)
+    record = build_document_record(
+        document_id=document_id,
+        title=title,
+        version=version,
+        document_class=document_class,
+        document_role=document_role,
+        source_path=source_path,
+        owner_role=owner_role,
+        status="registered" if source_exists else "blocked",
+        readiness_state="ready" if source_exists and not content_missing else "blocked",
+        notes=notes if not content_missing else f"{notes} Missing minimum content expectations: {', '.join(content_missing)}.",
+    )
+    record["missing_required_fields"] = sorted(set(record["missing_required_fields"]) | set(content_missing))
+    if record["missing_required_fields"]:
+        record["readiness_state"] = "blocked"
+        record["status"] = "blocked"
+    return record
+
+
+def build_test_plan_record(
+    *,
+    source_path: Path | None,
+    title: str = "MVP Test Plan",
+    version: str = "not_available",
+) -> dict[str, Any]:
+    if source_path is None:
+        return build_document_record(
+            document_id="mvp_test_plan_placeholder",
+            title=title,
+            version=version,
+            document_class="Test Plan",
+            document_role="test_plan",
+            source_path=None,
+            owner_role="QA Lead",
+            status="placeholder",
+            readiness_state="placeholder",
+            notes="Placeholder only. No Test Plan source has been provided for S2-F2/S2-F3.",
+        )
+    return build_contract_document_record(
+        document_id="mvp_test_plan",
+        title=title or source_path.stem,
+        version=version,
+        document_class="Test Plan",
+        document_role="test_plan",
+        source_path=source_path,
+        owner_role="QA Lead",
+        notes="Real Test Plan input registered under the S2-F3 minimum input contract.",
+        expectation_groups=TEST_PLAN_EXPECTATION_GROUPS,
+    )
+
+
+def build_regression_pack_index_record(
+    *,
+    source_path: Path | None,
+    title: str = "MVP Regression Pack Index",
+    version: str = "not_available",
+) -> dict[str, Any]:
+    if source_path is None:
+        return build_document_record(
+            document_id="mvp_regression_pack_index_placeholder",
+            title=title,
+            version=version,
+            document_class="Regression Pack Index",
+            document_role="regression_pack_index",
+            source_path=None,
+            owner_role="Automation Lead",
+            status="placeholder",
+            readiness_state="placeholder",
+            notes="Placeholder only. No Regression Pack Index source has been provided for S2-F2/S2-F3.",
+        )
+    return build_contract_document_record(
+        document_id="mvp_regression_pack_index",
+        title=title or source_path.stem,
+        version=version,
+        document_class="Regression Pack Index",
+        document_role="regression_pack_index",
+        source_path=source_path,
+        owner_role="Automation Lead",
+        notes="Real Regression Pack Index input registered under the S2-F3 minimum input contract.",
+        expectation_groups=REGRESSION_PACK_EXPECTATION_GROUPS,
+    )
+
+
 def build_hkv14_poc_registry(
     *,
     previous_spec_path: Path = Path("docs/materials/Initial Margin Calculation Guide HKv13.pdf"),
     current_spec_path: Path = Path("docs/materials/Initial Margin Calculation Guide HKv14.pdf"),
+    test_plan_path: Path | None = None,
+    test_plan_title: str = "MVP Test Plan",
+    test_plan_version: str = "not_available",
+    regression_pack_index_path: Path | None = None,
+    regression_pack_index_title: str = "MVP Regression Pack Index",
+    regression_pack_index_version: str = "not_available",
     generated_at: str | None = None,
 ) -> dict[str, Any]:
     timestamp = generated_at or timestamp_slug()
@@ -141,29 +282,15 @@ def build_hkv14_poc_registry(
             readiness_state="ready",
             notes="Repository-specific stand-in for the MVP Function Spec new version.",
         ),
-        build_document_record(
-            document_id="mvp_test_plan_placeholder",
-            title="MVP Test Plan",
-            version="not_available",
-            document_class="Test Plan",
-            document_role="test_plan",
-            source_path=None,
-            owner_role="QA Lead",
-            status="placeholder",
-            readiness_state="placeholder",
-            notes="Placeholder only. No Test Plan source has been provided for S2-F2.",
+        build_test_plan_record(
+            source_path=test_plan_path,
+            title=test_plan_title,
+            version=test_plan_version,
         ),
-        build_document_record(
-            document_id="mvp_regression_pack_index_placeholder",
-            title="MVP Regression Pack Index",
-            version="not_available",
-            document_class="Regression Pack Index",
-            document_role="regression_pack_index",
-            source_path=None,
-            owner_role="Automation Lead",
-            status="placeholder",
-            readiness_state="placeholder",
-            notes="Placeholder only. No Regression Pack Index source has been provided for S2-F2.",
+        build_regression_pack_index_record(
+            source_path=regression_pack_index_path,
+            title=regression_pack_index_title,
+            version=regression_pack_index_version,
         ),
     ]
 
@@ -195,7 +322,7 @@ def build_hkv14_poc_registry(
         "blockers": blockers,
         "limitations": [
             "Initial Margin guides are repo-specific stand-ins for Function Spec old/new documents.",
-            "Test Plan and Regression Pack Index are placeholders and must not be treated as provided inputs.",
+            "Test Plan and Regression Pack Index are ready only when real source files meet the S2-F3 minimum input contract.",
             "This registry does not claim Stage 3 real execution readiness.",
         ],
     }
@@ -344,6 +471,12 @@ def write_document_readiness_package(
     output_dir: Path = Path("evidence/mvp_document_readiness"),
     previous_spec_path: Path = Path("docs/materials/Initial Margin Calculation Guide HKv13.pdf"),
     current_spec_path: Path = Path("docs/materials/Initial Margin Calculation Guide HKv14.pdf"),
+    test_plan_path: Path | None = None,
+    test_plan_title: str = "MVP Test Plan",
+    test_plan_version: str = "not_available",
+    regression_pack_index_path: Path | None = None,
+    regression_pack_index_title: str = "MVP Regression Pack Index",
+    regression_pack_index_version: str = "not_available",
     generated_at: str | None = None,
 ) -> dict[str, Any]:
     run_id = generated_at or timestamp_slug()
@@ -351,6 +484,12 @@ def write_document_readiness_package(
     registry = build_hkv14_poc_registry(
         previous_spec_path=previous_spec_path,
         current_spec_path=current_spec_path,
+        test_plan_path=test_plan_path,
+        test_plan_title=test_plan_title,
+        test_plan_version=test_plan_version,
+        regression_pack_index_path=regression_pack_index_path,
+        regression_pack_index_title=regression_pack_index_title,
+        regression_pack_index_version=regression_pack_index_version,
         generated_at=run_id,
     )
     registry_path = run_dir / "document_readiness.json"

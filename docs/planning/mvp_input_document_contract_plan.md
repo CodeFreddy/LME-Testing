@@ -1,10 +1,11 @@
 # MVP Input Document Contract Plan
 
-**Status:** Approved planning slice / not yet implemented  
+**Status:** Implemented deterministic S2-F3 slice  
 **Created:** 2026-04-29  
+**Implemented:** 2026-04-29  
 **Task ID:** S2-F3  
 **Source:** Follow-on from `docs/planning/mvp_document_readiness_plan.md` and the S2-F2 readiness blockers  
-**Baseline impact:** Planning only. This document does not change schemas, prompts, default models, pipeline behavior, review-session behavior, document readiness generation, or Stage 3 readiness claims.
+**Baseline impact:** This slice extends deterministic document readiness generation to accept optional real Test Plan and Regression Pack Index inputs. It does not change schemas, prompts, default models, maker/checker pipeline behavior, review-session behavior, or Stage 3 readiness claims.
 
 ---
 
@@ -139,7 +140,7 @@ The source document should identify, in human-readable form:
 
 ## Future Implementation Expectations
 
-The implementation slice after S2-F3 should remain deterministic and should:
+The implementation slice remains deterministic and does:
 
 - allow real Test Plan and Regression Pack Index paths to be passed into the S2-F2 readiness generator,
 - validate role, state, source existence, and hash deterministically,
@@ -153,29 +154,40 @@ It should not parse detailed test mappings or infer regression impact.
 
 ## Acceptance Gates
 
-S2-F3 planning is PASS only if:
+S2-F3 is PASS only if:
 
-- the minimum Test Plan input contract is documented,
-- the minimum Regression Pack Index input contract is documented,
-- readiness and blocking rules are explicit,
-- future implementation expectations preserve S2-F2 boundaries,
-- non-goals exclude mapping, generation, LLM stages, integrations, and Stage 3 readiness claims,
-- docs governance passes.
+- [x] the minimum Test Plan input contract is documented,
+- [x] the minimum Regression Pack Index input contract is documented,
+- [x] readiness and blocking rules are explicit,
+- [x] implementation preserves S2-F2 boundaries,
+- [x] `mvp-document-readiness` accepts optional real Test Plan and Regression Pack Index paths,
+- [x] placeholder behavior is preserved when those files are not provided,
+- [x] focused tests cover valid real document inputs, missing source failure, incomplete content blocking, and placeholder fallback,
+- [x] non-goals exclude mapping, generation, LLM stages, integrations, and Stage 3 readiness claims,
+- [x] docs and artifact governance pass.
 
 ---
 
 ## Rollback Considerations
 
-This planning slice is rollback-safe:
+This slice is rollback-safe:
 
-- remove this plan from `docs/planning/`,
+- remove the S2-F3 optional-input changes from `src/lme_testing/mvp_document_readiness.py`, `src/lme_testing/cli.py`, and `tests/test_mvp_document_readiness.py`,
+- remove generated S2-F3 evidence under `evidence/mvp_document_readiness/20260429T083211Z/`,
 - remove S2-F3 references from roadmap, implementation plan, TODO, index, handoff, and checkpoints,
 - preserve S2-F2 implementation and evidence.
 
 ---
 
+## Implementation Evidence
+
+- Generator: `src/lme_testing/mvp_document_readiness.py`
+- CLI: `python main.py mvp-document-readiness --test-plan <path> --regression-pack-index <path>`
+- Default evidence preserving placeholder blockers: `evidence/mvp_document_readiness/20260429T083211Z/`
+- Tests: `tests/test_mvp_document_readiness.py`
+
 ## Self-Evaluation Target
 
-Current plan promotion status: PASS.
+Current implementation status: PASS.
 
-Implementation status: not started.
+Default workflow readiness remains blocked until real Test Plan and Regression Pack Index sources are provided.

@@ -267,6 +267,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Path to the current Function Spec stand-in document.",
     )
     mvp_document_readiness.add_argument(
+        "--test-plan",
+        default=None,
+        help="Optional path to a real Test Plan input. If omitted, the registry keeps the Test Plan placeholder blocker.",
+    )
+    mvp_document_readiness.add_argument("--test-plan-title", default="MVP Test Plan")
+    mvp_document_readiness.add_argument("--test-plan-version", default="not_available")
+    mvp_document_readiness.add_argument(
+        "--regression-pack-index",
+        default=None,
+        help="Optional path to a real Regression Pack Index input. If omitted, the registry keeps the placeholder blocker.",
+    )
+    mvp_document_readiness.add_argument("--regression-pack-index-title", default="MVP Regression Pack Index")
+    mvp_document_readiness.add_argument("--regression-pack-index-version", default="not_available")
+    mvp_document_readiness.add_argument(
         "--output-dir",
         default="evidence/mvp_document_readiness",
         help="Output root for document_readiness.json and document_readiness_summary.md.",
@@ -327,6 +341,12 @@ def main() -> int:
             output_dir=Path(args.output_dir),
             previous_spec_path=Path(args.previous_spec),
             current_spec_path=Path(args.current_spec),
+            test_plan_path=Path(args.test_plan) if args.test_plan else None,
+            test_plan_title=args.test_plan_title,
+            test_plan_version=args.test_plan_version,
+            regression_pack_index_path=Path(args.regression_pack_index) if args.regression_pack_index else None,
+            regression_pack_index_title=args.regression_pack_index_title,
+            regression_pack_index_version=args.regression_pack_index_version,
         )
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0

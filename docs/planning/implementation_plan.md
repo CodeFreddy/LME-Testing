@@ -705,7 +705,7 @@ Register MVP documents -> validate metadata/readiness -> produce document_readin
 
 ### S2-F3 — MVP Input Document Contract
 
-**状态：🔄 PLANNING APPROVED（2026-04-29）；implementation not started**
+**状态：✅ IMPLEMENTED（2026-04-29）；deterministic optional-input validation added**
 
 **目标：** Define the minimum Test Plan and Regression Pack Index input contracts needed to unblock the S2-F2 readiness registry when real files are provided.
 
@@ -727,6 +727,14 @@ Define minimal Test Plan and Regression Pack Index contracts -> preserve readine
 
 **输出契约：**
 - `docs/planning/mvp_input_document_contract_plan.md`
+- optional `mvp-document-readiness --test-plan ... --regression-pack-index ...` inputs
+- focused tests for valid real document inputs, missing source failure, incomplete content blocking, and placeholder fallback
+
+**实现证据：**
+- generator: `src/lme_testing/mvp_document_readiness.py`
+- CLI: `python main.py mvp-document-readiness --test-plan <path> --regression-pack-index <path>`
+- default evidence preserving placeholders: `evidence/mvp_document_readiness/20260429T083211Z/`
+- tests: `tests/test_mvp_document_readiness.py`
 
 **实现要点：**
 - Define required registry metadata for Test Plan and Regression Pack Index.
@@ -739,6 +747,9 @@ Define minimal Test Plan and Regression Pack Index contracts -> preserve readine
 - [x] Minimum Regression Pack Index input contract is documented
 - [x] Readiness and blocking rules are explicit
 - [x] Future implementation expectations preserve S2-F2 boundaries
+- [x] CLI accepts optional real Test Plan and Regression Pack Index paths
+- [x] Placeholder fallback is preserved when real files are omitted
+- [x] Focused tests cover valid real inputs, missing source failure, incomplete content blocking, and placeholder fallback
 - [x] Non-goals exclude mapping, generation, LLM stages, integrations, and Stage 3 readiness claims
 - [x] Docs governance check passes
 
@@ -751,7 +762,7 @@ Define minimal Test Plan and Regression Pack Index contracts -> preserve readine
 - Prompt, model, schema, maker/checker, or review-session behavior changes
 - Stage 3 real execution readiness claims
 
-**自评：** PASS for plan promotion. Implementation is not started.
+**自评：** PASS. S2-F3 is implemented as deterministic optional-input readiness validation. Default workflow readiness remains `blocked` until real Test Plan and Regression Pack Index sources are provided.
 
 ---
 

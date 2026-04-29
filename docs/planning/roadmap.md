@@ -386,7 +386,7 @@ Approved slice:
 
 ---
 
-### 方向 F3：MVP Input Document Contract（新增，已批准规划）
+### 方向 F3：MVP Input Document Contract（新增，已实现）
 
 **S2-F3 — MVP Test Plan and Regression Pack Index Input Contract**
 
@@ -398,9 +398,11 @@ Approved slice:
 
 **输出计划：**
 - `docs/planning/mvp_input_document_contract_plan.md`
-- future implementation may update `mvp-document-readiness` to accept real Test Plan and Regression Pack Index paths, but only after this contract is reviewed.
+- `mvp-document-readiness` optional inputs: `--test-plan` and `--regression-pack-index`
+- default evidence preserving blockers: `evidence/mvp_document_readiness/20260429T083211Z/`
+- tests: `tests/test_mvp_document_readiness.py`
 
-**状态：** planning approved; implementation not started.
+**状态：** implemented as deterministic optional-input validation. Default readiness remains `blocked` until real Test Plan and Regression Pack Index sources are provided.
 
 **边界：** This planning slice does not authorize creating documents, generic upload UI, document platform, OCR/parser work, LLM summarization, requirement-to-test mapping, regression impact mapping, automation backlog generation, external tool integration, prompt/model/schema changes, or Stage 3 readiness claims.
 

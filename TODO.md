@@ -335,8 +335,12 @@
 - [x] 明确 readiness/blocking rules
 - [x] 明确 future implementation boundaries
 - [x] 运行 docs governance check
+- [x] `mvp-document-readiness` 支持 optional `--test-plan`
+- [x] `mvp-document-readiness` 支持 optional `--regression-pack-index`
+- [x] placeholder fallback preserved when real files are omitted
+- [x] focused tests cover valid real inputs, missing source failure, incomplete content blocking, placeholder fallback
 
-**状态：** 🔄 PLANNING APPROVED；implementation not started
+**状态：** ✅ COMPLETE — deterministic optional-input readiness validation implemented. Default readiness remains `blocked` until real Test Plan and Regression Pack Index files are provided.
 
 **边界：** 不创建真实 Test Plan 或 Regression Pack Index，不新增 LLM stage，不实现 generic document upload/platform，不做 requirement-to-test/regression impact mapping，不声明 Stage 3 readiness。
 
@@ -368,7 +372,7 @@
 - [x] ✅ S2-D1　browser-level review UI E2E
 - [x] ✅ S2-F1　HKv14 role-friendly impact decision review package generator
 - [x] ✅ S2-F2　MVP document readiness registry
-- [ ] 🔄 S2-F3　MVP input document contract（plan approved，implementation not started）
+- [x] ✅ S2-F3　MVP input document contract and optional-input readiness validation
 - [ ] ⏳ 真实 LME API 接入（Stage 3，待 VM 权限）
 - [ ] 🧊 S2-E　LLM 非决定性稳定化（SR-MR-015-B3-4、SR-MR-071-C-1；已明确暂跳过，未来需 benchmark 成本/收益批准）
 
