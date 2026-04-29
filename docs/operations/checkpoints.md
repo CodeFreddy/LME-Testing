@@ -6,6 +6,69 @@ Keep the latest checkpoint at the top. Preserve prior checkpoints below it unles
 
 ---
 
+## 2026-04-29 - S2-F3 Non-Production Demo Fixtures Added
+
+### Current Task Goal
+
+Create non-production sample Test Plan and Regression Pack Index fixtures for validation/demo only.
+
+### Confirmed Key Facts
+
+- Human explicitly requested sample fixtures under `docs/materials/` or `tests/fixtures/`, clearly marked non-production.
+- Fixtures were added under `tests/fixtures/mvp_input_documents/` to keep them separate from real source materials.
+- Fixture README states they are non-production validation/demo fixtures only.
+- Both sample files contain `NON-PRODUCTION DEMO FIXTURE` in the title.
+- A focused test proves the sample fixtures satisfy the S2-F3 optional-input readiness path.
+- No schemas, prompts, default models, maker/checker pipeline behavior, review-session behavior, mapping, regression impact analysis, automation backlog generation, or Stage 3 readiness claims were changed.
+
+### Files Modified Or Inspected
+
+- `tests/fixtures/mvp_input_documents/README.md`
+- `tests/fixtures/mvp_input_documents/sample_test_plan.md`
+- `tests/fixtures/mvp_input_documents/sample_regression_pack_index.md`
+- `tests/test_mvp_document_readiness.py`
+- `docs/operations/checkpoints.md`
+
+### Remaining Work
+
+- Review and commit the fixture package if approved.
+- Real Test Plan and Regression Pack Index files are still required for real workflow readiness.
+
+### Next Single Action
+
+Review the fixture diff and prepare a commit if it looks good.
+
+### Constraints That Must Not Be Violated
+
+- Do not treat fixtures as real project inputs.
+- Do not use fixtures as production readiness evidence.
+- Do not create or fabricate real Test Plan or Regression Pack Index source documents.
+- Do not implement requirement-to-test mapping, regression impact mapping, automation backlog generation, or external integrations.
+- Do not claim Stage 3 real execution readiness.
+
+### Resume Prompt
+
+```text
+Continue working in C:\Codes\GenAI\LME-Testing. First read and follow AGENTS.md, then read the latest entry in docs/operations/checkpoints.md.
+
+Current task state:
+- Non-production demo fixtures for S2-F3 were added under tests/fixtures/mvp_input_documents/.
+- The fixtures are explicitly labeled NON-PRODUCTION DEMO FIXTURE and are validation/demo only.
+- tests/test_mvp_document_readiness.py includes a guard test proving the fixtures satisfy the optional-input readiness path.
+- Full tests passed: .venv\Scripts\python.exe -m unittest discover -s tests -t . -v -> 207 tests, 1 browser skip.
+- Docs and artifact governance checks passed.
+
+Next single action:
+Review the fixture diff and prepare a commit if approved.
+
+Must follow:
+- Do not treat fixtures as real project inputs or production readiness evidence.
+- Do not create or fabricate real Test Plan or Regression Pack Index documents.
+- Do not implement mapping, regression impact, automation backlog, integrations, or Stage 3 readiness claims.
+```
+
+---
+
 ## 2026-04-29 - S2-F3 MVP Input Document Contract Implemented
 
 ### Current Task Goal
