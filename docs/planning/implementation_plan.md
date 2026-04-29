@@ -49,6 +49,7 @@ Stage 2 规划（Stage 1 完成后展开）
 └── S2-D1: Browser-level review UI E2E
 └── S2-F1: HKv14 role-friendly impact decision review
 └── S2-F2: MVP document readiness registry
+└── S2-F3: MVP input document contract
 ```
 
 ---
@@ -699,6 +700,58 @@ Register MVP documents -> validate metadata/readiness -> produce document_readin
 - Stage 3 real execution readiness claims
 
 **自评：** PASS. S2-F2 is implemented as deterministic document readiness registry generation. Workflow readiness intentionally remains `blocked` until real Test Plan and Regression Pack Index inputs are provided.
+
+---
+
+### S2-F3 — MVP Input Document Contract
+
+**状态：🔄 PLANNING APPROVED（2026-04-29）；implementation not started**
+
+**目标：** Define the minimum Test Plan and Regression Pack Index input contracts needed to unblock the S2-F2 readiness registry when real files are provided.
+
+Approved slice:
+
+```text
+Define minimal Test Plan and Regression Pack Index contracts -> preserve readiness blockers until real inputs exist
+```
+
+**为什么现在做：**
+- S2-F2 correctly keeps readiness `blocked` because Test Plan and Regression Pack Index are placeholders.
+- Before accepting real files, the repo needs a documented minimum contract for those document classes.
+- The next slice should stay deterministic and avoid jumping into requirement-to-test or regression impact mapping.
+
+**输入契约：**
+- `docs/planning/mvp_document_readiness_plan.md`
+- `evidence/mvp_document_readiness/20260429T075702Z/document_readiness.json`
+- S2-F2 placeholder blocker records for `test_plan` and `regression_pack_index`
+
+**输出契约：**
+- `docs/planning/mvp_input_document_contract_plan.md`
+
+**实现要点：**
+- Define required registry metadata for Test Plan and Regression Pack Index.
+- Define minimum human-readable content expectations.
+- Define deterministic readiness/blocking rules.
+- Preserve S2-F2 behavior until real inputs are provided.
+
+**验收：**
+- [x] Minimum Test Plan input contract is documented
+- [x] Minimum Regression Pack Index input contract is documented
+- [x] Readiness and blocking rules are explicit
+- [x] Future implementation expectations preserve S2-F2 boundaries
+- [x] Non-goals exclude mapping, generation, LLM stages, integrations, and Stage 3 readiness claims
+- [x] Docs governance check passes
+
+**不在范围：**
+- Creating real Test Plan or Regression Pack Index documents
+- Generic upload UI or document storage platform
+- OCR, parser, LLM extraction, or LLM summarization work
+- Requirement-to-test mapping, regression impact mapping, or automation backlog generation
+- JIRA, Zephyr, Git, CI, Confluence, or SharePoint integration
+- Prompt, model, schema, maker/checker, or review-session behavior changes
+- Stage 3 real execution readiness claims
+
+**自评：** PASS for plan promotion. Implementation is not started.
 
 ---
 

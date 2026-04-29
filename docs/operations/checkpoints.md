@@ -6,6 +6,74 @@ Keep the latest checkpoint at the top. Preserve prior checkpoints below it unles
 
 ---
 
+## 2026-04-29 - S2-F3 MVP Input Document Contract Plan Promoted
+
+### Current Task Goal
+
+Define the minimum Test Plan and Regression Pack Index input contracts needed to unblock the S2-F2 document readiness registry when real files are provided.
+
+### Confirmed Key Facts
+
+- Human selected the next path: define the minimal Test Plan + Regression Pack Index input contract.
+- S2-F2 implementation is committed as `5e73712 Add MVP document readiness workflow implementation and evidence tracking`.
+- S2-F2 readiness remains intentionally `blocked` because Test Plan and Regression Pack Index are placeholders.
+- S2-F3 is planning-only and does not create real Test Plan or Regression Pack Index documents.
+- `docs/planning/mvp_input_document_contract_plan.md` defines required metadata, minimum content expectations, readiness rules, future implementation expectations, acceptance gates, non-goals, and rollback notes.
+- No schemas, prompts, default models, maker/checker pipeline behavior, review-session behavior, document readiness generation behavior, or Stage 3 readiness claims were changed.
+
+### Files Modified Or Inspected
+
+- `docs/planning/mvp_input_document_contract_plan.md`
+- `docs/planning/roadmap.md`
+- `docs/planning/implementation_plan.md`
+- `docs/index.md`
+- `TODO.md`
+- `docs/operations/session_handoff.md`
+- `docs/operations/checkpoints.md`
+
+### Remaining Work
+
+- Run docs governance check.
+- Review and commit the S2-F3 planning slice if approved.
+- Future implementation may update `mvp-document-readiness` to accept real Test Plan and Regression Pack Index paths, but only after this contract is accepted.
+
+### Next Single Action
+
+Run docs governance check, then report the S2-F3 planning promotion and current next-action state.
+
+### Constraints That Must Not Be Violated
+
+- Do not create or fabricate Test Plan or Regression Pack Index source documents.
+- Do not implement generic document upload UI or document platform.
+- Do not add a new LLM-driven stage.
+- Do not change schemas, prompts, default models, or roadmap phase boundaries without explicit approval and evidence.
+- Do not implement requirement-to-test mapping, regression impact mapping, automation backlog generation, or external integrations under S2-F3.
+- Do not claim Stage 3 real execution readiness.
+- Keep S2-F2 missing inputs visible in `blockers` until real sources are registered.
+
+### Resume Prompt
+
+```text
+Continue working in C:\Codes\GenAI\LME-Testing. First read and follow AGENTS.md, then read the latest entry in docs/operations/checkpoints.md.
+
+Current task state:
+- S2-F3 MVP input document contract planning slice has been promoted.
+- The plan is docs/planning/mvp_input_document_contract_plan.md.
+- The approved slice is: define minimal Test Plan and Regression Pack Index contracts -> preserve readiness blockers until real inputs exist.
+- S2-F2 remains implemented and committed as 5e73712.
+- S2-F2 readiness remains blocked because no real Test Plan or Regression Pack Index source is registered.
+
+Next single action:
+Run docs governance check, then report or commit the S2-F3 planning slice if approved.
+
+Must follow:
+- Do not create or fabricate real Test Plan or Regression Pack Index documents.
+- Do not implement generic document upload UI, document platform, new LLM stage, prompt/model/schema change, requirement-to-test mapping, regression impact mapping, automation backlog generation, external tool integration, or Stage 3 readiness claim.
+- Keep missing inputs visible in blockers.
+```
+
+---
+
 ## 2026-04-29 - S2-F2 MVP Document Readiness Registry Implemented
 
 ### Current Task Goal
