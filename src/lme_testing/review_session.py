@@ -37,6 +37,7 @@ class ReviewJobStatus:
     job_id: str
     status: str
     iteration: int
+    phase: str = "queued"
     saved_review_path: str | None = None
     latest_review_path: str | None = None
     error: str | None = None
@@ -611,6 +612,19 @@ class ReviewSessionManager:
             "audit_trail_path": str(audit_trail_path) if audit_trail_path.exists() else None,
         }
 
+    def rebuild_audit_trail(self) -> dict[str, Any]:
+        """Rebuild audit_trail.html against the current iteration set."""
+        audit_path = self.session_dir / "audit_trail.html"
+        result = build_audit_trail(self.session_dir, audit_path)
+        state = self._load_state()
+        state["audit_trail_path"] = str(audit_path)
+        self._save_manifest(state)
+        return {
+            "audit_trail_path": str(audit_path),
+            "audit_trail_url": self._file_url(audit_path),
+            "divergent_count": result.get("divergent_count", 0),
+        }
+
     def job_status(self, job_id: str) -> dict[str, Any]:
         with self._lock:
             status = self._jobs.get(job_id)
@@ -619,15 +633,23 @@ class ReviewSessionManager:
         return {
             "job_id": status.job_id,
             "status": status.status,
+            "phase": status.phase,
             "iteration": status.iteration,
             "saved_review_path": status.saved_review_path,
             "latest_review_path": status.latest_review_path,
             "error": status.error,
             "result": status.result,
         }
+
+    def _set_phase(self, job_id: str, phase: str) -> None:
+        with self._lock:
+            if job_id in self._jobs:
+                self._jobs[job_id].phase = phase
+
     def _run_job(self, job_id: str, iteration: int, human_reviews_path: Path) -> None:
         with self._lock:
             self._jobs[job_id].status = "running"
+            self._jobs[job_id].phase = "rewrite"
         logger.info("Review-session job started. session_id=%s job_id=%s iteration=%s human_reviews=%s", self.session_id, job_id, iteration, human_reviews_path)
         try:
             state = self._load_state()
@@ -647,32 +669,28 @@ class ReviewSessionManager:
                 batch_size=self.rewrite_batch_size,
                 human_scripts_edits_path=Path(state.get("human_scripts_edits_latest_path") or ""),
             )
-            # Generate case comparison HTML (previous vs rewritten iteration)
-            compare_output_path = rewrite_dir / "case_compare.html"
+            next_iteration = iteration + 1
+
+            compare_path: Path | None = None
+            rewritten_case_ids: set[str] = set(rewrite_summary.get("rewritten_case_ids", []))
             try:
-                prev_iter = iteration - 1
-                prev_maker_path = None
-                if str(prev_iter) in state["iterations"]:
-                    prev_iter_data = state["iterations"][str(prev_iter)]
-                    if prev_iter_data.get("maker_cases_path"):
-                        prev_maker_path = Path(prev_iter_data["maker_cases_path"])
-                if prev_maker_path and prev_maker_path.exists():
-                    human_reviews_data = load_json(human_reviews_path)
-                    rewritten_case_ids = [
-                        r["case_id"] for r in human_reviews_data.get("reviews", [])
-                        if r.get("review_decision") == "rewrite" and r.get("case_id")
-                    ]
-                    compare_result = build_case_compare(
-                        prev_cases_path=prev_maker_path,
+                if rewritten_case_ids:
+                    prev_cases_path = Path(state["current_maker_cases_path"])
+                    compare_out = self._iteration_dir(iteration) / f"compare_iter_{iteration:03d}_vs_{next_iteration:03d}.html"
+                    build_case_compare(
+                        prev_cases_path=prev_cases_path,
                         next_cases_path=Path(rewrite_summary["merged_cases_path"]),
                         rewritten_case_ids=rewritten_case_ids,
-                        iteration_prev=prev_iter,
-                        iteration_next=iteration,
-                        output_path=compare_output_path,
+                        iteration_prev=iteration,
+                        iteration_next=next_iteration,
+                        output_html_path=compare_out,
+                        display_iteration=iteration,
                     )
-                    logger.info("Case compare generated. path=%s rewritten=%s", compare_output_path, compare_result.get("rewritten_count"))
+                    compare_path = compare_out
             except Exception:
-                logger.warning("Case compare generation failed. session_id=%s error=%s", self.session_id, traceback.format_exc())
+                logger.exception("build_case_compare failed; continuing without compare file.")
+
+            self._set_phase(job_id, "checker")
             checker_summary = run_checker_pipeline(
                 config=self.config,
                 semantic_rules_path=self.rules_path,
@@ -709,6 +727,7 @@ class ReviewSessionManager:
                 curr_normalized = state.get("normalized_bdd_path") or state["iterations"][str(iteration)].get("normalized_bdd_path")
             curr_step_reg = state.get("step_registry_path") or state["iterations"][str(iteration)].get("step_registry_path")
 
+            self._set_phase(job_id, "report")
             state["history"].append(
                 {
                     "iteration": iteration,
@@ -716,13 +735,13 @@ class ReviewSessionManager:
                     "rewrite_summary_path": str(Path(rewrite_summary["output_dir"]) / "summary.json"),
                     "checker_summary_path": str(Path(checker_summary["output_dir"]) / "summary.json"),
                     "coverage_report_path": checker_summary["coverage_report_path"],
+                    "compare_path": str(compare_path) if compare_path else None,
                 }
             )
             state["iterations"][str(iteration)]["rewrite_summary_path"] = str(Path(rewrite_summary["output_dir"]) / "summary.json")
             state["iterations"][str(iteration)]["checker_summary_path"] = str(Path(checker_summary["output_dir"]) / "summary.json")
             state["iterations"][str(iteration)]["coverage_report_path"] = checker_summary["coverage_report_path"]
 
-            next_iteration = iteration + 1
             self._ensure_iteration_dirs(next_iteration)
             next_state = {
                 "iteration": next_iteration,
@@ -767,17 +786,20 @@ class ReviewSessionManager:
                     "checker_reviews": self._file_url(Path(checker_summary["results_path"])),
                     "coverage_report": self._file_url(Path(checker_summary["coverage_report_path"])),
                     "report_html": self._file_url(report_path),
-                    "case_compare_html": self._file_url(compare_output_path) if compare_output_path.exists() else None,
+                    "compare_html": self._file_url(compare_path) if compare_path else None,
+                    "case_compare_html": self._file_url(compare_path) if compare_path else None,
                     "normalized_bdd": self._file_url(Path(curr_normalized)) if curr_normalized else None,
                 },
             }
             with self._lock:
                 self._jobs[job_id].status = "succeeded"
+                self._jobs[job_id].phase = "done"
                 self._jobs[job_id].result = result
         except Exception as exc:  # pragma: no cover
             logger.exception("Review-session job failed. session_id=%s job_id=%s iteration=%s", self.session_id, job_id, iteration)
             with self._lock:
                 self._jobs[job_id].status = "failed"
+                self._jobs[job_id].phase = "failed"
                 self._jobs[job_id].error = f"{exc}\n{traceback.format_exc()}"
 
     def _seed_reviews(self, state: dict[str, Any]) -> list[dict]:
@@ -932,6 +954,9 @@ def _build_handler(manager: ReviewSessionManager):
                     return
                 if parsed.path == "/api/history":
                     self._send_json({"history": manager.session_payload().get("history", [])})
+                    return
+                if parsed.path == "/api/audit_trail":
+                    self._send_json(manager.rebuild_audit_trail())
                     return
                 if parsed.path == "/api/bdd":
                     self._send_json(manager.bdd_payload())
@@ -1103,8 +1128,15 @@ def _render_review_session_shell() -> str:
     .status-failed { color: #991b1b; }
     .status-finalized { color: #1d4ed8; }
     button { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; cursor: pointer; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
     ul { margin: 8px 0 0 18px; }
     pre { white-space: pre-wrap; word-break: break-word; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; font-size: 12px; }
+    .progress-wrap { margin-top: 8px; background: #e2e8f0; border-radius: 8px; height: 18px; overflow: hidden; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, #3b82f6, #6366f1); width: 0%; transition: width 0.4s ease; }
+    .progress-label { font-size: 12px; color: #334155; margin-top: 4px; }
+    .history-row { padding: 6px 0; border-bottom: 1px dashed #e2e8f0; }
+    .history-row:last-child { border-bottom: none; }
+    .history-row a { margin-left: 10px; }
     .tab-bar { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; }
     .tab-btn { padding: 8px 16px; border: 1px solid #cbd5e1; border-radius: 8px 8px 0 0; background: #f1f5f9; cursor: pointer; }
     .tab-btn.active { background: white; border-bottom-color: white; font-weight: 600; }
@@ -1201,6 +1233,7 @@ def _render_review_session_shell() -> str:
       <label>Checker Blocking <select id="blockingFilter"><option value="">全部</option><option value="true">true</option><option value="false">false</option></select></label>
       <button id="saveBtn">保存草稿</button>
       <button id="submitBtn">提交并执行回流</button>
+      <button id="auditBtn">查看 Audit Trail</button>
       <button id="finalizeBtn">Finalize</button>
     </div>
     <div class="muted">页面会自动把 human reviews 落到 session 目录，并在提交后串行执行 rewrite、checker、report。</div>
@@ -1250,6 +1283,8 @@ def _render_review_session_shell() -> str:
 let sessionPayload = null;
 let reviewMap = new Map();
 let pollTimer = null;
+const PHASE_PROGRESS = { queued: 5, rewrite: 20, checker: 55, report: 90, done: 100, failed: 100 };
+const PHASE_LABEL = { queued: '已排队', rewrite: '正在重写 cases', checker: '正在 checker 复检', report: '正在生成报告', done: '完成', failed: '失败' };
 let bddPayload = null;
 let scriptsPayload = null;
 let bddDirty = false;
@@ -1492,15 +1527,19 @@ function applyFilters() { const overall = document.getElementById('overallFilter
 async function postJson(url, payload) { const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload || {}) }); const data = await response.json(); if (!response.ok) throw new Error(data.error || JSON.stringify(data)); return data; }
 function currentPayload() { return { metadata: sessionPayload.metadata, reviews: Array.from(reviewMap.values()) }; }
 function renderResult(title, bodyHtml, cssClass='') { const card = document.getElementById('resultCard'); card.style.display = ''; card.innerHTML = `<h2 class="${cssClass}">${escapeHtml(title)}</h2>${bodyHtml}`; }
-function renderHistory() { const items = sessionPayload.history || []; document.getElementById('historyCard').innerHTML = items.length ? items.map(item => `<div><strong>Iteration ${item.iteration}</strong>: checker=${escapeHtml(item.checker_summary_path || '')}</div>`).join('') : '暂无历史'; }
+function hideResult() { const card = document.getElementById('resultCard'); card.style.display = 'none'; card.innerHTML = ''; }
+function renderProgress(percent, label) { const safe = Math.max(0, Math.min(100, percent)); const body = `<div class="progress-wrap"><div class="progress-bar" style="width:${safe}%"></div></div><div class="progress-label">${escapeHtml(label)} · ${safe}%</div>`; renderResult('后台执行中', body, 'status-running'); }
+function compareLinkHtml(item) { if (!item.compare_path) return ''; const url = `/files?path=${encodeURIComponent(item.compare_path)}`; return `<a href="${url}" target="_blank">Compare</a>`; }
+function renderHistory() { const items = sessionPayload.history || []; const container = document.getElementById('historyCard'); if (!items.length) { container.textContent = '暂无历史'; return; } container.innerHTML = items.map(item => `<div class="history-row"><strong>Iteration ${escapeHtml(String(item.iteration))}</strong>: checker=${escapeHtml(item.checker_summary_path || '')}${compareLinkHtml(item)}</div>`).join(''); }
 function resultLinksHtml(links) { return Object.entries(links || {}).map(([key, href]) => `<div><a href="${href}" target="_blank">${escapeHtml(key)}</a></div>`).join(''); }
 async function saveDraft() { const result = await postJson('/api/reviews/save', currentPayload()); renderResult('保存成功', `<div><strong>Iteration</strong>: ${result.iteration}</div><div><strong>Snapshot</strong>: ${escapeHtml(result.saved_review_path)}</div><div><strong>Latest</strong>: ${escapeHtml(result.latest_review_path)}</div>`); }
 async function refreshSession() { const response = await fetch('/api/session'); sessionPayload = await response.json(); reviewMap = new Map(sessionPayload.reviews.map(item => [item.case_id, item])); document.getElementById('summaryCard').innerHTML = `<div class="grid"><div class="metric"><strong>Session ID</strong><br/>${escapeHtml(sessionPayload.session_id)}</div><div class="metric"><strong>Status</strong><br/>${escapeHtml(sessionPayload.session_status)}</div><div class="metric"><strong>Current Iteration</strong><br/>${escapeHtml(String(sessionPayload.current_iteration))}</div></div><div class="muted">Latest review path: ${escapeHtml(sessionPayload.metadata.latest_review_path || '')}</div><div class="muted">Current report path: ${escapeHtml(sessionPayload.metadata.current_report_path || '')}</div>`; renderRows(); renderHistory(); applyFilters(); await loadStageData(); }
-async function pollJob(jobId) { const response = await fetch(`/api/status/${jobId}`); const payload = await response.json(); if (payload.status === 'queued' || payload.status === 'running') { renderResult('后台执行中', `<div class="status-running">状态: ${escapeHtml(payload.status)}</div>`, 'status-running'); pollTimer = setTimeout(() => pollJob(jobId), 2000); return; } if (payload.status === 'failed') { renderResult('执行失败', `<pre>${escapeHtml(payload.error || '')}</pre>`, 'status-failed'); return; } const result = payload.result || {}; await refreshSession(); renderResult('执行成功', `<div class="status-succeeded">状态: ${escapeHtml(payload.status)}</div><div><strong>Next Iteration</strong>: ${escapeHtml(String(result.next_iteration || ''))}</div><pre>${escapeHtml(JSON.stringify({ rewrite_summary: result.rewrite_summary, checker_summary: result.checker_summary, report_summary: result.report_summary }, null, 2))}</pre><div>${resultLinksHtml(result.links)}</div>`, 'status-succeeded'); }
-async function submitAndRun() { if (pollTimer) clearTimeout(pollTimer); const result = await postJson('/api/submit', currentPayload()); renderResult('已提交', `<div>Job ID: ${escapeHtml(result.job_id)}</div><div>Latest: ${escapeHtml(result.latest_review_path)}</div>`); pollJob(result.job_id); }
+async function pollJob(jobId) { const response = await fetch(`/api/status/${jobId}`); const payload = await response.json(); const phase = payload.phase || payload.status || 'queued'; if (payload.status === 'queued' || payload.status === 'running') { renderProgress(PHASE_PROGRESS[phase] ?? 10, PHASE_LABEL[phase] || phase); pollTimer = setTimeout(() => pollJob(jobId), 2000); return; } if (payload.status === 'failed') { renderResult('执行失败', `<pre>${escapeHtml(payload.error || '')}</pre>`, 'status-failed'); return; } const result = payload.result || {}; renderProgress(100, PHASE_LABEL.done); await refreshSession(); renderResult('执行成功', `<div class="status-succeeded">状态: ${escapeHtml(payload.status)}</div><div><strong>Next Iteration</strong>: ${escapeHtml(String(result.next_iteration || ''))}</div><pre>${escapeHtml(JSON.stringify({ rewrite_summary: result.rewrite_summary, checker_summary: result.checker_summary, report_summary: result.report_summary }, null, 2))}</pre><div>${resultLinksHtml(result.links)}</div>`, 'status-succeeded'); }
+async function submitAndRun() { if (pollTimer) clearTimeout(pollTimer); renderProgress(0, '提交中'); const result = await postJson('/api/submit', currentPayload()); pollJob(result.job_id); }
+async function openAuditTrail() { const resp = await fetch('/api/audit_trail'); const data = await resp.json(); if (data.audit_trail_url) window.open(data.audit_trail_url, '_blank'); }
 async function finalizeSession() { try { const result = await postJson('/api/finalize', {}); if (result.error) { renderResult('Finalize Failed', `<div class="status-failed">${escapeHtml(result.error)}</div>`, 'status-failed'); return; } if (result.final_report_url) { window.location.href = result.final_report_url; return; } await refreshSession(); renderResult('Session Finalized', `<div class="status-finalized">Status: ${escapeHtml(result.status || '')}</div><div><strong>Final Report</strong>: ${escapeHtml(result.final_report_path || "")}</div><div>${resultLinksHtml({ report_html: result.final_report_url, maker_html: result.final_maker_url, checker_html: result.final_checker_url })}</div>`, 'status-finalized'); } catch (err) { renderResult('Finalize Failed', `<div class="status-failed">${escapeHtml(err.message)}</div>`, 'status-failed'); } }
 async function bootstrap() { await refreshSession(); attachHandlers(); }
-function attachHandlers() { document.getElementById('overallFilter').addEventListener('change', applyFilters); document.getElementById('coverageFilter').addEventListener('change', applyFilters); document.getElementById('blockingFilter').addEventListener('change', applyFilters); document.getElementById('saveBtn').addEventListener('click', saveDraft); document.getElementById('submitBtn').addEventListener('click', submitAndRun); document.getElementById('finalizeBtn').addEventListener('click', finalizeSession); document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab))); document.getElementById('saveBddBtn').addEventListener('click', saveBddEdits); document.getElementById('saveScriptsBtn').addEventListener('click', saveScriptsEdits); document.querySelectorAll('.stage-step').forEach(el => el.addEventListener('click', () => { const stage = el.dataset.stage; if (stage === 'finalize') { if (confirm('Finalize this review session? No further edits will be possible.')) finalizeSession(); } else { const tab = STAGE_TAB_MAP[stage]; if (tab) switchTab(tab); } })); }
+function attachHandlers() { document.getElementById('overallFilter').addEventListener('change', applyFilters); document.getElementById('coverageFilter').addEventListener('change', applyFilters); document.getElementById('blockingFilter').addEventListener('change', applyFilters); document.getElementById('saveBtn').addEventListener('click', saveDraft); document.getElementById('submitBtn').addEventListener('click', submitAndRun); document.getElementById('auditBtn').addEventListener('click', openAuditTrail); document.getElementById('finalizeBtn').addEventListener('click', finalizeSession); document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab))); document.getElementById('saveBddBtn').addEventListener('click', saveBddEdits); document.getElementById('saveScriptsBtn').addEventListener('click', saveScriptsEdits); document.querySelectorAll('.stage-step').forEach(el => el.addEventListener('click', () => { const stage = el.dataset.stage; if (stage === 'finalize') { if (confirm('Finalize this review session? No further edits will be possible.')) finalizeSession(); } else { const tab = STAGE_TAB_MAP[stage]; if (tab) switchTab(tab); } })); }
 // Re-attach handlers and refresh state when navigating via browser back/forward (bfcache restore)
 window.addEventListener('pageshow', async (event) => { if (event.persisted) { await refreshSession(); attachHandlers(); } });
 bootstrap();

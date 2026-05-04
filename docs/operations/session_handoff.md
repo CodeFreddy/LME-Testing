@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-04-26 05:49:27 UTC`
+- `2026-05-04 13:32:54 UTC`
 
 ---
 
@@ -44,7 +44,7 @@ If the task touches extraction or rule artifacts, also read:
 
 Current branch:
 
-- `main`
+- `codex/merge-backup-scenario-review`
 
 Recent commit subjects:
 
