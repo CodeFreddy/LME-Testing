@@ -6,6 +6,118 @@ Keep the latest checkpoint at the top. Preserve prior checkpoints below it unles
 
 ---
 
+## 2026-05-06 - Compact Checkpoint: Rule Extraction Review Merge Committed
+
+### Original Goal
+
+Merge `CodeFreddy/LME-Testing` `feature/rule-extraction-review` at `b1287a2` into local code without overwriting newer local HKv14/MVP readiness work.
+
+### Current Implementation Status
+
+Implemented as a controlled merge slice on branch `codex/merge-codefreddy-rule-extraction-review`.
+
+Committed as:
+
+- `998456f Integrate rule extraction review workflow slice`
+
+Remaining dirty files in the continuation session:
+
+- `.claude/settings.local.json` (unrelated local settings)
+- `docs/operations/checkpoints.md` (this compact continuation checkpoint, not yet committed)
+
+### Files Changed
+
+Added:
+
+- `src/lme_testing/rule_extraction.py`
+- `src/lme_testing/rule_workflow_session.py`
+- `tests/test_reporting.py`
+- `tests/test_rule_extraction_review.py`
+
+Modified:
+
+- `src/lme_testing/cli.py`
+- `src/lme_testing/pipelines.py`
+- `src/lme_testing/reporting.py`
+- `src/lme_testing/review_session.py`
+- `docs/architecture/architecture.md`
+- `docs/governance/acceptance.md`
+- `docs/planning/roadmap.md`
+- `docs/planning/implementation_plan.md`
+- `docs/operations/session_handoff.md`
+- `docs/operations/checkpoints.md`
+
+### Key Design Decisions
+
+- Used controlled cherry-pick/manual integration, not a direct merge.
+- Preserved local HKv14/MVP readiness work.
+- Imported deterministic rule extraction/review workflow, CLI entry point, reporting audit/compare links, and focused tests.
+- Did not accept CodeFreddy prompt/schema/review-decision contract changes.
+- Pipeline concurrency is serial-compatible only; `concurrency > 1` fails visibly until separately governed.
+
+### Tests Already Run And Results
+
+Passed:
+
+- `tests.test_rule_extraction_review`
+- `tests.test_reporting`
+- `tests.test_pipelines`
+- `tests.test_review_session`
+- `tests.test_schemas`
+- `scripts/check_docs_governance.py`
+- `scripts/check_artifact_governance.py`
+- Full unittest discovery: `218 tests OK, 1 skipped`
+- Continuation validation on 2026-05-06:
+  - bundled Python `scripts/check_docs_governance.py` passed
+  - bundled Python `scripts/check_artifact_governance.py` passed
+
+Skipped:
+
+- Browser E2E skipped because Chrome DevTools was unavailable.
+
+### Known Failures Or Unresolved Risks
+
+- CodeFreddy's broader changes remain unmerged: full concurrency, rewrite prompt changes, schema simplification, and review decision changes.
+- Those broader changes require separate governed approval and evidence.
+- `.claude/settings.local.json` remains dirty and unrelated.
+- This checkpoint entry is currently an uncommitted documentation change.
+
+### Exact Next Steps
+
+1. In the new chat, read `AGENTS.md`, then this latest checkpoint.
+2. Run `git status --short --branch`.
+3. Review commit `998456f`.
+4. Commit or intentionally leave this compact checkpoint entry as a documentation-only handoff update.
+5. Decide whether to push the branch, open a PR, or merge to local `main`.
+6. If continuing beyond this slice, create a separate governed task for CodeFreddy's prompt/schema/concurrency changes.
+
+### Constraints That Must Not Be Forgotten
+
+- Do not overwrite local HKv14/MVP readiness work.
+- Do not change schemas, prompts, default models, or review decision contracts without explicit approval and evidence.
+- Do not claim Stage 3 execution readiness.
+- Keep deterministic validation visible.
+
+### Resume Prompt
+
+```text
+Continue in C:\Code\LME-Testing. Read AGENTS.md first, then read the latest checkpoint in docs/operations/checkpoints.md.
+
+Current state:
+- Branch: codex/merge-codefreddy-rule-extraction-review
+- Commit created: 998456f Integrate rule extraction review workflow slice
+- The commit integrates the CodeFreddy rule extraction review workflow slice from b1287a2.
+- Full verification already passed: docs/artifact governance checks, focused affected suites, and full unittest discovery (218 OK, 1 browser skip).
+- Remaining dirty files: unrelated .claude/settings.local.json plus this uncommitted compact checkpoint entry.
+
+Next action:
+Run git status --short --branch, review commit 998456f, decide whether to commit this checkpoint entry, then decide whether to push/open PR/merge to main.
+
+Do not accept prompt/schema/default model/review decision/concurrency contract changes without separate governed approval and evidence.
+```
+
+---
+
 ## 2026-05-06 - CodeFreddy Rule Extraction Review Merge Slice
 
 ### Current Task Goal

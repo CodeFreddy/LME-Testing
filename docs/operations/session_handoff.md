@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-05-06 08:13:34 UTC`
+- `2026-05-06 08:24:45 UTC`
 
 ---
 
@@ -56,11 +56,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `Record rule extraction merge checkpoint`
 - `Integrate rule extraction review workflow slice`
 - `Add test fixtures and improve MVP readiness unit tests`
 - `Implement MVP input document contract validation workflow`
 - `Add MVP input document contract plan and update Phase 3 roadmap`
-- `Add MVP document readiness workflow implementation and evidence tracking`
 
 ---
 
