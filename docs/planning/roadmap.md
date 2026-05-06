@@ -208,6 +208,7 @@
 8. ✅ S2-D1 review UI browser E2E 已完成，用于验证 BDD/Scripts tab 的真实浏览器交互与可见指标刷新
 9. ✅ S2-F1 role-friendly HKv14 impact decision review package generator 已实现；canonical JSON is source of truth, Markdown and HTML are derived/review surfaces
 10. ✅ S2-F2 MVP document readiness registry 已实现；canonical `document_readiness.json` and derived summary are under `evidence/mvp_document_readiness/20260429T075702Z/`
+11. ✅ S2-F4 rule extraction review merge slice 已实现；document intake + rule artifact review workflow 已纳入本地 integration branch，prompt/schema/concurrency contract changes 未纳入本 slice
 
 详见：`docs/planning/s2t01_coverage_analysis.md`
 
@@ -405,6 +406,28 @@ Approved slice:
 **状态：** implemented as deterministic optional-input validation. Default readiness remains `blocked` until real Test Plan and Regression Pack Index sources are provided.
 
 **边界：** This planning slice does not authorize creating documents, generic upload UI, document platform, OCR/parser work, LLM summarization, requirement-to-test mapping, regression impact mapping, automation backlog generation, external tool integration, prompt/model/schema changes, or Stage 3 readiness claims.
+
+---
+
+### 方向 F4：Rule Extraction Review Workflow Merge Slice（新增，已实现）
+
+**S2-F4 — CodeFreddy Rule Extraction Review Workflow Integration**
+
+从 `CodeFreddy/LME-Testing` 的 `feature/rule-extraction-review` at `b1287a2` 中纳入一个受控 merge slice：
+
+`Document upload/import -> deterministic rule artifact extraction -> business-friendly atomic/semantic rule review -> reviewed rule history -> optional case generation entry point`
+
+**输出：**
+- `src/lme_testing/rule_extraction.py`
+- `src/lme_testing/rule_workflow_session.py`
+- CLI command `python main.py rule-workflow-session`
+- `tests/test_rule_extraction_review.py`
+- `tests/test_reporting.py`
+- reporting audit/compare navigation support in `src/lme_testing/reporting.py`
+
+**状态：** implemented as a local deterministic review workflow merge slice.
+
+**边界：** This slice does not accept CodeFreddy's prompt/schema contract changes, does not remove `reject` or `block_recommendation_review` from the governed review contract, does not enable concurrent maker/checker execution beyond serial compatibility, does not add a new production LLM stage, and does not claim Stage 3 execution readiness.
 
 ---
 

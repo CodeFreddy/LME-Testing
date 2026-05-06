@@ -50,6 +50,7 @@ Stage 2 规划（Stage 1 完成后展开）
 └── S2-F1: HKv14 role-friendly impact decision review
 └── S2-F2: MVP document readiness registry
 └── S2-F3: MVP input document contract
+└── S2-F4: Rule extraction review workflow merge slice
 ```
 
 ---
@@ -763,6 +764,48 @@ Define minimal Test Plan and Regression Pack Index contracts -> preserve readine
 - Stage 3 real execution readiness claims
 
 **自评：** PASS. S2-F3 is implemented as deterministic optional-input readiness validation. Default workflow readiness remains `blocked` until real Test Plan and Regression Pack Index sources are provided.
+
+---
+
+### S2-F4 — Rule Extraction Review Workflow Merge Slice
+
+**状态：✅ IMPLEMENTED（2026-05-06）；controlled merge slice from CodeFreddy branch**
+
+**目标：** Bring in the deterministic document intake and rule artifact review workflow from `CodeFreddy/LME-Testing` `feature/rule-extraction-review` at `b1287a2` without overwriting newer local HKv14/MVP work or silently accepting governed contract changes.
+
+Approved slice:
+
+```text
+Document upload/import -> deterministic rule extraction -> atomic/semantic rule review -> reviewed history -> optional case generation entry point
+```
+
+**输出契约：**
+- `src/lme_testing/rule_extraction.py`
+- `src/lme_testing/rule_workflow_session.py`
+- CLI command `python main.py rule-workflow-session`
+- `tests/test_rule_extraction_review.py`
+- `tests/test_reporting.py`
+- reporting audit/compare navigation support
+
+**实现要点：**
+- The import is intentionally not a direct merge; newer local HKv14 and MVP readiness commits are preserved.
+- Prompt, schema, and review decision contract changes from the CodeFreddy branch are not accepted in this slice.
+- Pipeline concurrency is accepted only as serial-compatible API surface; `concurrency > 1` fails visibly until separately governed.
+- The workflow can call existing maker/checker/BDD stages, but it does not introduce a new production LLM stage.
+
+**验收：**
+- [x] New rule extraction workflow modules and focused tests are present.
+- [x] CLI exposes `rule-workflow-session`.
+- [x] Existing pipeline/review/session/schema focused tests still pass.
+- [x] No schema, prompt, or default model change is introduced.
+
+**不在范围：**
+- Full concurrent maker/checker execution
+- CodeFreddy schema simplification of human review decisions
+- CodeFreddy prompt changes or rewrite prompt promotion
+- Production document platform, generic upload portal, or Stage 3 execution readiness claims
+
+**自评：** PASS for this controlled merge slice. Broader CodeFreddy changes remain candidates for separate governed review.
 
 ---
 

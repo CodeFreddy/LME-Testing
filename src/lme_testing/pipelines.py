@@ -46,6 +46,14 @@ from .schemas import (
 from .storage import append_jsonl, ensure_dir, load_json, load_jsonl, timestamp_slug, write_json
 
 
+def _require_serial_concurrency(concurrency: int) -> None:
+    if concurrency != 1:
+        raise ValueError(
+            "concurrency > 1 requires the governed concurrent pipeline integration; "
+            "use concurrency=1 for the current merge slice."
+        )
+
+
 RULE_TYPE_CASE_REQUIREMENTS = {
     "obligation": {"required": ["positive", "negative"], "optional": ["boundary", "exception"]},
     "prohibition": {"required": ["negative", "positive"], "optional": ["exception"]},
@@ -250,8 +258,10 @@ def run_maker_pipeline(
     limit: int | None,
     batch_size: int,
     resume_from: Path | None,
+    concurrency: int = 1,
     provider_out: list | None = None,
 ) -> dict:
+    _require_serial_concurrency(concurrency)
     semantic_rules = load_json(semantic_rules_path)
     if not isinstance(semantic_rules, list):
         raise ValueError("semantic_rules.json must contain a list.")
@@ -565,8 +575,10 @@ def run_checker_pipeline(
     limit: int | None,
     batch_size: int,
     resume_from: Path | None,
+    concurrency: int = 1,
     provider_out: list | None = None,
 ) -> dict:
+    _require_serial_concurrency(concurrency)
     semantic_rules = load_json(semantic_rules_path)
     if not isinstance(semantic_rules, list):
         raise ValueError("semantic_rules.json must contain a list.")
@@ -880,8 +892,10 @@ def run_rewrite_pipeline(
     output_dir: Path,
     limit: int | None,
     batch_size: int,
+    concurrency: int = 1,
     human_scripts_edits_path: Path | None = None,
 ) -> dict:
+    _require_serial_concurrency(concurrency)
     """Rewrite maker cases based on human review decisions.
 
     Cases marked ``decision = rewrite`` are regenerated. All others are kept.

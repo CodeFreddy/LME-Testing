@@ -6,6 +6,80 @@ Keep the latest checkpoint at the top. Preserve prior checkpoints below it unles
 
 ---
 
+## 2026-05-06 - CodeFreddy Rule Extraction Review Merge Slice
+
+### Current Task Goal
+
+Merge `CodeFreddy/LME-Testing` `feature/rule-extraction-review` at `b1287a2` into local code without overwriting newer local HKv14/MVP readiness work.
+
+### Confirmed Key Facts
+
+- Local integration branch: `codex/merge-codefreddy-rule-extraction-review`.
+- CodeFreddy branch diverged from local at `ac48fa5`; local had 13 newer commits and CodeFreddy had 2 remote-only commits.
+- Direct merge would risk dropping newer local HKv14/MVP readiness artifacts, so the work was imported as a controlled slice.
+- Imported slice includes deterministic rule extraction, rule workflow session server, reporting audit/compare links, CLI exposure, and focused tests.
+- CodeFreddy prompt/schema contract changes were not accepted in this slice.
+- Existing governed human review contract remains preserved; `reject` and `block_recommendation_review` were not removed.
+- Pipeline concurrency is serial-compatible only; `concurrency > 1` fails visibly until separately governed.
+- Bundled Python requirements were installed to run tests.
+
+### Files Modified Or Inspected
+
+- `src/lme_testing/rule_extraction.py`
+- `src/lme_testing/rule_workflow_session.py`
+- `src/lme_testing/reporting.py`
+- `src/lme_testing/cli.py`
+- `src/lme_testing/pipelines.py`
+- `src/lme_testing/review_session.py`
+- `tests/test_rule_extraction_review.py`
+- `tests/test_reporting.py`
+- `docs/planning/roadmap.md`
+- `docs/planning/implementation_plan.md`
+- `docs/governance/acceptance.md`
+- `docs/architecture/architecture.md`
+- `docs/operations/session_handoff.md`
+- `docs/operations/checkpoints.md`
+
+### Remaining Work
+
+- Run governance baseline checks and broader unittest discovery.
+- Review whether CodeFreddy's full concurrent pipeline and rewrite prompt/schema changes should become a separate governed task.
+- Review diff and prepare commit if approved.
+
+### Next Single Action
+
+Run `python scripts/check_docs_governance.py` and `python scripts/check_artifact_governance.py`, then run broader tests.
+
+### Constraints That Must Not Be Violated
+
+- Do not directly merge or overwrite local `main` with CodeFreddy's branch tree.
+- Do not accept prompt, schema, default model, review decision, or concurrency behavior changes without governed approval and evidence.
+- Do not claim Stage 3 execution readiness.
+- Keep HKv14 and MVP readiness work preserved.
+
+### Resume Prompt
+
+```text
+Continue working in C:\Code\LME-Testing. First read and follow AGENTS.md, then read the latest entry in docs/operations/checkpoints.md.
+
+Current task state:
+- Integration branch is codex/merge-codefreddy-rule-extraction-review.
+- A controlled merge slice from CodeFreddy feature/rule-extraction-review at b1287a2 has been imported.
+- Added rule extraction/review workflow modules, CLI command rule-workflow-session, reporting audit/compare links, and focused tests.
+- Prompt/schema/review-decision/concurrency contract changes from CodeFreddy were deliberately not accepted in this slice.
+- Focused tests passed: tests.test_rule_extraction_review, tests.test_reporting, tests.test_pipelines, tests.test_review_session, tests.test_schemas.
+
+Next single action:
+Run docs/artifact governance checks and broader unittest discovery, then review the diff for commit readiness.
+
+Must follow:
+- Do not overwrite local HKv14/MVP readiness work.
+- Do not change schemas/prompts/default models or review decision contracts without explicit governed approval.
+- Do not claim Stage 3 real execution readiness.
+```
+
+---
+
 ## 2026-04-29 - S2-F3 Non-Production Demo Fixtures Added
 
 ### Current Task Goal

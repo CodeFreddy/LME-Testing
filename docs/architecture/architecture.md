@@ -174,6 +174,25 @@ Save Scripts edits
 
 该测试层只验证现有 UI 与 governed artifacts 的浏览器交互，不新增产品 scope、不调用 live LLM provider、不改变 artifact contract。
 
+### Rule extraction review workflow（S2-F4）
+
+`src/lme_testing/rule_workflow_session.py` adds a local workflow server for document intake and business-friendly rule artifact review:
+
+```
+Source document or artifact folder
+    │
+    ▼
+[rule_extraction.py]
+    │  atomic_rules.json + semantic_rules.json
+    ▼
+[Rule Workflow Review UI]
+    │  reviewed_atomic_rules.json + reviewed_semantic_rules.json
+    ▼
+[optional existing maker/checker/BDD/review-session path]
+```
+
+This was integrated from CodeFreddy's `feature/rule-extraction-review` branch as a controlled merge slice. The slice keeps schema, prompt, and default model impact at none; concurrent pipeline execution and CodeFreddy's review-decision contract changes remain out of scope unless separately governed.
+
 ---
 
 ## 四、模块目录（Main 完整版）
@@ -219,6 +238,8 @@ Review Session 启动时传入 `--step-registry step_visibility.json`，Scripts 
 | `src/lme_testing/oracles/` | 8 个确定性验证模块 | Main | ✅（未在真实场景验证）|
 | `src/lme_testing/audit_trail.py` | 审计跟踪 HTML 生成 | Main | ✅ 已实现并集成入 `review_session.py` |
 | `src/lme_testing/case_compare.py` | Case 对比视图 | Main | ✅ 已实现并集成入 `review_session.py` |
+| `src/lme_testing/rule_extraction.py` | Deterministic source-to-rule artifact extraction for rule review workflow | CodeFreddy merge slice | ✅ S2-F4 integrated |
+| `src/lme_testing/rule_workflow_session.py` | Local document intake and rule artifact review server | CodeFreddy merge slice | ✅ S2-F4 integrated |
 
 ### Master 分支额外实现（已分析，部分 cherry-pick）
 

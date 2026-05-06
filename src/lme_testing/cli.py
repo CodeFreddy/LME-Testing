@@ -18,6 +18,7 @@ from .mvp_document_readiness import write_document_readiness_package
 from .logging_utils import configure_logging
 from .review_session import ReviewSessionManager, serve_review_session
 from .workflow_session import choose_start_step, discover_workflow_artifacts, start_workflow_session
+from .rule_workflow_session import RuleWorkflowSessionManager, serve_rule_workflow_session
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -216,6 +217,19 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_session.add_argument("--host", default="127.0.0.1")
     workflow_session.add_argument("--port", type=int, default=8765)
     workflow_session.add_argument("--write-page-text", action="store_true")
+
+    rule_workflow_session = subparsers.add_parser(
+        "rule-workflow-session",
+        help="Start a local Rule Review workflow server for document intake, rule review, and case generation.",
+    )
+    rule_workflow_session.add_argument("--output-dir", default="runs/rule_workflow_sessions")
+    rule_workflow_session.add_argument("--maker-batch-size", type=int, default=2)
+    rule_workflow_session.add_argument("--checker-batch-size", type=int, default=2)
+    rule_workflow_session.add_argument("--bdd-batch-size", type=int, default=2)
+    rule_workflow_session.add_argument("--maker-concurrency", type=int, default=1)
+    rule_workflow_session.add_argument("--checker-concurrency", type=int, default=1)
+    rule_workflow_session.add_argument("--host", default="127.0.0.1")
+    rule_workflow_session.add_argument("--port", type=int, default=8765)
 
     im_hk_v14_role_review = subparsers.add_parser(
         "im-hk-v14-role-review",
@@ -515,6 +529,29 @@ def main() -> int:
             return 1
         server, url, manager = result
         print(json.dumps({"session_id": manager.session_id, "start_step": start_step, "url": url, "output_dir": str(manager.session_dir)}, ensure_ascii=False, indent=2))
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            server.shutdown()
+        return 0
+    elif args.command == "rule-workflow-session":
+        output_dir = Path(args.output_dir)
+        log_path = configure_logging("rule-workflow-session", output_dir / "logs")
+        print(json.dumps({"status": "starting", "log_path": str(log_path)}, ensure_ascii=False, indent=2))
+        manager = RuleWorkflowSessionManager(
+            config=config,
+            repo_root=Path.cwd(),
+            output_root=output_dir,
+            host=args.host,
+            port=args.port,
+            maker_batch_size=args.maker_batch_size,
+            checker_batch_size=args.checker_batch_size,
+            bdd_batch_size=args.bdd_batch_size,
+            maker_concurrency=args.maker_concurrency,
+            checker_concurrency=args.checker_concurrency,
+        )
+        server, url = serve_rule_workflow_session(manager)
+        print(json.dumps({"session_id": manager.session_id, "url": url, "output_dir": str(manager.session_dir)}, ensure_ascii=False, indent=2))
         try:
             server.serve_forever()
         except KeyboardInterrupt:

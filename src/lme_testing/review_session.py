@@ -55,6 +55,8 @@ class ReviewSessionManager:
         repo_root: Path,
         rewrite_batch_size: int = 1,
         checker_batch_size: int = 1,
+        rewrite_concurrency: int = 1,
+        checker_concurrency: int = 1,
         initial_maker_summary_path: Path | None = None,
         initial_checker_summary_path: Path | None = None,
         initial_coverage_report_path: Path | None = None,
@@ -66,6 +68,8 @@ class ReviewSessionManager:
         self.repo_root = repo_root.resolve()
         self.rewrite_batch_size = rewrite_batch_size
         self.checker_batch_size = checker_batch_size
+        self.rewrite_concurrency = rewrite_concurrency
+        self.checker_concurrency = checker_concurrency
         self.session_id = timestamp_slug()
         self.session_dir = ensure_dir(output_root / self.session_id)
         self.issue_type_options = load_issue_type_options()
@@ -645,6 +649,7 @@ class ReviewSessionManager:
                 output_dir=rewrite_dir,
                 limit=None,
                 batch_size=self.rewrite_batch_size,
+                concurrency=self.rewrite_concurrency,
                 human_scripts_edits_path=Path(state.get("human_scripts_edits_latest_path") or ""),
             )
             # Generate case comparison HTML (previous vs rewritten iteration)
@@ -681,6 +686,7 @@ class ReviewSessionManager:
                 limit=None,
                 batch_size=self.checker_batch_size,
                 resume_from=None,
+                concurrency=self.checker_concurrency,
             )
 
             # Re-run BDD pipeline so rewritten maker cases get fresh normalized_bdd

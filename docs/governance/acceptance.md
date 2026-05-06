@@ -416,6 +416,39 @@ Evidence：
 
 ---
 
+## Stage 2 Extension — Rule Extraction Review Workflow Merge Slice
+
+### Gate S2-F4：Rule Extraction Review Workflow Integration
+
+**Verification Type：** `stub_verified` for deterministic local workflow surfaces and focused unit coverage; no real execution readiness claim.
+
+**状态：** ✅ COMPLETE（controlled merge slice）
+
+**验收标准：**
+- CodeFreddy branch work is merged by understanding, not by overwriting local HKv14/MVP readiness work. ✅
+- `rule-workflow-session` CLI command is available. ✅
+- Deterministic source upload/import, rule extraction, rule review history, and reviewed artifact saving are covered by focused tests. ✅
+- Reporting can render compare and audit navigation links. ✅
+- Existing focused pipeline, review-session, and schema tests still pass. ✅
+- Schema, prompt, and default model impact is none for this slice. ✅
+- Concurrency beyond serial execution is not silently enabled. ✅
+
+**Evidence（2026-05-06）：**
+- `src/lme_testing/rule_extraction.py`
+- `src/lme_testing/rule_workflow_session.py`
+- `tests/test_rule_extraction_review.py`
+- `tests/test_reporting.py`
+- `python main.py rule-workflow-session --help`: command available.
+- Focused tests passed: `tests.test_rule_extraction_review`, `tests.test_reporting`, `tests.test_pipelines`, `tests.test_review_session`, `tests.test_schemas`.
+
+**Non-acceptance boundaries：**
+- No new production LLM-driven stage is accepted under this gate.
+- No CodeFreddy prompt or schema contract change is accepted under this gate.
+- No removal of `reject` or `block_recommendation_review` from the existing governed review contract is accepted under this gate.
+- No concurrent maker/checker execution or Stage 3 real execution claim is accepted under this gate.
+
+---
+
 ## Phase 3 — Execution Readiness
 
 **完成日期：** 2026-04-14（代码实现）  
