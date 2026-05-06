@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-05-06 13:56:09 UTC`
+- `2026-05-06 14:01:42 UTC`
 
 ---
 
@@ -60,11 +60,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `Add enterprise target architecture plan`
 - `Add tabbed review GUI development plan`
 - `Update status docs after rule workflow GUI integration`
 - `Fix rule workflow GUI startup and PDF extraction`
 - `Record rule extraction merge checkpoint`
-- `Integrate rule extraction review workflow slice`
 
 ---
 
