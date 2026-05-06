@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-05-06 09:18:15 UTC`
+- `2026-05-06 09:32:11 UTC`
 
 ---
 
@@ -60,11 +60,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `Record CodeFreddy follow-up planning checkpoint`
 - `Update status docs after rule workflow GUI integration`
 - `Fix rule workflow GUI startup and PDF extraction`
 - `Record rule extraction merge checkpoint`
 - `Integrate rule extraction review workflow slice`
-- `Add test fixtures and improve MVP readiness unit tests`
 
 ---
 

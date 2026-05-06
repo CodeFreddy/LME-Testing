@@ -6,6 +6,168 @@ Keep the latest checkpoint at the top. Preserve prior checkpoints below it unles
 
 ---
 
+## 2026-05-06 - Compact Checkpoint: Governed CodeFreddy Follow-Up Planning
+
+### Original Goal
+
+Plan the governed follow-up work for the remaining CodeFreddy `feature/rule-extraction-review` changes after the safe rule extraction review GUI slice was integrated, fixed, pushed, and documented.
+
+### Current Implementation Status
+
+Planning status only. No new code changes were made for the follow-up slices in this checkpoint.
+
+Current repo state before this checkpoint edit:
+
+- Local branch: `main`.
+- `origin/main`: `71a7dca Update status docs after rule workflow GUI integration`.
+- `CodeFreddy/LME-Testing` `feature/rule-extraction-review`: also `71a7dca`.
+- Local worktree was clean before this checkpoint update.
+- S2-F4 safe slice is complete:
+  - `rule-workflow-session` GUI integrated.
+  - config fallback to `config/llm_profiles.stub.json` implemented.
+  - rule workflow PDF extraction uses `pypdf` first, then `pdftotext`.
+  - HKv14 GUI smoke path reached checker review output and was accepted on first look.
+
+Governed follow-up plan was defined as separate candidate slices:
+
+1. Pipeline concurrency.
+2. Rewrite prompt / rewrite stage contract.
+3. Human review decision contract changes.
+4. BDD fallback behavior.
+5. UI progress/history/audit/compare polish.
+
+Recommended first slice: Pipeline concurrency, because it can be isolated from prompt/schema/review-decision contract changes.
+
+### Files Changed
+
+Current checkpoint edit:
+
+- `docs/operations/checkpoints.md`
+- `docs/operations/session_handoff.md`
+
+Recent already-committed status update:
+
+- `README.md`
+- `TODO.md`
+- `docs/index.md`
+- `docs/operations/checkpoints.md`
+- `docs/operations/session_handoff.md`
+- `scripts/update_session_handoff.ps1`
+- `docs/planning/roadmap.md`
+- `docs/planning/implementation_plan.md`
+- `docs/governance/acceptance.md`
+- `docs/architecture/architecture.md`
+
+Recent already-committed S2-F4 GUI fixes:
+
+- `src/lme_testing/cli.py`
+- `src/lme_testing/rule_extraction.py`
+- `tests/test_rule_extraction_review.py`
+- `docs/operations/session_handoff.md`
+
+### Key Design Decisions
+
+- Treat remaining CodeFreddy changes as separate governed slices, not a broad merge.
+- Do not bundle concurrency with prompt/schema/review-decision changes.
+- Keep prompt changes under model/prompt governance with benchmark evidence and rollback notes.
+- Keep human review decision contract changes isolated because removing `reject` or `block_recommendation_review` is high-risk.
+- BDD fallback behavior must be visible as fallback/degraded output, not silently counted as canonical model success.
+- UI polish may follow only after behavioral contracts are clear, and should not hide contract changes.
+- CodeFreddy branch was aligned to local `main` after the controlled integration; use previous commit/diff notes, not direct branch replacement, when reviewing the remaining unaccepted ideas.
+
+### Tests Already Run And Results
+
+For the committed S2-F4 GUI fix/status baseline:
+
+- `tests.test_rule_extraction_review`: 11 tests OK.
+- `scripts/check_docs_governance.py`: passed.
+- `scripts/check_artifact_governance.py`: passed.
+- Direct HKv14 rule workflow extraction found 5 target calculation sections from `docs/materials/Initial Margin Calculation Guide HKv14.pdf`.
+- HKv14 mock API POC validation passed earlier:
+  - compileall for common/HKv14 mock packages,
+  - HKv14 deliverable unit tests,
+  - `poc_flat_rate_margin.py`,
+  - full BDD runner: 37 passed, 0 failed,
+  - focused flat-rate feature: 4 passed, 0 failed.
+
+For this checkpoint-only edit:
+
+- `scripts/check_docs_governance.py`: passed using bundled Codex Python runtime.
+- `scripts/check_artifact_governance.py`: passed using bundled Codex Python runtime.
+
+### Known Failures Or Unresolved Risks
+
+- Stage 3 remains blocked by real LME VM/API access.
+- MVP readiness remains blocked until real Test Plan and Regression Pack Index inputs are provided.
+- Remaining CodeFreddy changes are not accepted:
+  - full maker/checker/rewrite concurrency,
+  - `REWRITE_SYSTEM_PROMPT` and rewrite prompt promotion,
+  - human review schema simplification,
+  - removal of `reject`,
+  - removal of `block_recommendation_review`,
+  - permissive embedded-JSON parsing,
+  - BDD deterministic fallback after invalid model output,
+  - review-session UI progress/history changes tied to altered rewrite/review behavior.
+- `.claude/settings.local.json` may reappear as unrelated local settings if modified by tools; do not include it unless explicitly requested.
+- Since CodeFreddy's branch now points to local `main`, future comparison of unaccepted ideas should use known commit `b1287a2`, prior diff outputs, or a saved branch/ref if available.
+
+### Exact Next Steps
+
+1. Run `git status --short --branch`.
+2. Run:
+   - `python scripts/check_docs_governance.py`
+   - `python scripts/check_artifact_governance.py`
+3. Commit this checkpoint-only update if desired.
+4. Start governed follow-up Slice A: Pipeline Concurrency.
+5. For Slice A, create a scoped branch such as `codex/codefreddy-pipeline-concurrency`.
+6. Recover the remaining concurrency diff from commit `b1287a2` or previous diff notes.
+7. Define and document acceptance for concurrency before editing code:
+   - deterministic JSONL output ordering,
+   - visible partial-failure behavior,
+   - no prompt/schema/review-decision changes,
+   - tests for `concurrency > 1`,
+   - rollback to serial execution.
+8. Implement only Slice A if approved; leave rewrite prompt, human review contract, BDD fallback, and UI polish for later slices.
+
+### Constraints That Must Not Be Forgotten
+
+- Do not claim Stage 3 real execution readiness.
+- Do not claim HKv14 production downstream automation readiness.
+- Do not silently accept CodeFreddy prompt/schema/review-decision/concurrency changes.
+- Do not remove `reject` or `block_recommendation_review` without explicit human approval, migration notes, tests, docs, and acceptance updates.
+- Do not introduce or promote `REWRITE_SYSTEM_PROMPT` without prompt governance, benchmark evidence, traceability, validation, and rollback notes.
+- Do not make BDD fallback invisible; fallback must be recorded and treated as degraded output.
+- Preserve HKv13 mock API deliverable as the preservation baseline.
+- Preserve deterministic validation and visible advisory warnings.
+- Keep `.claude/settings.local.json` out of commits unless explicitly requested.
+
+### Resume Prompt
+
+```text
+Continue in C:\Code\LME-Testing. Read AGENTS.md, then the latest checkpoint in docs/operations/checkpoints.md.
+
+Current task:
+Plan and execute governed CodeFreddy follow-up slices after S2-F4 rule-workflow-session GUI integration.
+
+Current state:
+- main, origin/main, and CodeFreddy feature/rule-extraction-review are aligned at 71a7dca before this checkpoint-only edit.
+- S2-F4 GUI integration and fixes are complete and documented.
+- Remaining CodeFreddy ideas must be split into governed slices:
+  1. pipeline concurrency,
+  2. rewrite prompt/stage contract,
+  3. human review decision contract changes,
+  4. BDD fallback behavior,
+  5. UI polish.
+- Recommended first slice is pipeline concurrency.
+
+Next action:
+Run git status and governance checks, commit this checkpoint if appropriate, then start a new branch for Slice A: Pipeline Concurrency with explicit acceptance criteria before code edits.
+
+Do not accept prompt/schema/review-decision changes in the concurrency slice. Do not claim Stage 3 or HKv14 production readiness.
+```
+
+---
+
 ## 2026-05-06 - Current Status: S2-F4 GUI Integrated, Fixed, And Pushed
 
 ### Current Task Goal
