@@ -11,6 +11,7 @@ from lme_testing.config import ProjectConfig, ProviderConfig, RoleDefaults
 from lme_testing.rule_extraction import (
     decode_pdf_text_output,
     extract_pages_from_docx,
+    extract_pages_from_pdf_with_pypdf,
     extract_rule_artifacts,
     fix_pdf_text_artifacts,
 )
@@ -114,6 +115,13 @@ class RuleExtractionReviewTests(unittest.TestCase):
         self.assertEqual(cleaned, "See \u00a73.2.5.2 for details.")
         symbol_font_cleaned = fix_pdf_text_artifacts("See \u222b3.2.5.2 for details.")
         self.assertEqual(symbol_font_cleaned, "See \u00a73.2.5.2 for details.")
+
+    def test_pypdf_extractor_reads_hkv14_pdf_without_pdftotext(self) -> None:
+        pdf_path = Path("docs/materials/Initial Margin Calculation Guide HKv14.pdf")
+        pages = extract_pages_from_pdf_with_pypdf(pdf_path)
+
+        self.assertGreaterEqual(len(pages), 30)
+        self.assertTrue(any("3.2.4.2" in page.text for page in pages))
 
     def test_docx_text_extraction_reads_paragraphs_and_tables(self) -> None:
         docx = WORK_TMP / "sample.docx"

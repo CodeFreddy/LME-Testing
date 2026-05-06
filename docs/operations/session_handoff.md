@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-05-06 08:24:45 UTC`
+- `2026-05-06 09:05:48 UTC`
 
 ---
 
@@ -52,15 +52,15 @@ If the task touches MVP document readiness, also read:
 
 Current branch:
 
-- `codex/merge-codefreddy-rule-extraction-review`
+- `main`
 
 Recent commit subjects:
 
+- `Fix rule workflow GUI startup and PDF extraction`
 - `Record rule extraction merge checkpoint`
 - `Integrate rule extraction review workflow slice`
 - `Add test fixtures and improve MVP readiness unit tests`
 - `Implement MVP input document contract validation workflow`
-- `Add MVP input document contract plan and update Phase 3 roadmap`
 
 ---
 

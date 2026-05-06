@@ -147,16 +147,42 @@ def extract_pages(path: Path) -> list[PageText]:
 
 
 def extract_pages_from_pdf(path: Path) -> list[PageText]:
+    pypdf_pages = extract_pages_from_pdf_with_pypdf(path)
+    if pypdf_pages:
+        return pypdf_pages
+
     executable = find_pdftotext()
     if not executable:
         raise ValueError(
-            "PDF extraction requires pdftotext. Set PDFTOTEXT_PATH or install poppler/pdftotext."
+            "PDF extraction requires pypdf or pdftotext. Install pypdf, or set PDFTOTEXT_PATH/install poppler/pdftotext."
         )
     output = run_pdftotext(executable, path)
     raw_pages = output.split("\f")
     pages: list[PageText] = []
     for index, text in enumerate(raw_pages, start=1):
         cleaned = clean_page_text(text)
+        if cleaned:
+            pages.append(PageText(page_number=index, text=cleaned))
+    return pages
+
+
+def extract_pages_from_pdf_with_pypdf(path: Path) -> list[PageText]:
+    """Extract page text from a PDF with pypdf when available.
+
+    The rule workflow GUI should not require a local Poppler installation for
+    the committed HKv14 POC path. Keep pdftotext as a fallback for environments
+    where it produces better layout-preserving text.
+    """
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        return []
+
+    reader = PdfReader(str(path))
+    pages: list[PageText] = []
+    for index, page in enumerate(reader.pages, start=1):
+        text = page.extract_text() or ""
+        cleaned = clean_page_text(text.replace("\r\n", "\n").replace("\r", "\n"))
         if cleaned:
             pages.append(PageText(page_number=index, text=cleaned))
     return pages

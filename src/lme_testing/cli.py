@@ -21,13 +21,37 @@ from .workflow_session import choose_start_step, discover_workflow_artifacts, st
 from .rule_workflow_session import RuleWorkflowSessionManager, serve_rule_workflow_session
 
 
+DEFAULT_CONFIG_PATH = Path("config/llm_profiles.json")
+RULE_WORKFLOW_STUB_CONFIG_PATH = Path("config/llm_profiles.stub.json")
+
+
+def _config_path_for_command(args: argparse.Namespace) -> Path:
+    path = Path(args.config)
+    if args.command == "rule-workflow-session" and path == DEFAULT_CONFIG_PATH and not path.exists():
+        if RULE_WORKFLOW_STUB_CONFIG_PATH.exists():
+            print(
+                json.dumps(
+                    {
+                        "status": "config_fallback",
+                        "reason": f"{DEFAULT_CONFIG_PATH} was not found.",
+                        "config": str(RULE_WORKFLOW_STUB_CONFIG_PATH),
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                flush=True,
+            )
+            return RULE_WORKFLOW_STUB_CONFIG_PATH
+    return path
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Run maker/checker pipelines against governed rule artifacts."
     )
     parser.add_argument(
         "--config",
-        default="config/llm_profiles.json",
+        default=str(DEFAULT_CONFIG_PATH),
         help="Path to the project LLM config file.",
     )
 
@@ -365,7 +389,7 @@ def main() -> int:
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
 
-    config = load_project_config(Path(args.config))
+    config = load_project_config(_config_path_for_command(args))
     init_schema_config_dir(config.config_dir)
 
     if args.command == "planner":
