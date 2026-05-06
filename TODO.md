@@ -1,7 +1,7 @@
 # LME Testing — TODO v3.1
 
-**修订日期：** 2026-04-27  
-**说明：** 整合 master 分支合并分析、S2-T01 v1.5 结果、S2-B1/B2 集成状态、S2-C1/S2-C2/S2-C3/S2-C4/S2-C5 mock API bridge and deliverables policy work，S2-D1 browser-level review UI E2E，S2-F1 role-friendly HKv14 impact decision review package generator，以及 S2-F2 MVP document readiness registry implementation。
+**修订日期：** 2026-05-06  
+**说明：** 整合 master 分支合并分析、S2-T01 v1.5 结果、S2-B1/B2 集成状态、S2-C1/S2-C2/S2-C3/S2-C4/S2-C5 mock API bridge and deliverables policy work，S2-D1 browser-level review UI E2E，S2-F1 role-friendly HKv14 impact decision review package generator，S2-F2/S2-F3 MVP document readiness registry and input contract implementation，以及 S2-F4 CodeFreddy rule extraction review GUI integration and follow-up GUI fixes。
 
 ---
 
@@ -169,6 +169,8 @@
 - ✅ S2-D1 已完成：browser-level review UI E2E 覆盖 Review -> BDD -> Scripts 主路径、BDD 未保存 edits 保留、可见 match metrics 刷新。
 - ✅ S2-F1 已完成：HKv13→HKv14 role-friendly impact decision review package generator；canonical JSON + derived Markdown + local review HTML。
 - ✅ S2-F2 已完成：MVP document readiness registry generator；canonical JSON + derived summary under `evidence/mvp_document_readiness/20260429T075702Z/`。
+- ✅ S2-F3 已完成：MVP input document contract and optional-input readiness validation。
+- ✅ S2-F4 已完成：CodeFreddy rule extraction review workflow integrated on `main`; `rule-workflow-session` GUI smoke-reviewed with HKv14; config fallback and pypdf PDF extraction fixes committed.
 - ⏳ Stage 3 仍阻塞于真实 LME VM/API 权限；mock API 不代表真实 LME execution readiness。
 
 ### S2-B1：audit_trail.py 实现（来自 master 概念）
@@ -346,6 +348,27 @@
 
 ---
 
+### S2-F4：Rule Extraction Review Workflow GUI
+- [x] 受控纳入 `CodeFreddy/LME-Testing` `feature/rule-extraction-review` at `b1287a2` 的 deterministic document intake + rule artifact review GUI slice。
+- [x] 保留 newer local HKv14/MVP readiness work；未直接覆盖 `main`。
+- [x] 暴露 CLI：`python main.py rule-workflow-session --port 8765`。
+- [x] 支持 source upload/import、deterministic extraction、atomic/semantic rule review、review history snapshots、reviewed artifact saving。
+- [x] 支持 optional case generation entry point and scenario review handoff under stub/LLM-configured execution.
+- [x] Follow-up fix: missing `config/llm_profiles.json` now falls back to `config/llm_profiles.stub.json` for `rule-workflow-session`.
+- [x] Follow-up fix: rule workflow PDF extraction uses `pypdf` first and falls back to `pdftotext`.
+- [x] HKv14 GUI smoke path completed: PDF extract -> Rule Extraction Review -> Generate Cases -> `checker_readable.html` first look accepted by human.
+- [x] Pushed to `origin/main`; `CodeFreddy/LME-Testing` `feature/rule-extraction-review` was updated to the same `main` commit.
+
+**验证：**
+- `python -m unittest tests.test_rule_extraction_review -v` 通过（11 tests OK）。
+- `python scripts/check_docs_governance.py` 通过。
+- `python scripts/check_artifact_governance.py` 通过。
+- HKv14 PDF direct extraction via rule workflow extractor found 5 target sections.
+
+**边界：** 不接受 CodeFreddy broader prompt/schema/review-decision/concurrency contract changes；不移除 `reject` 或 `block_recommendation_review`；不声明 Stage 3 或 HKv14 production execution readiness。
+
+---
+
 ## Stage 3（阻塞于外部）
 
 - ⏳ LME VM 访问权限（ETA：未知）
@@ -373,6 +396,7 @@
 - [x] ✅ S2-F1　HKv14 role-friendly impact decision review package generator
 - [x] ✅ S2-F2　MVP document readiness registry
 - [x] ✅ S2-F3　MVP input document contract and optional-input readiness validation
+- [x] ✅ S2-F4　CodeFreddy rule extraction review GUI integration and HKv14 smoke review
 - [ ] ⏳ 真实 LME API 接入（Stage 3，待 VM 权限）
 - [ ] 🧊 S2-E　LLM 非决定性稳定化（SR-MR-015-B3-4、SR-MR-071-C-1；已明确暂跳过，未来需 benchmark 成本/收益批准）
 

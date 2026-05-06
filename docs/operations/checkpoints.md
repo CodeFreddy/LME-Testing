@@ -6,6 +6,94 @@ Keep the latest checkpoint at the top. Preserve prior checkpoints below it unles
 
 ---
 
+## 2026-05-06 - Current Status: S2-F4 GUI Integrated, Fixed, And Pushed
+
+### Current Task Goal
+
+Update repo-readable status docs after completing the CodeFreddy rule extraction review GUI integration, HKv14 GUI smoke review, follow-up GUI fixes, and remote pushes.
+
+### Confirmed Key Facts
+
+- Local branch is `main`.
+- `origin/main` points to `ad99a73 Fix rule workflow GUI startup and PDF extraction`.
+- `CodeFreddy/LME-Testing` `feature/rule-extraction-review` was force-with-lease updated from `b1287a2` to the same `ad99a73` commit.
+- The controlled CodeFreddy slice is represented locally by:
+  - `998456f Integrate rule extraction review workflow slice`
+  - `bbc4a61 Record rule extraction merge checkpoint`
+  - `ad99a73 Fix rule workflow GUI startup and PDF extraction`
+- S2-F4 is complete as a governed local GUI slice:
+  - document upload/import,
+  - deterministic PDF/Markdown/DOCX extraction,
+  - atomic and semantic rule review,
+  - reviewed history snapshots,
+  - reviewed artifact saving,
+  - optional case generation and scenario review handoff.
+- `rule-workflow-session` now falls back to `config/llm_profiles.stub.json` when the historical default `config/llm_profiles.json` is absent.
+- Rule workflow PDF extraction now uses `pypdf` first and falls back to `pdftotext`.
+- HKv14 GUI smoke path was exercised through `Rule Extraction Review` and generated scenario/checker review output; human first look was good.
+
+### Files Modified Or Inspected In This Documentation Update
+
+- `README.md`
+- `TODO.md`
+- `docs/planning/roadmap.md`
+- `docs/planning/implementation_plan.md`
+- `docs/governance/acceptance.md`
+- `docs/architecture/architecture.md`
+- `docs/operations/session_handoff.md`
+- `scripts/update_session_handoff.ps1`
+- `docs/operations/checkpoints.md`
+
+### Validation Already Run For The S2-F4 Fix Package
+
+- `tests.test_rule_extraction_review`: 11 tests OK.
+- `scripts/check_docs_governance.py`: passed.
+- `scripts/check_artifact_governance.py`: passed.
+- Direct HKv14 rule workflow extraction found 5 target sections from `docs/materials/Initial Margin Calculation Guide HKv14.pdf`.
+- HKv14 mock API POC validation previously passed:
+  - compileall for HKv14/common mock packages,
+  - HKv14 deliverable unit tests,
+  - `poc_flat_rate_margin.py`,
+  - full BDD runner 37 passed, 0 failed,
+  - focused flat-rate feature 4 passed, 0 failed.
+
+### Remaining Work
+
+- Run docs/artifact governance checks after this documentation update.
+- Commit this documentation update if checks pass.
+- Push `main` again after the documentation commit if desired.
+- Leave `.claude/settings.local.json` uncommitted unless the human explicitly asks to include local settings.
+
+### Constraints That Must Not Be Violated
+
+- Do not claim Stage 3 real execution readiness.
+- Do not claim HKv14 production downstream automation readiness.
+- Do not silently accept CodeFreddy prompt/schema/review-decision/concurrency contract changes.
+- Preserve `reject` and `block_recommendation_review` in the governed review-session contract unless separately approved.
+- Keep HKv13 mock API deliverable as the preservation baseline.
+- Keep deterministic validation and advisory duplicate warnings visible.
+
+### Resume Prompt
+
+```text
+Continue in C:\Code\LME-Testing. Read AGENTS.md and the latest checkpoint in docs/operations/checkpoints.md.
+
+Current state:
+- main and origin/main are at ad99a73 before the current docs-only update.
+- CodeFreddy feature/rule-extraction-review was force-with-lease updated to ad99a73.
+- S2-F4 rule-workflow-session GUI is integrated, starts with stub config fallback, and uses pypdf for HKv14 PDF extraction.
+- HKv14 GUI smoke review reached checker_readable.html and the first look was accepted by the human.
+- A docs/status update is in progress across README/TODO/checkpoints/session_handoff and relevant roadmap/acceptance/architecture/implementation docs.
+- .claude/settings.local.json is dirty and unrelated.
+
+Next action:
+Run docs/artifact governance checks, review the docs diff, commit the docs-only status update, and optionally push main.
+
+Do not claim Stage 3 or HKv14 production execution readiness. Do not accept CodeFreddy prompt/schema/review-decision/concurrency changes without a separate governed task and evidence.
+```
+
+---
+
 ## 2026-05-06 - Compact Checkpoint: Rule Extraction Review Merge Committed
 
 ### Original Goal

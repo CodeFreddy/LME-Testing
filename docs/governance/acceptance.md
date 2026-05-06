@@ -422,7 +422,7 @@ Evidence：
 
 **Verification Type：** `stub_verified` for deterministic local workflow surfaces and focused unit coverage; no real execution readiness claim.
 
-**状态：** ✅ COMPLETE（controlled merge slice）
+**状态：** ✅ COMPLETE（controlled merge slice, pushed to `main`）
 
 **验收标准：**
 - CodeFreddy branch work is merged by understanding, not by overwriting local HKv14/MVP readiness work. ✅
@@ -432,6 +432,10 @@ Evidence：
 - Existing focused pipeline, review-session, and schema tests still pass. ✅
 - Schema, prompt, and default model impact is none for this slice. ✅
 - Concurrency beyond serial execution is not silently enabled. ✅
+- `rule-workflow-session` starts when the old default `config/llm_profiles.json` is absent by falling back to the committed stub config. ✅
+- HKv14 PDF upload/extract path works through `pypdf` without requiring local Poppler/`pdftotext`. ✅
+- HKv14 GUI smoke path reached generated checker review output and was accepted by human first look. ✅
+- `origin/main` and `CodeFreddy/LME-Testing` `feature/rule-extraction-review` are aligned to the same committed `main` SHA after guarded branch update. ✅
 
 **Evidence（2026-05-06）：**
 - `src/lme_testing/rule_extraction.py`
@@ -440,6 +444,9 @@ Evidence：
 - `tests/test_reporting.py`
 - `python main.py rule-workflow-session --help`: command available.
 - Focused tests passed: `tests.test_rule_extraction_review`, `tests.test_reporting`, `tests.test_pipelines`, `tests.test_review_session`, `tests.test_schemas`.
+- Follow-up verification passed: `tests.test_rule_extraction_review` (11 tests OK), docs governance, artifact governance.
+- HKv14 direct extraction through `lme_testing.rule_extraction.extract_rule_artifacts` found the 5 target calculation sections.
+- Remote push verification showed `origin/main` and CodeFreddy `feature/rule-extraction-review` at the same `main` commit.
 
 **Non-acceptance boundaries：**
 - No new production LLM-driven stage is accepted under this gate.

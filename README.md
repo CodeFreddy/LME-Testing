@@ -24,6 +24,7 @@
 | Review UI browser E2E | ✅ Complete | `tests/test_review_session_browser.py`, Chrome/Edge CDP harness |
 | HKv14 role-friendly impact review | ✅ Stub | S2-F1 CLI generates canonical decision JSON, Markdown summary, and local review HTML |
 | MVP document readiness registry | ✅ Stub | S2-F2 CLI generates canonical readiness JSON and derived Markdown summary |
+| Rule extraction review GUI | ✅ Stub | S2-F4 `rule-workflow-session` document/rule review GUI, HKv14 smoke-reviewed |
 | Real LME API execution | ⏳ Blocked | Stage 3, LME VM access needed |
 
 ### Verification Type Key
@@ -49,6 +50,7 @@ Stage 1 (real data access) is complete. Stage 2 scoped work is complete:
 - **S2-D1**: Review UI browser-level E2E test covers the primary BDD/Scripts human path
 - **S2-F1**: Role-friendly HKv14 impact decision review package generation complete; local HTML review surface plus canonical structured JSON
 - **S2-F2**: MVP document readiness registry generation complete; Test Plan and Regression Pack Index remain explicit placeholders/blockers
+- **S2-F4**: CodeFreddy rule extraction review GUI integrated on `main`; HKv14 PDF upload/extraction and scenario review smoke path validated with stub config
 - **Stage 3**: Still blocked pending real LME VM/API access
 
 See `docs/planning/roadmap.md` and `TODO.md` for Stage 2 details.
@@ -175,6 +177,16 @@ python main.py --config config/llm_profiles.json workflow-session --start-step m
 
 This is the recommended way to start the GUI from scratch — it runs maker → checker → then starts the web UI at `http://127.0.0.1:8765` automatically.
 
+### Step 7 — Rule extraction review GUI
+
+Use this GUI to upload/import a source document or existing rule artifact folder, review atomic/semantic rules, save reviewed rule artifacts, and optionally generate scenario review output.
+
+```powershell
+python main.py rule-workflow-session --port 8765
+```
+
+If `config/llm_profiles.json` is absent, this command falls back to `config/llm_profiles.stub.json` so deterministic document/rule review can start without live LLM credentials. For the HKv14 POC, upload the PDF at `docs/materials/Initial Margin Calculation Guide HKv14.pdf` or import the existing artifact folder `artifacts/im_hk_v14/`. The PDF extractor uses `pypdf` first and falls back to `pdftotext` when available.
+
 ---
 
 ## CLI Commands
@@ -194,6 +206,7 @@ All commands: `python main.py <command> [options]`
 | `human-review` | Generate a static HTML review page (no server needed) |
 | `review-session` | **Web GUI** — interactive review at `http://127.0.0.1:8765` |
 | `workflow-session` | Run E2E pipeline, auto-start `review-session` after checker |
+| `rule-workflow-session` | **Web GUI** — document intake, rule extraction/review, history, optional scenario generation |
 | `governance-signals` | Compute operational metrics from run artifacts |
 | `im-hk-v14-role-review` | Generate the S2-F1 HKv14 role-friendly impact decision review package |
 | `mvp-document-readiness` | Generate the S2-F2/S2-F3 MVP document readiness registry, optionally with real Test Plan and Regression Pack Index inputs |
@@ -236,6 +249,8 @@ src/
     storage.py            # JSON/JSONL read/write
     reporting.py          # HTML report generation
     review_session.py     # HTTP review web server
+    rule_extraction.py    # Deterministic source-to-rule extraction for rule review GUI
+    rule_workflow_session.py # Document/rule review GUI server
     im_hk_v14_role_review.py # HKv14 role review package generation
     mvp_document_readiness.py # MVP document readiness registry generation
     workflow_session.py   # End-to-end orchestrator

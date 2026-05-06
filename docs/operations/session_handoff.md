@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-05-06 09:05:48 UTC`
+- `2026-05-06 09:18:15 UTC`
 
 ---
 
@@ -22,7 +22,7 @@ Before making substantial changes, read these files in order:
 1. `AGENTS.md`
 2. `README.md`
 3. `docs/index.md`
-4. `docs/planning/roadmap.md` (v3.1 - Stage 2 current through HKv14, S2-F1 role review package, and S2-F2 planning)
+4. `docs/planning/roadmap.md` (v3.1 - Stage 2 current through HKv14, S2-F1/F4 review workflows, and S2-F2/F3 document readiness)
 5. `docs/planning/implementation_plan.md` (v3.1)
 6. `docs/governance/acceptance.md`
 7. `docs/architecture/architecture.md` (v3.1)
@@ -46,6 +46,10 @@ If the task touches MVP document readiness, also read:
 
 - `docs/planning/mvp_document_readiness_plan.md`
 
+If the task touches the CodeFreddy rule extraction review workflow, also read:
+
+- `docs/planning/implementation_plan.md` section `S2-F4`
+
 ---
 
 ## Current Branch and Recent Commit Direction
@@ -56,17 +60,26 @@ Current branch:
 
 Recent commit subjects:
 
+- `Update status docs after rule workflow GUI integration`
 - `Fix rule workflow GUI startup and PDF extraction`
 - `Record rule extraction merge checkpoint`
 - `Integrate rule extraction review workflow slice`
 - `Add test fixtures and improve MVP readiness unit tests`
-- `Implement MVP input document contract validation workflow`
 
 ---
 
 ## What Was Just Done
 
 Recent completed work:
+
+- **S2-F4 CodeFreddy rule extraction review workflow and GUI fixes (2026-05-06)**
+  - Integrated the controlled CodeFreddy `feature/rule-extraction-review` slice into `main` without overwriting newer HKv14/MVP work
+  - Added `rule-workflow-session` local GUI for source upload/import, deterministic extraction, atomic/semantic rule review, review history, reviewed artifact saving, and optional case generation
+  - Preserved governed review-session contracts; CodeFreddy prompt/schema/review-decision/concurrency changes remain out of scope
+  - Follow-up fixes: missing `config/llm_profiles.json` falls back to `config/llm_profiles.stub.json` for the GUI, and PDF extraction uses `pypdf` before `pdftotext`
+  - HKv14 GUI smoke path reached `checker_readable.html` and was accepted by human first look
+  - Pushed to `origin/main`; CodeFreddy `feature/rule-extraction-review` was guarded-updated to the same `main` commit
+  - Validation: `tests.test_rule_extraction_review` 11 OK, docs/artifact governance passed
 
 - **S2-F2 MVP document readiness registry planning (2026-04-27)**
   - Human approved promotion of the next small MVP slice from `docs/architecture/Executable_Engineering_Knowledge_Contract.md`
@@ -118,7 +131,7 @@ Recent completed work:
 
 ## Current Repo State
 
-**Stage M (master branch merge) COMPLETED 2026-04-19.** Stage 2 Direction A (S2-T01) COMPLETE. S2-B1/B2 INTEGRATED. S2-C1 MOCK API EXECUTION BRIDGE COMPLETE. S2-C2 IM HKv13 MOCK API BRIDGE COMPLETE. S2-C3 IM HKv14 POC DOCUMENT WORKFLOW AND MODULAR MOCK API BRIDGE COMPLETE. S2-C4 IM HKv14 PROMOTED DOWNSTREAM SLICE COMPLETE. S2-C5 MOCK API DELIVERABLES LOCATION POLICY COMPLETE. S2-F1 HKV14 ROLE-FRIENDLY IMPACT DECISION REVIEW PACKAGE COMPLETE. S2-F2 MVP DOCUMENT READINESS REGISTRY PLANNING APPROVED.
+**Stage M (master branch merge) COMPLETED 2026-04-19.** Stage 2 Direction A (S2-T01) COMPLETE. S2-B1/B2 INTEGRATED. S2-C1 MOCK API EXECUTION BRIDGE COMPLETE. S2-C2 IM HKv13 MOCK API BRIDGE COMPLETE. S2-C3 IM HKv14 POC DOCUMENT WORKFLOW AND MODULAR MOCK API BRIDGE COMPLETE. S2-C4 IM HKv14 PROMOTED DOWNSTREAM SLICE COMPLETE. S2-C5 MOCK API DELIVERABLES LOCATION POLICY COMPLETE. S2-F1 HKV14 ROLE-FRIENDLY IMPACT DECISION REVIEW PACKAGE COMPLETE. S2-F2 MVP DOCUMENT READINESS REGISTRY COMPLETE. S2-F3 MVP INPUT DOCUMENT CONTRACT COMPLETE. S2-F4 RULE EXTRACTION REVIEW GUI INTEGRATED.
 
 Key repo state:
 
@@ -133,9 +146,12 @@ Key repo state:
 - Initial Margin HKv14 downstream treatment mapping is documented in `docs/planning/im_hk_v14_downstream_treatment_mapping.md`
 - Initial Margin HKv14 role-friendly impact decision review is implemented in `src/lme_testing/im_hk_v14_role_review.py`; `decision_record.json` is canonical and Markdown/HTML are derived review artifacts
 - S2-F1 review evidence is preserved in `evidence/im_hk_v14_role_review/20260427T134948Z/`; all 11 candidates are approved and recorded for POC purpose with 0 open items
-- S2-F2 MVP document readiness registry plan is documented in `docs/planning/mvp_document_readiness_plan.md`; implementation has not started
+- S2-F2 MVP document readiness registry is implemented in `src/lme_testing/mvp_document_readiness.py`; readiness remains blocked by missing real Test Plan and Regression Pack Index unless optional real inputs are provided
+- S2-F3 MVP input document contract and optional-input validation are implemented for Test Plan and Regression Pack Index
+- S2-F4 rule extraction review GUI is implemented in `src/lme_testing/rule_workflow_session.py`; `rule-workflow-session` can start with stub config fallback and uses `pypdf` for HKv14 PDF extraction
 - Modular HKv14 mock bridge preserved in `deliverables/im_hk_mock_api_common/` and `deliverables/im_hk_v14_mock_api/`; HKv13 deliverable remains the preservation baseline
 - Mock API deliverables policy is documented in `docs/planning/mock_api_deliverables_policy.md`; current Stage 2 bridge samples stay under `deliverables/` and this policy should be revisited before adding a new mock bridge or promoting the bridges into maintained tools
+- Remote status as of 2026-05-06: `origin/main` and `CodeFreddy/LME-Testing` `feature/rule-extraction-review` both point to the latest local `main` commit
 - Phase 1/2 acceptance gates are updated in `docs/governance/acceptance.md`; Stage 3 real LME API remains blocked
 
 Governance checks available:
@@ -148,12 +164,13 @@ Governance checks available:
 
 ## Recommended Next Step
 
-**Stage 2 is current through completed S2-F1 role-friendly impact decision review package and approved S2-F2 planning. Remaining:**
+**Stage 2 is current through completed S2-F4 rule extraction review GUI integration. Remaining:**
 
-1. **S2-F2 implementation**: Build the MVP document readiness registry only from `docs/planning/mvp_document_readiness_plan.md`, preserving its non-goals and validation gates.
-2. **Stage 3**: Blocked on LME VM access (ETA unknown); replace mock API target with real LME API only when access is available.
+1. **Stage 3**: Blocked on LME VM access (ETA unknown); replace mock API target with real LME API only when access is available.
+2. **Real MVP input documents**: Provide real Test Plan and Regression Pack Index if readiness should move beyond placeholder/blocked status.
 3. **LLM non-determinism stabilization**: SR-MR-015-B3-4 boundary and SR-MR-071-C-1 negative still fluctuate - multi-run voting or consolidated scenario design, if separately approved with benchmark cost/benefit.
-4. **Before adding any new mock API bridge**, revisit `docs/planning/mock_api_deliverables_policy.md` and decide whether `deliverables/` remains the right long-lived location.
+4. **Broader CodeFreddy changes**: Full concurrency, rewrite prompt/schema simplification, and review-decision contract changes require separate governed approval and benchmark evidence.
+5. **Before adding any new mock API bridge**, revisit `docs/planning/mock_api_deliverables_policy.md` and decide whether `deliverables/` remains the right long-lived location.
 
 ---
 

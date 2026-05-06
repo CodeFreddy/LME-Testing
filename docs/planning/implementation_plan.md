@@ -50,7 +50,7 @@ Stage 2 规划（Stage 1 完成后展开）
 └── S2-F1: HKv14 role-friendly impact decision review
 └── S2-F2: MVP document readiness registry
 └── S2-F3: MVP input document contract
-└── S2-F4: Rule extraction review workflow merge slice
+└── S2-F4: Rule extraction review workflow merge slice and GUI startup/PDF fix
 ```
 
 ---
@@ -769,7 +769,7 @@ Define minimal Test Plan and Regression Pack Index contracts -> preserve readine
 
 ### S2-F4 — Rule Extraction Review Workflow Merge Slice
 
-**状态：✅ IMPLEMENTED（2026-05-06）；controlled merge slice from CodeFreddy branch**
+**状态：✅ IMPLEMENTED（2026-05-06）；controlled merge slice from CodeFreddy branch, pushed to `main`**
 
 **目标：** Bring in the deterministic document intake and rule artifact review workflow from `CodeFreddy/LME-Testing` `feature/rule-extraction-review` at `b1287a2` without overwriting newer local HKv14/MVP work or silently accepting governed contract changes.
 
@@ -786,18 +786,25 @@ Document upload/import -> deterministic rule extraction -> atomic/semantic rule 
 - `tests/test_rule_extraction_review.py`
 - `tests/test_reporting.py`
 - reporting audit/compare navigation support
+- follow-up fix: config fallback for `rule-workflow-session`
+- follow-up fix: `pypdf` primary PDF extraction for the rule workflow GUI
 
 **实现要点：**
 - The import is intentionally not a direct merge; newer local HKv14 and MVP readiness commits are preserved.
 - Prompt, schema, and review decision contract changes from the CodeFreddy branch are not accepted in this slice.
 - Pipeline concurrency is accepted only as serial-compatible API surface; `concurrency > 1` fails visibly until separately governed.
 - The workflow can call existing maker/checker/BDD stages, but it does not introduce a new production LLM stage.
+- `rule-workflow-session` can start with `config/llm_profiles.stub.json` when the historical default `config/llm_profiles.json` is absent.
+- PDF upload/extract in the rule workflow GUI uses `pypdf` first, matching the HKv14 governed intake path, while keeping `pdftotext` as fallback.
 
 **验收：**
 - [x] New rule extraction workflow modules and focused tests are present.
 - [x] CLI exposes `rule-workflow-session`.
 - [x] Existing pipeline/review/session/schema focused tests still pass.
 - [x] No schema, prompt, or default model change is introduced.
+- [x] HKv14 PDF extraction through the rule workflow extractor works without local `pdftotext`.
+- [x] HKv14 GUI smoke path reached `checker_readable.html` and was accepted by human first look.
+- [x] `origin/main` and `CodeFreddy/LME-Testing` `feature/rule-extraction-review` now point to the same `main` commit after guarded branch update.
 
 **不在范围：**
 - Full concurrent maker/checker execution
@@ -805,7 +812,13 @@ Document upload/import -> deterministic rule extraction -> atomic/semantic rule 
 - CodeFreddy prompt changes or rewrite prompt promotion
 - Production document platform, generic upload portal, or Stage 3 execution readiness claims
 
-**自评：** PASS for this controlled merge slice. Broader CodeFreddy changes remain candidates for separate governed review.
+**验证：**
+- `tests.test_rule_extraction_review`: 11 tests OK.
+- `scripts/check_docs_governance.py`: passed.
+- `scripts/check_artifact_governance.py`: passed.
+- HKv14 direct rule workflow extraction found 5 target sections.
+
+**自评：** PASS for this controlled merge slice and follow-up GUI fix package. Broader CodeFreddy changes remain candidates for separate governed review.
 
 ---
 

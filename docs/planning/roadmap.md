@@ -23,6 +23,7 @@
 | Review UI browser E2E | ✅ `tests/test_review_session_browser.py` 覆盖 Review→BDD→Scripts 主路径与可见匹配指标刷新 |
 | HKv14 role-friendly decision review | ✅ S2-F1 local package generator implemented; canonical decision JSON, Markdown summary, and review HTML |
 | MVP document readiness registry | ✅ S2-F2 deterministic registry implemented; evidence at `evidence/mvp_document_readiness/20260429T075702Z/` |
+| Rule extraction review GUI | ✅ S2-F4 `rule-workflow-session` integrated on `main`; HKv14 PDF/rule/scenario review smoke path accepted; CodeFreddy feature branch aligned to `main` |
 | 真实 LME API 接入 | ⏳ ETA 未知（需内部 VM 权限）|
 
 ---
@@ -208,7 +209,7 @@
 8. ✅ S2-D1 review UI browser E2E 已完成，用于验证 BDD/Scripts tab 的真实浏览器交互与可见指标刷新
 9. ✅ S2-F1 role-friendly HKv14 impact decision review package generator 已实现；canonical JSON is source of truth, Markdown and HTML are derived/review surfaces
 10. ✅ S2-F2 MVP document readiness registry 已实现；canonical `document_readiness.json` and derived summary are under `evidence/mvp_document_readiness/20260429T075702Z/`
-11. ✅ S2-F4 rule extraction review merge slice 已实现；document intake + rule artifact review workflow 已纳入本地 integration branch，prompt/schema/concurrency contract changes 未纳入本 slice
+11. ✅ S2-F4 rule extraction review merge slice 已实现并合入/push 到 `main`；document intake + rule artifact review workflow 可通过 `rule-workflow-session` GUI 使用，prompt/schema/concurrency contract changes 未纳入本 slice
 
 详见：`docs/planning/s2t01_coverage_analysis.md`
 
@@ -425,7 +426,9 @@ Approved slice:
 - `tests/test_reporting.py`
 - reporting audit/compare navigation support in `src/lme_testing/reporting.py`
 
-**状态：** implemented as a local deterministic review workflow merge slice.
+**状态：** implemented, committed to `main`, pushed to `origin/main`, and used for an HKv14 GUI smoke review. `CodeFreddy/LME-Testing` `feature/rule-extraction-review` was force-with-lease updated to the same `main` commit after the controlled merge.
+
+**Follow-up fixes:** `rule-workflow-session` falls back to `config/llm_profiles.stub.json` when the old default `config/llm_profiles.json` is absent, and the GUI PDF extractor now uses `pypdf` before falling back to `pdftotext`.
 
 **边界：** This slice does not accept CodeFreddy's prompt/schema contract changes, does not remove `reject` or `block_recommendation_review` from the governed review contract, does not enable concurrent maker/checker execution beyond serial compatibility, does not add a new production LLM stage, and does not claim Stage 3 execution readiness.
 

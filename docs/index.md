@@ -220,6 +220,30 @@ It defines:
 
 ### 17. `docs/planning/mvp_input_document_contract_plan.md`
 
+Use this for the implemented S2-F3 input contract slice.
+
+It defines:
+
+- the minimum Test Plan input contract,
+- the minimum Regression Pack Index input contract,
+- deterministic readiness/blocking rules,
+- optional-input validation boundaries,
+- and explicit non-goals for mapping, LLM stages, and external integrations.
+
+### 18. `docs/planning/implementation_plan.md` section `S2-F4`
+
+Use this for the implemented CodeFreddy rule extraction review workflow slice.
+
+It defines:
+
+- the controlled merge boundary,
+- the `rule-workflow-session` GUI scope,
+- HKv14 PDF extraction and GUI smoke validation,
+- follow-up startup/PDF extraction fixes,
+- and the broader CodeFreddy prompt/schema/concurrency changes that remain out of scope.
+
+### 17. `docs/planning/mvp_input_document_contract_plan.md`
+
 Use this for the implemented S2-F3 slice that defines the minimum Test Plan and Regression Pack Index input contracts.
 
 It defines:

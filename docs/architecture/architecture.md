@@ -193,6 +193,8 @@ Source document or artifact folder
 
 This was integrated from CodeFreddy's `feature/rule-extraction-review` branch as a controlled merge slice. The slice keeps schema, prompt, and default model impact at none; concurrent pipeline execution and CodeFreddy's review-decision contract changes remain out of scope unless separately governed.
 
+As of 2026-05-06, the slice is on `main` and pushed to both `origin/main` and CodeFreddy's `feature/rule-extraction-review` branch. The GUI startup path falls back to the committed stub LLM config when `config/llm_profiles.json` is absent, and PDF upload/extract uses `pypdf` before falling back to `pdftotext`. HKv14 PDF extraction and the rule-to-scenario review smoke path were exercised through the GUI.
+
 ---
 
 ## 四、模块目录（Main 完整版）
@@ -238,7 +240,7 @@ Review Session 启动时传入 `--step-registry step_visibility.json`，Scripts 
 | `src/lme_testing/oracles/` | 8 个确定性验证模块 | Main | ✅（未在真实场景验证）|
 | `src/lme_testing/audit_trail.py` | 审计跟踪 HTML 生成 | Main | ✅ 已实现并集成入 `review_session.py` |
 | `src/lme_testing/case_compare.py` | Case 对比视图 | Main | ✅ 已实现并集成入 `review_session.py` |
-| `src/lme_testing/rule_extraction.py` | Deterministic source-to-rule artifact extraction for rule review workflow | CodeFreddy merge slice | ✅ S2-F4 integrated |
+| `src/lme_testing/rule_extraction.py` | Deterministic source-to-rule artifact extraction for rule review workflow; `pypdf` primary PDF extraction, `pdftotext` fallback | CodeFreddy merge slice + GUI fix | ✅ S2-F4 integrated |
 | `src/lme_testing/rule_workflow_session.py` | Local document intake and rule artifact review server | CodeFreddy merge slice | ✅ S2-F4 integrated |
 
 ### Master 分支额外实现（已分析，部分 cherry-pick）
