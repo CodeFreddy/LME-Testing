@@ -9,6 +9,21 @@ from pathlib import Path
 from .storage import load_json, load_jsonl
 
 
+def _nav_links_html(active: str, audit_trail_url: str | None = None) -> str:
+    links = [
+        ("report", "Report", "report.html"),
+        ("maker", "Maker", "maker_readable.html"),
+        ("checker", "Checker", "checker_readable.html"),
+    ]
+    rendered = []
+    for key, label, href in links:
+        css_class = "active" if key == active else ""
+        rendered.append(f'<a class="{css_class}" href="{html.escape(href)}">{html.escape(label)}</a>')
+    if audit_trail_url:
+        rendered.append(f'<a href="{html.escape(audit_trail_url)}" target="_blank">Audit Trail</a>')
+    return '<nav class="top-nav">' + ''.join(rendered) + '</nav>'
+
+
 def _status_options(values: list[str]) -> str:
     options = ['<option value="">全部</option>']
     for value in sorted({value for value in values if value}):
@@ -16,7 +31,14 @@ def _status_options(values: list[str]) -> str:
     return ''.join(options)
 
 
-def _render_page(title: str, body: str, extra_script: str = "") -> str:
+def _render_page(
+    title: str,
+    body: str,
+    extra_script: str = "",
+    active_nav: str = "report",
+    audit_trail_url: str | None = None,
+) -> str:
+    nav = _nav_links_html(active_nav, audit_trail_url=audit_trail_url)
     return f"""
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -26,6 +48,9 @@ def _render_page(title: str, body: str, extra_script: str = "") -> str:
   <style>
     body {{ font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif; margin: 24px; color: #1f2937; background: #f8fafc; }}
     h1, h2 {{ color: #0f172a; }}
+    .top-nav {{ display: flex; gap: 10px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }}
+    .top-nav a {{ color: #2563eb; background: #ffffff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 8px 12px; text-decoration: none; font-weight: 600; }}
+    .top-nav a.active {{ color: #0f172a; background: #dbeafe; border-color: #3b82f6; }}
     .card {{ background: white; border: 1px solid #cbd5e1; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06); }}
     table {{ width: 100%; border-collapse: collapse; background: white; }}
     th, td {{ border: 1px solid #cbd5e1; padding: 10px; vertical-align: top; text-align: left; font-size: 13px; }}
@@ -69,6 +94,7 @@ def _render_page(title: str, body: str, extra_script: str = "") -> str:
   </style>
 </head>
 <body>
+{nav}
 {body}
 <script>
 {extra_script}
@@ -113,6 +139,34 @@ def _case_type_pills_html(required: list, present: list, accepted: list, missing
             parts.append('<span class="rule-pill-sep">|</span>')
         parts.append(f'<span class="case-pill case-pill-missing">Missing</span> ' + _case_type_pills(missing, 'case-pill-missing'))
     return ''.join(parts) if parts else '&nbsp;'
+
+
+def _relative_or_uri(path: Path, output_dir: Path) -> str:
+    try:
+        return path.resolve().relative_to(output_dir.resolve()).as_posix()
+    except ValueError:
+        return path.resolve().as_uri()
+
+
+def _render_compare_links(compare_links: list[dict] | None, output_dir: Path) -> str:
+    if not compare_links:
+        return ""
+    items: list[str] = []
+    for index, link in enumerate(compare_links):
+        label = str(link.get("label") or f"Compare {index + 1}")
+        href = str(link.get("url") or "")
+        if not href and link.get("path"):
+            href = _relative_or_uri(Path(str(link["path"])), output_dir)
+        if href:
+            items.append(f'<li><a href="{html.escape(href)}" target="_blank">{html.escape(label)}</a></li>')
+    if not items:
+        return ""
+    return (
+        '<div class="card">'
+        '<h2>Compare / Iteration Changes</h2>'
+        '<ul>' + ''.join(items) + '</ul>'
+        '</div>'
+    )
 
 
 def _evidence_html(items: list[dict]) -> str:
@@ -291,6 +345,9 @@ def generate_html_report(
     coverage_report_path: Path,
     output_html_path: Path,
     previous_coverage_report_path: Path | None = None,
+    audit_trail_path: Path | None = None,
+    audit_trail_url: str | None = None,
+    compare_links: list[dict] | None = None,
 ) -> dict:
     """Generate HTML report from pipeline outputs.
 
@@ -303,6 +360,9 @@ def generate_html_report(
         output_html_path: Output path for main HTML report
         previous_coverage_report_path: Optional path to a previous coverage_report.json
             for computing drift. If provided, a Drift View section is included.
+        audit_trail_path: Optional path to audit trail HTML.
+        audit_trail_url: Optional URL to audit trail HTML.
+        compare_links: Optional iteration compare links to render in the report.
     """
     maker_cases = load_jsonl(maker_cases_path)
     checker_reviews = load_jsonl(checker_reviews_path)
@@ -321,6 +381,10 @@ def generate_html_report(
     # Export CSV alongside HTML
     csv_path = output_html_path.with_suffix(".csv")
     export_coverage_csv(coverage_report, csv_path)
+    resolved_audit_url = audit_trail_url
+    if not resolved_audit_url and audit_trail_path:
+        resolved_audit_url = _relative_or_uri(audit_trail_path, output_html_path.parent)
+    compare_links_html = _render_compare_links(compare_links, output_html_path.parent)
 
     reviews_by_case = {item['case_id']: item for item in checker_reviews}
 
@@ -485,6 +549,7 @@ applyCoverageTableFilters();
 
     combined_body = f"""
   <h1>Maker / Checker HTML 报告</h1>
+  {compare_links_html}
   <div class="card">
     <h2>运行摘要</h2>
     <div class="grid">
@@ -637,9 +702,9 @@ applyCoverageTableFilters();
     maker_html_path = output_html_path.with_name('maker_readable.html')
     checker_html_path = output_html_path.with_name('checker_readable.html')
 
-    _write_text(output_html_path, _render_page('Maker Checker Report', combined_body, filter_script))
-    _write_text(maker_html_path, _render_page('Maker Readable Report', maker_body))
-    _write_text(checker_html_path, _render_page('Checker Readable Report', checker_body))
+    _write_text(output_html_path, _render_page('Maker Checker Report', combined_body, filter_script, active_nav='report', audit_trail_url=resolved_audit_url))
+    _write_text(maker_html_path, _render_page('Maker Readable Report', maker_body, active_nav='maker', audit_trail_url=resolved_audit_url))
+    _write_text(checker_html_path, _render_page('Checker Readable Report', checker_body, active_nav='checker', audit_trail_url=resolved_audit_url))
 
     return {
         'output_html': str(output_html_path),

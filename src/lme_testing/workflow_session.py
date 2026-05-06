@@ -103,6 +103,8 @@ def start_workflow_session(
     start_step: str,
     maker_batch_size: int,
     checker_batch_size: int,
+    maker_concurrency: int = 1,
+    checker_concurrency: int = 1,
     write_page_text: bool = False,
 ) -> tuple[object, str, ReviewSessionManager] | None:
     workflow_dir = ensure_dir(output_root / "workflow_bootstrap")
@@ -127,6 +129,7 @@ def start_workflow_session(
                 limit=None,
                 batch_size=maker_batch_size,
                 resume_from=None,
+                concurrency=maker_concurrency,
                 provider_out=provider_out,
             )
         except KeyboardInterrupt:
@@ -149,6 +152,7 @@ def start_workflow_session(
                 limit=None,
                 batch_size=checker_batch_size,
                 resume_from=None,
+                concurrency=checker_concurrency,
                 provider_out=provider_out,
             )
         except KeyboardInterrupt:
@@ -169,6 +173,8 @@ def start_workflow_session(
         repo_root=repo_root,
         rewrite_batch_size=maker_batch_size,
         checker_batch_size=checker_batch_size,
+        rewrite_concurrency=maker_concurrency,
+        checker_concurrency=checker_concurrency,
         initial_maker_summary_path=current_artifacts.maker_summary_path,
         initial_checker_summary_path=current_artifacts.checker_summary_path,
         initial_coverage_report_path=current_artifacts.coverage_report_path,

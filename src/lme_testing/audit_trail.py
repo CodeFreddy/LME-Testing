@@ -4,6 +4,7 @@ import html
 from pathlib import Path
 from typing import Any
 
+from .schemas import normalize_human_review_decision
 from .storage import load_json, load_jsonl
 
 
@@ -51,7 +52,7 @@ def _audit_rows(session_dir: Path) -> tuple[list[str], int]:
             case_id = review.get("case_id", "")
             checker = checker_reviews.get(case_id, {})
             checker_decision = _review_decision_for_checker(checker)
-            human_decision = review.get("review_decision", "")
+            human_decision = normalize_human_review_decision(review.get("review_decision", ""))
             divergent = bool(checker) and human_decision in {"approve", "rewrite"} and checker_decision != human_decision
             if not divergent:
                 continue

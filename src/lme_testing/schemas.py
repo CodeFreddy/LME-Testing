@@ -60,10 +60,20 @@ def _strip_markdown_fence(text: str) -> str:
 
 def parse_json_object(text: str) -> dict:
     normalized = _strip_markdown_fence(text)
+    if not normalized:
+        raise SchemaError("Model output is empty; expected a JSON object.")
     try:
         data = json.loads(normalized)
     except json.JSONDecodeError as exc:
-        raise SchemaError(f"Model output is not valid JSON: {exc}") from exc
+        start = normalized.find("{")
+        end = normalized.rfind("}")
+        if start >= 0 and end > start:
+            try:
+                data = json.loads(normalized[start:end + 1])
+            except json.JSONDecodeError:
+                raise SchemaError(f"Model output is not valid JSON: {exc}") from exc
+        else:
+            raise SchemaError(f"Model output is not valid JSON: {exc}") from exc
     if not isinstance(data, dict):
         raise SchemaError("Model output must be a JSON object.")
     return data
@@ -341,8 +351,27 @@ def validate_checker_payload(payload: dict, expected_case_map: dict[str, str] | 
     return payload
 
 
-VALID_REVIEW_DECISIONS = {"approve", "rewrite", "reject"}
-VALID_BLOCK_RECOMMENDATION_REVIEWS = {"not_applicable", "pending_review", "confirmed", "dismissed"}
+VALID_REVIEW_DECISIONS = {"pending", "approve", "rewrite"}
+
+
+def normalize_human_review_decision(decision: object) -> object:
+    """Normalize legacy human review decisions into the current three-state contract."""
+    if decision == "approved":
+        return "approve"
+    if decision in {"needs_rewrite", "rejected", "reject"}:
+        return "rewrite"
+    return decision
+
+
+def normalize_human_review_item(item: dict) -> dict:
+    """Normalize a human review item while preserving existing non-legacy fields."""
+    decision = normalize_human_review_decision(item.get("review_decision") or item.get("decision"))
+    if decision is not None:
+        item["review_decision"] = decision
+    item.pop("decision", None)
+    item.pop("human_block_decision", None)
+    item.pop("block_recommendation_review", None)
+    return item
 
 
 def validate_human_review_payload(payload: dict, expected_case_map: dict[str, str] | None = None) -> dict:
@@ -373,13 +402,10 @@ def validate_human_review_payload(payload: dict, expected_case_map: dict[str, st
             raise SchemaError(f"Duplicate case_id in human review: {case_id}")
         seen_case_ids.add(case_id)
 
-        decision = item.get("review_decision") or item.get("decision")
+        normalize_human_review_item(item)
+        decision = item.get("review_decision")
         if decision not in VALID_REVIEW_DECISIONS:
             raise SchemaError(f"Invalid review decision: {decision}")
-
-        block_rec = item.get("block_recommendation_review")
-        if block_rec is not None and block_rec not in VALID_BLOCK_RECOMMENDATION_REVIEWS:
-            raise SchemaError(f"Invalid block_recommendation_review value: {block_rec}")
 
         issue_types = item.get("issue_types")
         if issue_types is not None and not isinstance(issue_types, list):

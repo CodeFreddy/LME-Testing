@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-05-04 13:32:54 UTC`
+- `2026-05-06 00:31:31 UTC`
 
 ---
 
@@ -44,15 +44,15 @@ If the task touches extraction or rule artifacts, also read:
 
 Current branch:
 
-- `codex/merge-backup-scenario-review`
+- `feature/rule-extraction-review`
 
 Recent commit subjects:
 
+- `Merge Darcy and backup review-session code`
 - `add zip and pdf for now`
 - `Add Phase 3 planning docs and architecture updates`
 - `Add Phase 2 deliverables: Mock API implementations and documentation`
 - `Update: Config env var name, docs, and gitignore`
-- `Update repo structure and POC validation and HKEX Risk rules v1.3`
 
 ---
 
