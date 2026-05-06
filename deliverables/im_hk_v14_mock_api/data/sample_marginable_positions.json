@@ -1,0 +1,18 @@
+{
+  "positions": [
+    {
+      "instrument_id": "700",
+      "quantity": 1000,
+      "contract_value": 360000,
+      "market_price": 380,
+      "currency": "HKD"
+    },
+    {
+      "instrument_id": "658",
+      "quantity": 500,
+      "contract_value": 50000,
+      "market_price": 100,
+      "currency": "HKD"
+    }
+  ]
+}

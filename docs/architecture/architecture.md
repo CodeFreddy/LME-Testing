@@ -1,7 +1,7 @@
 # LME Testing — Architecture v3.1
 
-**修订日期：** 2026-04-23  
-**变更说明：** 整合 master 分支合并分析、S2-B1/B2 集成状态，新增 S2-C1 mock API execution bridge，并补充 browser-level review UI E2E 验证层。
+**修订日期：** 2026-04-26
+**变更说明：** 整合 HKv14 POC governed intake、deterministic diff evidence and modular mock API bridge，同时保持 HKv14 POC/mock/stub boundary。
 
 ---
 
@@ -136,6 +136,25 @@ BDD feature
 
 该 bridge 覆盖 RPF validation、position normalization、market risk components、MTM split、margin aggregation、corporate actions、cross-day netting、cross-currency netting 和 intraday MTM treatment。它只验证脚本到 HTTP mock API 的闭环，不代表真实 VaR Platform/HKSCC/HKEX execution readiness，也不改变主流水线 artifact contract。
 
+### Initial Margin HKv14 POC modular mock API bridge（S2-C3）
+
+`artifacts/im_hk_v14/` contains governed HKv14 intake generated from `docs/materials/Initial Margin Calculation Guide HKv14.pdf`. `evidence/im_hk_v14_diff/` preserves deterministic HKv13→HKv14 diff evidence, and `docs/planning/im_hk_v14_downstream_decision.md` records the POC decision to accept all deterministic diff candidates.
+
+The mock API implementation is split into:
+
+```
+deliverables/im_hk_mock_api_common/
+    │
+    ├── shared deterministic implementation
+    │
+    ▼
+deliverables/im_hk_v14_mock_api/
+    │
+    └── thin HKv14 wrapper, labels, data, BDD sample, tests
+```
+
+This bridge proves wrapper reuse for HKv14 POC validation. It does not claim HKv14 production downstream automation readiness, does not alter main pipeline schemas/prompts/models, and does not overwrite `deliverables/im_hk_v13_mock_api/`.
+
 ### Review UI automation assurance（S2-D1）
 
 `tests/test_review_session_browser.py` 启动真实 local review-session HTTP server，并通过 Chrome DevTools Protocol 驱动本机 Chrome/Edge，验证：
@@ -154,6 +173,27 @@ Save Scripts edits
 ```
 
 该测试层只验证现有 UI 与 governed artifacts 的浏览器交互，不新增产品 scope、不调用 live LLM provider、不改变 artifact contract。
+
+### Rule extraction review workflow（S2-F4）
+
+`src/lme_testing/rule_workflow_session.py` adds a local workflow server for document intake and business-friendly rule artifact review:
+
+```
+Source document or artifact folder
+    │
+    ▼
+[rule_extraction.py]
+    │  atomic_rules.json + semantic_rules.json
+    ▼
+[Rule Workflow Review UI]
+    │  reviewed_atomic_rules.json + reviewed_semantic_rules.json
+    ▼
+[optional existing maker/checker/BDD/review-session path]
+```
+
+This was integrated from CodeFreddy's `feature/rule-extraction-review` branch as a controlled merge slice. The slice keeps schema, prompt, and default model impact at none; concurrent pipeline execution and CodeFreddy's review-decision contract changes remain out of scope unless separately governed.
+
+As of 2026-05-06, the slice is on `main` and pushed to both `origin/main` and CodeFreddy's `feature/rule-extraction-review` branch. The GUI startup path falls back to the committed stub LLM config when `config/llm_profiles.json` is absent, and PDF upload/extract uses `pypdf` before falling back to `pdftotext`. HKv14 PDF extraction and the rule-to-scenario review smoke path were exercised through the GUI.
 
 ---
 
@@ -200,6 +240,8 @@ Review Session 启动时传入 `--step-registry step_visibility.json`，Scripts 
 | `src/lme_testing/oracles/` | 8 个确定性验证模块 | Main | ✅（未在真实场景验证）|
 | `src/lme_testing/audit_trail.py` | 审计跟踪 HTML 生成 | Main | ✅ 已实现并集成入 `review_session.py` |
 | `src/lme_testing/case_compare.py` | Case 对比视图 | Main | ✅ 已实现并集成入 `review_session.py` |
+| `src/lme_testing/rule_extraction.py` | Deterministic source-to-rule artifact extraction for rule review workflow; `pypdf` primary PDF extraction, `pdftotext` fallback | CodeFreddy merge slice + GUI fix | ✅ S2-F4 integrated |
+| `src/lme_testing/rule_workflow_session.py` | Local document intake and rule artifact review server | CodeFreddy merge slice | ✅ S2-F4 integrated |
 
 ### Master 分支额外实现（已分析，部分 cherry-pick）
 
@@ -297,6 +339,9 @@ Review Session 启动时传入 `--step-registry step_visibility.json`，Scripts 
 | `runs/` | pipeline 运行输出（gitignored）|
 | `deliverables/lme_mock_api/` | S2-C1 mock API execution bridge（独立交付物，不改变主包契约）|
 | `deliverables/im_hk_v13_mock_api/` | S2-C2 Initial Margin HKv13 mock API execution bridge（独立交付物，不改变主包契约）|
+| `deliverables/im_hk_mock_api_common/` | S2-C3 shared Initial Margin mock API implementation for bounded POC wrappers |
+| `deliverables/im_hk_v14_mock_api/` | S2-C3 Initial Margin HKv14 POC mock API wrapper（thin wrapper over common code）|
+| `evidence/im_hk_v14_diff/` | S2-C3 deterministic HKv13→HKv14 governed artifact diff evidence |
 | `tests/test_review_session_browser.py` | S2-D1 browser-level review UI E2E（本机 Chrome/Edge，可 skip）|
 
 ---
@@ -340,6 +385,7 @@ charset = utf-8
 | audit_trail/case_compare 已集成但为本地 HTML 输出 | 只覆盖 review-session 本地审计视图 | 符合单用户工具定位 |
 | Mock API 不是真实 LME API | 只能验证脚本到 HTTP API 的闭环，不代表真实执行能力 | Stage 3 仍需 VM/API 权限 |
 | Initial Margin HKv13 mock API 不是真实 VaR Platform | 只能验证 IM BDD/script 到 HTTP API 的闭环，不代表真实保证金计算能力 | Stage 3 仍需真实执行环境 |
+| Initial Margin HKv14 bridge is POC/mock/stub only | 只验证 HKv14 intake、diff evidence and wrapper reuse，不代表 production downstream automation readiness | HKv13 remains preservation baseline; Stage 3 still requires real execution access |
 | Windows PowerShell 工具链 | 跨平台受限 | 单人开发现状 |
 
 ---
@@ -356,4 +402,3 @@ charset = utf-8
 - [ ] `atomic_write_json()` 是否保留？
 - [ ] CI smoke test 是否通过？
 - [ ] 是否与当前 roadmap 阶段一致？
-

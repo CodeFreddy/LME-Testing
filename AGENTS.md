@@ -84,6 +84,31 @@ The current roadmap is biased toward:
 
 Do not prioritize heavier future-platform work over these controls unless explicitly directed.
 
+## Current Active Work
+
+As of 2026-04-26, the active handoff is the HKv14 POC document workflow and modular mock API bridge.
+
+Current facts to preserve:
+
+- HKv14 governed intake was generated under `artifacts/im_hk_v14/` from `docs/materials/Initial Margin Calculation Guide HKv14.pdf`.
+- The PDF extractor now uses `pypdf` as the primary extractor for PDF inputs and writes the full extracted Markdown source into the artifact output folder.
+- The HKv13-to-HKv14 deterministic diff was generated under `evidence/im_hk_v14_diff/` and summarized in `docs/planning/im_hk_v14_diff_report.md`.
+- The POC downstream decision note is `docs/planning/im_hk_v14_downstream_decision.md`; for POC, all deterministic diff candidates were accepted.
+- The HKv14 mock API POC bridge uses a shared package in `deliverables/im_hk_mock_api_common/` plus a thin HKv14 wrapper in `deliverables/im_hk_v14_mock_api/`.
+- The HKv13 mock API deliverable remains the preservation baseline and must not be overwritten by HKv14 work.
+- A future role-friendly decision UI requirement is recorded as planning scope only; do not implement it unless a human explicitly asks.
+
+Next recommended action for a fresh chat:
+
+- Read the latest checkpoint in `docs/operations/checkpoints.md`, run `git status --short`, then either prepare the current package for review/commit or proceed only on the next human-approved task.
+
+Constraints for this active work:
+
+- Keep HKv14 as POC/mock/stub bridge work unless explicitly promoted.
+- Do not claim production readiness for HKv14 downstream automation.
+- Do not change schemas, prompts, default models, or roadmap phase boundaries without explicit approval and evidence.
+- Keep deterministic validation visible; do not hide duplicate/advisory warnings to make flows look cleaner.
+
 ## Required Change Summary
 
 For any substantial change, provide:

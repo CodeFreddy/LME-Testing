@@ -1,0 +1,402 @@
+{
+  "metadata": {
+    "generated_at": "2026-04-26T09:32:20Z",
+    "tool": "scripts/compare_initial_margin_versions.py",
+    "comparison_mode": "generic_governed_artifact_directory_diff",
+    "changed_threshold": 0.985,
+    "match_threshold": 0.9
+  },
+  "source_versions": {
+    "previous": {
+      "doc_id": "im_hk_v13",
+      "doc_title": "Initial Margin Calculation Guide HKv13",
+      "doc_version": "HKv13",
+      "source_path": "artifacts\\im_hk_v13\\source_from_pdf.md",
+      "source_format": "md",
+      "document_class": "calculation_guide",
+      "page_count": 38,
+      "clause_count": 10,
+      "atomic_rule_count": 164
+    },
+    "current": {
+      "doc_id": "im_hk_v14",
+      "doc_title": "Initial Margin Calculation Guide HKv14",
+      "doc_version": "HKv14",
+      "source_path": "docs\\materials\\Initial Margin Calculation Guide HKv14.pdf",
+      "source_format": "pdf",
+      "extraction_method": "pypdf_page_text_v1",
+      "document_class": "calculation_guide",
+      "page_count": 38,
+      "clause_count": 10,
+      "atomic_rule_count": 164,
+      "extracted_source_path": "artifacts\\im_hk_v14\\source_from_pdf.md"
+    }
+  },
+  "artifact_inventory": {
+    "metadata": {
+      "previous_exists": true,
+      "current_exists": true
+    },
+    "pages.json": {
+      "previous_exists": true,
+      "current_exists": true
+    },
+    "clauses": {
+      "previous_exists": true,
+      "current_exists": true
+    },
+    "atomic_rules": {
+      "previous_exists": true,
+      "current_exists": true
+    },
+    "semantic_rules": {
+      "previous_exists": true,
+      "current_exists": true
+    },
+    "validation_report": {
+      "previous_exists": true,
+      "current_exists": true
+    }
+  },
+  "rule_type_distribution_delta": [
+    {
+      "value": "calculation",
+      "previous": 122,
+      "current": 120,
+      "delta": -2
+    },
+    {
+      "value": "data_constraint",
+      "previous": 13,
+      "current": 13,
+      "delta": 0
+    },
+    {
+      "value": "obligation",
+      "previous": 8,
+      "current": 8,
+      "delta": 0
+    },
+    {
+      "value": "permission",
+      "previous": 0,
+      "current": 1,
+      "delta": 1
+    },
+    {
+      "value": "reference_only",
+      "previous": 21,
+      "current": 22,
+      "delta": 1
+    }
+  ],
+  "semantic_rule_type_distribution_delta": [
+    {
+      "value": "calculation",
+      "previous": 122,
+      "current": 120,
+      "delta": -2
+    },
+    {
+      "value": "data_constraint",
+      "previous": 13,
+      "current": 13,
+      "delta": 0
+    },
+    {
+      "value": "obligation",
+      "previous": 8,
+      "current": 8,
+      "delta": 0
+    },
+    {
+      "value": "permission",
+      "previous": 0,
+      "current": 1,
+      "delta": 1
+    },
+    {
+      "value": "reference_only",
+      "previous": 21,
+      "current": 22,
+      "delta": 1
+    }
+  ],
+  "clause_delta": {
+    "previous_count": 10,
+    "current_count": 10,
+    "delta": 0,
+    "common_id_count": 5,
+    "added_clause_ids": [],
+    "removed_clause_ids": [],
+    "changed_clause_candidates": [
+      {
+        "clause_id": "MR-012",
+        "similarity": 0.892355,
+        "previous_pages": [
+          8,
+          23
+        ],
+        "current_pages": [
+          8,
+          23
+        ]
+      }
+    ]
+  },
+  "rule_delta": {
+    "previous_count": 164,
+    "current_count": 164,
+    "delta": 0,
+    "common_id_count": 69,
+    "unchanged_count": 59,
+    "changed_count": 10,
+    "added_count": 0,
+    "removed_count": 0,
+    "id_drift_candidate_count": 1,
+    "changed_rule_candidates": [
+      {
+        "rule_id": "MR-012-A-1",
+        "similarity": 0.892355,
+        "previous_rule_type": "calculation",
+        "current_rule_type": "calculation",
+        "previous_anchor": {
+          "paragraph_id": "MR-012-A-1",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "current_anchor": {
+          "paragraph_id": "MR-012-A-1",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "previous_text": "12. when using the information in the \"marginable position report\", please note that: 6 mtm refers to \"mark-to-market\" a.k.a. the marks. 7 the report will be generated on each business day for cps to download via repo...",
+        "current_text": "12. when using the information in the \"marginable position report\", please note that: 6 mtm refers to \"mark-to-market\" a.k.a. the marks. 7 the report will be generated on each business day for cps to download via repo..."
+      },
+      {
+        "rule_id": "MR-012-A-3",
+        "similarity": 0.705882,
+        "previous_rule_type": "calculation",
+        "current_rule_type": "calculation",
+        "previous_anchor": {
+          "paragraph_id": "MR-012-A-3",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "current_anchor": {
+          "paragraph_id": "MR-012-A-3",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "previous_text": "in the mtm and margin requirement report, absolute value of favorable mtm(or mtm requirement) will be shown.",
+        "current_text": "in the mtm and margin requirement report, absolute value of favorable mtm(or mtm requirement) will be shown. 42 the aggregated value of hkd equivalent contract value and hkd equivalent market value."
+      },
+      {
+        "rule_id": "MR-012-A-4",
+        "similarity": 0.794964,
+        "previous_rule_type": "calculation",
+        "current_rule_type": "calculation",
+        "previous_anchor": {
+          "paragraph_id": "MR-012-A-4",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "current_anchor": {
+          "paragraph_id": "MR-012-A-4",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "previous_text": "hkscc - var platform initial margin calculation guide page 21 of 38 favorable mtm(or mtm requirement)42 = market valueportfolio - contract valueportfolio = (,700,000) – (,000,000) =,700,000 the negative number refers...",
+        "current_text": "hkscc - var platform initial margin calculation guide page 21 of 38 = (,550,000) – (,850,000) =,700,000 the negative number refers to a mtm requirement, which its absolute value will be added after applying margin cre..."
+      },
+      {
+        "rule_id": "MR-012-A-5",
+        "similarity": 0.584906,
+        "previous_rule_type": "calculation",
+        "current_rule_type": "permission",
+        "previous_anchor": {
+          "paragraph_id": "MR-012-A-5",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "current_anchor": {
+          "paragraph_id": "MR-012-A-5",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "previous_text": "please refer to appendix 4.6 for calculation logic that involve multiple currencies in the portfolio. 43 such amount may be reduced for risk management purpose.",
+        "current_text": "for illustration purpose, position limit add -on for the sample portfolio is assumed to be 487,332. 43 such amount may be reduced for risk management purpose."
+      },
+      {
+        "rule_id": "MR-012-A-9",
+        "similarity": 0.972067,
+        "previous_rule_type": "calculation",
+        "current_rule_type": "calculation",
+        "previous_anchor": {
+          "paragraph_id": "MR-012-A-9",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "current_anchor": {
+          "paragraph_id": "MR-012-A-9",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "previous_text": "total mtm and margin requirement = net margin after credit + other risk components = net margin after credit + mtm requirement + position limit add-on + credit risk add-on + ad-hoc add-on = 41,930,000 + 12,700,000 + 4...",
+        "current_text": "total mtm and margin requirement = net margin after credit + other risk components = net margin after credit + mtm requirement + position limit add-on + credit risk add-on + ad-hoc add-on = 41,930,000 + 12,700,000 + 4..."
+      },
+      {
+        "rule_id": "MR-012-B-1",
+        "similarity": 0.892355,
+        "previous_rule_type": "calculation",
+        "current_rule_type": "calculation",
+        "previous_anchor": {
+          "paragraph_id": "MR-012-B-1",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "current_anchor": {
+          "paragraph_id": "MR-012-B-1",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "previous_text": "12. when using the information in the \"marginable position report\", please note that: 6 mtm refers to \"mark-to-market\" a.k.a. the marks. 7 the report will be generated on each business day for cps to download via repo...",
+        "current_text": "12. when using the information in the \"marginable position report\", please note that: 6 mtm refers to \"mark-to-market\" a.k.a. the marks. 7 the report will be generated on each business day for cps to download via repo..."
+      },
+      {
+        "rule_id": "MR-012-B-2",
+        "similarity": 0.025834,
+        "previous_rule_type": "calculation",
+        "current_rule_type": "calculation",
+        "previous_anchor": {
+          "paragraph_id": "MR-012-B-2",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "current_anchor": {
+          "paragraph_id": "MR-012-B-2",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "previous_text": "as there is a positive quantity of instrumentid 26883(i.e., 110,000,000), the instrument is under long position and should be included in the subsequent calculation for structured product add-on34.",
+        "current_text": "hkscc - var platform initial margin calculation guide page 18 of 38 portfolio-level liquidation risk add-on = m aximum [0, absolute value of(total market value of b eta hedge position) – hedging market value threshold..."
+      },
+      {
+        "rule_id": "MR-012-B-3",
+        "similarity": 0.352221,
+        "previous_rule_type": "calculation",
+        "current_rule_type": "calculation",
+        "previous_anchor": {
+          "paragraph_id": "MR-012-B-3",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "current_anchor": {
+          "paragraph_id": "MR-012-B-3",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "previous_text": "hkscc will issue circulars to notify the market before any change is made. 34 if the quantity of instrumentid 26883 is negative e.g., it will be excluded from the calculation of structured product add-on. 35 tick size...",
+        "current_text": "as there is a positive quantity of instrumentid 26883(i.e., 110,000,000), the instrument is under long position and should be included in the subsequent calculation for structured product add-on34."
+      },
+      {
+        "rule_id": "MR-012-C-1",
+        "similarity": 0.892355,
+        "previous_rule_type": "calculation",
+        "current_rule_type": "calculation",
+        "previous_anchor": {
+          "paragraph_id": "MR-012-C-1",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "current_anchor": {
+          "paragraph_id": "MR-012-C-1",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "previous_text": "12. when using the information in the \"marginable position report\", please note that: 6 mtm refers to \"mark-to-market\" a.k.a. the marks. 7 the report will be generated on each business day for cps to download via repo...",
+        "current_text": "12. when using the information in the \"marginable position report\", please note that: 6 mtm refers to \"mark-to-market\" a.k.a. the marks. 7 the report will be generated on each business day for cps to download via repo..."
+      },
+      {
+        "rule_id": "MR-012-D-1",
+        "similarity": 0.892355,
+        "previous_rule_type": "calculation",
+        "current_rule_type": "calculation",
+        "previous_anchor": {
+          "paragraph_id": "MR-012-D-1",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "current_anchor": {
+          "paragraph_id": "MR-012-D-1",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "previous_text": "12. when using the information in the \"marginable position report\", please note that: 6 mtm refers to \"mark-to-market\" a.k.a. the marks. 7 the report will be generated on each business day for cps to download via repo...",
+        "current_text": "12. when using the information in the \"marginable position report\", please note that: 6 mtm refers to \"mark-to-market\" a.k.a. the marks. 7 the report will be generated on each business day for cps to download via repo..."
+      }
+    ],
+    "added_rule_candidates": [],
+    "removed_rule_candidates": [],
+    "id_drift_candidates": [
+      {
+        "previous_rule_id": "MR-012-B-4",
+        "current_rule_id": "MR-012-C-2",
+        "similarity": 1.0,
+        "previous_anchor": {
+          "paragraph_id": "MR-012-B-4",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "current_anchor": {
+          "paragraph_id": "MR-012-C-2",
+          "clause_id": "MR-012",
+          "start_page": 8,
+          "end_page": 23
+        },
+        "previous_text": "hkscc will notify the market before any change is made.",
+        "current_text": "hkscc will notify the market before any change is made."
+      }
+    ],
+    "source_anchor_warnings": []
+  },
+  "limitations": [
+    "This is deterministic artifact comparison, not business interpretation.",
+    "Changed candidates require human review before downstream scope decisions.",
+    "Text similarity can be affected by PDF extraction differences and table layout changes.",
+    "ID-drift candidates are heuristic matches and must not be treated as canonical without review."
+  ],
+  "downstream_impact_candidates": [
+    {
+      "area": "maker_checker_bdd",
+      "level": "review_required",
+      "reason": "11 rule-level candidate difference(s) found."
+    },
+    {
+      "area": "artifact_governance",
+      "level": "review_required",
+      "reason": "Rule type distribution changed between versions."
+    }
+  ]
+}

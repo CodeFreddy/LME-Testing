@@ -1,8 +1,8 @@
 # LME Testing — Implementation Plan v3.1
 
-**修订日期：** 2026-04-23  
-**范围：** Stage M（合并）+ Stage 1（真实数据接入）+ Stage 2 已执行任务  
-**说明：** Stage 2 已基于真实数据展开：S2-T01 prompt 校准完成，S2-B1/B2 集成完成，S2-C1 mock API execution bridge 完成，S2-D1 browser-level review UI E2E 完成。
+**修订日期：** 2026-04-26
+**范围：** Stage M（合并）+ Stage 1（真实数据接入）+ Stage 2 已执行任务
+**说明：** Stage 2 已基于真实数据展开：S2-T01 prompt 校准完成，S2-B1/B2 集成完成，S2-C1 mock API execution bridge 完成，S2-C2 IM HKv13 mock bridge 完成，S2-C3 IM HKv14 POC document workflow and modular mock bridge 完成，S2-C4 IM HKv14 promoted downstream slice 完成，S2-D1 browser-level review UI E2E 完成。S2-F1 role-friendly HKv14 impact decision review package generator 已实现。S2-F2 MVP document readiness registry 已实现为 deterministic readiness package。
 
 ---
 ## 如何使用本文档
@@ -43,7 +43,14 @@ Stage 2 规划（Stage 1 完成后展开）
 └── S2-B2: case_compare.py 实现
 └── S2-C1: Mock API execution bridge
 └── S2-C2: Initial Margin HKv13 mock API execution bridge
+└── S2-C3: Initial Margin HKv14 POC document workflow and modular mock API bridge
+└── S2-C4: Initial Margin HKv14 promoted downstream slice
+└── S2-C5: Mock API deliverables location policy
 └── S2-D1: Browser-level review UI E2E
+└── S2-F1: HKv14 role-friendly impact decision review
+└── S2-F2: MVP document readiness registry
+└── S2-F3: MVP input document contract
+└── S2-F4: Rule extraction review workflow merge slice and GUI startup/PDF fix
 ```
 
 ---
@@ -399,6 +406,133 @@ MiniMax API 连接随机断开，全量 322-case 测量无法完成。参见 S2-
 
 ---
 
+### S2-C3 — Initial Margin HKv14 POC Document Workflow And Modular Mock API Bridge
+
+**状态：✅ DONE（2026-04-26）**
+
+**目标：** 在不覆盖 HKv13 preservation baseline 的前提下，将 `Initial Margin Calculation Guide HKv14` 纳入 governed intake，生成 HKv13→HKv14 deterministic diff evidence，并用 shared common package + thin HKv14 wrapper 验证 mock/stub execution bridge reuse。
+
+**为什么现在做：**
+- HKv13 mock API bridge 已完成，可作为 preservation baseline。
+- HKv14 PDF input is available under `docs/materials/Initial Margin Calculation Guide HKv14.pdf`.
+- The POC needed deterministic diff evidence and a bounded downstream decision note before any wrapper work.
+
+**输入契约：**
+- `docs/materials/Initial Margin Calculation Guide HKv14.pdf`
+- `artifacts/im_hk_v13/`
+- Existing HKv13 mock API behavior as preservation baseline
+
+**输出契约：**
+- `artifacts/im_hk_v14/`
+- `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json`
+- `docs/planning/im_hk_v14_diff_report.md`
+- `docs/planning/im_hk_v14_downstream_decision.md`
+- `docs/planning/im_hk_v14_mock_api_validation_plan.md`
+- `deliverables/im_hk_mock_api_common/`
+- `deliverables/im_hk_v14_mock_api/`
+- `deliverables/im_hk_v14_mock_api.zip`
+- `scripts/compare_initial_margin_versions.py`
+
+**实现要点：**
+- `scripts/extract_matching_rules.py` uses `pypdf` as the primary PDF extractor for PDF inputs and writes full extracted `source_from_pdf.md`.
+- `scripts/compare_initial_margin_versions.py` compares governed artifact directories generically despite the Initial Margin filename.
+- HKv14 wrapper reuses shared code in `deliverables/im_hk_mock_api_common/` instead of rebuilding a separate implementation.
+- HKv13 deliverable remains the preservation baseline and must not be overwritten by HKv14 work.
+
+**验收：**
+- [x] HKv14 governed artifacts generated: 38 pages, 10 clauses, 164 atomic rules, 164 semantic rules
+- [x] Deterministic HKv13→HKv14 diff generated and summarized: 10 changed candidates, 0 added, 0 removed, 1 ID drift candidate, 0 source-anchor warnings
+- [x] POC downstream decision note records accepted deterministic candidates
+- [x] HKv14 mock API health/rules labels are HKv14-specific while implementation is shared
+- [x] HKv14 BDD runner passes included feature steps: 37 passed, 0 failed
+- [x] Full unittest discovery passed after package refresh: 193 tests, 1 browser E2E skip when Chrome DevTools unavailable
+- [x] Docs and artifact governance checks passed
+
+**不在范围：**
+- 不声明 HKv14 downstream automation production-ready
+- 不改变 schemas、prompts、default models or roadmap phase boundaries
+- 不实现 future role-friendly decision UI
+- 不替代 Stage 3 real execution environment
+
+**自评：** PASS。HKv14 POC artifacts, deterministic diff evidence, decision note, shared mock implementation, thin wrapper, tests, and governance checks are present. The work remains explicitly bounded to POC/mock/stub bridge validation.
+
+---
+
+### S2-C4 — Initial Margin HKv14 Promoted Downstream Slice
+
+**状态：✅ DONE（2026-04-26）**
+
+**目标：** Promote HKv14 from POC-only continuation into a governed Stage 2 downstream candidate while preserving HKv13 as the stable baseline.
+
+**为什么现在做：**
+- Human project owner explicitly approved promotion.
+- S2-C3 produced governed HKv14 artifacts, deterministic diff evidence, decision note, and a thin HKv14 mock wrapper.
+- Promotion requires a scoped contract before further implementation.
+
+**输入契约：**
+- `docs/planning/im_hk_v14_promotion_scope.md`
+- `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json`
+- `docs/planning/im_hk_v14_downstream_decision.md`
+- `artifacts/im_hk_v14/`
+- `deliverables/im_hk_mock_api_common/`
+- `deliverables/im_hk_v14_mock_api/`
+- `deliverables/im_hk_v13_mock_api/`
+
+**输出契约：**
+- `docs/planning/im_hk_v14_downstream_treatment_mapping.md`
+- updated `docs/planning/im_hk_v14_mock_api_validation_plan.md`
+- updated HKv14 flat-rate validation data/test/BDD label
+- refreshed `deliverables/im_hk_v14_mock_api.zip`
+
+**实现要点：**
+- First implementation action must be deterministic diff candidate mapping.
+- Do not change mock behavior before each accepted diff candidate has a treatment category.
+- Keep HKv13 and HKv14 validation runnable side by side.
+- Keep schema, prompt, and model impact at none unless a separate governed task is opened.
+
+**验收：**
+- [x] 10 changed candidates and 1 ID drift candidate mapped to downstream treatment categories
+- [x] Required HKv14-specific BDD/data/test updates identified and applied
+- [x] HKv13 deliverable remains preserved
+- [x] HKv13 and HKv14 validation commands pass after implementation change
+- [x] Docs and artifact governance checks pass
+
+**不在范围：**
+- 不声明 HKv14 production downstream automation readiness
+- 不替代 Stage 3 real execution environment
+- 不改变 schemas、prompts、default models
+- 不实现 future role-friendly decision UI
+
+**自评：** PASS. Promotion contract, deterministic treatment mapping, HKv14 validation data refresh, side-by-side HKv13/HKv14 validation, and governance checks are complete. The slice remains bounded to mock/stub downstream baseline candidacy.
+
+---
+
+### S2-C5 — Mock API Deliverables Location Policy
+
+**状态：✅ DONE（2026-04-26）**
+
+**目标：** Decide whether current long-lived mock API samples remain under `deliverables/` or move under a future `samples/` or `tools/` path.
+
+**Decision:** Keep current mock API source folders and packaged zips under `deliverables/` for Stage 2.
+
+**Output contract:**
+- `docs/planning/mock_api_deliverables_policy.md`
+
+**Implementation notes:**
+- No directories are moved.
+- Existing validation commands and zip paths remain stable.
+- Revisit before adding a new mock API bridge or promoting mock APIs into maintained internal tooling.
+
+**验收：**
+- [x] Human decision captured
+- [x] No file move authorized
+- [x] Revisit trigger documented
+- [x] Schema/prompt/model/artifact-contract impact documented as none
+
+**自评：** PASS.
+
+---
+
 ### S2-D1 — Browser-Level Review UI E2E
 
 **状态：✅ DONE（2026-04-23）**
@@ -439,6 +573,252 @@ MiniMax API 连接随机断开，全量 322-case 测量无法完成。参见 S2-
 - 不改变 review-session artifact contracts
 
 **自评：** PASS。
+
+---
+
+### S2-F1 — HKv14 Role-Friendly Impact Decision Review
+
+**状态：✅ DONE（2026-04-27）**
+
+**目标：** 将 `docs/architecture/Executable_Engineering_Knowledge_Contract.md` 中 "MVP Scope and Delivery Plan" 的 human-control slice 提升为当前 repo 的小范围 governed implementation path。
+
+Approved slice:
+
+```text
+Initial Margin HKv13 -> HKv14 -> Deterministic Diff -> Role Review -> Structured Decision Record
+```
+
+**为什么现在做：**
+- HKv14 deterministic diff、downstream treatment mapping, and mock/stub bridge decision evidence already exist.
+- Current HKv14 decision handling is Markdown-based; the proposal requires role-friendly review and structured decisions.
+- This slice can improve human review traceability without adding a generic document platform or new LLM stage.
+
+**输入契约：**
+- `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json`
+- `docs/planning/im_hk_v14_downstream_treatment_mapping.md`
+- `artifacts/im_hk_v13/`
+- `artifacts/im_hk_v14/`
+- `docs/planning/im_hk_v14_role_review_plan.md`
+
+**输出契约：**
+- `runs/im_hk_v14/review_decisions/<timestamp>/decision_record.json`
+- `runs/im_hk_v14/review_decisions/<timestamp>/decision_summary.md`
+- `runs/im_hk_v14/review_decisions/<timestamp>/review.html`
+- focused tests for load, save, validation failure, and Markdown export
+
+**实现要点：**
+- Keep the decision record JSON canonical; Markdown is derived export only.
+- Capture reviewer role, reviewer name, decision, rationale, comments, and timestamp.
+- Allowed roles and decisions must be validated deterministically.
+- Prefer existing local review-session patterns where practical.
+- Use atomic writes for structured decision records.
+- Keep deterministic evidence visible.
+
+**验收：**
+- [x] Existing HKv13 baseline artifacts and deliverables are untouched
+- [x] HKv14 remains POC/mock/stub downstream baseline candidate work
+- [x] Every candidate decision links back to deterministic diff evidence or downstream treatment mapping
+- [x] Structured decision record validates deterministically
+- [x] Markdown summary is derived from structured JSON
+- [x] Focused tests cover load, save, validation failure, and export
+- [x] Docs and artifact governance checks pass
+
+**不在范围：**
+- Generic document upload or document library
+- Full workflow engine or role-based permission system
+- New LLM-driven stage
+- Prompt, schema, or default model changes
+- Automatic test case updates or code generation
+- Stage 3 real execution readiness claims
+
+**验证：**
+- `.venv\Scripts\python.exe -m unittest tests.test_im_hk_v14_role_review -v`: passed, 5 tests OK.
+- `.venv\Scripts\python.exe main.py im-hk-v14-role-review --output-dir .tmp_test\s2f1_review --reviewer-name Test --rationale "Planning validation"`: passed, generated 11 candidates.
+- `.venv\Scripts\python.exe -m compileall src\lme_testing tests`: passed.
+
+**自评：** PASS. S2-F1 is implemented as a deterministic local review package generator with canonical JSON, derived Markdown, and local HTML review surface. It remains bounded to HKv14 POC/mock/stub decision review.
+
+---
+
+### S2-F2 — MVP Document Readiness Registry
+
+**状态：✅ IMPLEMENTED（2026-04-29）；deterministic package generated**
+
+**目标：** 将 `docs/architecture/Executable_Engineering_Knowledge_Contract.md` 中 "MVP Scope and Delivery Plan" 的 document registration/readiness slice 提升为当前 repo 的小范围 governed implementation path。
+
+Approved slice:
+
+```text
+Register MVP documents -> validate metadata/readiness -> produce document_readiness.json
+```
+
+**为什么现在做：**
+- Full MVP scope starts with registering Function Spec old/new, Test Plan, and Regression Pack Index before any LLM-assisted mapping.
+- S2-F1 produced reviewed impact decisions; S2-F2 should make the upstream document set explicit and deterministic.
+- A readiness registry gives later MVP work a stable input contract without adding a generic document platform.
+
+**输入契约：**
+- `docs/materials/Initial Margin Calculation Guide HKv13.pdf`
+- `docs/materials/Initial Margin Calculation Guide HKv14.pdf`
+- placeholder entries for Test Plan and Regression Pack Index
+- `docs/planning/mvp_document_readiness_plan.md`
+
+**输出契约：**
+- `evidence/mvp_document_readiness/<timestamp>/document_readiness.json`
+- `evidence/mvp_document_readiness/<timestamp>/document_readiness_summary.md`
+- focused tests for valid registry generation, missing source handling, placeholder handling, and validation failure
+
+**实现证据：**
+- generator: `src/lme_testing/mvp_document_readiness.py`
+- CLI: `python main.py mvp-document-readiness`
+- evidence: `evidence/mvp_document_readiness/20260429T075702Z/`
+- tests: `tests/test_mvp_document_readiness.py`
+
+**实现要点：**
+- Treat Initial Margin HKv13/HKv14 guides as the repo-specific stand-in for the broader proposal's Function Spec old/new pair.
+- Record deterministic file existence and content hash for available source files.
+- Mark unavailable Test Plan and Regression Pack Index as explicit placeholders or blockers.
+- Represent HKv14 superseding HKv13.
+- Keep missing inputs visible in `blockers`; do not silently ignore them.
+
+**验收：**
+- [x] `document_readiness.json` is generated deterministically
+- [x] HKv13 and HKv14 source files are registered with existing-source checks and hashes
+- [x] Placeholder Test Plan and Regression Pack Index records are explicit
+- [x] Missing inputs are visible in `blockers`
+- [x] HKv13 -> HKv14 supersedes relationship is represented
+- [x] Deterministic validation rejects unsupported roles/states and ready records with missing sources
+- [x] Focused tests cover valid registry generation, missing source handling, placeholder handling, and validation failure
+- [x] Docs and artifact governance checks pass
+
+**不在范围：**
+- Generic document upload UI
+- Document storage platform
+- OCR or new parser work
+- New LLM-driven stages, summaries, or maker/checker changes
+- Requirement-to-test mapping, regression-pack mapping, or automation backlog generation
+- JIRA, Zephyr, Git, CI, Confluence, or SharePoint integration
+- Stage 3 real execution readiness claims
+
+**自评：** PASS. S2-F2 is implemented as deterministic document readiness registry generation. Workflow readiness intentionally remains `blocked` until real Test Plan and Regression Pack Index inputs are provided.
+
+---
+
+### S2-F3 — MVP Input Document Contract
+
+**状态：✅ IMPLEMENTED（2026-04-29）；deterministic optional-input validation added**
+
+**目标：** Define the minimum Test Plan and Regression Pack Index input contracts needed to unblock the S2-F2 readiness registry when real files are provided.
+
+Approved slice:
+
+```text
+Define minimal Test Plan and Regression Pack Index contracts -> preserve readiness blockers until real inputs exist
+```
+
+**为什么现在做：**
+- S2-F2 correctly keeps readiness `blocked` because Test Plan and Regression Pack Index are placeholders.
+- Before accepting real files, the repo needs a documented minimum contract for those document classes.
+- The next slice should stay deterministic and avoid jumping into requirement-to-test or regression impact mapping.
+
+**输入契约：**
+- `docs/planning/mvp_document_readiness_plan.md`
+- `evidence/mvp_document_readiness/20260429T075702Z/document_readiness.json`
+- S2-F2 placeholder blocker records for `test_plan` and `regression_pack_index`
+
+**输出契约：**
+- `docs/planning/mvp_input_document_contract_plan.md`
+- optional `mvp-document-readiness --test-plan ... --regression-pack-index ...` inputs
+- focused tests for valid real document inputs, missing source failure, incomplete content blocking, and placeholder fallback
+
+**实现证据：**
+- generator: `src/lme_testing/mvp_document_readiness.py`
+- CLI: `python main.py mvp-document-readiness --test-plan <path> --regression-pack-index <path>`
+- default evidence preserving placeholders: `evidence/mvp_document_readiness/20260429T083211Z/`
+- tests: `tests/test_mvp_document_readiness.py`
+
+**实现要点：**
+- Define required registry metadata for Test Plan and Regression Pack Index.
+- Define minimum human-readable content expectations.
+- Define deterministic readiness/blocking rules.
+- Preserve S2-F2 behavior until real inputs are provided.
+
+**验收：**
+- [x] Minimum Test Plan input contract is documented
+- [x] Minimum Regression Pack Index input contract is documented
+- [x] Readiness and blocking rules are explicit
+- [x] Future implementation expectations preserve S2-F2 boundaries
+- [x] CLI accepts optional real Test Plan and Regression Pack Index paths
+- [x] Placeholder fallback is preserved when real files are omitted
+- [x] Focused tests cover valid real inputs, missing source failure, incomplete content blocking, and placeholder fallback
+- [x] Non-goals exclude mapping, generation, LLM stages, integrations, and Stage 3 readiness claims
+- [x] Docs governance check passes
+
+**不在范围：**
+- Creating real Test Plan or Regression Pack Index documents
+- Generic upload UI or document storage platform
+- OCR, parser, LLM extraction, or LLM summarization work
+- Requirement-to-test mapping, regression impact mapping, or automation backlog generation
+- JIRA, Zephyr, Git, CI, Confluence, or SharePoint integration
+- Prompt, model, schema, maker/checker, or review-session behavior changes
+- Stage 3 real execution readiness claims
+
+**自评：** PASS. S2-F3 is implemented as deterministic optional-input readiness validation. Default workflow readiness remains `blocked` until real Test Plan and Regression Pack Index sources are provided.
+
+---
+
+### S2-F4 — Rule Extraction Review Workflow Merge Slice
+
+**状态：✅ IMPLEMENTED（2026-05-06）；controlled merge slice from CodeFreddy branch, pushed to `main`**
+
+**目标：** Bring in the deterministic document intake and rule artifact review workflow from `CodeFreddy/LME-Testing` `feature/rule-extraction-review` at `b1287a2` without overwriting newer local HKv14/MVP work or silently accepting governed contract changes.
+
+Approved slice:
+
+```text
+Document upload/import -> deterministic rule extraction -> atomic/semantic rule review -> reviewed history -> optional case generation entry point
+```
+
+**输出契约：**
+- `src/lme_testing/rule_extraction.py`
+- `src/lme_testing/rule_workflow_session.py`
+- CLI command `python main.py rule-workflow-session`
+- `tests/test_rule_extraction_review.py`
+- `tests/test_reporting.py`
+- reporting audit/compare navigation support
+- follow-up fix: config fallback for `rule-workflow-session`
+- follow-up fix: `pypdf` primary PDF extraction for the rule workflow GUI
+
+**实现要点：**
+- The import is intentionally not a direct merge; newer local HKv14 and MVP readiness commits are preserved.
+- Prompt, schema, and review decision contract changes from the CodeFreddy branch are not accepted in this slice.
+- Pipeline concurrency is accepted only as serial-compatible API surface; `concurrency > 1` fails visibly until separately governed.
+- The workflow can call existing maker/checker/BDD stages, but it does not introduce a new production LLM stage.
+- `rule-workflow-session` can start with `config/llm_profiles.stub.json` when the historical default `config/llm_profiles.json` is absent.
+- PDF upload/extract in the rule workflow GUI uses `pypdf` first, matching the HKv14 governed intake path, while keeping `pdftotext` as fallback.
+
+**验收：**
+- [x] New rule extraction workflow modules and focused tests are present.
+- [x] CLI exposes `rule-workflow-session`.
+- [x] Existing pipeline/review/session/schema focused tests still pass.
+- [x] No schema, prompt, or default model change is introduced.
+- [x] HKv14 PDF extraction through the rule workflow extractor works without local `pdftotext`.
+- [x] HKv14 GUI smoke path reached `checker_readable.html` and was accepted by human first look.
+- [x] `origin/main` and `CodeFreddy/LME-Testing` `feature/rule-extraction-review` now point to the same `main` commit after guarded branch update.
+
+**不在范围：**
+- Full concurrent maker/checker execution
+- CodeFreddy schema simplification of human review decisions
+- CodeFreddy prompt changes or rewrite prompt promotion
+- Production document platform, generic upload portal, or Stage 3 execution readiness claims
+
+**验证：**
+- `tests.test_rule_extraction_review`: 11 tests OK.
+- `scripts/check_docs_governance.py`: passed.
+- `scripts/check_artifact_governance.py`: passed.
+- HKv14 direct rule workflow extraction found 5 target sections.
+
+**自评：** PASS for this controlled merge slice and follow-up GUI fix package. Broader CodeFreddy changes remain candidates for separate governed review.
 
 ---
 
@@ -486,7 +866,7 @@ MiniMax API 连接随机断开，全量 322-case 测量无法完成。参见 S2-
 def build_audit_trail(session_dir: Path, output_path: Path) -> dict:
     """
     生成审计跟踪 HTML。
-    
+
     输入：session_dir/iterations/<N>/ 下的所有 maker/checker/review 数据
     输出：audit_trail.html（决策链时间线），返回 {"path": str, "rules_count": N}
     """
@@ -505,14 +885,14 @@ def build_audit_trail(session_dir: Path, output_path: Path) -> dict:
 **接口设计：**
 ```python
 def build_case_compare(
-    session_dir: Path, 
-    iteration_a: int, 
-    iteration_b: int, 
+    session_dir: Path,
+    iteration_a: int,
+    iteration_b: int,
     output_path: Path
 ) -> dict:
     """
     生成两个迭代之间的 case 对比 HTML。
-    
+
     用途：rewrite 后查看 case 有何变化
     输出：case_compare.html（并排视图，高亮变化）
     """
@@ -521,4 +901,3 @@ def build_case_compare(
 **触发时机：** 在 `ReviewSessionManager._run_rewrite_job()` 完成后调用（iteration N vs N-1 对比）
 
 **前置：** S2-B1 完成后（共用部分 session 数据读取逻辑）
-

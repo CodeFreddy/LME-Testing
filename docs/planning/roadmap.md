@@ -1,7 +1,7 @@
 # LME Testing — Roadmap v3.1
 
-**修订日期：** 2026-04-23  
-**变更说明：** 在 v3.0 基础上，对齐 S2-T01 v1.5、S2-B1/B2 集成状态，新增 S2-C1 mock API execution bridge，并补充 S2-D1 review UI browser E2E 测试收尾。
+**修订日期：** 2026-04-26
+**变更说明：** 在 v3.1 基础上，记录 HKv14 POC document intake、HKv13→HKv14 deterministic diff、POC downstream decision note, modular HKv14 mock API bridge, S2-F1 role-friendly impact decision review, and approved S2-F2 document readiness registry planning slice。
 
 ---
 
@@ -18,7 +18,12 @@
 | Stage 2 质量提升 | ✅ v1.5 coverage=78.89%（142/180 fully covered）；剩余 gap 为证据约束或 LLM 非决定性 |
 | Mock API execution bridge | ✅ 已交付 `deliverables/lme_mock_api.zip`；BDD/script 可通过 HTTP 调 mock API |
 | Initial Margin HKv13 mock API bridge | ✅ 已交付 `deliverables/im_hk_v13_mock_api/`；用于验证 IM HKv13 BDD/script 到 HTTP mock API 的闭环 |
+| Initial Margin HKv14 promoted slice | ✅ `docs/planning/im_hk_v14_downstream_treatment_mapping.md` 已完成；HKv14 flat-rate validation data 已对齐三项公式 |
+| Mock API deliverables location | ✅ 当前 Stage 2 保持在 `deliverables/`；新增 bridge 前按 `docs/planning/mock_api_deliverables_policy.md` 复审 |
 | Review UI browser E2E | ✅ `tests/test_review_session_browser.py` 覆盖 Review→BDD→Scripts 主路径与可见匹配指标刷新 |
+| HKv14 role-friendly decision review | ✅ S2-F1 local package generator implemented; canonical decision JSON, Markdown summary, and review HTML |
+| MVP document readiness registry | ✅ S2-F2 deterministic registry implemented; evidence at `evidence/mvp_document_readiness/20260429T075702Z/` |
+| Rule extraction review GUI | ✅ S2-F4 `rule-workflow-session` integrated on `main`; HKv14 PDF/rule/scenario review smoke path accepted; CodeFreddy feature branch aligned to `main` |
 | 真实 LME API 接入 | ⏳ ETA 未知（需内部 VM 权限）|
 
 ---
@@ -38,15 +43,15 @@
 
 ## Stage 0 — 框架完成（存档）
 
-**日期：** 2026-04-13/14  
-**说明：** AI 代理 48 小时实现全框架，代码层面完整，验证深度为 2 条规则 POC。  
+**日期：** 2026-04-13/14
+**说明：** AI 代理 48 小时实现全框架，代码层面完整，验证深度为 2 条规则 POC。
 **存档，不再重新进入此阶段。**
 
 ---
 
 ## Stage M — Master 分支合并 ✅ COMPLETE
 
-**完成日期：** 2026-04-19  
+**完成日期：** 2026-04-19
 **目标：** 将同事 master 分支的有效改进合并进 main，同时保留 main 的完整 BDD 和 governance 体系
 
 ### Gate M.1 — 存档 Master 代码 ✅
@@ -55,7 +60,7 @@
 - 将 master zip 解压到此目录 ✅
 - 创建 `vendor/master-branch/README.md` ✅
 
-**验收：** `vendor/master-branch/lme_testing/` 存在，不影响主路径 import  
+**验收：** `vendor/master-branch/lme_testing/` 存在，不影响主路径 import
 **后续：** `vendor/` 目录已删除 — master 分支通过单独 remote 访问
 
 ### Gate M.2 — Cherry-pick P1：UTC 时间戳 ✅
@@ -100,7 +105,7 @@
 
 ## Stage 1 — 真实数据接入与可信基准建立
 
-**时间预估：** 2-4 周（Stage M 完成后开始）  
+**时间预估：** 2-4 周（Stage M 完成后开始）
 **目标：** 让 governance 消费真实数据，建立全量质量基准
 
 ### Gate 1.1 — Schema Signal 数据源修复
@@ -145,7 +150,7 @@
 
 ## Stage 2 — 规模化质量提升 + 功能补全
 
-**前置：** Stage 1 完成  
+**前置：** Stage 1 完成
 **时间预估：** 4-8 周（取决于 Stage 1 发现）
 
 ### 方向 A：基于真实数据的质量提升
@@ -199,7 +204,12 @@
 3. ✅ S2-B1 audit_trail.py + S2-B2 case_compare.py 已实现并集成
 4. ✅ S2-C1 mock API execution bridge 已完成，用于 Stage 3 前验证 BDD/script 调 API 的闭环
 5. ✅ S2-C2 Initial Margin HKv13 mock API execution bridge 已完成，用于验证计算指南领域的 BDD/script 调 API 闭环
-6. ✅ S2-D1 review UI browser E2E 已完成，用于验证 BDD/Scripts tab 的真实浏览器交互与可见指标刷新
+6. ✅ S2-C3 Initial Margin HKv14 POC document workflow and modular mock API bridge 已完成，用于验证 HKv14 governed intake、diff evidence and wrapper reuse
+7. ✅ S2-C4 Initial Margin HKv14 promoted downstream slice 已完成，deterministic treatment mapping and HKv14 validation data refresh passed
+8. ✅ S2-D1 review UI browser E2E 已完成，用于验证 BDD/Scripts tab 的真实浏览器交互与可见指标刷新
+9. ✅ S2-F1 role-friendly HKv14 impact decision review package generator 已实现；canonical JSON is source of truth, Markdown and HTML are derived/review surfaces
+10. ✅ S2-F2 MVP document readiness registry 已实现；canonical `document_readiness.json` and derived summary are under `evidence/mvp_document_readiness/20260429T075702Z/`
+11. ✅ S2-F4 rule extraction review merge slice 已实现并合入/push 到 `main`；document intake + rule artifact review workflow 可通过 `rule-workflow-session` GUI 使用，prompt/schema/concurrency contract changes 未纳入本 slice
 
 详见：`docs/planning/s2t01_coverage_analysis.md`
 
@@ -266,6 +276,49 @@
 
 ---
 
+### 方向 C3：Initial Margin HKv14 POC Document Workflow And Modular Mock API Bridge（新增，已完成）
+
+**S2-C3 — `artifacts/im_hk_v14` + `deliverables/im_hk_v14_mock_api`**
+
+基于 `docs/materials/Initial Margin Calculation Guide HKv14.pdf` 完成 HKv14 governed intake，并用 deterministic comparator 生成 HKv13→HKv14 diff evidence。POC downstream decision note 接受全部 deterministic diff candidates，并通过 shared common package 复用 HKv13 mock bridge 逻辑，输出 thin HKv14 wrapper。
+
+**输出：**
+- `artifacts/im_hk_v14/`
+- `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json`
+- `docs/planning/im_hk_v14_diff_report.md`
+- `docs/planning/im_hk_v14_downstream_decision.md`
+- `docs/planning/im_hk_v14_mock_api_validation_plan.md`
+- `deliverables/im_hk_mock_api_common/`
+- `deliverables/im_hk_v14_mock_api/`
+- `deliverables/im_hk_v14_mock_api.zip`
+
+**验证：**
+- HKv14 extraction: 38 pages, 10 clauses, 164 atomic rules, 164 semantic rules
+- HKv13→HKv14 diff: 10 changed candidates, 0 added, 0 removed, 1 ID drift candidate, 0 source-anchor warnings
+- `python -m unittest tests.test_compare_initial_margin_versions -v`：passed
+- `python -m unittest tests.test_extract_matching_rules -v`：passed
+- `python -m unittest discover -s deliverables\im_hk_v14_mock_api\tests -t deliverables\im_hk_v14_mock_api -v`：3 tests OK；BDD summary 37 passed, 0 failed
+- Full unittest discovery after package refresh: 193 tests OK, 1 browser E2E skip when Chrome DevTools unavailable
+- `python scripts/check_docs_governance.py` and `python scripts/check_artifact_governance.py`：passed
+
+**边界：** 这是 HKv14 POC/mock/stub bridge work，不代表 HKv14 production downstream automation readiness，不改变 schemas、prompts、default models or roadmap phase boundaries。HKv13 mock API deliverable remains the preservation baseline.
+
+---
+
+### 方向 C4：Initial Margin HKv14 Promoted Downstream Slice（新增，已批准）
+
+**S2-C4 — `docs/planning/im_hk_v14_promotion_scope.md`**
+
+HKv14 已由 human project owner 明确批准从 POC-only continuation promoted into a governed Stage 2 implementation slice。该 slice 的目标是让 HKv14 成为 reviewable downstream baseline candidate for the Initial Margin mock/stub bridge。
+
+**当前状态：** complete.
+
+**完成内容：** deterministic mapping of 10 changed candidates and 1 ID drift candidate from `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json` into downstream treatment categories. The only immediate HKv14 wrapper update required was the flat-rate validation data refresh to the HKv14 three-term example.
+
+**边界：** Promotion does not authorize production readiness claims, Stage 3 real execution claims, prompt/model changes, schema changes, or replacement of the HKv13 preservation baseline.
+
+---
+
 ### 方向 D：Review UI 流程自动化验证（新增，已完成）
 
 **S2-D1 — Browser-level Review UI E2E**
@@ -289,9 +342,101 @@
 
 ---
 
+### 方向 F：Role-Friendly Impact Decision Review（新增，已批准规划）
+
+**S2-F1 — HKv13 → HKv14 Role-Friendly Impact Decision Review**
+
+从 `docs/architecture/Executable_Engineering_Knowledge_Contract.md` 的 "MVP Scope and Delivery Plan" 中提升一个小范围 MVP slice 到当前 governed roadmap。
+
+Approved slice:
+
+`Initial Margin HKv13 -> HKv14 -> Deterministic Diff -> Role Review -> Structured Decision Record`
+
+**输出：**
+- `docs/planning/im_hk_v14_role_review_plan.md`
+- `src/lme_testing/im_hk_v14_role_review.py`
+- `tests/test_im_hk_v14_role_review.py`
+- CLI command `python main.py im-hk-v14-role-review`
+- generated review packages under `runs/im_hk_v14/review_decisions/<timestamp>/`
+
+**状态：** implemented as local deterministic review package generator.
+
+**边界：** This implementation does not authorize a generic document platform, new LLM stage, prompt/model change, schema change, automatic test/code updates, Stage 3 readiness claim, or replacement of the HKv13 preservation baseline. The structured decision record is canonical; Markdown summaries and review HTML are derived/review surfaces.
+
+---
+
+### 方向 F2：MVP Document Readiness Registry（新增，已实现）
+
+**S2-F2 — MVP Document Readiness Registry**
+
+从 `docs/architecture/Executable_Engineering_Knowledge_Contract.md` 的 "MVP Scope and Delivery Plan" 中提升 input registration and readiness validation slice 到当前 governed roadmap。
+
+Approved slice:
+
+`Register MVP documents -> validate metadata/readiness -> produce document_readiness.json`
+
+**输出：**
+- `docs/planning/mvp_document_readiness_plan.md`
+- generator: `src/lme_testing/mvp_document_readiness.py`
+- CLI: `python main.py mvp-document-readiness`
+- evidence: `evidence/mvp_document_readiness/20260429T075702Z/`
+- tests: `tests/test_mvp_document_readiness.py`
+
+**状态：** implemented as deterministic S2-F2 registry generation. Overall readiness remains `blocked` because Test Plan and Regression Pack Index are explicit placeholders.
+
+**边界：** This promotion does not authorize generic upload UI, document platform, OCR/parser work, LLM summarization, requirement-to-test mapping, regression-pack mapping, automation backlog generation, external tool integration, or Stage 3 readiness claims.
+
+---
+
+### 方向 F3：MVP Input Document Contract（新增，已实现）
+
+**S2-F3 — MVP Test Plan and Regression Pack Index Input Contract**
+
+S2-F2 surfaced two explicit readiness blockers: Test Plan and Regression Pack Index are required MVP inputs but no real sources are currently registered. S2-F3 defines the minimum document contract for those inputs before implementation tries to mark them ready.
+
+Approved slice:
+
+`Define minimal Test Plan and Regression Pack Index contracts -> preserve readiness blockers until real inputs exist`
+
+**输出计划：**
+- `docs/planning/mvp_input_document_contract_plan.md`
+- `mvp-document-readiness` optional inputs: `--test-plan` and `--regression-pack-index`
+- default evidence preserving blockers: `evidence/mvp_document_readiness/20260429T083211Z/`
+- tests: `tests/test_mvp_document_readiness.py`
+
+**状态：** implemented as deterministic optional-input validation. Default readiness remains `blocked` until real Test Plan and Regression Pack Index sources are provided.
+
+**边界：** This planning slice does not authorize creating documents, generic upload UI, document platform, OCR/parser work, LLM summarization, requirement-to-test mapping, regression impact mapping, automation backlog generation, external tool integration, prompt/model/schema changes, or Stage 3 readiness claims.
+
+---
+
+### 方向 F4：Rule Extraction Review Workflow Merge Slice（新增，已实现）
+
+**S2-F4 — CodeFreddy Rule Extraction Review Workflow Integration**
+
+从 `CodeFreddy/LME-Testing` 的 `feature/rule-extraction-review` at `b1287a2` 中纳入一个受控 merge slice：
+
+`Document upload/import -> deterministic rule artifact extraction -> business-friendly atomic/semantic rule review -> reviewed rule history -> optional case generation entry point`
+
+**输出：**
+- `src/lme_testing/rule_extraction.py`
+- `src/lme_testing/rule_workflow_session.py`
+- CLI command `python main.py rule-workflow-session`
+- `tests/test_rule_extraction_review.py`
+- `tests/test_reporting.py`
+- reporting audit/compare navigation support in `src/lme_testing/reporting.py`
+
+**状态：** implemented, committed to `main`, pushed to `origin/main`, and used for an HKv14 GUI smoke review. `CodeFreddy/LME-Testing` `feature/rule-extraction-review` was force-with-lease updated to the same `main` commit after the controlled merge.
+
+**Follow-up fixes:** `rule-workflow-session` falls back to `config/llm_profiles.stub.json` when the old default `config/llm_profiles.json` is absent, and the GUI PDF extractor now uses `pypdf` before falling back to `pdftotext`.
+
+**边界：** This slice does not accept CodeFreddy's prompt/schema contract changes, does not remove `reject` or `block_recommendation_review` from the governed review contract, does not enable concurrent maker/checker execution beyond serial compatibility, does not add a new production LLM stage, and does not claim Stage 3 execution readiness.
+
+---
+
 ## Stage 3 — 真实执行环境接入
 
-**前置：** Stage 2 完成 + 获得 LME 内部 VM 访问权限  
+**前置：** Stage 2 完成 + 获得 LME 内部 VM 访问权限
 **当前 ETA：** 未知
 
 核心工作：
@@ -324,4 +469,3 @@
 3. **master 的改进通过 cherry-pick 合并**，不整体覆盖
 4. **broken import（如 audit_trail/case_compare）记录为新任务**，不作为"已完成"合并
 5. **文件编码问题（如 providers.py 的 ??? 乱码）在合并前修复**
-

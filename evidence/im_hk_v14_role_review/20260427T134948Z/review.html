@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>HKv14 Impact Decision Review</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; color: #1f2933; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #c7d0d9; padding: 8px; vertical-align: top; }
+    th { background: #eef3f7; text-align: left; }
+    textarea { min-height: 64px; width: 100%; }
+    input, select { width: 100%; box-sizing: border-box; }
+    small { color: #52606d; }
+  </style>
+</head>
+<body>
+  <h1>HKv14 Impact Decision Review</h1>
+  <p>This local review surface is generated from deterministic HKv13 -> HKv14 evidence. The canonical record is <code>decision_record.json</code>.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Candidate</th><th>Type</th><th>Treatment</th><th>Source Anchor</th>
+        <th>Role</th><th>Reviewer</th><th>Decision</th><th>Rationale</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>MR-012-A-1</code><br>Rule text changed between HKv13 and HKv14.</td><td>changed_rule</td><td>requires_hkv14_validation_data_update<br><small>Update HKv14 validation data source anchor and sample portfolio values. No shared API logic change.</small></td><td>MR-012-A-1 / MR-012 / p.8-23</td><td><select><option>Automation Lead</option><option>BA</option><option>PM / Release Owner</option><option>QA Lead</option></select></td><td><input value="" placeholder="Reviewer name"></td><td><select><option>approve</option><option>defer</option><option>reject</option><option>request_rework</option></select></td><td><textarea placeholder="Decision rationale"></textarea></td></tr>
+<tr><td><code>MR-012-A-3</code><br>Rule text changed between HKv13 and HKv14.</td><td>changed_rule</td><td>already_covered_by_shared_bridge<br><small>Existing MTM split behavior remains sufficient for mock/stub bridge; record as covered.</small></td><td>MR-012-A-3 / MR-012 / p.8-23</td><td><select><option>Automation Lead</option><option>BA</option><option>PM / Release Owner</option><option>QA Lead</option></select></td><td><input value="" placeholder="Reviewer name"></td><td><select><option>approve</option><option>defer</option><option>reject</option><option>request_rework</option></select></td><td><textarea placeholder="Decision rationale"></textarea></td></tr>
+<tr><td><code>MR-012-A-4</code><br>Rule text changed between HKv13 and HKv14.</td><td>changed_rule</td><td>already_covered_by_shared_bridge<br><small>Existing MTM requirement treatment remains sufficient for mock/stub bridge; no code change.</small></td><td>MR-012-A-4 / MR-012 / p.8-23</td><td><select><option>Automation Lead</option><option>BA</option><option>PM / Release Owner</option><option>QA Lead</option></select></td><td><input value="" placeholder="Reviewer name"></td><td><select><option>approve</option><option>defer</option><option>reject</option><option>request_rework</option></select></td><td><textarea placeholder="Decision rationale"></textarea></td></tr>
+<tr><td><code>MR-012-A-5</code><br>Rule type changed from calculation to permission.</td><td>changed_rule</td><td>already_covered_by_shared_bridge<br><small>Existing position limit add-on mock value already uses `487,332`; no code change.</small></td><td>MR-012-A-5 / MR-012 / p.8-23</td><td><select><option>Automation Lead</option><option>BA</option><option>PM / Release Owner</option><option>QA Lead</option></select></td><td><input value="" placeholder="Reviewer name"></td><td><select><option>approve</option><option>defer</option><option>reject</option><option>request_rework</option></select></td><td><textarea placeholder="Decision rationale"></textarea></td></tr>
+<tr><td><code>MR-012-A-9</code><br>Rule text changed between HKv13 and HKv14.</td><td>changed_rule</td><td>already_covered_by_shared_bridge<br><small>Existing total margin aggregation behavior remains valid; future full-total test may assert HKv14 value.</small></td><td>MR-012-A-9 / MR-012 / p.8-23</td><td><select><option>Automation Lead</option><option>BA</option><option>PM / Release Owner</option><option>QA Lead</option></select></td><td><input value="" placeholder="Reviewer name"></td><td><select><option>approve</option><option>defer</option><option>reject</option><option>request_rework</option></select></td><td><textarea placeholder="Decision rationale"></textarea></td></tr>
+<tr><td><code>MR-012-B-1</code><br>Rule text changed between HKv13 and HKv14.</td><td>changed_rule</td><td>requires_hkv14_validation_data_update<br><small>Same HKv14 flat-rate sample update as `MR-012-A-1`.</small></td><td>MR-012-B-1 / MR-012 / p.8-23</td><td><select><option>Automation Lead</option><option>BA</option><option>PM / Release Owner</option><option>QA Lead</option></select></td><td><input value="" placeholder="Reviewer name"></td><td><select><option>approve</option><option>defer</option><option>reject</option><option>request_rework</option></select></td><td><textarea placeholder="Decision rationale"></textarea></td></tr>
+<tr><td><code>MR-012-B-2</code><br>Rule text changed between HKv13 and HKv14.</td><td>changed_rule</td><td>deferred_domain_clarification<br><small>Treat as extraction/table alignment drift; do not change behavior until domain review.</small></td><td>MR-012-B-2 / MR-012 / p.8-23</td><td><select><option>Automation Lead</option><option>BA</option><option>PM / Release Owner</option><option>QA Lead</option></select></td><td><input value="" placeholder="Reviewer name"></td><td><select><option>approve</option><option>defer</option><option>reject</option><option>request_rework</option></select></td><td><textarea placeholder="Decision rationale"></textarea></td></tr>
+<tr><td><code>MR-012-B-3</code><br>Rule text changed between HKv13 and HKv14.</td><td>changed_rule</td><td>already_covered_by_shared_bridge<br><small>Existing structured product inclusion behavior remains valid; no HKv14-specific code change.</small></td><td>MR-012-B-3 / MR-012 / p.8-23</td><td><select><option>Automation Lead</option><option>BA</option><option>PM / Release Owner</option><option>QA Lead</option></select></td><td><input value="" placeholder="Reviewer name"></td><td><select><option>approve</option><option>defer</option><option>reject</option><option>request_rework</option></select></td><td><textarea placeholder="Decision rationale"></textarea></td></tr>
+<tr><td><code>MR-012-C-1</code><br>Rule text changed between HKv13 and HKv14.</td><td>changed_rule</td><td>requires_hkv14_validation_data_update<br><small>Same HKv14 flat-rate sample update as `MR-012-A-1`.</small></td><td>MR-012-C-1 / MR-012 / p.8-23</td><td><select><option>Automation Lead</option><option>BA</option><option>PM / Release Owner</option><option>QA Lead</option></select></td><td><input value="" placeholder="Reviewer name"></td><td><select><option>approve</option><option>defer</option><option>reject</option><option>request_rework</option></select></td><td><textarea placeholder="Decision rationale"></textarea></td></tr>
+<tr><td><code>MR-012-D-1</code><br>Rule text changed between HKv13 and HKv14.</td><td>changed_rule</td><td>requires_hkv14_validation_data_update<br><small>Same HKv14 flat-rate sample update as `MR-012-A-1`.</small></td><td>MR-012-D-1 / MR-012 / p.8-23</td><td><select><option>Automation Lead</option><option>BA</option><option>PM / Release Owner</option><option>QA Lead</option></select></td><td><input value="" placeholder="Reviewer name"></td><td><select><option>approve</option><option>defer</option><option>reject</option><option>request_rework</option></select></td><td><textarea placeholder="Decision rationale"></textarea></td></tr>
+<tr><td><code>MR-012-B-4 -&gt; MR-012-C-2</code><br>Rule text appears unchanged but the rule id drifted between versions.</td><td>id_drift</td><td>advisory_reference_only<br><small>Preserve as ID drift advisory; no executable mock behavior change.</small></td><td>MR-012-C-2 / MR-012 / p.8-23</td><td><select><option>Automation Lead</option><option>BA</option><option>PM / Release Owner</option><option>QA Lead</option></select></td><td><input value="" placeholder="Reviewer name"></td><td><select><option>approve</option><option>defer</option><option>reject</option><option>request_rework</option></select></td><td><textarea placeholder="Decision rationale"></textarea></td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

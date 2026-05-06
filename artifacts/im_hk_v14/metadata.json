@@ -1,0 +1,13 @@
+{
+  "doc_id": "im_hk_v14",
+  "doc_title": "Initial Margin Calculation Guide HKv14",
+  "doc_version": "HKv14",
+  "source_path": "docs\\materials\\Initial Margin Calculation Guide HKv14.pdf",
+  "source_format": "pdf",
+  "extraction_method": "pypdf_page_text_v1",
+  "document_class": "calculation_guide",
+  "page_count": 38,
+  "clause_count": 10,
+  "atomic_rule_count": 164,
+  "extracted_source_path": "artifacts\\im_hk_v14\\source_from_pdf.md"
+}

@@ -42,8 +42,8 @@ Before making substantial changes, read these files in order:
 1. `AGENTS.md`
 2. `README.md`
 3. `docs/index.md`
-4. `docs/planning/roadmap.md` (v3.1 - Stage 2 complete, mock execution bridge added)
-5. `docs/planning/implementation_plan.md` (v3.0)
+4. `docs/planning/roadmap.md` (v3.1 - Stage 2 current through HKv14, S2-F1/F4 review workflows, and S2-F2/F3 document readiness)
+5. `docs/planning/implementation_plan.md` (v3.1)
 6. `docs/governance/acceptance.md`
 7. `docs/architecture/architecture.md` (v3.1)
 
@@ -57,6 +57,18 @@ If the task touches extraction or rule artifacts, also read:
 
 - `docs/guides/rule_extraction_script_guide.md`
 - `docs/architecture/rule_model_and_parsing_design.md`
+
+If the task touches HKv14 role-friendly impact decision review, also read:
+
+- `docs/planning/im_hk_v14_role_review_plan.md`
+
+If the task touches MVP document readiness, also read:
+
+- `docs/planning/mvp_document_readiness_plan.md`
+
+If the task touches the CodeFreddy rule extraction review workflow, also read:
+
+- `docs/planning/implementation_plan.md` section `S2-F4`
 
 ---
 
@@ -75,6 +87,29 @@ Recent commit subjects:
 ## What Was Just Done
 
 Recent completed work:
+
+- **S2-F4 CodeFreddy rule extraction review workflow and GUI fixes (2026-05-06)**
+  - Integrated the controlled CodeFreddy `feature/rule-extraction-review` slice into `main` without overwriting newer HKv14/MVP work
+  - Added `rule-workflow-session` local GUI for source upload/import, deterministic extraction, atomic/semantic rule review, review history, reviewed artifact saving, and optional case generation
+  - Preserved governed review-session contracts; CodeFreddy prompt/schema/review-decision/concurrency changes remain out of scope
+  - Follow-up fixes: missing `config/llm_profiles.json` falls back to `config/llm_profiles.stub.json` for the GUI, and PDF extraction uses `pypdf` before `pdftotext`
+  - HKv14 GUI smoke path reached `checker_readable.html` and was accepted by human first look
+  - Pushed to `origin/main`; CodeFreddy `feature/rule-extraction-review` was guarded-updated to the same `main` commit
+  - Validation: `tests.test_rule_extraction_review` 11 OK, docs/artifact governance passed
+
+- **S2-F2 MVP document readiness registry planning (2026-04-27)**
+  - Human approved promotion of the next small MVP slice from `docs/architecture/Executable_Engineering_Knowledge_Contract.md`
+  - Approved slice: Register MVP documents -> validate metadata/readiness -> produce document_readiness.json
+  - Planning doc: `docs/planning/mvp_document_readiness_plan.md`
+  - Implementation not started; no schemas, prompts, models, or pipeline behavior changed
+
+- **S2-F1 role-friendly HKv14 impact decision review package (2026-04-27)**
+  - Added deterministic package generator `src/lme_testing/im_hk_v14_role_review.py`
+  - Added CLI command `python main.py im-hk-v14-role-review`
+  - Generated actual review package under `runs/im_hk_v14/review_decisions/20260427T134948Z/`
+  - Copied review evidence to `evidence/im_hk_v14_role_review/20260427T134948Z/`
+  - Human POC decisions: 11 approved, 11 recorded, 0 open items
+  - Validation: full unittest discovery passed with 198 tests, 1 browser skip; docs/artifact governance passed
 
 - **S2-T01 v1.5 maker + checker run (2026-04-21)**
   - MAKER_PROMPT_VERSION 1.4 -> 1.5, CHECKER_PROMPT_VERSION 1.2 -> 1.3
@@ -112,7 +147,7 @@ Recent completed work:
 
 ## Current Repo State
 
-**Stage M (master branch merge) COMPLETED 2026-04-19.** Stage 2 Direction A (S2-T01) COMPLETE. S2-B1/B2 INTEGRATED. S2-C1 MOCK API EXECUTION BRIDGE COMPLETE.
+**Stage M (master branch merge) COMPLETED 2026-04-19.** Stage 2 Direction A (S2-T01) COMPLETE. S2-B1/B2 INTEGRATED. S2-C1 MOCK API EXECUTION BRIDGE COMPLETE. S2-C2 IM HKv13 MOCK API BRIDGE COMPLETE. S2-C3 IM HKv14 POC DOCUMENT WORKFLOW AND MODULAR MOCK API BRIDGE COMPLETE. S2-C4 IM HKv14 PROMOTED DOWNSTREAM SLICE COMPLETE. S2-C5 MOCK API DELIVERABLES LOCATION POLICY COMPLETE. S2-F1 HKV14 ROLE-FRIENDLY IMPACT DECISION REVIEW PACKAGE COMPLETE. S2-F2 MVP DOCUMENT READINESS REGISTRY COMPLETE. S2-F3 MVP INPUT DOCUMENT CONTRACT COMPLETE. S2-F4 RULE EXTRACTION REVIEW GUI INTEGRATED.
 
 Key repo state:
 
@@ -122,6 +157,17 @@ Key repo state:
 - `pipelines.py` + `providers.py`: error surfacing and retry logic implemented
 - Evidence preserved in `evidence/` directory
 - Mock API bridge preserved in `deliverables/lme_mock_api/` and documented in `docs/planning/mock_api_validation_plan.md`
+- Initial Margin HKv14 POC evidence preserved in `artifacts/im_hk_v14/`, `evidence/im_hk_v14_diff/`, `docs/planning/im_hk_v14_diff_report.md`, `docs/planning/im_hk_v14_downstream_decision.md`, and `docs/planning/im_hk_v14_mock_api_validation_plan.md`
+- Initial Margin HKv14 promotion scope is documented in `docs/planning/im_hk_v14_promotion_scope.md`
+- Initial Margin HKv14 downstream treatment mapping is documented in `docs/planning/im_hk_v14_downstream_treatment_mapping.md`
+- Initial Margin HKv14 role-friendly impact decision review is implemented in `src/lme_testing/im_hk_v14_role_review.py`; `decision_record.json` is canonical and Markdown/HTML are derived review artifacts
+- S2-F1 review evidence is preserved in `evidence/im_hk_v14_role_review/20260427T134948Z/`; all 11 candidates are approved and recorded for POC purpose with 0 open items
+- S2-F2 MVP document readiness registry is implemented in `src/lme_testing/mvp_document_readiness.py`; readiness remains blocked by missing real Test Plan and Regression Pack Index unless optional real inputs are provided
+- S2-F3 MVP input document contract and optional-input validation are implemented for Test Plan and Regression Pack Index
+- S2-F4 rule extraction review GUI is implemented in `src/lme_testing/rule_workflow_session.py`; `rule-workflow-session` can start with stub config fallback and uses `pypdf` for HKv14 PDF extraction
+- Modular HKv14 mock bridge preserved in `deliverables/im_hk_mock_api_common/` and `deliverables/im_hk_v14_mock_api/`; HKv13 deliverable remains the preservation baseline
+- Mock API deliverables policy is documented in `docs/planning/mock_api_deliverables_policy.md`; current Stage 2 bridge samples stay under `deliverables/` and this policy should be revisited before adding a new mock bridge or promoting the bridges into maintained tools
+- Remote status as of 2026-05-06: `origin/main` and `CodeFreddy/LME-Testing` `feature/rule-extraction-review` both point to the latest local `main` commit
 - Phase 1/2 acceptance gates are updated in `docs/governance/acceptance.md`; Stage 3 real LME API remains blocked
 
 Governance checks available:
@@ -134,11 +180,13 @@ Governance checks available:
 
 ## Recommended Next Step
 
-**Stage 2 complete (S2-T01 at 78.89%, S2-B1/B2 integrated). Remaining:**
+**Stage 2 is current through completed S2-F4 rule extraction review GUI integration. Remaining:**
 
-1. **Decide whether to keep `deliverables/lme_mock_api/` as a long-lived sample or move it under a future `samples/`/`tools/` path.**
-2. **LLM non-determinism stabilization**: SR-MR-015-B3-4 boundary and SR-MR-071-C-1 negative still fluctuate - multi-run voting or consolidated scenario design.
-3. **Stage 3**: Blocked on LME VM access (ETA unknown); replace mock API target with real LME API when access is available.
+1. **Stage 3**: Blocked on LME VM access (ETA unknown); replace mock API target with real LME API only when access is available.
+2. **Real MVP input documents**: Provide real Test Plan and Regression Pack Index if readiness should move beyond placeholder/blocked status.
+3. **LLM non-determinism stabilization**: SR-MR-015-B3-4 boundary and SR-MR-071-C-1 negative still fluctuate - multi-run voting or consolidated scenario design, if separately approved with benchmark cost/benefit.
+4. **Broader CodeFreddy changes**: Full concurrency, rewrite prompt/schema simplification, and review-decision contract changes require separate governed approval and benchmark evidence.
+5. **Before adding any new mock API bridge**, revisit `docs/planning/mock_api_deliverables_policy.md` and decide whether `deliverables/` remains the right long-lived location.
 
 ---
 
@@ -158,6 +206,7 @@ Governance checks available:
 - `docs/planning/roadmap.md` - current Stage 2 priorities
 - `docs/architecture/architecture.md` - system architecture and module boundaries
 - `docs/planning/mock_api_validation_plan.md` - S2-C1 mock execution bridge
+- `docs/planning/mock_api_deliverables_policy.md` - current policy for mock bridge source and zip locations
 - `docs/references/Claude-roadmap-compare.md` - historical comparison
 
 Treat reference files as non-normative unless their content is promoted into the official docs.

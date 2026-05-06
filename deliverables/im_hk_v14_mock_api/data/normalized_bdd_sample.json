@@ -1,0 +1,33 @@
+{
+  "metadata": {
+    "source_document": "Initial Margin Calculation Guide HKv13",
+    "source_artifact": "artifacts/im_hk_v13/semantic_rules.json",
+    "mock_package": "deliverables/im_hk_v13_mock_api",
+    "execution_mode": "deterministic_mock_http"
+  },
+  "features": [
+    {
+      "name": "Initial Margin HKv13 executable mock validation",
+      "scenarios": [
+        {
+          "rule_id": "IM-HK13-RPF",
+          "name": "Risk Parameter File contains required fields",
+          "steps": [
+            "Given an Initial Margin Risk Parameter File contains required global fields and supported FieldType records",
+            "When the risk parameter file is validated",
+            "Then the risk parameter file validation is accepted"
+          ]
+        },
+        {
+          "rule_id": "IM-HK13-ROUND",
+          "name": "Aggregated market risk component is rounded up",
+          "steps": [
+            "Given market risk total is below a rounding unit",
+            "When the margin is aggregated",
+            "Then the market risk is rounded up before offsets and add-ons"
+          ]
+        }
+      ]
+    }
+  ]
+}

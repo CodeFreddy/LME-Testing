@@ -352,6 +352,110 @@ Evidence：
 
 ---
 
+## Stage 2 Extension — Governed HKv14 Role Review Slice
+
+### Gate S2-F1：HKv14 Role-Friendly Impact Decision Review
+
+**Verification Type 目标：** `stub_verified` for local UI/review surface and deterministic validation; no real execution readiness claim.
+
+**状态：** ✅ COMPLETE（local deterministic package generator）
+
+**Source plan：**
+- `docs/planning/im_hk_v14_role_review_plan.md`
+
+**验收标准：**
+- Existing HKv13 baseline artifacts and deliverables remain untouched. ✅
+- HKv14 remains scoped as POC/mock/stub downstream baseline candidate work. ✅
+- Every reviewed candidate links back to deterministic HKv13→HKv14 diff evidence or documented downstream treatment mapping. ✅
+- Structured decision record JSON is canonical and validates deterministically. ✅
+- Markdown decision summary is derived from the structured decision record. ✅
+- Reviewer role, reviewer name, decision, rationale, comments, and timestamp are captured. ✅
+- Allowed role and decision values are enforced. ✅
+- Focused tests cover load, save, validation failure, and Markdown export. ✅
+- Docs governance and artifact governance checks pass. ✅
+
+**Evidence（2026-04-27）：**
+- `src/lme_testing/im_hk_v14_role_review.py`
+- `tests/test_im_hk_v14_role_review.py`
+- CLI command: `python main.py im-hk-v14-role-review`
+- Generated review package contains canonical `decision_record.json`, derived `decision_summary.md`, and local `review.html`.
+- `.venv\Scripts\python.exe -m unittest tests.test_im_hk_v14_role_review -v`: passed, 5 tests OK.
+
+**Non-acceptance boundaries：**
+- No new LLM-driven stage is accepted under this gate.
+- No prompt, schema, or default model change is accepted under this gate.
+- No automatic test case update, automatic code generation, generic document platform, or Stage 3 real execution claim is accepted under this gate.
+
+---
+
+## Stage 2 Extension — MVP Document Readiness Slice
+
+### Gate S2-F2：MVP Document Readiness Registry
+
+**Verification Type 目标：** `stub_verified` for deterministic local artifact generation and validation; no document platform or real execution readiness claim.
+
+**状态：** 🔄 PLANNING APPROVED（implementation not started）
+
+**Source plan：**
+- `docs/planning/mvp_document_readiness_plan.md`
+
+**验收标准：**
+- `document_readiness.json` is generated deterministically.
+- HKv13 and HKv14 Initial Margin source files are registered with source-exists checks and hashes.
+- Placeholder Test Plan and Regression Pack Index records are explicit and marked `placeholder` or `blocked`.
+- Missing inputs are visible in `blockers`.
+- HKv14 superseding HKv13 is represented.
+- Deterministic validation rejects unsupported document roles, unsupported readiness states, missing required metadata, and missing sources marked as ready.
+- Focused tests cover valid registry generation, missing source handling, placeholder handling, and validation failure.
+- Docs governance and artifact governance checks pass.
+
+**Non-acceptance boundaries：**
+- No generic upload UI or document platform is accepted under this gate.
+- No new LLM-driven stage, prompt change, schema change, or default model change is accepted under this gate.
+- No requirement-to-test mapping, regression-pack mapping, automation backlog generation, external tool integration, or Stage 3 real execution claim is accepted under this gate.
+
+---
+
+## Stage 2 Extension — Rule Extraction Review Workflow Merge Slice
+
+### Gate S2-F4：Rule Extraction Review Workflow Integration
+
+**Verification Type：** `stub_verified` for deterministic local workflow surfaces and focused unit coverage; no real execution readiness claim.
+
+**状态：** ✅ COMPLETE（controlled merge slice, pushed to `main`）
+
+**验收标准：**
+- CodeFreddy branch work is merged by understanding, not by overwriting local HKv14/MVP readiness work. ✅
+- `rule-workflow-session` CLI command is available. ✅
+- Deterministic source upload/import, rule extraction, rule review history, and reviewed artifact saving are covered by focused tests. ✅
+- Reporting can render compare and audit navigation links. ✅
+- Existing focused pipeline, review-session, and schema tests still pass. ✅
+- Schema, prompt, and default model impact is none for this slice. ✅
+- Concurrency beyond serial execution is not silently enabled. ✅
+- `rule-workflow-session` starts when the old default `config/llm_profiles.json` is absent by falling back to the committed stub config. ✅
+- HKv14 PDF upload/extract path works through `pypdf` without requiring local Poppler/`pdftotext`. ✅
+- HKv14 GUI smoke path reached generated checker review output and was accepted by human first look. ✅
+- `origin/main` and `CodeFreddy/LME-Testing` `feature/rule-extraction-review` are aligned to the same committed `main` SHA after guarded branch update. ✅
+
+**Evidence（2026-05-06）：**
+- `src/lme_testing/rule_extraction.py`
+- `src/lme_testing/rule_workflow_session.py`
+- `tests/test_rule_extraction_review.py`
+- `tests/test_reporting.py`
+- `python main.py rule-workflow-session --help`: command available.
+- Focused tests passed: `tests.test_rule_extraction_review`, `tests.test_reporting`, `tests.test_pipelines`, `tests.test_review_session`, `tests.test_schemas`.
+- Follow-up verification passed: `tests.test_rule_extraction_review` (11 tests OK), docs governance, artifact governance.
+- HKv14 direct extraction through `lme_testing.rule_extraction.extract_rule_artifacts` found the 5 target calculation sections.
+- Remote push verification showed `origin/main` and CodeFreddy `feature/rule-extraction-review` at the same `main` commit.
+
+**Non-acceptance boundaries：**
+- No new production LLM-driven stage is accepted under this gate.
+- No CodeFreddy prompt or schema contract change is accepted under this gate.
+- No removal of `reject` or `block_recommendation_review` from the existing governed review contract is accepted under this gate.
+- No concurrent maker/checker execution or Stage 3 real execution claim is accepted under this gate.
+
+---
+
 ## Phase 3 — Execution Readiness
 
 **完成日期：** 2026-04-14（代码实现）  
@@ -535,6 +639,70 @@ Evidence：
 - Section 3.2.4.2 Flat Rate Margin POC：expected flat rate margin `15,180,000`
 
 **状态：** ✅ COMPLETE（mock/stub execution bridge；真实 Stage 3 仍阻塞）
+
+---
+
+### Gate S2.6：Initial Margin HKv14 POC Document Workflow And Modular Mock API Bridge
+
+**Verification Type：** `stub_verified`
+
+**验收标准：**
+- HKv14 PDF input produces governed artifacts without weakening artifact contracts
+- HKv13→HKv14 deterministic diff evidence is generated and reviewable
+- POC downstream decision note records accepted deterministic diff candidates
+- HKv14 mock bridge reuses shared common implementation and keeps HKv13 deliverable preserved
+- BDD step definitions call the HKv14 mock API through HTTP
+- README、源码、zip 交付物存在
+- 文档明确 HKv14 POC bridge 不等于 production downstream automation readiness
+
+**Evidence（2026-04-26）：**
+- `artifacts/im_hk_v14/`
+- `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json`
+- `docs/planning/im_hk_v14_diff_report.md`
+- `docs/planning/im_hk_v14_downstream_decision.md`
+- `docs/planning/im_hk_v14_mock_api_validation_plan.md`
+- `deliverables/im_hk_mock_api_common/`
+- `deliverables/im_hk_v14_mock_api/`
+- `deliverables/im_hk_v14_mock_api.zip`
+- `.venv\Scripts\python.exe -m unittest tests.test_compare_initial_margin_versions -v`：passed
+- `.venv\Scripts\python.exe -m unittest tests.test_extract_matching_rules -v`：passed
+- `.venv\Scripts\python.exe -m unittest discover -s deliverables\im_hk_v14_mock_api\tests -t deliverables\im_hk_v14_mock_api -v`：3 tests OK；BDD summary 37 passed, 0 failed
+- `.venv\Scripts\python.exe -m unittest discover -s tests -t . -v`：193 tests OK, 1 skipped when Chrome DevTools unavailable
+- `.venv\Scripts\python.exe scripts/check_docs_governance.py`：passed
+- `.venv\Scripts\python.exe scripts/check_artifact_governance.py`：passed
+
+**状态：** ✅ COMPLETE（HKv14 POC/mock/stub bridge；真实 Stage 3 和 production downstream automation 仍不声明完成）
+
+---
+
+### Gate S2.7：Initial Margin HKv14 Promoted Downstream Slice
+
+**Verification Type：** `stub_verified`
+
+**验收标准：**
+- promotion scope exists and records explicit human approval
+- 10 HKv13→HKv14 changed candidates and 1 ID drift candidate are mapped to downstream treatment categories
+- required HKv14-specific BDD/data/test changes are identified before implementation
+- HKv13 deliverable remains preserved
+- HKv13 and HKv14 validation commands pass after any implementation change
+- docs and artifact governance checks pass
+- schema, prompt, and model impact remains none unless a separate governed task is opened
+
+**Evidence（2026-04-26）：**
+- `docs/planning/im_hk_v14_promotion_scope.md`
+- `docs/planning/im_hk_v14_downstream_treatment_mapping.md`
+- `docs/planning/im_hk_v14_mock_api_validation_plan.md`
+- updated `deliverables/im_hk_v14_mock_api/data/flat_rate_margin_poc.json`
+- updated `deliverables/im_hk_v14_mock_api/tests/test_mock_api.py`
+- updated `deliverables/im_hk_v14_mock_api/features/initial_margin/flat_rate_margin_poc.feature`
+- refreshed `deliverables/im_hk_v14_mock_api.zip`
+- `.venv\Scripts\python.exe -m unittest discover -s deliverables\im_hk_v14_mock_api\tests -t deliverables\im_hk_v14_mock_api -v`：passed, 3 tests OK；BDD summary 37 passed, 0 failed
+- `.venv\Scripts\python.exe deliverables\im_hk_v14_mock_api\poc_flat_rate_margin.py`：passed
+- `.venv\Scripts\python.exe -m unittest discover -s deliverables\im_hk_v13_mock_api\tests -t deliverables\im_hk_v13_mock_api -v`：passed, 4 tests OK；BDD summary 37 passed, 0 failed
+- `.venv\Scripts\python.exe scripts/check_docs_governance.py`：passed
+- `.venv\Scripts\python.exe scripts/check_artifact_governance.py`：passed
+
+**状态：** ✅ COMPLETE（promoted mock/stub downstream baseline candidate；真实 Stage 3 和 production downstream automation 仍不声明完成）
 
 ---
 

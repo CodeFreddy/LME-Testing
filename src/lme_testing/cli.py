@@ -13,10 +13,36 @@ from .reporting import generate_html_report
 from .step_registry import extract_steps_from_normalized_bdd, extract_steps_from_python_step_defs, extract_steps_from_step_defs, compute_step_gaps, compute_step_matches, render_step_visibility_report, StepInventory, MatchReport
 from .signals import compute_governance_signals, write_signals_report
 from .human_review import generate_human_review_page
+from .im_hk_v14_role_review import write_review_package
+from .mvp_document_readiness import write_document_readiness_package
 from .logging_utils import configure_logging
 from .review_session import ReviewSessionManager, serve_review_session
 from .workflow_session import choose_start_step, discover_workflow_artifacts, start_workflow_session
 from .rule_workflow_session import RuleWorkflowSessionManager, serve_rule_workflow_session
+
+
+DEFAULT_CONFIG_PATH = Path("config/llm_profiles.json")
+RULE_WORKFLOW_STUB_CONFIG_PATH = Path("config/llm_profiles.stub.json")
+
+
+def _config_path_for_command(args: argparse.Namespace) -> Path:
+    path = Path(args.config)
+    if args.command == "rule-workflow-session" and path == DEFAULT_CONFIG_PATH and not path.exists():
+        if RULE_WORKFLOW_STUB_CONFIG_PATH.exists():
+            print(
+                json.dumps(
+                    {
+                        "status": "config_fallback",
+                        "reason": f"{DEFAULT_CONFIG_PATH} was not found.",
+                        "config": str(RULE_WORKFLOW_STUB_CONFIG_PATH),
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                flush=True,
+            )
+            return RULE_WORKFLOW_STUB_CONFIG_PATH
+    return path
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -25,7 +51,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--config",
-        default="config/llm_profiles.json",
+        default=str(DEFAULT_CONFIG_PATH),
         help="Path to the project LLM config file.",
     )
 
@@ -236,6 +262,75 @@ def build_parser() -> argparse.ArgumentParser:
     rule_workflow_session.add_argument("--host", default="127.0.0.1")
     rule_workflow_session.add_argument("--port", type=int, default=8765)
 
+    im_hk_v14_role_review = subparsers.add_parser(
+        "im-hk-v14-role-review",
+        help="Generate the S2-F1 HKv14 role-friendly impact decision review package.",
+    )
+    im_hk_v14_role_review.add_argument(
+        "--diff-report",
+        default="evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json",
+        help="Path to HKv13 -> HKv14 deterministic diff JSON.",
+    )
+    im_hk_v14_role_review.add_argument(
+        "--mapping",
+        default="docs/planning/im_hk_v14_downstream_treatment_mapping.md",
+        help="Path to HKv14 downstream treatment mapping Markdown.",
+    )
+    im_hk_v14_role_review.add_argument(
+        "--output-dir",
+        default="runs/im_hk_v14/review_decisions",
+        help="Output root for decision_record.json, decision_summary.md, and review.html.",
+    )
+    im_hk_v14_role_review.add_argument(
+        "--reviewer-role",
+        default="BA",
+        choices=["BA", "QA Lead", "Automation Lead", "PM / Release Owner"],
+        help="Default reviewer role to seed into the decision record.",
+    )
+    im_hk_v14_role_review.add_argument("--reviewer-name", default="")
+    im_hk_v14_role_review.add_argument(
+        "--decision",
+        default="defer",
+        choices=["approve", "reject", "defer", "request_rework"],
+        help="Default decision to seed into the decision record.",
+    )
+    im_hk_v14_role_review.add_argument("--rationale", default="")
+    im_hk_v14_role_review.add_argument("--comments", default="")
+
+    mvp_document_readiness = subparsers.add_parser(
+        "mvp-document-readiness",
+        help="Generate the S2-F2 deterministic MVP document readiness registry.",
+    )
+    mvp_document_readiness.add_argument(
+        "--previous-spec",
+        default="docs/materials/Initial Margin Calculation Guide HKv13.pdf",
+        help="Path to the previous Function Spec stand-in document.",
+    )
+    mvp_document_readiness.add_argument(
+        "--current-spec",
+        default="docs/materials/Initial Margin Calculation Guide HKv14.pdf",
+        help="Path to the current Function Spec stand-in document.",
+    )
+    mvp_document_readiness.add_argument(
+        "--test-plan",
+        default=None,
+        help="Optional path to a real Test Plan input. If omitted, the registry keeps the Test Plan placeholder blocker.",
+    )
+    mvp_document_readiness.add_argument("--test-plan-title", default="MVP Test Plan")
+    mvp_document_readiness.add_argument("--test-plan-version", default="not_available")
+    mvp_document_readiness.add_argument(
+        "--regression-pack-index",
+        default=None,
+        help="Optional path to a real Regression Pack Index input. If omitted, the registry keeps the placeholder blocker.",
+    )
+    mvp_document_readiness.add_argument("--regression-pack-index-title", default="MVP Regression Pack Index")
+    mvp_document_readiness.add_argument("--regression-pack-index-version", default="not_available")
+    mvp_document_readiness.add_argument(
+        "--output-dir",
+        default="evidence/mvp_document_readiness",
+        help="Output root for document_readiness.json and document_readiness_summary.md.",
+    )
+
     return parser
 
 
@@ -272,7 +367,36 @@ def main() -> int:
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
 
-    config = load_project_config(Path(args.config))
+    if args.command == "im-hk-v14-role-review":
+        result = write_review_package(
+            diff_report_path=Path(args.diff_report),
+            mapping_path=Path(args.mapping),
+            output_dir=Path(args.output_dir),
+            reviewer_role=args.reviewer_role,
+            reviewer_name=args.reviewer_name,
+            decision=args.decision,
+            rationale=args.rationale,
+            comments=args.comments,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+
+    if args.command == "mvp-document-readiness":
+        result = write_document_readiness_package(
+            output_dir=Path(args.output_dir),
+            previous_spec_path=Path(args.previous_spec),
+            current_spec_path=Path(args.current_spec),
+            test_plan_path=Path(args.test_plan) if args.test_plan else None,
+            test_plan_title=args.test_plan_title,
+            test_plan_version=args.test_plan_version,
+            regression_pack_index_path=Path(args.regression_pack_index) if args.regression_pack_index else None,
+            regression_pack_index_title=args.regression_pack_index_title,
+            regression_pack_index_version=args.regression_pack_index_version,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+
+    config = load_project_config(_config_path_for_command(args))
     init_schema_config_dir(config.config_dir)
 
     if args.command == "planner":
@@ -283,7 +407,6 @@ def main() -> int:
             limit=args.limit,
             batch_size=args.batch_size,
             resume_from=Path(args.resume_from) if args.resume_from else None,
-            concurrency=args.maker_concurrency,
         )
     elif args.command == "maker":
         result = run_maker_pipeline(
@@ -293,7 +416,7 @@ def main() -> int:
             limit=args.limit,
             batch_size=args.batch_size,
             resume_from=Path(args.resume_from) if args.resume_from else None,
-            concurrency=args.checker_concurrency,
+            concurrency=args.maker_concurrency,
         )
     elif args.command == "checker":
         result = run_checker_pipeline(
@@ -304,6 +427,7 @@ def main() -> int:
             limit=args.limit,
             batch_size=args.batch_size,
             resume_from=Path(args.resume_from) if args.resume_from else None,
+            concurrency=args.checker_concurrency,
         )
     elif args.command == "bdd":
         result = run_bdd_pipeline(

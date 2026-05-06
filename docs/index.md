@@ -178,6 +178,82 @@ It defines:
 - current UI test coverage limits,
 - and the implemented browser E2E coverage for the primary Review -> BDD -> Scripts path.
 
+### 14. `docs/planning/im_hk_v14_promotion_scope.md`
+
+Use this for the promoted HKv14 downstream implementation slice.
+
+It defines:
+
+- the human promotion decision,
+- allowed HKv14 downstream scope,
+- contracts and non-outputs,
+- acceptance gates,
+- rollback boundaries,
+- and the next deterministic candidate-mapping action.
+
+### 15. `docs/planning/im_hk_v14_role_review_plan.md`
+
+Use this for the implemented S2-F1 slice promoted from the broader Executable Engineering Knowledge Contract MVP proposal.
+
+It defines:
+
+- the HKv13 -> HKv14 role-friendly impact decision review scope,
+- structured decision record inputs and outputs,
+- BA / QA Lead / Automation Lead / PM review boundaries,
+- acceptance gates,
+- implementation boundaries,
+- and explicit non-goals.
+
+### 16. `docs/planning/mvp_document_readiness_plan.md`
+
+Use this for the implemented S2-F2 planning slice promoted from the broader Executable Engineering Knowledge Contract MVP proposal.
+
+It defines:
+
+- the MVP document readiness registry scope,
+- document readiness inputs and outputs,
+- HKv13/HKv14 old/new document registration boundaries,
+- placeholder handling for Test Plan and Regression Pack Index,
+- acceptance gates,
+- implementation evidence,
+- and explicit non-goals.
+
+### 17. `docs/planning/mvp_input_document_contract_plan.md`
+
+Use this for the implemented S2-F3 input contract slice.
+
+It defines:
+
+- the minimum Test Plan input contract,
+- the minimum Regression Pack Index input contract,
+- deterministic readiness/blocking rules,
+- optional-input validation boundaries,
+- and explicit non-goals for mapping, LLM stages, and external integrations.
+
+### 18. `docs/planning/implementation_plan.md` section `S2-F4`
+
+Use this for the implemented CodeFreddy rule extraction review workflow slice.
+
+It defines:
+
+- the controlled merge boundary,
+- the `rule-workflow-session` GUI scope,
+- HKv14 PDF extraction and GUI smoke validation,
+- follow-up startup/PDF extraction fixes,
+- and the broader CodeFreddy prompt/schema/concurrency changes that remain out of scope.
+
+### 17. `docs/planning/mvp_input_document_contract_plan.md`
+
+Use this for the implemented S2-F3 slice that defines the minimum Test Plan and Regression Pack Index input contracts.
+
+It defines:
+
+- required readiness registry metadata,
+- minimum human-readable content expectations,
+- deterministic readiness and blocking rules,
+- implementation expectations and evidence,
+- and explicit non-goals.
+
 ### Supporting Guide And Reference Folders
 
 - `docs/guides/maker_checker_usage.md` explains the maker/checker CLI workflow.
@@ -186,6 +262,10 @@ It defines:
 - `docs/architecture/rule_model_and_parsing_design.md` captures rule model and parsing design detail.
 - `docs/architecture/run_directory_structure.md` documents run output layout.
 - `docs/archives/20260422_script_generation_investigation.md`, `docs/planning/stage2_planned_modules.md`, and `docs/planning/s2t01_coverage_analysis.md` preserve supporting Stage 2 planning and analysis.
+- `docs/planning/im_hk_v14_downstream_treatment_mapping.md` preserves the S2-C4 deterministic treatment mapping for HKv14 diff candidates.
+- `docs/planning/im_hk_v14_role_review_plan.md` preserves the implemented S2-F1 role-friendly impact decision review plan and package boundaries.
+- `docs/planning/mvp_document_readiness_plan.md` preserves the implemented S2-F2 MVP document readiness registry plan and package boundaries.
+- `docs/planning/mvp_input_document_contract_plan.md` preserves the implemented S2-F3 Test Plan and Regression Pack Index input contract slice.
 
 ---
 
@@ -211,6 +291,10 @@ Then read supporting docs only as needed:
 11. `docs/planning/mock_api_validation_plan.md`
 12. `docs/operations/checkpoints.md`
 13. `docs/planning/ui_test_plan.md`
+14. `docs/planning/mvp_input_document_contract_plan.md`
+14. `docs/planning/im_hk_v14_promotion_scope.md`
+15. `docs/planning/im_hk_v14_role_review_plan.md`
+16. `docs/planning/mvp_document_readiness_plan.md`
 
 ### If you are implementing a task
 

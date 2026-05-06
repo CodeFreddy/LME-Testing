@@ -1,0 +1,38 @@
+{
+  "global_fields": {
+    "Valuation_DT": "01/04/2019",
+    "HVaR_WGT": 0.75,
+    "SVaR_WGT": 0.25,
+    "HVaR_Scen_Count": 1000,
+    "SVaR_Scen_Count": 1018,
+    "STV_Count": 200,
+    "HVaR_CL": 0.994,
+    "SVaR_CL": 0.98,
+    "HVaR_Measure": 4,
+    "SVaR_Measure": 4,
+    "Rounding": 10000,
+    "Holiday_Factor": 0.7320508075
+  },
+  "records": [
+    {
+      "InstrumentID": "700",
+      "FieldType": 1,
+      "values": [0.01391, 0.01422]
+    },
+    {
+      "InstrumentID": "700",
+      "FieldType": 2,
+      "values": [0.041026, 0.092873]
+    },
+    {
+      "InstrumentID": "658",
+      "FieldType": 3,
+      "values": [0.12]
+    },
+    {
+      "InstrumentID": "700",
+      "FieldType": 4,
+      "values": [0.0022, 0.9, 300000000, 400]
+    }
+  ]
+}
