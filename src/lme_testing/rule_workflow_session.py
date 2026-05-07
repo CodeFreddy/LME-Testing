@@ -1104,14 +1104,6 @@ RULE_WORKFLOW_HTML = r"""<!DOCTYPE html>
       <p class="muted">PDF/Markdown/DOCX are supported. HKEX HKv14 demo extracts core calculation sections deterministically.</p>
     </section>
 
-    <section class="band hidden" id="artifactImportSection">
-      <div class="row">
-        <label>Existing artifact folder <input id="artifactFolder" type="file" webkitdirectory multiple></label>
-        <button id="artifactBtn">Load Artifact Folder</button>
-      </div>
-      <p class="muted">The selected folder must contain atomic_rules.json and semantic_rules.json.</p>
-    </section>
-
     <section class="band">
       <div class="row">
         <button id="saveRulesBtn" disabled>Save Rule Edits</button>
@@ -1652,22 +1644,6 @@ async function extractSource() {
   setStatus(`Extracted ${data.semantic_rule_count} business rules.\nSections:\n` + (data.sections || []).join('\n'));
   await refreshRules();
 }
-async function loadArtifactFolder() {
-  const files = Array.from($('artifactFolder').files || []);
-  if (!files.length) throw new Error('Choose an artifact folder first.');
-  setStatus('Reading artifact folder...');
-  const payload = { files: [] };
-  for (const file of files) {
-    payload.files.push({
-      filename: file.name,
-      relative_path: file.webkitRelativePath || file.name,
-      content_base64: await fileToBase64(file),
-    });
-  }
-  await postJson('/api/rule-workflow/upload-artifacts', payload);
-  await refreshRules();
-  setStatus('Artifact folder loaded.');
-}
 async function saveRules() {
   setStatus('Saving reviewed rules...');
   const payload = { atomic_rules: state.atomic_rules, semantic_rules: state.semantic_rules.map(stripPrivate) };
@@ -2190,7 +2166,6 @@ window.addEventListener('hashchange', () => {
 
 $('uploadBtn').addEventListener('click', () => uploadSource().catch(err => setStatus(err.message)));
 $('extractBtn').addEventListener('click', () => extractSource().catch(err => setStatus(err.message)));
-$('artifactBtn').addEventListener('click', () => loadArtifactFolder().catch(err => setStatus(err.message)));
 $('saveRulesBtn').addEventListener('click', () => saveRules().catch(err => setStatus(err.message)));
 $('ruleNextBtn').addEventListener('click', () => generateCases().catch(err => setStatus(err.message)));
 $('coverageFilter').addEventListener('change', applyReviewFilters);
