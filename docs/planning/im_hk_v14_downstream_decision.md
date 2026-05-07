@@ -1,9 +1,9 @@
 # Initial Margin HKv14 Downstream Decision
 
-**Status:** Human accepted for POC  
-**Date:** 2026-04-26  
-**Reviewer:** Human project owner  
-**Related diff report:** `docs/planning/im_hk_v14_diff_report.md`  
+**Status:** Human accepted for POC
+**Date:** 2026-04-26
+**Reviewer:** Human project owner
+**Related diff report:** `docs/planning/im_hk_v14_diff_report.md`
 **Evidence JSON:** `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json`
 
 ---

@@ -58,6 +58,18 @@ Case-type specific guidance:
 """
 
 
+REWRITE_SYSTEM_PROMPT = """You are the maker revision model for an LME test design workflow.
+You revise maker-generated test cases using checker feedback and human review feedback.
+Hard requirements:
+- For every input semantic rule, return exactly one revised result object.
+- Output ONLY the cases listed in target_case_ids; do NOT regenerate cases that are not targeted.
+- Fix the issues raised by checker findings and human review comments when they are grounded in the supplied rule and evidence.
+- When human feedback conflicts with checker findings, human takes precedence.
+- Preserve fidelity to the semantic rule and evidence; do not invent business behavior.
+- Return JSON only.
+"""
+
+
 CHECKER_SYSTEM_PROMPT = """You are the checker model for an LME test design workflow.
 You review maker-generated test cases against source semantic rules.
 Hard requirements:
@@ -89,6 +101,58 @@ Hard requirements:
 - recommended_validation_strategy suggests validation approach: smoke, regression, boundary, or exception.
 - Return JSON only.
 """
+
+
+def _maker_result_schema_example() -> dict:
+    return {
+        "results": [
+            {
+                "semantic_rule_id": "SR-MR-000-00",
+                "requirement_ids": ["MR-000-00"],
+                "feature": "Short feature title",
+                "scenarios": [
+                    {
+                        "scenario_id": "TC-SR-MR-000-00-positive-01",
+                        "title": "Short scenario title",
+                        "intent": "Why this scenario exists",
+                        "priority": "high",
+                        "scenario_type": "positive",
+                        "case_type": "positive",
+                        "given": ["precondition"],
+                        "when": ["action"],
+                        "then": ["expected outcome"],
+                        "assumptions": [],
+                        "evidence": [
+                            {
+                                "atomic_rule_id": "MR-000-00",
+                                "page": 1,
+                                "quote": "short literal quote"
+                            }
+                        ]
+                    },
+                    {
+                        "scenario_id": "TC-SR-MR-000-00-negative-01",
+                        "title": "Negative scenario title",
+                        "intent": "Why this negative scenario exists",
+                        "priority": "high",
+                        "scenario_type": "negative",
+                        "case_type": "negative",
+                        "given": ["precondition"],
+                        "when": ["invalid or missing action"],
+                        "then": ["expected rejection or failure"],
+                        "assumptions": [],
+                        "evidence": [
+                            {
+                                "atomic_rule_id": "MR-000-00",
+                                "page": 1,
+                                "quote": "short literal quote"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
 
 
 def build_planner_user_prompt(batch: list[dict]) -> str:
@@ -219,55 +283,7 @@ def build_maker_user_prompt(batch: list[dict]) -> str:
         item["semantic_rule_id"]: item.get("required_case_types", [])
         for item in batch
     }
-    schema = {
-        "results": [
-            {
-                "semantic_rule_id": "SR-MR-000-00",
-                "requirement_ids": ["MR-000-00"],
-                "feature": "Short feature title",
-                "scenarios": [
-                    {
-                        "scenario_id": "TC-SR-MR-000-00-positive-01",
-                        "title": "Short scenario title",
-                        "intent": "Why this scenario exists",
-                        "priority": "high",
-                        "scenario_type": "positive",
-                        "case_type": "positive",
-                        "given": ["precondition"],
-                        "when": ["action"],
-                        "then": ["expected outcome"],
-                        "assumptions": [],
-                        "evidence": [
-                            {
-                                "atomic_rule_id": "MR-000-00",
-                                "page": 1,
-                                "quote": "short literal quote"
-                            }
-                        ]
-                    },
-                    {
-                        "scenario_id": "TC-SR-MR-000-00-negative-01",
-                        "title": "Negative scenario title",
-                        "intent": "Why this negative scenario exists",
-                        "priority": "high",
-                        "scenario_type": "negative",
-                        "case_type": "negative",
-                        "given": ["precondition"],
-                        "when": ["invalid or missing action"],
-                        "then": ["expected rejection or failure"],
-                        "assumptions": [],
-                        "evidence": [
-                            {
-                                "atomic_rule_id": "MR-000-00",
-                                "page": 1,
-                                "quote": "short literal quote"
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
-    }
+    schema = _maker_result_schema_example()
     return (
         "Generate BDD test cases for the following semantic rules.\n"
         "You must return exactly one result per semantic_rule_id.\n"
@@ -281,6 +297,21 @@ def build_maker_user_prompt(batch: list[dict]) -> str:
         "Return JSON matching this schema shape:\n"
         f"{json.dumps(schema, ensure_ascii=False, indent=2)}\n"
         "Input semantic rules:\n"
+        f"{json.dumps(batch, ensure_ascii=False, indent=2)}"
+    )
+
+
+def build_rewrite_user_prompt(batch: list[dict]) -> str:
+    schema = _maker_result_schema_example()
+    return (
+        "Revise only the targeted maker scenarios for each semantic rule.\n"
+        "Return exactly one result per semantic_rule.semantic_rule_id in the batch.\n"
+        "Each result.scenarios must contain only scenarios whose scenario_id is listed in target_case_ids.\n"
+        "If you keep the same scenario_id, use that exact id. If you produce a new id, keep it clearly traceable to the target id.\n"
+        "Use human_reviews as the highest-priority feedback, then checker_reviews.\n"
+        "Return JSON matching this schema shape:\n"
+        f"{json.dumps(schema, ensure_ascii=False, indent=2)}\n"
+        "Rewrite batch:\n"
         f"{json.dumps(batch, ensure_ascii=False, indent=2)}"
     )
 

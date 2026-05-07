@@ -1,0 +1,14 @@
+{
+  "run_id": "20260505T155351Z",
+  "role": "rewrite",
+  "pipeline_version": "2.1",
+  "semantic_rules_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\20260505T151304Z\\artifacts\\im_hk_v14\\rule_review\\reviewed_semantic_rules.json",
+  "maker_cases_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\20260505T151304Z\\generated_cases\\20260505T151318Z\\maker\\20260505T151318Z\\maker_cases.jsonl",
+  "checker_reviews_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\20260505T151304Z\\generated_cases\\20260505T151318Z\\checker\\20260505T152805Z\\checker_reviews.jsonl",
+  "human_reviews_path": ".tmp_rule_workflow_sessions\\20260505T151304Z\\scenario_review_sessions\\20260505T153951Z\\iterations\\000\\reviews\\human_reviews_latest.json",
+  "output_dir": ".tmp_rule_workflow_sessions\\20260505T151304Z\\scenario_review_sessions\\20260505T153951Z\\iterations\\000\\rewrite",
+  "merged_cases_path": ".tmp_rule_workflow_sessions\\20260505T151304Z\\scenario_review_sessions\\20260505T153951Z\\iterations\\000\\rewrite\\merged_cases.jsonl",
+  "rewritten_cases_path": ".tmp_rule_workflow_sessions\\20260505T151304Z\\scenario_review_sessions\\20260505T153951Z\\iterations\\000\\rewrite\\maker\\maker_cases.jsonl",
+  "rewrite_count": 2,
+  "kept_count": 5
+}

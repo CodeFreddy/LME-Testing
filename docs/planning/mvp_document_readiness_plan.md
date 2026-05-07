@@ -1,10 +1,10 @@
 # MVP Document Readiness Registry Plan
 
-**Status:** Implemented deterministic S2-F2 slice  
-**Created:** 2026-04-27  
-**Implemented:** 2026-04-29  
-**Task ID:** S2-F2  
-**Source proposal:** `docs/architecture/Executable_Engineering_Knowledge_Contract.md` section "03 MVP Scope and Delivery Plan"  
+**Status:** Implemented deterministic S2-F2 slice
+**Created:** 2026-04-27
+**Implemented:** 2026-04-29
+**Task ID:** S2-F2
+**Source proposal:** `docs/architecture/Executable_Engineering_Knowledge_Contract.md` section "03 MVP Scope and Delivery Plan"
 **Baseline impact:** This slice adds deterministic registry generation only. It does not change schemas, prompts, default models, pipeline behavior, review-session behavior, or Stage 3 readiness claims.
 
 ---

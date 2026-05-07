@@ -1,8 +1,8 @@
 # Initial Margin HKv14 Promotion Scope
 
-**Status:** Completed scoped implementation slice  
-**Decision date:** 2026-04-26  
-**Promotion basis:** `docs/planning/im_hk_v14_downstream_decision.md`  
+**Status:** Completed scoped implementation slice
+**Decision date:** 2026-04-26
+**Promotion basis:** `docs/planning/im_hk_v14_downstream_decision.md`
 **POC evidence:** `docs/planning/im_hk_v14_diff_report.md` and `docs/planning/im_hk_v14_mock_api_validation_plan.md`
 
 ---

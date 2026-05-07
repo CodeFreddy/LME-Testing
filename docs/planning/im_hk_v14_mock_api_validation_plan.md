@@ -1,8 +1,8 @@
 # Initial Margin HKv14 Mock API Validation Plan
 
-**Status:** Promoted S2-C4 validation plan  
-**Created:** 2026-04-26  
-**Related decision:** `docs/planning/im_hk_v14_downstream_decision.md`  
+**Status:** Promoted S2-C4 validation plan
+**Created:** 2026-04-26
+**Related decision:** `docs/planning/im_hk_v14_downstream_decision.md`
 **Related diff:** `docs/planning/im_hk_v14_diff_report.md`
 **Related treatment mapping:** `docs/planning/im_hk_v14_downstream_treatment_mapping.md`
 

@@ -1,6 +1,6 @@
 # LME Testing — Architecture v3.1
 
-**修订日期：** 2026-04-26  
+**修订日期：** 2026-04-26
 **变更说明：** 整合 HKv14 POC governed intake、deterministic diff evidence and modular mock API bridge，同时保持 HKv14 POC/mock/stub boundary。
 
 ---
@@ -402,4 +402,3 @@ charset = utf-8
 - [ ] `atomic_write_json()` 是否保留？
 - [ ] CI smoke test 是否通过？
 - [ ] 是否与当前 roadmap 阶段一致？
-

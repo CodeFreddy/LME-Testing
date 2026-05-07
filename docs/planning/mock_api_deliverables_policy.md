@@ -1,7 +1,7 @@
 # Mock API Deliverables Policy
 
-**Status:** Current Stage 2 policy  
-**Decision date:** 2026-04-26  
+**Status:** Current Stage 2 policy
+**Decision date:** 2026-04-26
 **Decision:** Keep current mock API samples under `deliverables/`; do not move to `samples/` or `tools/` now.
 
 ---

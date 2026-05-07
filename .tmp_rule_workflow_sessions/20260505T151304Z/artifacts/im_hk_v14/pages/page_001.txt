@@ -1,0 +1,11 @@
+INITIAL MARGIN CALCULATION GUIDE
+
+Hong Kong Exchanges and Clearing Limited
+VaR Platform
+Version 1.4
+Oct 2025
+
+Disclaimer
+HKEX endeavors to ensure the accuracy and reliability of the information provided but takes
+no responsibility for any errors or omissions or for any losses arising from decisions, action,
+or inaction.

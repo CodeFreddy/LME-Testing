@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import base64
+import importlib.util
 import json
 import shutil
 import unittest
 import zipfile
 from pathlib import Path
+from unittest.mock import patch
 
 from lme_testing.config import ProjectConfig, ProviderConfig, RoleDefaults
 from lme_testing.rule_extraction import (
@@ -15,7 +17,7 @@ from lme_testing.rule_extraction import (
     extract_rule_artifacts,
     fix_pdf_text_artifacts,
 )
-from lme_testing.rule_workflow_session import RuleWorkflowSessionManager
+from lme_testing.rule_workflow_session import RuleWorkflowJobStatus, RuleWorkflowSessionManager, render_rule_workflow_shell
 
 
 WORK_TMP = Path(".tmp_rule_extraction_review")
@@ -102,11 +104,152 @@ class RuleExtractionReviewTests(unittest.TestCase):
             doc_version="HKv14",
         )
 
-        self.assertEqual(result["semantic_rule_count"], 5)
+        self.assertEqual(result["semantic_rule_count"], 2)
         semantic_rules = json.loads((output / "semantic_rules.json").read_text(encoding="utf-8"))
         self.assertTrue(all(rule["classification"]["rule_type"] == "calculation" for rule in semantic_rules))
         self.assertIn("source_block_id", semantic_rules[0]["source"])
-        self.assertIn("Flat Rate Margin", semantic_rules[0]["source"]["section"])
+        self.assertIn("Rounding on Aggregated Market-risk-component Margin", semantic_rules[0]["source"]["section"])
+        self.assertEqual(
+            [rule["source"]["section"] for rule in semantic_rules],
+            [
+                "3.2.5.1 Rounding on Aggregated Market-risk-component Margin",
+                "3.2.5.3 Application of Margin Credit",
+            ],
+        )
+
+    def test_rule_workflow_shell_integrates_end_to_end_steps(self) -> None:
+        html = render_rule_workflow_shell()
+
+        self.assertIn("HKEX AI Assisted Workflow", html)
+        self.assertIn("Rule Extraction", html)
+        self.assertIn("Test Case", html)
+        self.assertIn(">BDD<", html)
+        self.assertIn(">Scripts<", html)
+        self.assertIn(">Finalize<", html)
+        self.assertIn("Save &amp; Rerun", html)
+        self.assertIn("Check Reports", html)
+        self.assertIn("Finalize Workflow", html)
+        self.assertIn("Next Step", html)
+        self.assertIn("Checker Suggestion", html)
+        self.assertIn("BDD generation mode", html)
+        self.assertIn('<option value="false">Yes</option>', html)
+        self.assertIn('<option value="true">No</option>', html)
+        self.assertIn("return value ? '<span class=\"suggestion-no\">No</span>' : '<span class=\"suggestion-yes\">Yes</span>';", html)
+        self.assertIn("Test Case Report", html)
+        self.assertIn("Maker Report", html)
+        self.assertIn("Checker Report", html)
+        self.assertNotIn("Open Scenario Review", html)
+        self.assertNotIn("Generate Cases", html)
+        self.assertNotIn("Generate BDD", html)
+        self.assertNotIn("<th>Blocking Category</th>", html)
+
+    def test_generate_cases_does_not_run_bdd_until_bdd_stage(self) -> None:
+        manager = make_extracted_manager(WORK_TMP)
+
+        def fake_maker(**kwargs):
+            output_dir = Path(kwargs["output_dir"])
+            run_dir = output_dir / "maker_run"
+            run_dir.mkdir(parents=True)
+            cases_path = run_dir / "maker_cases.jsonl"
+            cases_path.write_text(
+                json.dumps(
+                    {
+                        "run_id": "maker_run",
+                        "semantic_rule_id": manager.current_semantic_rules[0]["semantic_rule_id"],
+                        "requirement_ids": manager.current_semantic_rules[0]["source"]["atomic_rule_ids"],
+                        "feature": "Generated feature",
+                        "scenarios": [
+                            {
+                                "scenario_id": "TC-1",
+                                "case_type": "positive",
+                                "title": "Generated case",
+                                "intent": "Validate generated case",
+                                "priority": "high",
+                                "given": [],
+                                "when": [],
+                                "then": [],
+                                "assumptions": [],
+                                "evidence": [{"atomic_rule_id": "AR-1", "page": 1, "quote": "q"}],
+                            }
+                        ],
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            summary = {
+                "run_id": "maker_run",
+                "processed_rule_count": 1,
+                "scenario_count": 1,
+                "results_path": str(cases_path),
+            }
+            (run_dir / "summary.json").write_text(json.dumps(summary, ensure_ascii=False), encoding="utf-8")
+            return summary
+
+        def fake_checker(**kwargs):
+            output_dir = Path(kwargs["output_dir"])
+            run_dir = output_dir / "checker_run"
+            run_dir.mkdir(parents=True)
+            reviews_path = run_dir / "checker_reviews.jsonl"
+            coverage_path = run_dir / "coverage_report.json"
+            reviews_path.write_text(
+                json.dumps(
+                    {
+                        "case_id": "TC-1",
+                        "semantic_rule_id": manager.current_semantic_rules[0]["semantic_rule_id"],
+                        "overall_status": "pass",
+                        "scores": {},
+                        "coverage_assessment": {"status": "covered", "reason": "ok", "missing_aspects": []},
+                        "checker_blocking": False,
+                        "findings": [],
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            coverage = {
+                "total_requirements": 1,
+                "fully_covered": 1,
+                "partially_covered": 0,
+                "uncovered": 0,
+                "status_by_rule": {
+                    manager.current_semantic_rules[0]["semantic_rule_id"]: {
+                        "rule_type": "calculation",
+                        "rule_coverage_status": "fully_covered",
+                        "rule_pass_status": "pass",
+                        "required_case_types": ["positive"],
+                        "present_case_types": ["positive"],
+                        "accepted_case_types": ["positive"],
+                        "missing_case_types": [],
+                    }
+                },
+            }
+            coverage_path.write_text(json.dumps(coverage, ensure_ascii=False), encoding="utf-8")
+            summary = {
+                "run_id": "checker_run",
+                "review_count": 1,
+                "results_path": str(reviews_path),
+                "coverage_report_path": str(coverage_path),
+            }
+            (run_dir / "summary.json").write_text(json.dumps(summary, ensure_ascii=False), encoding="utf-8")
+            return summary
+
+        job_id = "job1"
+        manager._jobs[job_id] = RuleWorkflowJobStatus(job_id=job_id, status="queued", phase="queued")
+        with patch("lme_testing.rule_workflow_session.run_maker_pipeline", side_effect=fake_maker), \
+            patch("lme_testing.rule_workflow_session.run_checker_pipeline", side_effect=fake_checker), \
+            patch("lme_testing.rule_workflow_session.run_bdd_pipeline") as bdd_mock:
+            manager._run_generate_cases_job(job_id)
+
+        status = manager.job_status(job_id)
+        self.assertEqual(status["status"], "succeeded")
+        self.assertIsNone(status["result"]["bdd_summary"])
+        self.assertIsNone(status["result"]["step_registry_path"])
+        self.assertIsNotNone(manager.review_manager)
+        bdd_mock.assert_not_called()
+        self.assertFalse(manager.review_manager.bdd_payload()["has_bdd"])
 
     def test_pdf_text_decoder_preserves_section_references(self) -> None:
         decoded = decode_pdf_text_output(b"See \xa73.2.5.2 for details.")
@@ -117,7 +260,11 @@ class RuleExtractionReviewTests(unittest.TestCase):
         self.assertEqual(symbol_font_cleaned, "See \u00a73.2.5.2 for details.")
 
     def test_pypdf_extractor_reads_hkv14_pdf_without_pdftotext(self) -> None:
+        if importlib.util.find_spec("pypdf") is None:
+            self.skipTest("pypdf is not installed in the current test environment.")
         pdf_path = Path("docs/materials/Initial Margin Calculation Guide HKv14.pdf")
+        if not pdf_path.exists():
+            self.skipTest("HKv14 PDF fixture is not available in the current checkout.")
         pages = extract_pages_from_pdf_with_pypdf(pdf_path)
 
         self.assertGreaterEqual(len(pages), 30)

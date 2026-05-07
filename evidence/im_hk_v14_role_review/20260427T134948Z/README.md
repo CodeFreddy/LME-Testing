@@ -1,7 +1,7 @@
 # HKv14 Role-Friendly Impact Decision Review Evidence
 
-**Task ID:** S2-F1  
-**Generated at:** 20260427T134948Z  
+**Task ID:** S2-F1
+**Generated at:** 20260427T134948Z
 **Source run:** `runs/im_hk_v14/review_decisions/20260427T134948Z/`
 
 ## Contents

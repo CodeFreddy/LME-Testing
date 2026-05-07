@@ -32,4 +32,3 @@ Version: RP-DEMO-1.
 ## Automation Coverage Note
 
 Automation coverage is partial and demo-only. Manual review is still required for real project readiness.
-

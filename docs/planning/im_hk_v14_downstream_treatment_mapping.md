@@ -1,9 +1,9 @@
 # Initial Margin HKv14 Downstream Treatment Mapping
 
-**Status:** S2-C4 deterministic treatment mapping complete  
-**Created:** 2026-04-26  
-**Promotion scope:** `docs/planning/im_hk_v14_promotion_scope.md`  
-**Diff evidence:** `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json`  
+**Status:** S2-C4 deterministic treatment mapping complete
+**Created:** 2026-04-26
+**Promotion scope:** `docs/planning/im_hk_v14_promotion_scope.md`
+**Diff evidence:** `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json`
 
 ---
 

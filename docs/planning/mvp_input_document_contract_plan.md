@@ -1,10 +1,10 @@
 # MVP Input Document Contract Plan
 
-**Status:** Implemented deterministic S2-F3 slice  
-**Created:** 2026-04-29  
-**Implemented:** 2026-04-29  
-**Task ID:** S2-F3  
-**Source:** Follow-on from `docs/planning/mvp_document_readiness_plan.md` and the S2-F2 readiness blockers  
+**Status:** Implemented deterministic S2-F3 slice
+**Created:** 2026-04-29
+**Implemented:** 2026-04-29
+**Task ID:** S2-F3
+**Source:** Follow-on from `docs/planning/mvp_document_readiness_plan.md` and the S2-F2 readiness blockers
 **Baseline impact:** This slice extends deterministic document readiness generation to accept optional real Test Plan and Regression Pack Index inputs. It does not change schemas, prompts, default models, maker/checker pipeline behavior, review-session behavior, or Stage 3 readiness claims.
 
 ---

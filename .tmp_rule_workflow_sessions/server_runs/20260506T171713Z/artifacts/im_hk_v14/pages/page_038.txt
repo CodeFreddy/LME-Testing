@@ -1,0 +1,39 @@
+MTM (HKD equivalent)
+= (2,500) x (1.15) x (1 + 3%)
+= 2,961 (+ve MTM means loss and –ve MTM means gain to CP)
+
+Favorable MTM for Clearing Participant A = HKD0
+MTM requirement for Clearing Participant A = HKD2,961
+
+Clearing Participant B
+
+Marginable positions before excluding due positions
+
+Instrument  Position  Position  Currency  Instrument  Position  MTM      FX Haircut Due
+    Code     long /   contract                price   market
+             (short)                                    value   -1,000   rate     rate     today
+                        value                                   -2,500
+            quantity
+                                                                     50
+700         -50 -20,000 HKD               380 -19,000                          1        0  Y
+
+80737       5,000 15,000 CNY              3.5 17,500                     1.15     3%       N
+
+9167        -100        -900 USD          9.5         -950               7.8      1%       Y
+
+Marginable position after excluding due positions
+
+Instrument  Position  Position  Currency  Instrument  Position  MTM      FX Haircut Due
+    Code     long /   contract                price   market    -2,500
+             (short)                                    value            rate     rate     today
+                        value
+            quantity
+
+80737       5,000 15,000 CNY              3.5 17,500                     1.15     3%       N
+
+MTM (HKD equivalent)
+= (-2,500) x (1.15) x (1 - 3%)
+= -2,789 (+ve MTM means loss and –ve MTM means gain to CP)
+
+Favorable MTM for Clearing Participant B = HKD2,789
+MTM requirement for Clearing Participant B = HKD0

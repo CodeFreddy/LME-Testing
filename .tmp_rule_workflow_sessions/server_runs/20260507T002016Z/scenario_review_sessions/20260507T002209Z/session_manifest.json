@@ -1,0 +1,43 @@
+{
+  "session_id": "20260507T002209Z",
+  "status": "running",
+  "rules_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\artifacts\\im_hk_v14\\rule_review\\reviewed_semantic_rules.json",
+  "current_iteration": 0,
+  "current_maker_cases_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\generated_cases\\20260507T002041Z\\maker\\20260507T002041Z\\maker_cases.jsonl",
+  "current_checker_reviews_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\generated_cases\\20260507T002041Z\\checker\\20260507T002150Z\\checker_reviews.jsonl",
+  "current_report_path": ".tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\scenario_review_sessions\\20260507T002209Z\\iterations\\000\\report\\report.html",
+  "normalized_bdd_path": ".tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\scenario_review_sessions\\20260507T002209Z\\iterations\\000\\bdd\\reviewed_normalized_bdd_latest.jsonl",
+  "step_registry_path": ".tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\scenario_review_sessions\\20260507T002209Z\\iterations\\000\\bdd\\step_visibility_latest.json",
+  "history": [],
+  "iterations": {
+    "0": {
+      "iteration": 0,
+      "maker_cases_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\generated_cases\\20260507T002041Z\\maker\\20260507T002041Z\\maker_cases.jsonl",
+      "checker_reviews_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\generated_cases\\20260507T002041Z\\checker\\20260507T002150Z\\checker_reviews.jsonl",
+      "report_path": ".tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\scenario_review_sessions\\20260507T002209Z\\iterations\\000\\report\\report.html",
+      "human_reviews_latest_path": ".tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\scenario_review_sessions\\20260507T002209Z\\iterations\\000\\reviews\\human_reviews_latest.json",
+      "rewrite_summary_path": null,
+      "checker_summary_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\generated_cases\\20260507T002041Z\\checker\\20260507T002150Z\\summary.json",
+      "maker_summary_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\generated_cases\\20260507T002041Z\\maker\\20260507T002041Z\\summary.json",
+      "coverage_report_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\generated_cases\\20260507T002041Z\\checker\\20260507T002150Z\\coverage_report.json",
+      "normalized_bdd_path": ".tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\scenario_review_sessions\\20260507T002209Z\\iterations\\000\\bdd\\reviewed_normalized_bdd_latest.jsonl",
+      "step_registry_path": ".tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\scenario_review_sessions\\20260507T002209Z\\iterations\\000\\bdd\\step_visibility_latest.json",
+      "stage_gates": {
+        "review_decided": false,
+        "bdd_edited": true,
+        "scripts_viewed": true
+      },
+      "source_normalized_bdd_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\generated_bdd\\20260507T002353Z\\bdd\\20260507T002353Z\\normalized_bdd.jsonl",
+      "human_scripts_edits_latest_path": ".tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\scenario_review_sessions\\20260507T002209Z\\iterations\\000\\bdd\\human_scripts_edits_latest.json",
+      "human_bdd_edits_latest_path": ".tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\scenario_review_sessions\\20260507T002209Z\\iterations\\000\\bdd\\human_bdd_edits_latest.json"
+    }
+  },
+  "stage_gates": {
+    "review_decided": false,
+    "bdd_edited": true,
+    "scripts_viewed": true
+  },
+  "source_normalized_bdd_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\generated_bdd\\20260507T002353Z\\bdd\\20260507T002353Z\\normalized_bdd.jsonl",
+  "human_scripts_edits_latest_path": ".tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\scenario_review_sessions\\20260507T002209Z\\iterations\\000\\bdd\\human_scripts_edits_latest.json",
+  "human_bdd_edits_latest_path": ".tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\scenario_review_sessions\\20260507T002209Z\\iterations\\000\\bdd\\human_bdd_edits_latest.json"
+}

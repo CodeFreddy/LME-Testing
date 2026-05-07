@@ -66,5 +66,3 @@ Feature: Initial Margin HKv14 executable mock validation
     Given due-today positions exist at 14:00
     When intraday MTM treatment is applied
     Then due-today positions are excluded
-
-

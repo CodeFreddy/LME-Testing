@@ -1,0 +1,68 @@
+Instrument Code for Instrument identifier for Rights issue / Open offer                     will be entitled to 0.13 quantity
+Rights                                                                                      of the stock dividend
+
+Rights Quantity           Rights quantity                                                   TEXT (23);
+                                                                                            e.g. a label of SRI5 means a
+                                                                                            rights issue distributed by the
+                                                                                            stock of instrument code 5
+                                                                                            DECIMALS (X,10);
+                                                                                            e.g., a value of 1.5 means
+                                                                                            every 1 position quantity held
+                                                                                            before the corporate action
+                                                                                            will be entitled to 1.5 quantity
+                                                                                            of the rights issue
+
+4.5.1 Position Quantity Adjustment for Bonus Share / Stock Split / Stock Consolidation
+
+Supposing there is a bonus share / stock split / stock consolidation shown in the Corporate
+Action Position Adjustment Report:
+
+Business         Ex-Date  Market  Instrument  Converted     Quantity  Instrument    Cash    Instrument  Entitled  Instrument   Rights
+   Date                               Code    Instrument  Conversion   Code for   Dividend   Code for    Stock     Code for   Quantity
+                                       (A)                                Cash    Amount       Stock    Quantity     Rights
+                                                  Code        Ratio    Dividend              Dividend                   (H)       (I)
+                                                   (B)          (C)         (D)       (E)         (F)      (G)
+
+05/11/2019 05/11/2019 HKMK        5           5           2
+
+Note: Please repeat the position adjustment if more than one corporate actions with different ex-dates for the
+same instrument are required.
+
+Supposing a CP trades instrument (stock) with corporate action announcement, the original
+traded positions before corporate action adjustment is shown below:
+
+          Trade date                 Instrument code                        Quantity                    Contract value
+          04/11/2019                          (X)                               (Y)                             (Z)
+          05/11/2019                           5                               400                                       24,000
+
+                                               5                               -600                                     -20,000
+
+Only the position traded before ex-date is subject to the position quantity adjustment. For
+positions that require the adjustment, the new position quantity after adjustment will be
+equal to the original position quantity times the quantity conversion ratio. The contract value
+remains unchanged.
+
+i.e. the positions after corporate action adjustment will be:
+
+          Trade date                 Instrument code                     Quantity                       Contract value
+          04/11/2019
+          05/11/2019                           5                            800                                          24,000
+                                           from (B)                   from (Y) x (C)                                    from (Z)
+                                                                                                                        -20,000
+                                               5                            -600
+
+4.5.2 Create Benefit Entitlement Position for Cash Dividend
+
+Supposing there is a cash dividend shown in the Corporate Action Position Adjustment
+Report:
+
+Business         Ex-Date  Market  Instrument  Converted     Quantity  Instrument    Cash    Instrument  Entitled  Instrument   Rights
+   Date                               Code    Instrument  Conversion   Code for   Dividend   Code for    Stock     Code for   Quantity
+                                       (A)                                Cash    Amount       Stock    Quantity     Rights
+                                                  Code        Ratio    Dividend              Dividend                   (H)       (I)
+                                                   (B)          (C)          (D)      (E)         (F)      (G)
+
+05/11/2019 05/11/2019 HKMK        5                                   DIV5        -0.78
+
+Note: Please repeat the position adjustment if more than one corporate actions with different ex-dates for the
+same instrument are required.

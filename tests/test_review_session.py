@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from lme_testing.config import ProjectConfig, ProviderConfig, RoleDefaults
-from lme_testing.review_session import ReviewSessionManager
+from lme_testing.review_session import ReviewSessionManager, _render_review_session_shell
 from lme_testing.step_registry import (
     compute_step_matches,
     extract_steps_from_normalized_bdd,
@@ -62,6 +62,52 @@ class ReviewSessionTests(unittest.TestCase):
         result = manager.save_reviews(payload)
         self.assertTrue(Path(result['saved_review_path']).exists())
         self.assertTrue(Path(result['latest_review_path']).exists())
+
+    def test_save_reviews_normalizes_legacy_review_fields(self) -> None:
+        manager = self._build_manager()
+        payload = self._payload('reject', 'approved')
+        result = manager.save_reviews(payload)
+
+        latest_payload = json.loads(Path(result['latest_review_path']).read_text(encoding='utf-8'))
+
+        self.assertEqual([item['review_decision'] for item in latest_payload['reviews']], ['rewrite', 'approve'])
+        self.assertNotIn('block_recommendation_review', latest_payload['reviews'][0])
+        self.assertNotIn('block_recommendation_review', latest_payload['reviews'][1])
+
+    def test_save_reviews_treats_pending_comment_as_rewrite(self) -> None:
+        manager = self._build_manager()
+        payload = self._payload('pending', 'approve')
+        payload['reviews'][0]['human_comment'] = '  please rewrite this case with clearer inputs  '
+        result = manager.save_reviews(payload)
+
+        latest_payload = json.loads(Path(result['latest_review_path']).read_text(encoding='utf-8'))
+
+        self.assertEqual(latest_payload['reviews'][0]['review_decision'], 'rewrite')
+        self.assertEqual(latest_payload['reviews'][0]['human_comment'], '  please rewrite this case with clearer inputs  ')
+
+    def test_review_session_shell_uses_three_state_decision_ui(self) -> None:
+        html = _render_review_session_shell()
+
+        self.assertIn('<option value="pending"', html)
+        self.assertIn('<option value="approve"', html)
+        self.assertIn('<option value="rewrite"', html)
+        self.assertNotIn('<option value="reject"', html)
+        self.assertNotIn('Block Recommendation Review', html)
+        self.assertIn('View Changes', html)
+        self.assertIn('PHASE_PROGRESS', html)
+        self.assertIn('正在 checker 复检', html)
+        self.assertNotIn('rewrite_summary', html)
+        self.assertNotIn('checker_summary', html)
+        self.assertNotIn('Latest review path', html)
+
+    def test_audit_trail_records_human_checker_divergence_after_normalization(self) -> None:
+        manager = self._build_manager()
+        manager.save_reviews(self._payload('reject', 'approve'))
+
+        trail = manager.rebuild_audit_trail()
+
+        self.assertEqual(trail['divergent_count'], 1)
+        self.assertTrue(Path(trail['audit_trail_path']).exists())
 
     def test_submit_reviews_advances_iteration_and_generates_report(self) -> None:
         manager = self._build_manager()
@@ -141,7 +187,13 @@ class ReviewSessionTests(unittest.TestCase):
         self.assertEqual(session['current_iteration'], 1)
         self.assertTrue(session['metadata']['current_report_path'])
         self.assertIn('report_html', status['result']['links'])
+        self.assertEqual(status['result']['history_iteration'], 0)
+        self.assertIn('case_compare_html', status['result']['links'])
+        self.assertTrue(status['result']['links']['case_compare_html'])
         self.assertEqual(len(session['history']), 1)
+        self.assertEqual(session['history'][0]['next_iteration'], 1)
+        self.assertTrue(session['history'][0]['compare_path'])
+        self.assertTrue(Path(session['history'][0]['compare_path']).exists())
 
     def test_finalize_locks_session(self) -> None:
         manager = self._build_manager()

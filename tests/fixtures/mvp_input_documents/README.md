@@ -19,4 +19,3 @@ Use with:
   --regression-pack-index tests\fixtures\mvp_input_documents\sample_regression_pack_index.md `
   --regression-pack-index-version RP-DEMO-1
 ```
-

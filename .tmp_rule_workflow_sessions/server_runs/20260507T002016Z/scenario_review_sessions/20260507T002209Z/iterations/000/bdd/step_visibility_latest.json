@@ -1,0 +1,1098 @@
+{
+  "total_steps": 43,
+  "given_count": 15,
+  "when_count": 11,
+  "then_count": 17,
+  "unique_bdd_patterns": 38,
+  "exact_matches": 0,
+  "parameterized_matches": 1,
+  "candidates": [
+    {
+      "step_type": "given",
+      "step_text": "Liquidation risk add-on is 266,865",
+      "step_pattern": "Liquidation risk add-on is \\d+,\\d+",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "confidence": 0.535,
+      "suggestions": [
+        {
+          "library_step_text": "business is transacted on the Exchange",
+          "library_step_pattern": "business is transacted on (?:a|an|the) exchange",
+          "library_name": "step_library",
+          "similarity": 0.535
+        }
+      ]
+    },
+    {
+      "step_type": "given",
+      "step_text": "Structured product add-on is 550,000",
+      "step_pattern": "Structured product add-on is \\d+,\\d+",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "confidence": 0.535,
+      "suggestions": [
+        {
+          "library_step_text": "business is transacted on the Exchange",
+          "library_step_pattern": "business is transacted on (?:a|an|the) exchange",
+          "library_name": "step_library",
+          "similarity": 0.535
+        }
+      ]
+    },
+    {
+      "step_type": "given",
+      "step_text": "Holiday add-on is 18,433,039",
+      "step_pattern": "Holiday add-on is \\d+,\\d+,\\d+",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "confidence": 0.535,
+      "suggestions": [
+        {
+          "library_step_text": "business is transacted on the Exchange",
+          "library_step_pattern": "business is transacted on (?:a|an|the) exchange",
+          "library_name": "step_library",
+          "similarity": 0.535
+        }
+      ]
+    },
+    {
+      "step_type": "given",
+      "step_text": "Rounding parameter in Initial Margin Risk Parameter File is 10,000",
+      "step_pattern": "Rounding parameter in Initial Margin Risk Parameter File is \\d+,\\d+",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "confidence": 0.3,
+      "suggestions": [
+        {
+          "library_step_text": "trade submission resulted in Failed Checks",
+          "library_step_pattern": "trade submission resulted in failed checks",
+          "library_name": "step_library",
+          "similarity": 0.3
+        }
+      ]
+    },
+    {
+      "step_type": "given",
+      "step_text": "A clearing participant portfolio with margin calculation request",
+      "step_pattern": "(?:a|an|the) clearing participant portfolio with margin calculation request",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "confidence": 0.32,
+      "suggestions": [
+        {
+          "library_step_text": "a relevant deadline exists for the request",
+          "library_step_pattern": "(?:a|an|the) relevant deadline exists for (?:a|an|the) request",
+          "library_name": "step_library",
+          "similarity": 0.32
+        }
+      ]
+    },
+    {
+      "step_type": "given",
+      "step_text": "A clearing participant with margin calculation request",
+      "step_pattern": "(?:a|an|the) clearing participant with margin calculation request",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "confidence": 0.32,
+      "suggestions": [
+        {
+          "library_step_text": "a relevant deadline exists for the request",
+          "library_step_pattern": "(?:a|an|the) relevant deadline exists for (?:a|an|the) request",
+          "library_name": "step_library",
+          "similarity": 0.32
+        }
+      ]
+    },
+    {
+      "step_type": "when",
+      "step_text": "the system applies rounding up to the nearest 10,000",
+      "step_pattern": "(?:a|an|the) system applies rounding up to (?:a|an|the) nearest \\d+,\\d+",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "confidence": 0.353,
+      "suggestions": [
+        {
+          "library_step_text": "the system processes the document terminology",
+          "library_step_pattern": "(?:a|an|the) system processes (?:a|an|the) document terminology",
+          "library_name": "step_library",
+          "similarity": 0.353
+        }
+      ]
+    },
+    {
+      "step_type": "when",
+      "step_text": "the system calculates net margin after credit",
+      "step_pattern": "(?:a|an|the) system calculates net margin after credit",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-positive-01"
+      ],
+      "confidence": 0.417,
+      "suggestions": [
+        {
+          "library_step_text": "the system processes the document terminology",
+          "library_step_pattern": "(?:a|an|the) system processes (?:a|an|the) document terminology",
+          "library_name": "step_library",
+          "similarity": 0.417
+        }
+      ]
+    },
+    {
+      "step_type": "when",
+      "step_text": "the system validates the margin credit value",
+      "step_pattern": "(?:a|an|the) system validates (?:a|an|the) margin credit value",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "confidence": 0.419,
+      "suggestions": [
+        {
+          "library_step_text": "the system processes the document terminology",
+          "library_step_pattern": "(?:a|an|the) system processes (?:a|an|the) document terminology",
+          "library_name": "step_library",
+          "similarity": 0.419
+        }
+      ]
+    },
+    {
+      "step_type": "when",
+      "step_text": "the system validates the Maximum function logic for net margin calculation",
+      "step_pattern": "(?:a|an|the) system validates (?:a|an|the) Maximum function logic for net margin calculation",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "confidence": 0.327,
+      "suggestions": [
+        {
+          "library_step_text": "the system processes the document terminology",
+          "library_step_pattern": "(?:a|an|the) system processes (?:a|an|the) document terminology",
+          "library_name": "step_library",
+          "similarity": 0.327
+        }
+      ]
+    },
+    {
+      "step_type": "then",
+      "step_text": "the aggregated margin before rounding is calculated as 46,929,904",
+      "step_pattern": "(?:a|an|the) aggregated margin before rounding is calculated as \\d+,\\d+,\\d+",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "confidence": 0.381,
+      "suggestions": [
+        {
+          "library_step_text": "the request is rejected as a late submission",
+          "library_step_pattern": "(?:a|an|the) request is rejected as (?:a|an|the) late submission",
+          "library_name": "step_library",
+          "similarity": 0.381
+        }
+      ]
+    },
+    {
+      "step_type": "then",
+      "step_text": "Corporate action position margin is present and valid",
+      "step_pattern": "Corporate action position margin is present and valid",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "confidence": 0.745,
+      "suggestions": [
+        {
+          "library_step_text": "the contact action is recorded",
+          "library_step_pattern": "(?:a|an|the) contact action is recorded",
+          "library_name": "step_library",
+          "similarity": 0.745
+        }
+      ]
+    },
+    {
+      "step_type": "then",
+      "step_text": "Rounding parameter is retrieved from the Initial Margin Risk Parameter File",
+      "step_pattern": "Rounding parameter is retrieved from (?:a|an|the) Initial Margin Risk Parameter File",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "confidence": 0.462,
+      "suggestions": [
+        {
+          "library_step_text": "the system identifies the deviation from the LME Rulebook",
+          "library_step_pattern": "(?:a|an|the) system identifies (?:a|an|the) deviation from (?:a|an|the) lme rulebook",
+          "library_name": "step_library",
+          "similarity": 0.462
+        }
+      ]
+    },
+    {
+      "step_type": "then",
+      "step_text": "net margin after credit is calculated as 41,930,000",
+      "step_pattern": "net margin after credit is calculated as \\d+,\\d+,\\d+",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-positive-01"
+      ],
+      "confidence": 0.493,
+      "suggestions": [
+        {
+          "library_step_text": "the request is rejected as a late submission",
+          "library_step_pattern": "(?:a|an|the) request is rejected as (?:a|an|the) late submission",
+          "library_name": "step_library",
+          "similarity": 0.493
+        },
+        {
+          "library_step_text": "the member explains the rationale as to the price of the rejected order or trade",
+          "library_step_pattern": "(?:a|an|the) member explains (?:a|an|the) rationale as to (?:a|an|the) price of (?:a|an|the) rejected order or trade",
+          "library_name": "step_library",
+          "similarity": 0.304
+        }
+      ]
+    },
+    {
+      "step_type": "then",
+      "step_text": "the Maximum function ensures the result is not negative",
+      "step_pattern": "(?:a|an|the) Maximum function ensures (?:a|an|the) result is not negative",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-boundary-01"
+      ],
+      "confidence": 0.421,
+      "suggestions": [
+        {
+          "library_step_text": "the obligation is not fulfilled",
+          "library_step_pattern": "(?:a|an|the) obligation is not fulfilled",
+          "library_name": "step_library",
+          "similarity": 0.421
+        },
+        {
+          "library_step_text": "the deadline validation result is 'pass'",
+          "library_step_pattern": "(?:a|an|the) deadline validation result is 'pass'",
+          "library_name": "step_library",
+          "similarity": 0.346
+        }
+      ]
+    },
+    {
+      "step_type": "then",
+      "step_text": "net margin after credit is never negative regardless of input values",
+      "step_pattern": "net margin after credit is never negative regardless of input values",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "confidence": 0.354,
+      "suggestions": [
+        {
+          "library_step_text": "the member explains the rationale as to the price of the rejected order or trade",
+          "library_step_pattern": "(?:a|an|the) member explains (?:a|an|the) rationale as to (?:a|an|the) price of (?:a|an|the) rejected order or trade",
+          "library_name": "step_library",
+          "similarity": 0.354
+        },
+        {
+          "library_step_text": "the rules are recognized as part of Administrative Procedures",
+          "library_step_pattern": "(?:a|an|the) rules are recognized as part of administrative procedures",
+          "library_name": "step_library",
+          "similarity": 0.315
+        }
+      ]
+    }
+  ],
+  "unmatched": 21,
+  "reuse_scores": {
+    "when:(?:a|an|the) request is submitted (\\d+) minutes before (?:a|an|the) relevant deadline": 0.026
+  },
+  "ownership": {
+    "given:(?:a|an|the) order or trade has been submitted for processing": "step_library",
+    "given:(?:a|an|the) price validation check has been performed": "step_library",
+    "given:(?:a|an|the) request needs to be submitted to lme post-trade operations": "step_library",
+    "given:(?:a|an|the) relevant deadline exists for (?:a|an|the) request": "step_library",
+    "given:(?:a|an|the) registered_intermediating_broker submits (?:a|an|the) document containing capitalised terms": "step_library",
+    "given:(?:a|an|the) terms are not otherwise defined within (?:a|an|the) document": "step_library",
+    "given:(?:a|an|the) terms are defined differently than in (?:a|an|the) lme rulebook": "step_library",
+    "given:exchange defines matching rules": "step_library",
+    "given:business is transacted on (?:a|an|the) exchange": "step_library",
+    "given:trade submission resulted in failed checks": "step_library",
+    "given:exchange requested additional information": "step_library",
+    "given:member provided (?:a|an|the) requested additional information": "step_library",
+    "given:lme trading environment is active": "step_library",
+    "when:(?:a|an|the) order or trade fails (?:a|an|the) price validation check": "step_library",
+    "when:(?:a|an|the) order or trade passes (?:a|an|the) price validation check": "step_library",
+    "when:(?:a|an|the) system processes (?:a|an|the) document terminology": "step_library",
+    "when:(?:a|an|the) rules are submitted for adoption": "step_library",
+    "when:trade agreement occurs": "step_library",
+    "when:(?:a|an|the) request is submitted (\\d+) minutes before (?:a|an|the) relevant deadline": "step_library",
+    "when:(?:a|an|the) request is submitted exactly (\\d+) minutes before (?:a|an|the) relevant deadline": "step_library",
+    "when:(?:a|an|the) member contacts (?:a|an|the) exchange to explain (?:a|an|the) rationale for (?:a|an|the) price": "step_library",
+    "when:(?:a|an|the) member does not contact (?:a|an|the) exchange to explain (?:a|an|the) rationale for (?:a|an|the) price": "step_library",
+    "when:member requests to re-submit (?:a|an|the) trade in its original form": "step_library",
+    "when:trade agreement occurs on any venue": "step_library",
+    "then:(?:a|an|the) terms are assigned (?:a|an|the) meaning ascribed in (?:a|an|the) lme rulebook": "step_library",
+    "then:(?:a|an|the) obligation is fulfilled": "step_library",
+    "then:(?:a|an|the) system identifies (?:a|an|the) deviation from (?:a|an|the) lme rulebook": "step_library",
+    "then:(?:a|an|the) obligation is not fulfilled": "step_library",
+    "then:(?:a|an|the) rules are recognized as part of administrative procedures": "step_library",
+    "then:business is subject to price validation": "step_library",
+    "then:(?:a|an|the) member contacts (?:a|an|the) exchange": "step_library",
+    "then:(?:a|an|the) member explains (?:a|an|the) rationale as to (?:a|an|the) price of (?:a|an|the) rejected order or trade": "step_library",
+    "then:(?:a|an|the) contact action is recorded": "step_library",
+    "then:exchange records (?:a|an|the) contact": "step_library",
+    "then:(?:a|an|the) member is not required to contact (?:a|an|the) exchange to explain price rationale": "step_library",
+    "then:(?:a|an|the) processing result indicates compliance": "step_library",
+    "then:(?:a|an|the) processing result indicates non-compliance or failure": "step_library",
+    "then:(?:a|an|the) order or trade proceeds without (?:a|an|the) contact obligation": "step_library",
+    "then:system permits (?:a|an|the) trade re-submission": "step_library",
+    "then:validation result indicates acceptance": "step_library",
+    "then:(?:a|an|the) request is accepted": "step_library",
+    "then:(?:a|an|the) deadline validation result is 'pass'": "step_library",
+    "then:(?:a|an|the) recorded timestamp reflects timely submission": "step_library",
+    "then:(?:a|an|the) submission meets (?:a|an|the) deadline requirement": "step_library",
+    "then:(?:a|an|the) request is rejected as (?:a|an|the) late submission": "step_library",
+    "then:(?:a|an|the) deadline validation result indicates failure": "step_library",
+    "then:(?:a|an|the) late_submission outcome is recorded": "step_library",
+    "then:trade is subject to price validation": "step_library"
+  },
+  "given_steps": [
+    {
+      "step_text": "Portfolio margin is 10,000,000",
+      "step_pattern": "Portfolio margin is \\d+,\\d+,\\d+",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "Flat rate margin is 15,180,000",
+      "step_pattern": "Flat rate margin is \\d+,\\d+,\\d+",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "Liquidation risk add-on is 266,865",
+      "step_pattern": "Liquidation risk add-on is \\d+,\\d+",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.535,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "business is transacted on the Exchange",
+          "library_step_pattern": "business is transacted on (?:a|an|the) exchange",
+          "library_name": "step_library",
+          "similarity": 0.535,
+          "capture_groups": []
+        }
+      ]
+    },
+    {
+      "step_text": "Structured product add-on is 550,000",
+      "step_pattern": "Structured product add-on is \\d+,\\d+",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.535,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "business is transacted on the Exchange",
+          "library_step_pattern": "business is transacted on (?:a|an|the) exchange",
+          "library_name": "step_library",
+          "similarity": 0.535,
+          "capture_groups": []
+        }
+      ]
+    },
+    {
+      "step_text": "Corporate action position margin is 2,500,000",
+      "step_pattern": "Corporate action position margin is \\d+,\\d+,\\d+",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "Holiday add-on is 18,433,039",
+      "step_pattern": "Holiday add-on is \\d+,\\d+,\\d+",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.535,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "business is transacted on the Exchange",
+          "library_step_pattern": "business is transacted on (?:a|an|the) exchange",
+          "library_name": "step_library",
+          "similarity": 0.535,
+          "capture_groups": []
+        }
+      ]
+    },
+    {
+      "step_text": "Rounding parameter in Initial Margin Risk Parameter File is 10,000",
+      "step_pattern": "Rounding parameter in Initial Margin Risk Parameter File is \\d+,\\d+",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.3,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "trade submission resulted in Failed Checks",
+          "library_step_pattern": "trade submission resulted in failed checks",
+          "library_name": "step_library",
+          "similarity": 0.3,
+          "capture_groups": []
+        }
+      ]
+    },
+    {
+      "step_text": "Aggregated margin before rounding is exactly 46,930,000",
+      "step_pattern": "Aggregated margin before rounding is exactly \\d+,\\d+,\\d+",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-boundary-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "A clearing participant portfolio with margin calculation request",
+      "step_pattern": "(?:a|an|the) clearing participant portfolio with margin calculation request",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.32,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "a relevant deadline exists for the request",
+          "library_step_pattern": "(?:a|an|the) relevant deadline exists for (?:a|an|the) request",
+          "library_name": "step_library",
+          "similarity": 0.32,
+          "capture_groups": []
+        }
+      ]
+    },
+    {
+      "step_text": "Net margin before credit is 46,930,000",
+      "step_pattern": "Net margin before credit is \\d+,\\d+,\\d+",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-positive-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "Margin credit is 5,000,000",
+      "step_pattern": "Margin credit is \\d+,\\d+,\\d+",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-positive-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "Net margin before credit is exactly 5,000,000",
+      "step_pattern": "Net margin before credit is exactly \\d+,\\d+,\\d+",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-boundary-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "A clearing participant with margin calculation request",
+      "step_pattern": "(?:a|an|the) clearing participant with margin calculation request",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.32,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "a relevant deadline exists for the request",
+          "library_step_pattern": "(?:a|an|the) relevant deadline exists for (?:a|an|the) request",
+          "library_name": "step_library",
+          "similarity": 0.32,
+          "capture_groups": []
+        }
+      ]
+    }
+  ],
+  "when_steps": [
+    {
+      "step_text": "the clearing participant calculates the aggregated market-risk-component margin",
+      "step_pattern": "(?:a|an|the) clearing participant calculates (?:a|an|the) aggregated market-risk-component margin",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "the system applies rounding up to the nearest 10,000",
+      "step_pattern": "(?:a|an|the) system applies rounding up to (?:a|an|the) nearest \\d+,\\d+",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.353,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "the system processes the document terminology",
+          "library_step_pattern": "(?:a|an|the) system processes (?:a|an|the) document terminology",
+          "library_name": "step_library",
+          "similarity": 0.353,
+          "capture_groups": []
+        }
+      ]
+    },
+    {
+      "step_text": "the system validates the presence of all margin components",
+      "step_pattern": "(?:a|an|the) system validates (?:a|an|the) presence of all margin components",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "the system validates the rounding parameter from the Initial Margin Risk Parameter File",
+      "step_pattern": "(?:a|an|the) system validates (?:a|an|the) rounding parameter from (?:a|an|the) Initial Margin Risk Parameter File",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "the system calculates net margin after credit",
+      "step_pattern": "(?:a|an|the) system calculates net margin after credit",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.417,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-positive-01"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "the system processes the document terminology",
+          "library_step_pattern": "(?:a|an|the) system processes (?:a|an|the) document terminology",
+          "library_name": "step_library",
+          "similarity": 0.417,
+          "capture_groups": []
+        }
+      ]
+    },
+    {
+      "step_text": "the system applies the Maximum[0, (Net margin – Margin credit)] formula",
+      "step_pattern": "(?:a|an|the) system applies (?:a|an|the) Maximum[\\d+, (Net margin – Margin credit)] formula",
+      "match_type": "parameterized",
+      "library_step_text": "the request is submitted (\\d+) minutes before the relevant deadline",
+      "confidence": 0.9,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-positive-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "the system validates the margin credit value",
+      "step_pattern": "(?:a|an|the) system validates (?:a|an|the) margin credit value",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.419,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "the system processes the document terminology",
+          "library_step_pattern": "(?:a|an|the) system processes (?:a|an|the) document terminology",
+          "library_name": "step_library",
+          "similarity": 0.419,
+          "capture_groups": []
+        }
+      ]
+    },
+    {
+      "step_text": "the system validates the Maximum function logic for net margin calculation",
+      "step_pattern": "(?:a|an|the) system validates (?:a|an|the) Maximum function logic for net margin calculation",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.327,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "the system processes the document terminology",
+          "library_step_pattern": "(?:a|an|the) system processes (?:a|an|the) document terminology",
+          "library_name": "step_library",
+          "similarity": 0.327,
+          "capture_groups": []
+        }
+      ]
+    }
+  ],
+  "then_steps": [
+    {
+      "step_text": "the aggregated margin before rounding is calculated as 46,929,904",
+      "step_pattern": "(?:a|an|the) aggregated margin before rounding is calculated as \\d+,\\d+,\\d+",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.381,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "the request is rejected as a late submission",
+          "library_step_pattern": "(?:a|an|the) request is rejected as (?:a|an|the) late submission",
+          "library_name": "step_library",
+          "similarity": 0.381,
+          "capture_groups": []
+        }
+      ]
+    },
+    {
+      "step_text": "the rounded aggregated market-risk-component margin is 46,930,000",
+      "step_pattern": "(?:a|an|the) rounded aggregated market-risk-component margin is \\d+,\\d+,\\d+",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "the rounded aggregated market-risk-component margin remains 46,930,000",
+      "step_pattern": "(?:a|an|the) rounded aggregated market-risk-component margin remains \\d+,\\d+,\\d+",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-boundary-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "no upward adjustment is applied since value is already at the rounding boundary",
+      "step_pattern": "no upward adjustment is applied since value is already at (?:a|an|the) rounding boundary",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-boundary-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "Portfolio margin is present and valid",
+      "step_pattern": "Portfolio margin is present and valid",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "Flat rate margin is present and valid",
+      "step_pattern": "Flat rate margin is present and valid",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "Liquidation risk add-on is present and valid",
+      "step_pattern": "Liquidation risk add-on is present and valid",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "Structured product add-on is present and valid",
+      "step_pattern": "Structured product add-on is present and valid",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "Corporate action position margin is present and valid",
+      "step_pattern": "Corporate action position margin is present and valid",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.745,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "the contact action is recorded",
+          "library_step_pattern": "(?:a|an|the) contact action is recorded",
+          "library_name": "step_library",
+          "similarity": 0.745,
+          "capture_groups": []
+        }
+      ]
+    },
+    {
+      "step_text": "Holiday add-on is present and valid",
+      "step_pattern": "Holiday add-on is present and valid",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "Rounding parameter is retrieved from the Initial Margin Risk Parameter File",
+      "step_pattern": "Rounding parameter is retrieved from (?:a|an|the) Initial Margin Risk Parameter File",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.462,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "the system identifies the deviation from the LME Rulebook",
+          "library_step_pattern": "(?:a|an|the) system identifies (?:a|an|the) deviation from (?:a|an|the) lme rulebook",
+          "library_name": "step_library",
+          "similarity": 0.462,
+          "capture_groups": []
+        }
+      ]
+    },
+    {
+      "step_text": "net margin after credit is calculated as 41,930,000",
+      "step_pattern": "net margin after credit is calculated as \\d+,\\d+,\\d+",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.493,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-positive-01"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "the request is rejected as a late submission",
+          "library_step_pattern": "(?:a|an|the) request is rejected as (?:a|an|the) late submission",
+          "library_name": "step_library",
+          "similarity": 0.493,
+          "capture_groups": []
+        },
+        {
+          "library_step_text": "the member explains the rationale as to the price of the rejected order or trade",
+          "library_step_pattern": "(?:a|an|the) member explains (?:a|an|the) rationale as to (?:a|an|the) price of (?:a|an|the) rejected order or trade",
+          "library_name": "step_library",
+          "similarity": 0.304,
+          "capture_groups": []
+        }
+      ]
+    },
+    {
+      "step_text": "net margin after credit is 0",
+      "step_pattern": "net margin after credit is \\d+",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-boundary-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "the Maximum function ensures the result is not negative",
+      "step_pattern": "(?:a|an|the) Maximum function ensures (?:a|an|the) result is not negative",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.421,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-boundary-01"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "the obligation is not fulfilled",
+          "library_step_pattern": "(?:a|an|the) obligation is not fulfilled",
+          "library_name": "step_library",
+          "similarity": 0.421,
+          "capture_groups": []
+        },
+        {
+          "library_step_text": "the deadline validation result is 'pass'",
+          "library_step_pattern": "(?:a|an|the) deadline validation result is 'pass'",
+          "library_name": "step_library",
+          "similarity": 0.346,
+          "capture_groups": []
+        }
+      ]
+    },
+    {
+      "step_text": "margin credit is a valid positive numeric value",
+      "step_pattern": "margin credit is (?:a|an|the) valid positive numeric value",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "the Maximum[0, (Net margin – Margin credit)] formula is correctly implemented",
+      "step_pattern": "(?:a|an|the) Maximum[\\d+, (Net margin – Margin credit)] formula is correctly implemented",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "net margin after credit is never negative regardless of input values",
+      "step_pattern": "net margin after credit is never negative regardless of input values",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.354,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "the member explains the rationale as to the price of the rejected order or trade",
+          "library_step_pattern": "(?:a|an|the) member explains (?:a|an|the) rationale as to (?:a|an|the) price of (?:a|an|the) rejected order or trade",
+          "library_name": "step_library",
+          "similarity": 0.354,
+          "capture_groups": []
+        },
+        {
+          "library_step_text": "the rules are recognized as part of Administrative Procedures",
+          "library_step_pattern": "(?:a|an|the) rules are recognized as part of administrative procedures",
+          "library_name": "step_library",
+          "similarity": 0.315,
+          "capture_groups": []
+        }
+      ]
+    }
+  ],
+  "gaps": [
+    {
+      "step_text": "Portfolio margin is 10,000,000",
+      "step_pattern": "Portfolio margin is \\d+,\\d+,\\d+",
+      "step_type": "given",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ]
+    },
+    {
+      "step_text": "Flat rate margin is 15,180,000",
+      "step_pattern": "Flat rate margin is \\d+,\\d+,\\d+",
+      "step_type": "given",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ]
+    },
+    {
+      "step_text": "Corporate action position margin is 2,500,000",
+      "step_pattern": "Corporate action position margin is \\d+,\\d+,\\d+",
+      "step_type": "given",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ]
+    },
+    {
+      "step_text": "Aggregated margin before rounding is exactly 46,930,000",
+      "step_pattern": "Aggregated margin before rounding is exactly \\d+,\\d+,\\d+",
+      "step_type": "given",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-boundary-01"
+      ]
+    },
+    {
+      "step_text": "Net margin before credit is 46,930,000",
+      "step_pattern": "Net margin before credit is \\d+,\\d+,\\d+",
+      "step_type": "given",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-positive-01"
+      ]
+    },
+    {
+      "step_text": "Margin credit is 5,000,000",
+      "step_pattern": "Margin credit is \\d+,\\d+,\\d+",
+      "step_type": "given",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-positive-01"
+      ]
+    },
+    {
+      "step_text": "Net margin before credit is exactly 5,000,000",
+      "step_pattern": "Net margin before credit is exactly \\d+,\\d+,\\d+",
+      "step_type": "given",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-boundary-01"
+      ]
+    },
+    {
+      "step_text": "the clearing participant calculates the aggregated market-risk-component margin",
+      "step_pattern": "(?:a|an|the) clearing participant calculates (?:a|an|the) aggregated market-risk-component margin",
+      "step_type": "when",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ]
+    },
+    {
+      "step_text": "the system validates the presence of all margin components",
+      "step_pattern": "(?:a|an|the) system validates (?:a|an|the) presence of all margin components",
+      "step_type": "when",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ]
+    },
+    {
+      "step_text": "the system validates the rounding parameter from the Initial Margin Risk Parameter File",
+      "step_pattern": "(?:a|an|the) system validates (?:a|an|the) rounding parameter from (?:a|an|the) Initial Margin Risk Parameter File",
+      "step_type": "when",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ]
+    },
+    {
+      "step_text": "the rounded aggregated market-risk-component margin is 46,930,000",
+      "step_pattern": "(?:a|an|the) rounded aggregated market-risk-component margin is \\d+,\\d+,\\d+",
+      "step_type": "then",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ]
+    },
+    {
+      "step_text": "the rounded aggregated market-risk-component margin remains 46,930,000",
+      "step_pattern": "(?:a|an|the) rounded aggregated market-risk-component margin remains \\d+,\\d+,\\d+",
+      "step_type": "then",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-boundary-01"
+      ]
+    },
+    {
+      "step_text": "no upward adjustment is applied since value is already at the rounding boundary",
+      "step_pattern": "no upward adjustment is applied since value is already at (?:a|an|the) rounding boundary",
+      "step_type": "then",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-boundary-01"
+      ]
+    },
+    {
+      "step_text": "Portfolio margin is present and valid",
+      "step_pattern": "Portfolio margin is present and valid",
+      "step_type": "then",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ]
+    },
+    {
+      "step_text": "Flat rate margin is present and valid",
+      "step_pattern": "Flat rate margin is present and valid",
+      "step_type": "then",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ]
+    },
+    {
+      "step_text": "Liquidation risk add-on is present and valid",
+      "step_pattern": "Liquidation risk add-on is present and valid",
+      "step_type": "then",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ]
+    },
+    {
+      "step_text": "Structured product add-on is present and valid",
+      "step_pattern": "Structured product add-on is present and valid",
+      "step_type": "then",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ]
+    },
+    {
+      "step_text": "Holiday add-on is present and valid",
+      "step_pattern": "Holiday add-on is present and valid",
+      "step_type": "then",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ]
+    },
+    {
+      "step_text": "net margin after credit is 0",
+      "step_pattern": "net margin after credit is \\d+",
+      "step_type": "then",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-boundary-01"
+      ]
+    },
+    {
+      "step_text": "margin credit is a valid positive numeric value",
+      "step_pattern": "margin credit is (?:a|an|the) valid positive numeric value",
+      "step_type": "then",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ]
+    },
+    {
+      "step_text": "the Maximum[0, (Net margin – Margin credit)] formula is correctly implemented",
+      "step_pattern": "(?:a|an|the) Maximum[\\d+, (Net margin – Margin credit)] formula is correctly implemented",
+      "step_type": "then",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ]
+    }
+  ]
+}

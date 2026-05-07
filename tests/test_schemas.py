@@ -12,11 +12,20 @@ from schemas import (
     validate_checker_output,
     validate_executable_scenario,
 )
-from lme_testing.schemas import SchemaError, validate_maker_payload
+from lme_testing.schemas import SchemaError, parse_json_object, validate_human_review_payload, validate_maker_payload
 
 
 def _fixture_path(name: str) -> Path:
     return Path(__file__).parent.parent / "schemas" / "fixtures" / name
+
+
+class JsonParsingTests(unittest.TestCase):
+    def test_parse_json_object_extracts_embedded_object(self) -> None:
+        self.assertEqual(parse_json_object('Here is JSON:\n{"ok": true}\nDone.')["ok"], True)
+
+    def test_parse_json_object_reports_empty_output(self) -> None:
+        with self.assertRaisesRegex(SchemaError, "empty"):
+            parse_json_object("")
 
 
 class ExecutableScenarioSchemaTests(unittest.TestCase):
@@ -345,6 +354,42 @@ class MakerOutputSchemaTests(unittest.TestCase):
             reference_only_rules={"SR-MR-001-01"},
         )
         self.assertEqual(result, payload)
+
+
+class HumanReviewSchemaTests(unittest.TestCase):
+    def test_accepts_three_state_decisions_and_normalizes_legacy_values(self) -> None:
+        payload = {
+            "reviews": [
+                {
+                    "case_id": "TC-1",
+                    "semantic_rule_id": "SR-1",
+                    "review_decision": "pending",
+                    "block_recommendation_review": "pending_review",
+                },
+                {
+                    "case_id": "TC-2",
+                    "semantic_rule_id": "SR-2",
+                    "review_decision": "reject",
+                    "human_block_decision": "confirmed",
+                },
+                {
+                    "case_id": "TC-3",
+                    "semantic_rule_id": "SR-3",
+                    "decision": "needs_rewrite",
+                },
+            ],
+        }
+
+        result = validate_human_review_payload(payload)
+
+        self.assertEqual([item["review_decision"] for item in result["reviews"]], ["pending", "rewrite", "rewrite"])
+        self.assertNotIn("block_recommendation_review", result["reviews"][0])
+        self.assertNotIn("human_block_decision", result["reviews"][1])
+        self.assertNotIn("decision", result["reviews"][2])
+
+    def test_rejects_unknown_decision(self) -> None:
+        with self.assertRaises(SchemaError):
+            validate_human_review_payload({"reviews": [{"case_id": "TC-1", "review_decision": "defer"}]})
 
 
 class CheckerOutputSchemaTests(unittest.TestCase):

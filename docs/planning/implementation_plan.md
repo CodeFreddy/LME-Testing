@@ -1,7 +1,7 @@
 # LME Testing — Implementation Plan v3.1
 
-**修订日期：** 2026-04-26  
-**范围：** Stage M（合并）+ Stage 1（真实数据接入）+ Stage 2 已执行任务  
+**修订日期：** 2026-04-26
+**范围：** Stage M（合并）+ Stage 1（真实数据接入）+ Stage 2 已执行任务
 **说明：** Stage 2 已基于真实数据展开：S2-T01 prompt 校准完成，S2-B1/B2 集成完成，S2-C1 mock API execution bridge 完成，S2-C2 IM HKv13 mock bridge 完成，S2-C3 IM HKv14 POC document workflow and modular mock bridge 完成，S2-C4 IM HKv14 promoted downstream slice 完成，S2-D1 browser-level review UI E2E 完成。S2-F1 role-friendly HKv14 impact decision review package generator 已实现。S2-F2 MVP document readiness registry 已实现为 deterministic readiness package。
 
 ---
@@ -866,7 +866,7 @@ Document upload/import -> deterministic rule extraction -> atomic/semantic rule 
 def build_audit_trail(session_dir: Path, output_path: Path) -> dict:
     """
     生成审计跟踪 HTML。
-    
+
     输入：session_dir/iterations/<N>/ 下的所有 maker/checker/review 数据
     输出：audit_trail.html（决策链时间线），返回 {"path": str, "rules_count": N}
     """
@@ -885,14 +885,14 @@ def build_audit_trail(session_dir: Path, output_path: Path) -> dict:
 **接口设计：**
 ```python
 def build_case_compare(
-    session_dir: Path, 
-    iteration_a: int, 
-    iteration_b: int, 
+    session_dir: Path,
+    iteration_a: int,
+    iteration_b: int,
     output_path: Path
 ) -> dict:
     """
     生成两个迭代之间的 case 对比 HTML。
-    
+
     用途：rewrite 后查看 case 有何变化
     输出：case_compare.html（并排视图，高亮变化）
     """
@@ -901,4 +901,3 @@ def build_case_compare(
 **触发时机：** 在 `ReviewSessionManager._run_rewrite_job()` 完成后调用（iteration N vs N-1 对比）
 
 **前置：** S2-B1 完成后（共用部分 session 数据读取逻辑）
-

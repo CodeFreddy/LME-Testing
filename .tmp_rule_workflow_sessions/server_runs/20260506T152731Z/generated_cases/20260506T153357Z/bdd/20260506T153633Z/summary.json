@@ -1,0 +1,32 @@
+{
+  "run_id": "20260506T153633Z",
+  "role": "bdd",
+  "pipeline_version": "2.1",
+  "prompt_version": "3.0",
+  "provider": "maker_glm",
+  "model": "glm-5",
+  "input_cases": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\maker\\20260506T153357Z\\maker_cases.jsonl",
+  "output_dir": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\bdd\\20260506T153633Z",
+  "processed_rule_count": 5,
+  "batch_count": 2,
+  "fallback_batch_count": 1,
+  "fallback_reasons_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\bdd\\20260506T153633Z\\bdd_fallbacks.json",
+  "results_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\bdd\\20260506T153633Z\\normalized_bdd.jsonl",
+  "raw_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\bdd\\20260506T153633Z\\bdd_raw_responses.jsonl",
+  "feature_files_count": 5,
+  "feature_files": [
+    ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\bdd\\20260506T153633Z\\features\\matching_rules\\SR-IMHK-3_2_4_2-01_flat_rate_margin_calculation.feature",
+    ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\bdd\\20260506T153633Z\\features\\matching_rules\\SR-IMHK-3_2_5_1-01_rounding_on_aggregated_market-risk-component_margi.feature",
+    ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\bdd\\20260506T153633Z\\features\\matching_rules\\SR-IMHK-3_2_5_2-01_favorable_mtm_calculation.feature",
+    ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\bdd\\20260506T153633Z\\features\\matching_rules\\SR-IMHK-3_2_5_3-01_application_of_margin_credit.feature",
+    ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\bdd\\20260506T153633Z\\features\\matching_rules\\SR-IMHK-3_2_8-01_total_mtm_and_margin_requirement_calculation.feature"
+  ],
+  "step_definitions_files": [
+    ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\bdd\\20260506T153633Z\\features\\step_definitions\\SR_IMHK_3_2_4_2_01_steps.py",
+    ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\bdd\\20260506T153633Z\\features\\step_definitions\\SR_IMHK_3_2_5_1_01_steps.py",
+    ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\bdd\\20260506T153633Z\\features\\step_definitions\\SR_IMHK_3_2_5_2_01_steps.py",
+    ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\bdd\\20260506T153633Z\\features\\step_definitions\\SR_IMHK_3_2_5_3_01_steps.py",
+    ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\bdd\\20260506T153633Z\\features\\step_definitions\\SR_IMHK_3_2_8_01_steps.py"
+  ],
+  "step_definitions_count": 5
+}

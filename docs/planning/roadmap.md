@@ -1,6 +1,6 @@
 # LME Testing — Roadmap v3.1
 
-**修订日期：** 2026-04-26  
+**修订日期：** 2026-04-26
 **变更说明：** 在 v3.1 基础上，记录 HKv14 POC document intake、HKv13→HKv14 deterministic diff、POC downstream decision note, modular HKv14 mock API bridge, S2-F1 role-friendly impact decision review, and approved S2-F2 document readiness registry planning slice。
 
 ---
@@ -43,15 +43,15 @@
 
 ## Stage 0 — 框架完成（存档）
 
-**日期：** 2026-04-13/14  
-**说明：** AI 代理 48 小时实现全框架，代码层面完整，验证深度为 2 条规则 POC。  
+**日期：** 2026-04-13/14
+**说明：** AI 代理 48 小时实现全框架，代码层面完整，验证深度为 2 条规则 POC。
 **存档，不再重新进入此阶段。**
 
 ---
 
 ## Stage M — Master 分支合并 ✅ COMPLETE
 
-**完成日期：** 2026-04-19  
+**完成日期：** 2026-04-19
 **目标：** 将同事 master 分支的有效改进合并进 main，同时保留 main 的完整 BDD 和 governance 体系
 
 ### Gate M.1 — 存档 Master 代码 ✅
@@ -60,7 +60,7 @@
 - 将 master zip 解压到此目录 ✅
 - 创建 `vendor/master-branch/README.md` ✅
 
-**验收：** `vendor/master-branch/lme_testing/` 存在，不影响主路径 import  
+**验收：** `vendor/master-branch/lme_testing/` 存在，不影响主路径 import
 **后续：** `vendor/` 目录已删除 — master 分支通过单独 remote 访问
 
 ### Gate M.2 — Cherry-pick P1：UTC 时间戳 ✅
@@ -105,7 +105,7 @@
 
 ## Stage 1 — 真实数据接入与可信基准建立
 
-**时间预估：** 2-4 周（Stage M 完成后开始）  
+**时间预估：** 2-4 周（Stage M 完成后开始）
 **目标：** 让 governance 消费真实数据，建立全量质量基准
 
 ### Gate 1.1 — Schema Signal 数据源修复
@@ -150,7 +150,7 @@
 
 ## Stage 2 — 规模化质量提升 + 功能补全
 
-**前置：** Stage 1 完成  
+**前置：** Stage 1 完成
 **时间预估：** 4-8 周（取决于 Stage 1 发现）
 
 ### 方向 A：基于真实数据的质量提升
@@ -436,7 +436,7 @@ Approved slice:
 
 ## Stage 3 — 真实执行环境接入
 
-**前置：** Stage 2 完成 + 获得 LME 内部 VM 访问权限  
+**前置：** Stage 2 完成 + 获得 LME 内部 VM 访问权限
 **当前 ETA：** 未知
 
 核心工作：
@@ -469,4 +469,3 @@ Approved slice:
 3. **master 的改进通过 cherry-pick 合并**，不整体覆盖
 4. **broken import（如 audit_trail/case_compare）记录为新任务**，不作为"已完成"合并
 5. **文件编码问题（如 providers.py 的 ??? 乱码）在合并前修复**
-

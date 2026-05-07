@@ -1,0 +1,20 @@
+[
+  {
+    "clause_id": "IMHK-3_2_5_1",
+    "clause_number": "3.2.5.1",
+    "section": "3.2.5.1 Rounding on Aggregated Market-risk-component Margin",
+    "start_page": 20,
+    "end_page": 20,
+    "raw_text": "3.2.5.1 Rounding on Aggregated Market-risk-component Margin\n Margin rounding is performed on all market risk components according to the steps as\n follows:\n Step 1: Calculate aggregated margin derived from market risk components.\n Aggregated market-risk-component margin\n = Portfolio margin + Flat rate margin + Liquidation risk add-on + Structured product add-\n on + Corporate action position margin + Holiday add-on\n = 10,000,000 + 15,180,000 + 266,865 + 550,000 + 2,500,000 + 18,433,039\n = 46,929,904\n Step 2: Round up the aggregated margin with reference to the rounding parameter\n stated in the Initial Margin Risk Parameter File (e.g., 10,000 in the sample\n Initial Margin Risk Parameter File).\n In our example, 46,929,904 is to be rounded up to the nearest 10,000.\n Rounded aggregated market-risk-component margin = 46,930,000",
+    "source_block_id": "SRC-3_2_5_1"
+  },
+  {
+    "clause_id": "IMHK-3_2_5_3",
+    "clause_number": "3.2.5.3",
+    "section": "3.2.5.3 Application of Margin Credit",
+    "start_page": 21,
+    "end_page": 21,
+    "raw_text": "3.2.5.3 Application of Margin Credit\n A margin credit (normally 5,000,000)43 is granted to each CP and applied for margin\n calculation44.\n Net margin after credit is calculated as follows:\n Net margin after credit\n = Maximum [0 , (Net margin – Margin credit)]\n = Maximum [0 , (46,930,000 – 5,000,000)]\n = 41,930,000",
+    "source_block_id": "SRC-3_2_5_3"
+  }
+]

@@ -1,0 +1,37 @@
+{
+  "session_id": "20260505T153951Z",
+  "status": "running",
+  "rules_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\20260505T151304Z\\artifacts\\im_hk_v14\\rule_review\\reviewed_semantic_rules.json",
+  "current_iteration": 0,
+  "current_maker_cases_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\20260505T151304Z\\generated_cases\\20260505T151318Z\\maker\\20260505T151318Z\\maker_cases.jsonl",
+  "current_checker_reviews_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\20260505T151304Z\\generated_cases\\20260505T151318Z\\checker\\20260505T152805Z\\checker_reviews.jsonl",
+  "current_report_path": ".tmp_rule_workflow_sessions\\20260505T151304Z\\scenario_review_sessions\\20260505T153951Z\\iterations\\000\\report\\report.html",
+  "normalized_bdd_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\20260505T151304Z\\generated_cases\\20260505T151318Z\\bdd\\20260505T153128Z\\normalized_bdd.jsonl",
+  "step_registry_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\20260505T151304Z\\generated_cases\\20260505T151318Z\\step_registry\\20260505T153950Z\\step_visibility.json",
+  "history": [],
+  "iterations": {
+    "0": {
+      "iteration": 0,
+      "maker_cases_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\20260505T151304Z\\generated_cases\\20260505T151318Z\\maker\\20260505T151318Z\\maker_cases.jsonl",
+      "checker_reviews_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\20260505T151304Z\\generated_cases\\20260505T151318Z\\checker\\20260505T152805Z\\checker_reviews.jsonl",
+      "report_path": ".tmp_rule_workflow_sessions\\20260505T151304Z\\scenario_review_sessions\\20260505T153951Z\\iterations\\000\\report\\report.html",
+      "human_reviews_latest_path": ".tmp_rule_workflow_sessions\\20260505T151304Z\\scenario_review_sessions\\20260505T153951Z\\iterations\\000\\reviews\\human_reviews_latest.json",
+      "rewrite_summary_path": null,
+      "checker_summary_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\20260505T151304Z\\generated_cases\\20260505T151318Z\\checker\\20260505T152805Z\\summary.json",
+      "maker_summary_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\20260505T151304Z\\generated_cases\\20260505T151318Z\\maker\\20260505T151318Z\\summary.json",
+      "coverage_report_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\20260505T151304Z\\generated_cases\\20260505T151318Z\\checker\\20260505T152805Z\\coverage_report.json",
+      "normalized_bdd_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\20260505T151304Z\\generated_cases\\20260505T151318Z\\bdd\\20260505T153128Z\\normalized_bdd.jsonl",
+      "step_registry_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\20260505T151304Z\\generated_cases\\20260505T151318Z\\step_registry\\20260505T153950Z\\step_visibility.json",
+      "stage_gates": {
+        "review_decided": true,
+        "bdd_edited": false,
+        "scripts_viewed": false
+      }
+    }
+  },
+  "stage_gates": {
+    "review_decided": true,
+    "bdd_edited": false,
+    "scripts_viewed": false
+  }
+}

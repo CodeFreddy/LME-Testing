@@ -1,0 +1,68 @@
+04-Nov-2019 06-Nov-2019  5                  -2,500    -150,000     HKD     Pro-rata reduction on
+                                                      -360,000     HKD     amount based on covered
+01-Nov-2019 05-Nov-2019 388                 -1,500                 HKD     quantity
+                                                                0  CNY     Not allowed to be covered
+04-Nov-2019 06-Nov-2019 700                 0                   0  HKD     as Settlement Date =
+                                                        32,500             Business Date
+04-Nov-2019 06-Nov-2019 700                 0                      CNY     The position is fully
+                                                                0  HKD     covered. Excess collateral
+04-Nov-2019 06-Nov-2019 941                 -500       -30,000             is ignored.
+                                                                           The position is fully
+04-Nov-2019 06-Nov-2019 941                 0                              covered. Excess collateral
+                                                                           is ignored.
+05-Nov-2019 07-Nov-2019 2828                -500                           The position is covered
+                                                                           after 941 in CNY because
+                                                                           of lower average position
+                                                                           price
+                                                                           The position is covered
+                                                                           before 941 in HKD
+                                                                           because of higher
+                                                                           average position price.
+                                                                           Pro-rata reduction on
+                                                                           amount based on covered
+                                                                           quantity
+
+In case of a half trading day (e.g. 24 Dec 2019), for each stock, there could be 2 positions
+with different trade dates but having the same settlement date.
+
+If both the positions have quantity < 0, then the position with higher position average price
+will be covered first (i.e., Position average price = Absolute value of (Amount / Quantity))
+
+Nevertheless, if there are two positions, one with quantity > 0 while the other one with
+quantity < 0, only the one with quantity < 0 will undergo the position cover before cross-day
+position netting.
+
+An example of a CP holds some positions traded on different dates but with the same
+settlement date:
+
+Current business date: 24-Dec-2019
+
+Trade date  Settlement   Stock code               Currency  Quantity        Amount        Average
+                date                                                          (HKD       price (HKD
+                                                                  -4,000                 equivalent)
+23-Dec-2019 30-Dec-2019                5            HKD            2,000  equivalent)
+                                                    HKD           -1,000       -240,000               60
+24-Dec-2019 30-Dec-2019                5            HKD           -2,000
+                                                    CNY                         126,000               63
+23-Dec-2019 30-Dec-2019                700
+                                                                               -330,000             330
+24-Dec-2019 30-Dec-2019                700
+                                                                               -720,000             360
+
+Supposing the CP tries to pledge a quantity of 2,500 for each of the stocks, i.e. 5 and 700,
+multi-counter eligible securities are considered the same stock, as per the same settlement
+date as SSC, the resulting uncovered positions are shown as follows:
+
+Current business date: 24-Dec-2019
+
+Trade date  Settlement   Stock              Currency     Quantity  Amount    Remarks
+                date     code                             -1,500
+                                               HKD         2,000
+23-Dec-     30-Dec-2019             5          HKD          -500    -90,000  Pro-rata reduction on
+  2019                                         HKD                  126,000  amount based on
+                                                                   -165,000  covered quantity
+24-Dec-     30-Dec-2019             5                                        SSC is not accepted as
+  2019                                                                       quantity > 0
+                                                                             Because of the lower
+23-Dec-     30-Dec-2019  700                                                 position average price,
+  2019

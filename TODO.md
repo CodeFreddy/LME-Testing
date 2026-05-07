@@ -1,6 +1,6 @@
 # LME Testing — TODO v3.1
 
-**修订日期：** 2026-05-06  
+**修订日期：** 2026-05-06
 **说明：** 整合 master 分支合并分析、S2-T01 v1.5 结果、S2-B1/B2 集成状态、S2-C1/S2-C2/S2-C3/S2-C4/S2-C5 mock API bridge and deliverables policy work，S2-D1 browser-level review UI E2E，S2-F1 role-friendly HKv14 impact decision review package generator，S2-F2/S2-F3 MVP document readiness registry and input contract implementation，以及 S2-F4 CodeFreddy rule extraction review GUI integration and follow-up GUI fixes。
 
 ---
@@ -83,7 +83,7 @@
 - [x] `schema_signal_source: "real_validation"` 字段
 - [x] 验证：invalid fixture → `schema_failure_rate > 0`
 
-**状态：** ✅ COMPLETE  
+**状态：** ✅ COMPLETE
 **证据：** `runs/schema_validation_latest.json` 存在（370 fixtures，0 failures）；`compute_governance_signals()` → `schema_signal_source: "real_validation"`；`test_schema_failure_rate_detects_invalid_fixtures` 测试通过
 
 ### S1-T02：全量运行数据路径对齐
@@ -93,7 +93,7 @@
 - [x] 新增 `--runs-dir` 参数
 - [x] 验证：`runs_analyzed > 0`，`total_rules ≥ 180`
 
-**状态：** ✅ COMPLETE  
+**状态：** ✅ COMPLETE
 **证据：** `docs/architecture/run_directory_structure.md` 存在；`compute_governance_signals()` → `runs_analyzed=21`，`total_rules=180`；coverage=72.78%；`--runs-dir` 参数在 CI ci.yml 中使用
 
 ### S1-T03：Session Snapshot 原子写入确认
@@ -103,7 +103,7 @@
   - `/api/scripts/save` 路径 ✅
 - [x] `docs/architecture/architecture.md` 声明单用户设计约束
 
-**状态：** ✅ COMPLETE  
+**状态：** ✅ COMPLETE
 **证据：** `review_session.py` lines 151-232-354 全部使用 `atomic_write_json`；`docs/architecture/architecture.md` 第 10、20、254 行明确单用户设计
 
 ### S1-T03b：Checker 真实稳定性测量
@@ -113,7 +113,7 @@
 - [x] `docs/governance/acceptance.md` Phase 1 Gate 6 更新为真实数字（instability_rate = 9.5%）
 - [x] 若 instability > 5%：`docs/governance/model_governance.md` 分析记录
 
-**实测值：** instability_rate = 9.5%（6/63 comparable cases，v3 measurement）  
+**实测值：** instability_rate = 9.5%（6/63 comparable cases，v3 measurement）
 **状态：** ✅ COMPLETE — Gate 6 已更新；v3 stability data 超出 5% threshold 已记录；poc_two_rules 特定测量因 API 可靠性问题未能获得有效数据
 
 ### S1-T04：全量规则质量基准
@@ -124,8 +124,8 @@
 - [x] `docs/releases/BASELINE-183-RULES.md`
 - [x] `coverage_signals.total_rules ≥ 180`
 
-**当前 coverage（全量）：** 72.78%（131/180 fully covered）  
-**状态：** ✅ COMPLETE  
+**当前 coverage（全量）：** 72.78%（131/180 fully covered）
+**状态：** ✅ COMPLETE
 **证据：** maker: `runs/maker_v1.1_full/20260419T090524+0800/`；checker: `runs/checker_v1.1_full/20260419T092854+0800/`；HTML: `reports/baseline_full_20260418.html`；doc: `docs/releases/BASELINE-183-RULES.md`（12条人工抽查）；total_rules=180
 
 ### S1-T05：项目状态声明重写
@@ -133,7 +133,7 @@
 - [x] 消除所有无数据支撑的"100%"和"Complete"声明
 - [x] `docs/governance/acceptance.md` 每个 gate 有 Verification Type
 
-**状态：** ✅ COMPLETE  
+**状态：** ✅ COMPLETE
 **证据：** acceptance.md v2.0 每个 gate 有 Verification Type；README.md Verification Status 表格已更新；无"All Phases Complete"表述
 
 ---
@@ -178,7 +178,7 @@
 - [x] HTML output shows maker → checker → human decision chain per rule
 - [x] Works with existing `review_session.py` without modification
 
-**状态：** ✅ COMPLETE  
+**状态：** ✅ COMPLETE
 **证据：** `src/lme_testing/audit_trail.py` 完整实现（267行），`build_audit_trail(session_dir, output_path) -> dict`；`review_session.py` 的 `finalize_session()` 已集成调用，输出到 `final/audit_trail.html`；生成失败不影响 session（graceful degradation）
 
 ### S2-B2：case_compare.py 实现（来自 master 概念）
@@ -186,7 +186,7 @@
 - [x] HTML output highlights differences between two iterations
 - [x] Works with existing `review_session.py` without modification
 
-**状态：** ✅ COMPLETE  
+**状态：** ✅ COMPLETE
 **证据：** `src/lme_testing/case_compare.py` 完整实现（216行），`build_case_compare(...)`；`review_session.py` 的 `_run_job()` 已集成调用，输出到 `iter<N>/rewrite/case_compare.html`；生成失败不影响 session（graceful degradation）
 
 ### S2-A 系列：质量提升（取决于 Stage 1 数据）
@@ -294,7 +294,7 @@
 - [x] 验证 Save Scripts Edits 后 visible exact/unmatched metrics 更新
 - [x] 无 browser 时自动 skip
 
-**状态：** ✅ COMPLETE  
+**状态：** ✅ COMPLETE
 **证据：** `tests/test_review_session_browser.py`；`docs/planning/ui_test_plan.md`；`.venv\Scripts\python.exe -m unittest tests.test_review_session_browser -v` 通过（1 browser test）；`.venv\Scripts\python.exe -m unittest discover -v tests` 通过（181 tests）
 
 **边界：** 当前 browser E2E 覆盖 BDD/Scripts 主路径，不覆盖 submit/finalize browser flow。
@@ -399,4 +399,3 @@
 - [x] ✅ S2-F4　CodeFreddy rule extraction review GUI integration and HKv14 smoke review
 - [ ] ⏳ 真实 LME API 接入（Stage 3，待 VM 权限）
 - [ ] 🧊 S2-E　LLM 非决定性稳定化（SR-MR-015-B3-4、SR-MR-071-C-1；已明确暂跳过，未来需 benchmark 成本/收益批准）
-

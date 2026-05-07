@@ -1,9 +1,9 @@
 # Initial Margin HKv14 Role-Friendly Impact Decision Review Plan
 
-**Status:** Implemented local review package generator  
-**Created:** 2026-04-27  
-**Task ID:** S2-F1  
-**Source proposal:** `docs/architecture/Executable_Engineering_Knowledge_Contract.md` section "03 MVP Scope and Delivery Plan"  
+**Status:** Implemented local review package generator
+**Created:** 2026-04-27
+**Task ID:** S2-F1
+**Source proposal:** `docs/architecture/Executable_Engineering_Knowledge_Contract.md` section "03 MVP Scope and Delivery Plan"
 **Baseline impact:** Adds a deterministic S2-F1 CLI package generator. This document does not change schemas, prompts, default models, maker/checker pipeline behavior, review-session behavior, or Stage 3 readiness claims.
 
 ---

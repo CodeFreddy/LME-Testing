@@ -1,0 +1,66 @@
+05/11/2019                      5                                   -600                               20,000
+
+4.5.4 Create Benefit Entitlement Position for Rights Issue / Open Offer
+
+Supposing there is a rights issue / open offer shown in the Corporate Action Position
+Adjustment Report:
+
+Business  Ex-Date     Market  Instrument  Converted     Quantity  Instrument    Cash       Instrument  Entitled  Instrument   Rights
+   Date                           Code    Instrument  Conversion   Code for   Dividend      Code for    Stock     Code for   Quantity
+                                   (A)                                Cash    Amount          Stock    Quantity     Rights
+                                              Code        Ratio    Dividend                 Dividend                   (H)       (I)
+                                               (B)          (C)         (D)       (E)            (F)      (G)
+
+05/11/2019 05/11/2019 HKMK    5                                                                                  SRI5              1.5
+
+Note: Please repeat the position adjustment if more than one corporate actions with different ex-dates for the
+same instrument are required.
+
+Supposing a CP trades instrument (stock) with corporate action announcement, the original
+traded positions before corporate action adjustment is shown below:
+
+          Trade date             Instrument code                        Quantity                       Contract value
+          04/11/2019                      (X)                               (Y)                                (Z)
+          05/11/2019                       5                               400                                          24,000
+
+                                           5                               -600                                        -20,000
+
+Only the position traded before ex-date is required to create the benefit entitlement position.
+To create the rights issue position, the instrument code will be the Rights Code. The
+position quantity will be equal to the original stock position quantity times the rights quantity.
+The contract value will be set as 0.
+
+i.e. the positions after corporate action adjustment will be:
+
+          Trade date             Instrument code                    Quantity                           Contract value
+          04/11/2019
+          04/11/2019                       5                           400                                              24,000
+          05/11/2019                     SRI5                          600                                                      0
+                                       from (H)                   from (Y) x (I)
+                                                                       -600                                (set as 0 for SRI)
+                                           5                                                                           -20,000
+
+4.5.5 Combined Effects on Position Adjustment for Combination of Corporate Actions
+
+Supposing there is a combo of corporate action events shown in the Corporate Action
+Position Adjustment Report on the same ex-date:
+
+Business  Ex-Date     Market  Instrument  Converted     Quantity  Instrument    Cash       Instrument  Entitled  Instrument   Rights
+   Date                           Code    Instrument  Conversion   Code for   Dividend      Code for    Stock     Code for   Quantity
+                                   (A)                                Cash    Amount          Stock    Quantity     Rights
+                                              Code        Ratio    Dividend                 Dividend                   (H)       (I)
+                                               (B)          (C)          (D)      (E)             (F)     (G)
+
+05/11/2019 05/11/2019 HKMK    5           5           2           DIV5              -0.78  DSP5        0.13      SRI5              1.5
+
+Note: Please repeat the position adjustment if more than one corporate actions with different ex-dates for the
+same instrument are required.
+
+Supposing a CP trades instrument (stock) with corporate action announcement, the original
+traded positions before corporate action adjustment is shown below:
+
+          Trade date             Instrument code                        Quantity                       Contract value
+          04/11/2019                      (X)                               (Y)                                (Z)
+          05/11/2019                       5                               400                                          24,000
+
+                                           5                               -600                                        -20,000

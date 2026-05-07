@@ -1,0 +1,441 @@
+{
+  "total_steps": 30,
+  "given_count": 10,
+  "when_count": 10,
+  "then_count": 10,
+  "unique_bdd_patterns": 15,
+  "exact_matches": 0,
+  "parameterized_matches": 0,
+  "candidates": [
+    {
+      "step_type": "then",
+      "step_text": "Then result is as expected for SR-IMHK-3_2_4_2-01",
+      "step_pattern": "Then result is as expected for SR-IMHK-3_2_4_2-01",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_4_2-01-1"
+      ],
+      "confidence": 0.336,
+      "suggestions": [
+        {
+          "library_step_text": "the request is rejected as a late submission",
+          "library_step_pattern": "(?:a|an|the) request is rejected as (?:a|an|the) late submission",
+          "library_name": "step_library",
+          "similarity": 0.336
+        }
+      ]
+    },
+    {
+      "step_type": "then",
+      "step_text": "Then result is as expected for SR-IMHK-3_2_5_1-01",
+      "step_pattern": "Then result is as expected for SR-IMHK-3_2_5_1-01",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-1"
+      ],
+      "confidence": 0.336,
+      "suggestions": [
+        {
+          "library_step_text": "the request is rejected as a late submission",
+          "library_step_pattern": "(?:a|an|the) request is rejected as (?:a|an|the) late submission",
+          "library_name": "step_library",
+          "similarity": 0.336
+        }
+      ]
+    },
+    {
+      "step_type": "then",
+      "step_text": "Then result is as expected for SR-IMHK-3_2_5_2-01",
+      "step_pattern": "Then result is as expected for SR-IMHK-3_2_5_2-01",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_2-01-1"
+      ],
+      "confidence": 0.336,
+      "suggestions": [
+        {
+          "library_step_text": "the request is rejected as a late submission",
+          "library_step_pattern": "(?:a|an|the) request is rejected as (?:a|an|the) late submission",
+          "library_name": "step_library",
+          "similarity": 0.336
+        }
+      ]
+    },
+    {
+      "step_type": "then",
+      "step_text": "Then result is as expected for SR-IMHK-3_2_5_3-01",
+      "step_pattern": "Then result is as expected for SR-IMHK-3_2_5_3-01",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-1"
+      ],
+      "confidence": 0.336,
+      "suggestions": [
+        {
+          "library_step_text": "the request is rejected as a late submission",
+          "library_step_pattern": "(?:a|an|the) request is rejected as (?:a|an|the) late submission",
+          "library_name": "step_library",
+          "similarity": 0.336
+        }
+      ]
+    },
+    {
+      "step_type": "then",
+      "step_text": "Then result is as expected for SR-IMHK-3_2_8-01",
+      "step_pattern": "Then result is as expected for SR-IMHK-3_2_8-01",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_8-01-1"
+      ],
+      "confidence": 0.336,
+      "suggestions": [
+        {
+          "library_step_text": "the request is rejected as a late submission",
+          "library_step_pattern": "(?:a|an|the) request is rejected as (?:a|an|the) late submission",
+          "library_name": "step_library",
+          "similarity": 0.336
+        }
+      ]
+    }
+  ],
+  "unmatched": 10,
+  "reuse_scores": {},
+  "ownership": {
+    "given:(?:a|an|the) order or trade has been submitted for processing": "step_library",
+    "given:(?:a|an|the) price validation check has been performed": "step_library",
+    "given:(?:a|an|the) request needs to be submitted to lme post-trade operations": "step_library",
+    "given:(?:a|an|the) relevant deadline exists for (?:a|an|the) request": "step_library",
+    "given:(?:a|an|the) registered_intermediating_broker submits (?:a|an|the) document containing capitalised terms": "step_library",
+    "given:(?:a|an|the) terms are not otherwise defined within (?:a|an|the) document": "step_library",
+    "given:(?:a|an|the) terms are defined differently than in (?:a|an|the) lme rulebook": "step_library",
+    "given:exchange defines matching rules": "step_library",
+    "given:business is transacted on (?:a|an|the) exchange": "step_library",
+    "given:trade submission resulted in failed checks": "step_library",
+    "given:exchange requested additional information": "step_library",
+    "given:member provided (?:a|an|the) requested additional information": "step_library",
+    "given:lme trading environment is active": "step_library",
+    "when:(?:a|an|the) order or trade fails (?:a|an|the) price validation check": "step_library",
+    "when:(?:a|an|the) order or trade passes (?:a|an|the) price validation check": "step_library",
+    "when:(?:a|an|the) system processes (?:a|an|the) document terminology": "step_library",
+    "when:(?:a|an|the) rules are submitted for adoption": "step_library",
+    "when:trade agreement occurs": "step_library",
+    "when:(?:a|an|the) request is submitted (\\d+) minutes before (?:a|an|the) relevant deadline": "step_library",
+    "when:(?:a|an|the) request is submitted exactly (\\d+) minutes before (?:a|an|the) relevant deadline": "step_library",
+    "when:(?:a|an|the) member contacts (?:a|an|the) exchange to explain (?:a|an|the) rationale for (?:a|an|the) price": "step_library",
+    "when:(?:a|an|the) member does not contact (?:a|an|the) exchange to explain (?:a|an|the) rationale for (?:a|an|the) price": "step_library",
+    "when:member requests to re-submit (?:a|an|the) trade in its original form": "step_library",
+    "when:trade agreement occurs on any venue": "step_library",
+    "then:(?:a|an|the) terms are assigned (?:a|an|the) meaning ascribed in (?:a|an|the) lme rulebook": "step_library",
+    "then:(?:a|an|the) obligation is fulfilled": "step_library",
+    "then:(?:a|an|the) system identifies (?:a|an|the) deviation from (?:a|an|the) lme rulebook": "step_library",
+    "then:(?:a|an|the) obligation is not fulfilled": "step_library",
+    "then:(?:a|an|the) rules are recognized as part of administrative procedures": "step_library",
+    "then:business is subject to price validation": "step_library",
+    "then:(?:a|an|the) member contacts (?:a|an|the) exchange": "step_library",
+    "then:(?:a|an|the) member explains (?:a|an|the) rationale as to (?:a|an|the) price of (?:a|an|the) rejected order or trade": "step_library",
+    "then:(?:a|an|the) contact action is recorded": "step_library",
+    "then:exchange records (?:a|an|the) contact": "step_library",
+    "then:(?:a|an|the) member is not required to contact (?:a|an|the) exchange to explain price rationale": "step_library",
+    "then:(?:a|an|the) processing result indicates compliance": "step_library",
+    "then:(?:a|an|the) processing result indicates non-compliance or failure": "step_library",
+    "then:(?:a|an|the) order or trade proceeds without (?:a|an|the) contact obligation": "step_library",
+    "then:system permits (?:a|an|the) trade re-submission": "step_library",
+    "then:validation result indicates acceptance": "step_library",
+    "then:(?:a|an|the) request is accepted": "step_library",
+    "then:(?:a|an|the) deadline validation result is 'pass'": "step_library",
+    "then:(?:a|an|the) recorded timestamp reflects timely submission": "step_library",
+    "then:(?:a|an|the) submission meets (?:a|an|the) deadline requirement": "step_library",
+    "then:(?:a|an|the) request is rejected as (?:a|an|the) late submission": "step_library",
+    "then:(?:a|an|the) deadline validation result indicates failure": "step_library",
+    "then:(?:a|an|the) late_submission outcome is recorded": "step_library",
+    "then:trade is subject to price validation": "step_library"
+  },
+  "given_steps": [
+    {
+      "step_text": "Given the system is ready for SR-IMHK-3_2_4_2-01",
+      "step_pattern": "Given the system is ready for SR-IMHK-3_2_4_2-01",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_4_2-01-1"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "Given the system is ready for SR-IMHK-3_2_5_1-01",
+      "step_pattern": "Given the system is ready for SR-IMHK-3_2_5_1-01",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-1"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "Given the system is ready for SR-IMHK-3_2_5_2-01",
+      "step_pattern": "Given the system is ready for SR-IMHK-3_2_5_2-01",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_2-01-1"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "Given the system is ready for SR-IMHK-3_2_5_3-01",
+      "step_pattern": "Given the system is ready for SR-IMHK-3_2_5_3-01",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-1"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "Given the system is ready for SR-IMHK-3_2_8-01",
+      "step_pattern": "Given the system is ready for SR-IMHK-3_2_8-01",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_8-01-1"
+      ],
+      "suggestions": []
+    }
+  ],
+  "when_steps": [
+    {
+      "step_text": "When I perform action for SR-IMHK-3_2_4_2-01",
+      "step_pattern": "When I perform action for SR-IMHK-3_2_4_2-01",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_4_2-01-1"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "When I perform action for SR-IMHK-3_2_5_1-01",
+      "step_pattern": "When I perform action for SR-IMHK-3_2_5_1-01",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-1"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "When I perform action for SR-IMHK-3_2_5_2-01",
+      "step_pattern": "When I perform action for SR-IMHK-3_2_5_2-01",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_2-01-1"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "When I perform action for SR-IMHK-3_2_5_3-01",
+      "step_pattern": "When I perform action for SR-IMHK-3_2_5_3-01",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-1"
+      ],
+      "suggestions": []
+    },
+    {
+      "step_text": "When I perform action for SR-IMHK-3_2_8-01",
+      "step_pattern": "When I perform action for SR-IMHK-3_2_8-01",
+      "match_type": "unmatched",
+      "library_step_text": "",
+      "confidence": 0.0,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_8-01-1"
+      ],
+      "suggestions": []
+    }
+  ],
+  "then_steps": [
+    {
+      "step_text": "Then result is as expected for SR-IMHK-3_2_4_2-01",
+      "step_pattern": "Then result is as expected for SR-IMHK-3_2_4_2-01",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.336,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_4_2-01-1"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "the request is rejected as a late submission",
+          "library_step_pattern": "(?:a|an|the) request is rejected as (?:a|an|the) late submission",
+          "library_name": "step_library",
+          "similarity": 0.336,
+          "capture_groups": []
+        }
+      ]
+    },
+    {
+      "step_text": "Then result is as expected for SR-IMHK-3_2_5_1-01",
+      "step_pattern": "Then result is as expected for SR-IMHK-3_2_5_1-01",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.336,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-1"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "the request is rejected as a late submission",
+          "library_step_pattern": "(?:a|an|the) request is rejected as (?:a|an|the) late submission",
+          "library_name": "step_library",
+          "similarity": 0.336,
+          "capture_groups": []
+        }
+      ]
+    },
+    {
+      "step_text": "Then result is as expected for SR-IMHK-3_2_5_2-01",
+      "step_pattern": "Then result is as expected for SR-IMHK-3_2_5_2-01",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.336,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_2-01-1"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "the request is rejected as a late submission",
+          "library_step_pattern": "(?:a|an|the) request is rejected as (?:a|an|the) late submission",
+          "library_name": "step_library",
+          "similarity": 0.336,
+          "capture_groups": []
+        }
+      ]
+    },
+    {
+      "step_text": "Then result is as expected for SR-IMHK-3_2_5_3-01",
+      "step_pattern": "Then result is as expected for SR-IMHK-3_2_5_3-01",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.336,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-1"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "the request is rejected as a late submission",
+          "library_step_pattern": "(?:a|an|the) request is rejected as (?:a|an|the) late submission",
+          "library_name": "step_library",
+          "similarity": 0.336,
+          "capture_groups": []
+        }
+      ]
+    },
+    {
+      "step_text": "Then result is as expected for SR-IMHK-3_2_8-01",
+      "step_pattern": "Then result is as expected for SR-IMHK-3_2_8-01",
+      "match_type": "candidate",
+      "library_step_text": "",
+      "confidence": 0.336,
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_8-01-1"
+      ],
+      "suggestions": [
+        {
+          "library_step_text": "the request is rejected as a late submission",
+          "library_step_pattern": "(?:a|an|the) request is rejected as (?:a|an|the) late submission",
+          "library_name": "step_library",
+          "similarity": 0.336,
+          "capture_groups": []
+        }
+      ]
+    }
+  ],
+  "gaps": [
+    {
+      "step_text": "Given the system is ready for SR-IMHK-3_2_4_2-01",
+      "step_pattern": "Given the system is ready for SR-IMHK-3_2_4_2-01",
+      "step_type": "given",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_4_2-01-1"
+      ]
+    },
+    {
+      "step_text": "Given the system is ready for SR-IMHK-3_2_5_1-01",
+      "step_pattern": "Given the system is ready for SR-IMHK-3_2_5_1-01",
+      "step_type": "given",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-1"
+      ]
+    },
+    {
+      "step_text": "Given the system is ready for SR-IMHK-3_2_5_2-01",
+      "step_pattern": "Given the system is ready for SR-IMHK-3_2_5_2-01",
+      "step_type": "given",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_2-01-1"
+      ]
+    },
+    {
+      "step_text": "Given the system is ready for SR-IMHK-3_2_5_3-01",
+      "step_pattern": "Given the system is ready for SR-IMHK-3_2_5_3-01",
+      "step_type": "given",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-1"
+      ]
+    },
+    {
+      "step_text": "Given the system is ready for SR-IMHK-3_2_8-01",
+      "step_pattern": "Given the system is ready for SR-IMHK-3_2_8-01",
+      "step_type": "given",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_8-01-1"
+      ]
+    },
+    {
+      "step_text": "When I perform action for SR-IMHK-3_2_4_2-01",
+      "step_pattern": "When I perform action for SR-IMHK-3_2_4_2-01",
+      "step_type": "when",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_4_2-01-1"
+      ]
+    },
+    {
+      "step_text": "When I perform action for SR-IMHK-3_2_5_1-01",
+      "step_pattern": "When I perform action for SR-IMHK-3_2_5_1-01",
+      "step_type": "when",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-1"
+      ]
+    },
+    {
+      "step_text": "When I perform action for SR-IMHK-3_2_5_2-01",
+      "step_pattern": "When I perform action for SR-IMHK-3_2_5_2-01",
+      "step_type": "when",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_2-01-1"
+      ]
+    },
+    {
+      "step_text": "When I perform action for SR-IMHK-3_2_5_3-01",
+      "step_pattern": "When I perform action for SR-IMHK-3_2_5_3-01",
+      "step_type": "when",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-1"
+      ]
+    },
+    {
+      "step_text": "When I perform action for SR-IMHK-3_2_8-01",
+      "step_pattern": "When I perform action for SR-IMHK-3_2_8-01",
+      "step_type": "when",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_8-01-1"
+      ]
+    }
+  ]
+}

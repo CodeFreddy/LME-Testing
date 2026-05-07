@@ -1,0 +1,70 @@
+{
+  "session_id": "20260506T154412Z",
+  "status": "finalized",
+  "rules_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\artifacts\\im_hk_v14\\rule_review\\reviewed_semantic_rules.json",
+  "current_iteration": 1,
+  "current_maker_cases_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\000\\rewrite\\20260506T163029Z\\merged_cases.jsonl",
+  "current_checker_reviews_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\000\\checker\\20260506T163138Z\\checker_reviews.jsonl",
+  "current_report_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\001\\report\\report.html",
+  "normalized_bdd_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\001\\bdd\\reviewed_normalized_bdd_latest.jsonl",
+  "step_registry_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\001\\bdd\\step_visibility_latest.json",
+  "history": [
+    {
+      "iteration": 0,
+      "next_iteration": 1,
+      "human_reviews_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\000\\reviews\\human_reviews_latest.json",
+      "rewrite_summary_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\000\\rewrite\\20260506T163029Z\\summary.json",
+      "checker_summary_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\000\\checker\\20260506T163138Z\\summary.json",
+      "coverage_report_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\000\\checker\\20260506T163138Z\\coverage_report.json",
+      "compare_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\000\\compare_iter_000_vs_001.html"
+    }
+  ],
+  "iterations": {
+    "0": {
+      "iteration": 0,
+      "maker_cases_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\maker\\20260506T153357Z\\maker_cases.jsonl",
+      "checker_reviews_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\checker\\20260506T153523Z\\checker_reviews.jsonl",
+      "report_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\000\\report\\report.html",
+      "human_reviews_latest_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\000\\reviews\\human_reviews_latest.json",
+      "rewrite_summary_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\000\\rewrite\\20260506T163029Z\\summary.json",
+      "checker_summary_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\000\\checker\\20260506T163138Z\\summary.json",
+      "maker_summary_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\maker\\20260506T153357Z\\summary.json",
+      "coverage_report_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\000\\checker\\20260506T163138Z\\coverage_report.json",
+      "normalized_bdd_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\bdd\\20260506T153633Z\\normalized_bdd.jsonl",
+      "step_registry_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\step_registry\\20260506T154412Z\\step_visibility.json",
+      "stage_gates": {
+        "review_decided": true,
+        "bdd_edited": false,
+        "scripts_viewed": false
+      }
+    },
+    "1": {
+      "iteration": 1,
+      "maker_cases_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\000\\rewrite\\20260506T163029Z\\merged_cases.jsonl",
+      "checker_reviews_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\000\\checker\\20260506T163138Z\\checker_reviews.jsonl",
+      "report_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\001\\report\\report.html",
+      "human_reviews_latest_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\001\\reviews\\human_reviews_latest.json",
+      "rewrite_summary_path": null,
+      "checker_summary_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\000\\checker\\20260506T163138Z\\summary.json",
+      "maker_summary_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\000\\rewrite\\20260506T163029Z\\summary.json",
+      "coverage_report_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\000\\checker\\20260506T163138Z\\coverage_report.json",
+      "normalized_bdd_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\001\\bdd\\reviewed_normalized_bdd_latest.jsonl",
+      "step_registry_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\001\\bdd\\step_visibility_latest.json",
+      "stage_gates": {
+        "review_decided": false,
+        "bdd_edited": false,
+        "scripts_viewed": true
+      },
+      "human_scripts_edits_latest_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\001\\scripts\\human_scripts_edits_latest.json",
+      "source_normalized_bdd_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\bdd\\20260506T153633Z\\normalized_bdd.jsonl"
+    }
+  },
+  "stage_gates": {
+    "review_decided": true,
+    "bdd_edited": false,
+    "scripts_viewed": true
+  },
+  "audit_trail_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\final\\audit_trail.html",
+  "human_scripts_edits_latest_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\scenario_review_sessions\\20260506T154412Z\\iterations\\001\\scripts\\human_scripts_edits_latest.json",
+  "source_normalized_bdd_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260506T152731Z\\generated_cases\\20260506T153357Z\\bdd\\20260506T153633Z\\normalized_bdd.jsonl"
+}
