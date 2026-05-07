@@ -1,0 +1,56 @@
+Portfolio-level liquidation risk add-on
+= Maximum [0 , Absolute value of (Total market value of beta hedge position) –
+
+   Hedging market value threshold] x Hedging instrument bucket rate
+
+= Maximum [0 , (295,018,840 – 250,000,000)] x 0.002
+
+= 90,038 (rounded off to the nearest integer)
+
+As a result, the liquidation risk add-on will be:
+
+LRA
+= Instrument-level LRA + Portfolio-level LRA
+
+= 176,827 + 90,038
+
+= 266,865
+
+3.2.4.4 Structured Product Add-on
+
+Structured product add-on includes structured products which
+  • The instrument market prices are smaller than their corresponding price thresholds
+       (i.e., all instruments listed under FieldType 6 as per instruction in §3.2.2); and
+  • The instruments are under long positions.
+
+Structured product add-on is calculated according to the steps as follows:
+
+Step 1: Identify the position of all instruments under FieldType 6.
+
+In the sample portfolio, InstrumentID 26883 is identified under FieldType 6 as per the
+table shown in §3.2.2.
+
+As there is a positive quantity of InstrumentID 26883 (i.e., 110,000,000), the instrument
+
+is under long position and should be included in the subsequent calculation for structured
+product add-on34.
+
+Step 2: Calculate the structured product add-on by using the formula as follows:
+                   = Quantity x Tick size multiplier35 x Minimum tick size36
+
+The calculation process is shown as follows:
+
+InstrumentID    Quantity            Tick size      Minimum tick size     Structured
+     26883          (A)            multiplier                (C)      product add-on
+
+              110,000,000               (B)                 0.001              (D)
+                                                                      = (A) x (B) x (C)
+                                         5
+                                                                                   550,000
+                           Total
+                                                                                   550,000
+
+34 If the quantity of InstrumentID 26883 is negative e.g., -100 it will be excluded from the calculation of structured product add-on.
+35 Tick size multiplier of the respective instrument is calculated by 10 times the value as shown under Column 2 of FieldType 6 in
+the IMRPF of that instrument (i.e., 10 x 0.5 = 5 in this illustration).
+36 The current minimum tick size is set as 0.001. HKSCC will notify the market before any change is made.

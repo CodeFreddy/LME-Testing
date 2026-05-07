@@ -1,0 +1,13 @@
+[
+  {
+    "batch_num": 1,
+    "batch_semantic_rule_ids": [
+      "SR-IMHK-3_2_4_2-01",
+      "SR-IMHK-3_2_5_1-01",
+      "SR-IMHK-3_2_5_2-01",
+      "SR-IMHK-3_2_5_3-01",
+      "SR-IMHK-3_2_8-01"
+    ],
+    "reason": "Model output is not valid JSON: Expecting value: line 1 column 1 (char 0)"
+  }
+]

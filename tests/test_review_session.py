@@ -74,6 +74,17 @@ class ReviewSessionTests(unittest.TestCase):
         self.assertNotIn('block_recommendation_review', latest_payload['reviews'][0])
         self.assertNotIn('block_recommendation_review', latest_payload['reviews'][1])
 
+    def test_save_reviews_treats_pending_comment_as_rewrite(self) -> None:
+        manager = self._build_manager()
+        payload = self._payload('pending', 'approve')
+        payload['reviews'][0]['human_comment'] = '  please rewrite this case with clearer inputs  '
+        result = manager.save_reviews(payload)
+
+        latest_payload = json.loads(Path(result['latest_review_path']).read_text(encoding='utf-8'))
+
+        self.assertEqual(latest_payload['reviews'][0]['review_decision'], 'rewrite')
+        self.assertEqual(latest_payload['reviews'][0]['human_comment'], '  please rewrite this case with clearer inputs  ')
+
     def test_review_session_shell_uses_three_state_decision_ui(self) -> None:
         html = _render_review_session_shell()
 

@@ -1,0 +1,58 @@
+3. CALCULATION OF TOTAL MTM AND MARGIN REQUIREMENT
+
+3.1 Required Inputs
+
+3.1.1 Risk Parameters and Margin Adjustments
+
+To derive total MTM and margin requirement, the risk parameters (including market risk
+and other risk components) and margin adjustments below are required. The sources are
+stated as follows:
+
+Market risk             Portfolio margin        IMRPF  Source
+component               Flat rate margin                          MTM6 and Margin
+                    Liquidation risk add-on        Y
+   Margin        Structured product add-on         Y           Requirement Report7
+adjustment   Corporate action position margin8     Y                          -
+                         Holiday add-on            Y                          -
+Other risk   Rounding on aggregated market-        Y                          -
+component           risk-component margin          Y                          -
+             Consideration on favorable MTM                                   -
+                 Application of margin credit      Y                          -
+                       MTM requirement
+                     Position limit add-on          -                         -
+                       Credit risk add-on           -
+                         Ad-hoc add-on              -                        Y
+                                                    -                        Y
+                                                    -                        Y
+                                                    -                        Y
+                                                                             Y
+                                                                             Y
+
+3.1.2 Positions
+
+The following position details of portfolios are required to calculate total MTM and margin
+requirement:
+
+    • InstrumentID (e.g., 700 for Tencent Holdings)
+    • Quantity9 (e.g. -1,000,000 means to deliver 1,000,000 shares)
+    • Contract value10 in HKD equivalent (e.g., In VaR Platform, -384,000,000 means
+
+         the CP has a receivable of $384,000,000)
+    • Market value11 in HKD equivalent
+
+The above information for CPs’ entire portfolios could be retrieved from “Marginable
+Position Report” (“RMAMP01”), which will be disseminated to CPs after each margin call
+and day-end margin estimation process12. When using the information in the “Marginable
+Position Report”, please note that:
+
+6 MTM refers to “Mark-to-Market” a.k.a. the Marks.
+7 The report will be generated on each business day for CPs to download via Report Access Platform (“RAP”).
+8 Please note that corporate action position margin will be determined on a case-by-case basis. HKSCC will notify CPs in advance,
+
+  if applicable.
+9 Positive value means it is a long position. Negative value means it is a short position.
+10 Negative value means it is a receivable for CP in VaR Platform.
+11 Market value = Position quantity x Instrument market price. The sign is determined by the position quantity. (i.e., Negative quantity
+
+  means a short position and that market value is also negative.)
+12 The dissemination time is around 11:45 a.m., 5:00 p.m. and 9:00 p.m. HKT subject to system finalization.

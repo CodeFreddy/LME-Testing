@@ -7,12 +7,12 @@
             "base_url": "http://stub",
             "api_key": "stub"
         },
-        "maker_qwen": {
+        "maker_glm": {
             "type": "openai_compatible",
             "api_format": "openai_chat_completions",
             "base_url": "https://coding.dashscope.aliyuncs.com/v1",
             "model": "glm-5",
-            "api_key_env": "AUTH_TOKEN",
+            "api_key_env": "sk-sp-6ee75795a7ea4fba82a053538fbf64ae",
             "timeout_seconds": 300,
             "temperature": 0.1,
             "max_output_tokens": 8000
@@ -21,17 +21,28 @@
             "type": "openai_compatible",
             "api_format": "openai_chat_completions",
             "base_url": "https://coding.dashscope.aliyuncs.com/v1",
-            "model": "qwen3.5-plus",
-            "api_key_env": "AUTH_TOKEN",
+            "model": "MiniMax-M2.5",
+            "api_key_env": "sk-sp-6ee75795a7ea4fba82a053538fbf64ae",
             "timeout_seconds": 300,
             "temperature": 0.0,
             "max_output_tokens": 6000
+        },
+        "bdd_qwen": {
+            "type": "openai_compatible",
+            "api_format": "openai_chat_completions",
+            "base_url": "https://coding.dashscope.aliyuncs.com/v1",
+            "model": "qwen3.6-plus",
+            "api_key_env": "sk-sp-6ee75795a7ea4fba82a053538fbf64ae",
+            "timeout_seconds": 300,
+            "temperature": 0.0,
+            "max_output_tokens": 16000
         }
     },
     "roles": {
-        "maker": "maker_qwen",
+        "maker": "maker_glm",
         "checker": "checker_minimax",
-        "planner": "maker_qwen"
+        "bdd": "bdd_qwen",
+        "planner": "maker_glm"
     },
     "maker_defaults": {
         "temperature": 0.1,

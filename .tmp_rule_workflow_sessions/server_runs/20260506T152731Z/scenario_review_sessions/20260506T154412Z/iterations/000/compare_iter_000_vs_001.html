@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>Case Compare: Iteration 000</title>
+  <style>
+    body { font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif; margin: 24px; color: #1f2937; background: #f8fafc; }
+    h1 { color: #0f172a; }
+    .card { background: white; border: 1px solid #cbd5e1; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; }
+    .muted { color: #64748b; }
+    .label { font-weight: 700; color: #334155; margin-bottom: 6px; }
+    table { width: 100%; border-collapse: collapse; background: white; }
+    th, td { border: 1px solid #cbd5e1; padding: 10px; vertical-align: top; text-align: left; font-size: 13px; }
+    th { background: #e2e8f0; }
+    pre { white-space: pre-wrap; word-break: break-word; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; font-size: 12px; }
+    .diff-pre { line-height: 1.55; color: #1f2937; }
+    .diff-line { display: block; margin: 0 -4px; padding: 0 4px; border-radius: 4px; }
+    .diff-del { background: #fee2e2; }
+    .diff-add { background: #dcfce7; }
+    .diff-del-text { background: #fca5a5; color: #7f1d1d; font-weight: 700; text-decoration: line-through; }
+    .diff-add-text { background: #86efac; color: #14532d; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <h1>Case Compare: Iteration 000</h1>
+  <div class="card">
+    <div><strong>Previous Source</strong>: G:\Develop\python\LME-Testing\.tmp_rule_workflow_sessions\server_runs\20260506T152731Z\generated_cases\20260506T153357Z\maker\20260506T153357Z\maker_cases.jsonl</div>
+    <div><strong>Next Source</strong>: .tmp_rule_workflow_sessions\server_runs\20260506T152731Z\scenario_review_sessions\20260506T154412Z\iterations\000\rewrite\20260506T163029Z\merged_cases.jsonl</div>
+    <div><strong>Requested Rewrites</strong>: 2</div>
+    <div><strong>Changed</strong>: 2</div>
+  </div>
+  <table>
+    <thead><tr><th>Case ID</th><th>Status</th><th>Iteration 0 (before)</th><th>Iteration 0 (after)</th></tr></thead>
+    <tbody><tr data-status="changed"><td>TC-SR-IMHK-3_2_4_2-01-boundary-01</td><td>changed</td><td><div class="label">Iteration 0 (before)</div><pre class="diff-pre">{
+  &quot;scenario_id&quot;: &quot;TC-SR-IMHK-3_2_4_2-01-boundary-01&quot;,
+<span class="diff-line diff-del">  &quot;title&quot;: &quot;Flat rate margin when <span class="diff-del-text">long</span> <span class="diff-del-text">and</span> <span class="diff-del-text">short</span> <span class="diff-del-text">absolute</span> <span class="diff-del-text">market</span> <span class="diff-del-text">values</span> <span class="diff-del-text">are</span> <span class="diff-del-text">equal&quot;,</span></span>
+<span class="diff-line diff-del">  &quot;intent&quot;: &quot;Verify <span class="diff-del-text">behavior</span> <span class="diff-del-text">when</span> <span class="diff-del-text">total</span> <span class="diff-del-text">absolute</span> <span class="diff-del-text">market</span> value <span class="diff-del-text">of</span> <span class="diff-del-text">long</span> <span class="diff-del-text">positions</span> <span class="diff-del-text">equals total absolute market value of short positions within a sub-margin group&quot;,</span></span>
+  &quot;priority&quot;: &quot;high&quot;,
+  &quot;scenario_type&quot;: &quot;boundary&quot;,
+  &quot;case_type&quot;: &quot;boundary&quot;,
+  &quot;given&quot;: [
+    &quot;A clearing participant has positions in a sub-margin group&quot;,
+<span class="diff-line diff-del">    <span class="diff-del-text">&quot;Total</span> <span class="diff-del-text">absolute</span> <span class="diff-del-text">market</span> <span class="diff-del-text">value</span> <span class="diff-del-text">of</span> long positions <span class="diff-del-text">equals</span> total absolute market value of <span class="diff-del-text">short</span> <span class="diff-del-text">positions at exactly 50,000,000 HKD each&quot;</span></span>
+  ],
+  &quot;when&quot;: [
+    &quot;The flat rate margin calculation compares long and short absolute market values for the sub-margin group&quot;
+  ],
+  &quot;then&quot;: [
+<span class="diff-line diff-del">    <span class="diff-del-text">&quot;The</span> <span class="diff-del-text">system</span> <span class="diff-del-text">determines</span> <span class="diff-del-text">which</span> <span class="diff-del-text">side</span> <span class="diff-del-text">to</span> <span class="diff-del-text">include</span> <span class="diff-del-text">based</span> <span class="diff-del-text">on</span> <span class="diff-del-text">tie-breaking</span> <span class="diff-del-text">rules</span> <span class="diff-del-text">defined by HKEX&quot;</span></span>
+  ],
+<span class="diff-line diff-del">  &quot;assumptions&quot;: <span class="diff-del-text">[</span></span>
+<span class="diff-line diff-del"><span class="diff-del-text">    &quot;Tie-breaking behavior when long equals short is not explicitly defined in the evidence; system should have documented tie-breaking logic&quot;</span></span>
+<span class="diff-line diff-del"><span class="diff-del-text">  ],</span></span>
+  &quot;evidence&quot;: [
+    {
+      &quot;atomic_rule_id&quot;: &quot;IMHK-3_2_4_2-01&quot;,
+      &quot;page&quot;: 15,
+<span class="diff-line diff-del">      &quot;quote&quot;: <span class="diff-del-text">&quot;compare</span> <span class="diff-del-text">the</span> <span class="diff-del-text">total</span> <span class="diff-del-text">absolute</span> <span class="diff-del-text">market</span> <span class="diff-del-text">value</span> <span class="diff-del-text">of long positions and short positions separately for each sub-margin group&quot;</span></span>
+    },
+    {
+      &quot;atomic_rule_id&quot;: &quot;IMHK-3_2_4_2-01&quot;,
+      &quot;page&quot;: 15,
+      &quot;quote&quot;: &quot;take the higher of long and short absolute market value for each of them&quot;
+    }
+  ]
+}</pre></td><td><div class="label">Iteration 0 (after)</div><pre class="diff-pre">{
+  &quot;scenario_id&quot;: &quot;TC-SR-IMHK-3_2_4_2-01-boundary-01&quot;,
+<span class="diff-line diff-add">  &quot;title&quot;: &quot;Flat rate margin when <span class="diff-add-text">sub-margin</span> <span class="diff-add-text">group</span> <span class="diff-add-text">has</span> <span class="diff-add-text">positions</span> <span class="diff-add-text">only</span> <span class="diff-add-text">on</span> <span class="diff-add-text">one</span> <span class="diff-add-text">side&quot;,</span></span>
+<span class="diff-line diff-add">  &quot;intent&quot;: &quot;Verify <span class="diff-add-text">that</span> <span class="diff-add-text">flat</span> <span class="diff-add-text">rate</span> <span class="diff-add-text">margin</span> <span class="diff-add-text">correctly handles sub-margin groups where positions exist only on one side (all long or all short), with zero</span> value <span class="diff-add-text">on</span> <span class="diff-add-text">the</span> <span class="diff-add-text">opposite</span> <span class="diff-add-text">side&quot;,</span></span>
+  &quot;priority&quot;: &quot;high&quot;,
+  &quot;scenario_type&quot;: &quot;boundary&quot;,
+  &quot;case_type&quot;: &quot;boundary&quot;,
+  &quot;given&quot;: [
+    &quot;A clearing participant has positions in a sub-margin group&quot;,
+<span class="diff-line diff-add">    <span class="diff-add-text">&quot;The</span> <span class="diff-add-text">sub-margin</span> <span class="diff-add-text">group</span> <span class="diff-add-text">has</span> <span class="diff-add-text">only</span> long positions <span class="diff-add-text">with</span> total absolute market value of <span class="diff-add-text">750,000</span> <span class="diff-add-text">HKD&quot;,</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">    &quot;The sub-margin group has zero short positions (total absolute market value of 0 HKD)&quot;,</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">    &quot;Flat margin rate under FieldType 3 is 30% for this sub-margin group&quot;</span></span>
+  ],
+  &quot;when&quot;: [
+    &quot;The flat rate margin calculation compares long and short absolute market values for the sub-margin group&quot;
+  ],
+  &quot;then&quot;: [
+<span class="diff-line diff-add">    <span class="diff-add-text">&quot;Long</span> <span class="diff-add-text">positions</span> <span class="diff-add-text">are</span> <span class="diff-add-text">included</span> <span class="diff-add-text">in</span> <span class="diff-add-text">flat</span> <span class="diff-add-text">rate</span> <span class="diff-add-text">margin</span> <span class="diff-add-text">calculation</span> <span class="diff-add-text">(750,000</span> <span class="diff-add-text">&gt;</span> <span class="diff-add-text">0)&quot;,</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">    &quot;Short positions are excluded since their total absolute market value is zero&quot;,</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">    &quot;Flat rate margin contribution from this sub-margin group = 750,000 × 30% = 225,000 HKD&quot;</span></span>
+  ],
+<span class="diff-line diff-add">  &quot;assumptions&quot;: <span class="diff-add-text">[],</span></span>
+  &quot;evidence&quot;: [
+    {
+      &quot;atomic_rule_id&quot;: &quot;IMHK-3_2_4_2-01&quot;,
+      &quot;page&quot;: 15,
+<span class="diff-line diff-add">      &quot;quote&quot;: <span class="diff-add-text">&quot;Sub-group</span> <span class="diff-add-text">2</span> <span class="diff-add-text">positions...</span> <span class="diff-add-text">3456</span> <span class="diff-add-text">10,000</span> <span class="diff-add-text">910,000</span> <span class="diff-add-text">750,000&quot;</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">    },</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">    {</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">      &quot;atomic_rule_id&quot;: &quot;IMHK-3_2_4_2-01&quot;,</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">      &quot;page&quot;: 15,</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">      &quot;quote&quot;: &quot;all long sub-group 2 positions... will be included in the flat rate margin calculation&quot;</span></span>
+    },
+    {
+      &quot;atomic_rule_id&quot;: &quot;IMHK-3_2_4_2-01&quot;,
+      &quot;page&quot;: 15,
+      &quot;quote&quot;: &quot;take the higher of long and short absolute market value for each of them&quot;
+    }
+  ]
+}</pre></td></tr><tr data-status="changed"><td>TC-SR-IMHK-3_2_4_2-01-positive-01</td><td>changed</td><td><div class="label">Iteration 0 (before)</div><pre class="diff-pre">{
+  &quot;scenario_id&quot;: &quot;TC-SR-IMHK-3_2_4_2-01-positive-01&quot;,
+<span class="diff-line diff-del">  &quot;title&quot;: &quot;Flat rate margin calculated with higher of long or short positions <span class="diff-del-text">included&quot;,</span></span>
+<span class="diff-line diff-del">  &quot;intent&quot;: &quot;Verify that flat rate margin is correctly calculated by including only positions from the side with higher absolute market value and applying the margin multiplier&quot;,</span>
+  &quot;priority&quot;: &quot;high&quot;,
+  &quot;scenario_type&quot;: &quot;positive&quot;,
+  &quot;case_type&quot;: &quot;positive&quot;,
+  &quot;given&quot;: [
+<span class="diff-line diff-del">    &quot;A clearing participant has positions <span class="diff-del-text">in</span> sub-margin groups defined on HKEX website&quot;,</span>
+<span class="diff-line diff-del">    &quot;Sub-group <span class="diff-del-text">1</span> <span class="diff-del-text">contains long</span> positions<span class="diff-del-text"> with</span> total absolute market value <span class="diff-del-text">of </span>30,000,000 <span class="diff-del-text">HKD</span> <span class="diff-del-text">and short</span> positions<span class="diff-del-text"> with</span> total absolute market value <span class="diff-del-text">of </span>60,000,000 HKD&quot;,</span>
+<span class="diff-line diff-del">    <span class="diff-del-text">&quot;Flat</span> <span class="diff-del-text">margin</span> <span class="diff-del-text">rates</span> <span class="diff-del-text">are</span> <span class="diff-del-text">defined</span> <span class="diff-del-text">under</span> <span class="diff-del-text">FieldType</span> <span class="diff-del-text">3&quot;,</span></span>
+    &quot;A flat rate margin multiplier of 2 is assigned per DWH0081C report&quot;
+  ],
+  &quot;when&quot;: [
+<span class="diff-line diff-del">    &quot;The flat rate margin calculation is performed following Step <span class="diff-del-text">1,</span> Step <span class="diff-del-text">2,</span> and Step <span class="diff-del-text">3&quot;</span></span>
+  ],
+  &quot;then&quot;: [
+<span class="diff-line diff-del">    <span class="diff-del-text">&quot;All</span> <span class="diff-del-text">short</span> <span class="diff-del-text">sub-group 1</span> positions <span class="diff-del-text">are </span>included <span class="diff-del-text">in</span> <span class="diff-del-text">flat</span> <span class="diff-del-text">rate</span> <span class="diff-del-text">margin</span> <span class="diff-del-text">calculation&quot;,</span></span>
+<span class="diff-line diff-del">    <span class="diff-del-text">&quot;All</span> <span class="diff-del-text">long</span> <span class="diff-del-text">sub-group 1</span> positions <span class="diff-del-text">are</span> <span class="diff-del-text">excluded</span> <span class="diff-del-text">from</span> <span class="diff-del-text">flat</span> <span class="diff-del-text">rate</span> <span class="diff-del-text">margin</span> <span class="diff-del-text">calculation&quot;,</span></span>
+<span class="diff-line diff-del">    <span class="diff-del-text">&quot;Flat</span> <span class="diff-del-text">rate</span> <span class="diff-del-text">margin</span> <span class="diff-del-text">after</span> <span class="diff-del-text">applying</span> <span class="diff-del-text">margin</span> <span class="diff-del-text">multiplier</span> <span class="diff-del-text">equals</span> <span class="diff-del-text">15,180,000</span> <span class="diff-del-text">HKD&quot;</span></span>
+  ],
+<span class="diff-line diff-del">  &quot;assumptions&quot;: <span class="diff-del-text">[</span></span>
+<span class="diff-line diff-del"><span class="diff-del-text">    &quot;Flat margin rates used are 12% for sub-group 1, 30% for sub-group 2, 55% for sub-group 3 as per example&quot;</span></span>
+<span class="diff-line diff-del"><span class="diff-del-text">  ],</span></span>
+  &quot;evidence&quot;: [
+    {
+      &quot;atomic_rule_id&quot;: &quot;IMHK-3_2_4_2-01&quot;,
+      &quot;page&quot;: 15,
+<span class="diff-line diff-del">      &quot;quote&quot;: <span class="diff-del-text">&quot;the</span> <span class="diff-del-text">total</span> absolute<span class="diff-del-text"> short</span> market value <span class="diff-del-text">is</span> <span class="diff-del-text">higher</span> <span class="diff-del-text">than</span> <span class="diff-del-text">the total absolute long market value. Therefore, all short sub-group 1 positions will be included in the flat rate margin calculation&quot;</span></span>
+    },
+    {
+      &quot;atomic_rule_id&quot;: &quot;IMHK-3_2_4_2-01&quot;,
+      &quot;page&quot;: 15,
+      &quot;quote&quot;: &quot;Flat rate margin after applying margin multiplier = (60,000,000 × 12% + 750,000 × 30% + 300,000 × 55%) × 2 = 15,180,000&quot;
+    }
+  ]
+}</pre></td><td><div class="label">Iteration 0 (after)</div><pre class="diff-pre">{
+  &quot;scenario_id&quot;: &quot;TC-SR-IMHK-3_2_4_2-01-positive-01&quot;,
+<span class="diff-line diff-add">  &quot;title&quot;: &quot;Flat rate margin calculated with higher of long or short positions <span class="diff-add-text">included per sub-margin group&quot;,</span></span>
+<span class="diff-line diff-add">  &quot;intent&quot;: &quot;Verify that flat rate margin is correctly calculated by including only positions from the side with higher absolute market value <span class="diff-add-text">for each sub-margin group </span>and applying the margin multiplier&quot;,</span>
+  &quot;priority&quot;: &quot;high&quot;,
+  &quot;scenario_type&quot;: &quot;positive&quot;,
+  &quot;case_type&quot;: &quot;positive&quot;,
+  &quot;given&quot;: [
+<span class="diff-line diff-add">    &quot;A clearing participant has positions <span class="diff-add-text">across multiple</span> sub-margin groups defined on HKEX website&quot;,</span>
+<span class="diff-line diff-add">    &quot;Sub-group <span class="diff-add-text">1:</span> <span class="diff-add-text">Long</span> positions total absolute market value 30,000,000 <span class="diff-add-text">HKD,</span> <span class="diff-add-text">Short</span> positions total absolute market value 60,000,000 HKD&quot;,</span>
+<span class="diff-line diff-add">    <span class="diff-add-text">&quot;Sub-group</span> <span class="diff-add-text">2:</span> <span class="diff-add-text">Long</span> <span class="diff-add-text">positions</span> <span class="diff-add-text">total</span> <span class="diff-add-text">absolute</span> <span class="diff-add-text">market</span> <span class="diff-add-text">value 750,000 HKD, Short positions total absolute market value 0 HKD&quot;,</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">    &quot;Sub-group 3: Long positions total absolute market value 0 HKD, Short positions total absolute market value 300,000 HKD&quot;,</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">    &quot;Flat margin rates under FieldType 3 are 12% for sub-group 1, 30% for sub-group 2, 55% for sub-group 3&quot;,</span></span>
+    &quot;A flat rate margin multiplier of 2 is assigned per DWH0081C report&quot;
+  ],
+  &quot;when&quot;: [
+<span class="diff-line diff-add">    &quot;The flat rate margin calculation is performed following Step <span class="diff-add-text">1 (compare long vs short absolute market values per sub-margin group),</span> Step <span class="diff-add-text">2 (sum product of included positions&#x27; absolute market value and flat margin rate),</span> and Step <span class="diff-add-text">3 (apply margin multiplier)&quot;</span></span>
+  ],
+  &quot;then&quot;: [
+<span class="diff-line diff-add">    <span class="diff-add-text">&quot;Sub-group</span> <span class="diff-add-text">1:</span> <span class="diff-add-text">Short</span> positions included <span class="diff-add-text">(60,000,000</span> <span class="diff-add-text">&gt;</span> <span class="diff-add-text">30,000,000),</span> <span class="diff-add-text">long</span> <span class="diff-add-text">positions excluded&quot;,</span></span>
+<span class="diff-line diff-add">    <span class="diff-add-text">&quot;Sub-group</span> <span class="diff-add-text">2:</span> <span class="diff-add-text">Long</span> positions <span class="diff-add-text">included</span> <span class="diff-add-text">(750,000</span> <span class="diff-add-text">&gt;</span> <span class="diff-add-text">0),</span> <span class="diff-add-text">short</span> <span class="diff-add-text">positions</span> <span class="diff-add-text">excluded&quot;,</span></span>
+<span class="diff-line diff-add">    <span class="diff-add-text">&quot;Sub-group</span> <span class="diff-add-text">3:</span> <span class="diff-add-text">Short</span> <span class="diff-add-text">positions</span> <span class="diff-add-text">included</span> <span class="diff-add-text">(300,000</span> <span class="diff-add-text">&gt;</span> <span class="diff-add-text">0),</span> <span class="diff-add-text">long</span> <span class="diff-add-text">positions excluded&quot;,</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">    &quot;Flat rate margin before multiplier = 60,000,000 × 12% + 750,000 × 30% + 300,000 × 55% = 7,590,000 HKD&quot;,</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">    &quot;Flat rate margin after applying margin multiplier = 7,590,000 × 2 = 15,180,000 HKD&quot;</span></span>
+  ],
+<span class="diff-line diff-add">  &quot;assumptions&quot;: <span class="diff-add-text">[],</span></span>
+  &quot;evidence&quot;: [
+    {
+      &quot;atomic_rule_id&quot;: &quot;IMHK-3_2_4_2-01&quot;,
+      &quot;page&quot;: 15,
+<span class="diff-line diff-add">      &quot;quote&quot;: <span class="diff-add-text">&quot;take</span> <span class="diff-add-text">the higher of long and short</span> absolute market value <span class="diff-add-text">for</span> <span class="diff-add-text">each</span> <span class="diff-add-text">of</span> <span class="diff-add-text">them&quot;</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">    },</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">    {</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">      &quot;atomic_rule_id&quot;: &quot;IMHK-3_2_4_2-01&quot;,</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">      &quot;page&quot;: 15,</span></span>
+<span class="diff-line diff-add"><span class="diff-add-text">      &quot;quote&quot;: &quot;all short sub-group 1 positions will be included in the flat rate margin calculation while all long sub-group 1 positions will be excluded&quot;</span></span>
+    },
+    {
+      &quot;atomic_rule_id&quot;: &quot;IMHK-3_2_4_2-01&quot;,
+      &quot;page&quot;: 15,
+      &quot;quote&quot;: &quot;Flat rate margin after applying margin multiplier = (60,000,000 × 12% + 750,000 × 30% + 300,000 × 55%) × 2 = 15,180,000&quot;
+    }
+  ]
+}</pre></td></tr></tbody>
+  </table>
+</body>
+</html>

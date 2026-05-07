@@ -1,0 +1,64 @@
+• Calculate market risk components (See §3.2.4);
+• Aggregate market risk components and perform margin adjustments (See §3.2.5);
+• Calculate or retrieve other risk components from report (See §3.2.6); and
+• Derive total MTM and margin requirement by adding results from §3.2.5 & §3.2.6
+
+    (See §3.2.8).
+
+3.2.2 Identify Applicable Market Risk Components for Each Instrument in Portfolio
+
+Users shall identify applicable margin components by using the CP-specific “Marginable
+Position Report” and “Initial Margin Risk Parameter File” according to the steps as follows:
+Step 1: Identify all corresponding FieldType(s) in the “Initial Margin Risk
+
+            Parameter File” for each instrument shown in the “Marginable Position
+            Report”.
+
+Please note that Instrument Code in the “Marginable Position Report” is the same as
+InstrumentID in the “Initial Margin Risk Parameter File” for each tradeable instrument. For
+corporate action entitled instruments, the instrument code would be decomposed into two
+fields in FieldType 7 (See §2.2).
+
+For example, Instrument Code 658 is found in the “Marginable Position Report”. Users
+shall find out “658” under the column InstrumentID and identify the corresponding
+FieldType(s) associated with the instrument in the “Initial Margin Risk Parameter File”. In
+this case, FieldType 3 is identified for the instrument.
+
+For example, a corporate action entitled instrument “DSP700” is found in the “Marginable
+Position Report”, users shall find out “700” under the column InstrumentID and “1” under
+the next column in FieldType 7.
+
+After repeating the aforementioned step for each instrument, user should identify the
+instruments subject to holiday add-on17. The holiday add-on will apply to all instruments
+except for those having FieldType 7 (i.e. instruments subject to corporate action position
+margin). Finally, the identification result of the sample portfolio is shown as follows:
+
+                                           Market risk component
+
+ Instrument   Portfolio margin  Flat rate  Liquidation risk  Structured  Corporate  Holiday
+    Code /    HVaR SVaR         margin           add-on        product     action   add-on
+                                                               add-on     position
+InstrumentID                                                               margin
+
+      658                                  FieldType                                Holiday
+      700
+     1299     1  2              3          4          5           6      7          _factor
+     1876
+     2823     -  -              Y          -          -           -      -
+     3456
+     3457     Y  Y              -          Y          -           -      -
+     3606
+              Y  Y              -          Y          -           -      -
+
+              Y  Y              -          Y          -           -      -          Y
+
+              Y  Y              -          Y          -           -      -
+
+              -  -              Y          -          -           -      -
+
+              -  -              Y          -          -           -      -
+
+              -  -              Y          -          -           -      -
+
+17 Please note that the holiday add-on will not be applicable upon the launch of VaR Platform. HKSCC will notify CPs before the
+implementation.

@@ -1,0 +1,21 @@
+3.2.8 Derive Total MTM and Margin Requirement from Results under §3.2.5 & §3.2.6 22
+4. APPENDIX ...................................................................................................................... 23
+   4.1 Detailed Calculation on Position Limit Add-on ........................................................... 23
+   4.2 Guarantee Fund Risk Collateral ................................................................................ 24
+   4.3 Specific Stock / Cash Collateral Position Cover ........................................................ 24
+      4.3.1 Specific Stock Collateral for Short Position......................................................... 24
+      4.3.2 Specific Cash Collateral Position Cover ............................................................. 27
+   4.4 Corporate Action Position Adjustment ....................................................................... 28
+      4.4.1 Position Quantity Adjustment for Bonus Share / Stock Split / Stock Consolidation
+                  30
+      4.4.2 Create Benefit Entitlement Position for Cash Dividend ....................................... 30
+      4.4.3 Create Benefit Entitlement Position for Stock Dividend ...................................... 31
+      4.4.4 Create Benefit Entitlement Position for Rights Issue / Open Offer ...................... 32
+      4.4.5 Combined Effects on Position Adjustment for Combination of Corporate Actions
+                  32
+      4.4.6 Position Adjustment for Stock Conversion.......................................................... 33
+   4.5 Cross-day Position Netting........................................................................................ 33
+   4.6 Cross-currency Netting on MTM Requirement .......................................................... 34
+   4.7 Intra-day MTM Requirement Calculation ................................................................... 35
+      4.7.1 Intra-day MTM Requirement Calculation (11:00 a.m. HKT) ................................ 35
+      4.7.2 Intra-day MTM Requirement Calculation (2:00 p.m. HKT) .................................. 37

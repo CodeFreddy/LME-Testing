@@ -1,0 +1,6 @@
+semantic_rule_id,rule_type,rule_coverage_status,rule_pass_status,required_case_types,present_case_types,accepted_case_types,missing_case_types,review_count,paragraph_ids
+SR-IMHK-3_2_4_2-01,calculation,partially_covered,fail,positive|boundary|data_validation,data_validation,data_validation,boundary|positive,1,IMHK-3_2_4_2-01
+SR-IMHK-3_2_5_1-01,calculation,fully_covered,pass,positive|boundary|data_validation,boundary|data_validation|positive,boundary|data_validation|positive,,3,IMHK-3_2_5_1-01
+SR-IMHK-3_2_5_2-01,calculation,fully_covered,pass,positive|boundary|data_validation,boundary|data_validation|positive,boundary|data_validation|positive,,3,IMHK-3_2_5_2-01
+SR-IMHK-3_2_5_3-01,calculation,fully_covered,pass,positive|boundary|data_validation,boundary|data_validation|positive,boundary|data_validation|positive,,3,IMHK-3_2_5_3-01
+SR-IMHK-3_2_8-01,calculation,fully_covered,pass,positive|boundary|data_validation,boundary|data_validation|positive,boundary|data_validation|positive,,3,IMHK-3_2_8-01

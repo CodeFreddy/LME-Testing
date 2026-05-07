@@ -1,0 +1,20 @@
+{
+  "run_id": "20260505T145657Z",
+  "role": "maker",
+  "pipeline_version": "2.1",
+  "prompt_version": "1.5",
+  "provider": "stub",
+  "model": "stub-model",
+  "input_path": ".tmp_rule_workflow_sessions\\20260505T145548Z\\artifacts\\im_hk_v14\\rule_review\\reviewed_semantic_rules.json",
+  "source_artifact_hash": "cb87f9d94b41609c",
+  "output_dir": ".tmp_rule_workflow_sessions\\20260505T145548Z\\generated_cases\\20260505T145657Z\\maker\\20260505T145657Z",
+  "processed_rule_count": 5,
+  "input_rule_count": 5,
+  "excluded_rule_count": 0,
+  "batch_count": 5,
+  "scenario_count": 15,
+  "results_path": ".tmp_rule_workflow_sessions\\20260505T145548Z\\generated_cases\\20260505T145657Z\\maker\\20260505T145657Z\\maker_cases.jsonl",
+  "raw_path": ".tmp_rule_workflow_sessions\\20260505T145548Z\\generated_cases\\20260505T145657Z\\maker\\20260505T145657Z\\maker_raw_responses.jsonl",
+  "quality_report_path": ".tmp_rule_workflow_sessions\\20260505T145548Z\\generated_cases\\20260505T145657Z\\maker\\20260505T145657Z\\maker_input_quality.json",
+  "excluded_rules_path": ".tmp_rule_workflow_sessions\\20260505T145548Z\\generated_cases\\20260505T145657Z\\maker\\20260505T145657Z\\maker_excluded_rules.json"
+}

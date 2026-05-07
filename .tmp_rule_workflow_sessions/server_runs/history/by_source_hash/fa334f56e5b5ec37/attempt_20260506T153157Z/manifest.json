@@ -1,0 +1,16 @@
+{
+  "attempt_id": "attempt_20260506T153157Z",
+  "created_at": "20260506T153157Z",
+  "status": "extracted",
+  "status_label": "Extracted draft",
+  "doc_id": "im_hk_v14",
+  "source_hash": "fa334f56e5b5ec37981df47a43bc504129a4c2cc3a2043f4197b4ac210ac75f5",
+  "doc_title": "Initial Margin Calculation Guide HKv14",
+  "doc_version": "HKv14",
+  "source_filename": "Initial_Margin_Calculation_Guide_HKv14.pdf",
+  "semantic_rule_count": 5,
+  "edited_rule_count": 0,
+  "semantic_edited_rule_count": 0,
+  "atomic_edited_rule_count": 0,
+  "attempt_dir": ".tmp_rule_workflow_sessions\\server_runs\\history\\by_source_hash\\fa334f56e5b5ec37\\attempt_20260506T153157Z"
+}

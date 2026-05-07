@@ -1,0 +1,246 @@
+[
+  {
+    "semantic_rule_id": "SR-IMHK-3_2_5_1-01",
+    "version": "1.0",
+    "source": {
+      "doc_id": "im_hk_v14",
+      "doc_title": "Initial Margin Calculation Guide HKv14",
+      "doc_version": "HKv14",
+      "section": "3.2.5.1 Rounding on Aggregated Market-risk-component Margin",
+      "clause_refs": [
+        "3.2.5.1"
+      ],
+      "atomic_rule_ids": [
+        "IMHK-3_2_5_1-01"
+      ],
+      "pages": [
+        20
+      ],
+      "source_block_id": "SRC-3_2_5_1",
+      "source_excerpt": "3.2.5.1 Rounding on Aggregated Market-risk-component Margin Margin rounding is performed on all market risk components according to the steps as follows: Step 1: Calculate aggregated margin derived from market risk components. Aggregated market-risk-component margin = Portfolio margin + Flat rate margin + Liquidation risk add-on + Structured product add- on + Corporate action position margin + Holiday add-on = 10,000,000 + 15,180,000 + 266,865 + 550,000 + 2,500,000 + 18,433,039 = 46,929,904 Step",
+      "paragraph_ids": [
+        "IMHK-3_2_5_1-01"
+      ]
+    },
+    "classification": {
+      "rule_type": "calculation",
+      "rule_tags": [
+        "hkex",
+        "initial_margin",
+        "calculation_guide",
+        "core_calculation"
+      ],
+      "testability": "testable",
+      "priority": "high",
+      "coverage_eligible": true
+    },
+    "statement": {
+      "actor": {
+        "value": "clearing_participant",
+        "source_type": "normalized"
+      },
+      "action": {
+        "value": "calculate_value",
+        "source_type": "normalized"
+      },
+      "object": {
+        "value": "initial_margin_requirement",
+        "source_type": "normalized"
+      },
+      "conditions": [],
+      "constraints": [],
+      "outcome": {
+        "kind": "calculated_value",
+        "expected_state": "calculated_value_available",
+        "details": {}
+      },
+      "exceptions": []
+    },
+    "type_payload": {
+      "calculation": {
+        "calculation_kind": "initial_margin_core_calculation",
+        "inputs": [
+          "price_inputs"
+        ],
+        "formula_description": "3.2.5.1 Rounding on Aggregated Market-risk-component Margin\n Margin rounding is performed on all market risk components according to the steps as\n follows:\n Step 1: Calculate aggregated margin derived from market risk components.\n Aggregated market-risk-component margin\n = Portfolio margin + Flat rate margin + Liquidation risk add-on + Structured product add-\n on + Corporate action position margin + Holiday add-on\n = 10,000,000 + 15,180,000 + 266,865 + 550,000 + 2,500,000 + 18,433,039\n = 46,929,904\n Step 2: Round up the aggregated margin with reference to the rounding parameter\n stated in the Initial Margin Risk Parameter File (e.g., 10,000 in the sample\n Initial Margin Risk Parameter File).\n In our example, 46,929,904 is to be rounded up to the nearest 10,000.\n Rounded aggregated market-risk-component margin = 46,930,000",
+        "rounding_rule": null,
+        "source_section": "3.2.5.1 Rounding on Aggregated Market-risk-component Margin"
+      }
+    },
+    "execution_mapping": {
+      "business_inputs": [
+        "unspecified_object"
+      ],
+      "observable_outputs": [
+        "validation_result",
+        "processing_result"
+      ],
+      "system_events": [
+        "calculate_value"
+      ],
+      "preconditions_for_execution": [],
+      "postconditions_for_execution": [
+        "calculation"
+      ],
+      "dsl_assertions": [
+        {
+          "target": "processing_result",
+          "operator": "not_equals",
+          "value": null
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "target": "statement",
+        "quote": "3.2.5.1 Rounding on Aggregated Market-risk-component Margin\n Margin rounding is performed on all market risk components according to the steps as\n follows:\n Step 1: Calculate aggregated margin derived from market risk components.\n Aggregated market-risk-component margin\n = Portfolio margin + Flat rate margin + Liquidation risk add-on + Structured product add-\n on + Corporate action position margin + Holiday add-on\n = 10,000,000 + 15,180,000 + 266,865 + 550,000 + 2,500,000 + 18,433,039\n = 46,929,904\n Step 2: Round up the aggregated margin with reference to the rounding parameter\n stated in the Initial Margin Risk Parameter File (e.g., 10,000 in the sample\n Initial Margin Risk Parameter File).\n In our example, 46,929,904 is to be rounded up to the nearest 10,000.\n Rounded aggregated market-risk-component margin = 46,930,000",
+        "page": 20,
+        "atomic_rule_id": "IMHK-3_2_5_1-01",
+        "source_block_id": "SRC-3_2_5_1"
+      }
+    ],
+    "review": {
+      "confidence": 0.7,
+      "inference_flags": [
+        "deterministic_hkex_section_extraction"
+      ],
+      "ambiguities": []
+    },
+    "test_design_hints": {
+      "gherkin_intent": "3.2.5.1 Rounding on Aggregated Market-risk-component Margin Margin rounding is performed on all market risk components according to the steps as follows: Step 1: Calculate aggregated margin derived from market risk components. Aggregated market-risk-component margin = Portfolio margin + Flat rate margin + Liquidation risk add-on + Structured product add- on + Corporate action position margin + Holiday add-on = 10,000,000 + 15,180,000 + 266,865 + 550,000 + 2,500,000 + 18,433,039 = 46,929,904 Step 2: Round up the aggregated margin with reference to the rounding parameter stated in the Initial Margin Risk Parameter File (e.g., 10,000 in the sample Initial Margin Risk Parameter File). In our example, 46,929,904 is to be rounded up to the nearest 10,000. Rounded aggregated market-risk-component margin = 46,930,000",
+      "positive_scenarios": [
+        "happy path for calculation"
+      ],
+      "negative_scenarios": [],
+      "boundary_scenarios": [],
+      "data_requirements": [
+        "matching"
+      ],
+      "oracle_notes": [
+        "First-pass machine-generated semantic rule."
+      ]
+    }
+  },
+  {
+    "semantic_rule_id": "SR-IMHK-3_2_5_3-01",
+    "version": "1.0",
+    "source": {
+      "doc_id": "im_hk_v14",
+      "doc_title": "Initial Margin Calculation Guide HKv14",
+      "doc_version": "HKv14",
+      "section": "3.2.5.3 Application of Margin Credit",
+      "clause_refs": [
+        "3.2.5.3"
+      ],
+      "atomic_rule_ids": [
+        "IMHK-3_2_5_3-01"
+      ],
+      "pages": [
+        21
+      ],
+      "source_block_id": "SRC-3_2_5_3",
+      "source_excerpt": "3.2.5.3 Application of Margin Credit A margin credit (normally 5,000,000)43 is granted to each CP and applied for margin calculation44. Net margin after credit is calculated as follows: Net margin after credit = Maximum [0 , (Net margin – Margin credit)] = Maximum [0 , (46,930,000 – 5,000,000)] = 41,930,000",
+      "paragraph_ids": [
+        "IMHK-3_2_5_3-01"
+      ]
+    },
+    "classification": {
+      "rule_type": "calculation",
+      "rule_tags": [
+        "hkex",
+        "initial_margin",
+        "calculation_guide",
+        "core_calculation"
+      ],
+      "testability": "testable",
+      "priority": "high",
+      "coverage_eligible": true
+    },
+    "statement": {
+      "actor": {
+        "value": "clearing_participant",
+        "source_type": "normalized"
+      },
+      "action": {
+        "value": "calculate_value",
+        "source_type": "normalized"
+      },
+      "object": {
+        "value": "initial_margin_requirement",
+        "source_type": "normalized"
+      },
+      "conditions": [],
+      "constraints": [],
+      "outcome": {
+        "kind": "calculated_value",
+        "expected_state": "calculated_value_available",
+        "details": {}
+      },
+      "exceptions": []
+    },
+    "type_payload": {
+      "calculation": {
+        "calculation_kind": "initial_margin_core_calculation",
+        "inputs": [
+          "price_inputs"
+        ],
+        "formula_description": "3.2.5.3 Application of Margin Credit\n A margin credit (normally 5,000,000)43 is granted to each CP and applied for margin\n calculation44.\n Net margin after credit is calculated as follows:\n Net margin after credit\n = Maximum [0 , (Net margin – Margin credit)]\n = Maximum [0 , (46,930,000 – 5,000,000)]\n = 41,930,000",
+        "rounding_rule": null,
+        "source_section": "3.2.5.3 Application of Margin Credit"
+      }
+    },
+    "execution_mapping": {
+      "business_inputs": [
+        "unspecified_object"
+      ],
+      "observable_outputs": [
+        "validation_result",
+        "processing_result"
+      ],
+      "system_events": [
+        "calculate_value"
+      ],
+      "preconditions_for_execution": [],
+      "postconditions_for_execution": [
+        "calculation"
+      ],
+      "dsl_assertions": [
+        {
+          "target": "processing_result",
+          "operator": "not_equals",
+          "value": null
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "target": "statement",
+        "quote": "3.2.5.3 Application of Margin Credit\n A margin credit (normally 5,000,000)43 is granted to each CP and applied for margin\n calculation44.\n Net margin after credit is calculated as follows:\n Net margin after credit\n = Maximum [0 , (Net margin – Margin credit)]\n = Maximum [0 , (46,930,000 – 5,000,000)]\n = 41,930,000",
+        "page": 21,
+        "atomic_rule_id": "IMHK-3_2_5_3-01",
+        "source_block_id": "SRC-3_2_5_3"
+      }
+    ],
+    "review": {
+      "confidence": 0.7,
+      "inference_flags": [
+        "deterministic_hkex_section_extraction"
+      ],
+      "ambiguities": []
+    },
+    "test_design_hints": {
+      "gherkin_intent": "3.2.5.3 Application of Margin Credit A margin credit (normally 5,000,000)43 is granted to each CP and applied for margin calculation44. Net margin after credit is calculated as follows: Net margin after credit = Maximum [0 , (Net margin – Margin credit)] = Maximum [0 , (46,930,000 – 5,000,000)] = 41,930,000",
+      "positive_scenarios": [
+        "happy path for calculation"
+      ],
+      "negative_scenarios": [],
+      "boundary_scenarios": [],
+      "data_requirements": [
+        "matching"
+      ],
+      "oracle_notes": [
+        "First-pass machine-generated semantic rule."
+      ]
+    }
+  }
+]

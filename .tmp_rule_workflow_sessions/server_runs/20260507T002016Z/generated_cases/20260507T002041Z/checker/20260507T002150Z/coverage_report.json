@@ -1,0 +1,66 @@
+{
+  "total_requirements": 2,
+  "fully_covered": 2,
+  "partially_covered": 0,
+  "uncovered": 0,
+  "not_applicable": 0,
+  "coverage_percent": 100.0,
+  "status_by_rule": {
+    "SR-IMHK-3_2_5_1-01": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "IMHK-3_2_5_1-01"
+      ]
+    },
+    "SR-IMHK-3_2_5_3-01": {
+      "rule_type": "calculation",
+      "required_case_types": [
+        "positive",
+        "boundary",
+        "data_validation"
+      ],
+      "optional_case_types": [
+        "negative"
+      ],
+      "present_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "accepted_case_types": [
+        "boundary",
+        "data_validation",
+        "positive"
+      ],
+      "missing_case_types": [],
+      "rule_coverage_status": "fully_covered",
+      "rule_pass_status": "pass",
+      "review_count": 3,
+      "paragraph_ids": [
+        "IMHK-3_2_5_3-01"
+      ]
+    }
+  }
+}

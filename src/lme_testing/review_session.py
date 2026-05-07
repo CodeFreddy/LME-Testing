@@ -1,6 +1,7 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import logging
 import mimetypes
@@ -16,9 +17,9 @@ from urllib.parse import parse_qs, quote, urlparse
 from .config import ProjectConfig
 from .human_review import _render_case_detail
 from .bdd_export import apply_human_step_edits
-from .pipelines import _case_map_from_maker_records, run_bdd_pipeline, run_checker_pipeline, run_rewrite_pipeline
+from .pipelines import _case_map_from_maker_records, run_checker_pipeline, run_rewrite_pipeline
 from .reporting import generate_html_report
-from .schemas import load_issue_type_options, validate_human_review_payload
+from .schemas import load_issue_type_options, normalize_human_review_decision, validate_human_review_payload
 from .storage import atomic_write_json, ensure_dir, load_json, load_jsonl, timestamp_slug
 from .step_registry import (
     compute_step_matches,
@@ -30,6 +31,24 @@ from .audit_trail import build_audit_trail
 from .case_compare import build_case_compare
 
 logger = logging.getLogger(__name__)
+
+
+def _coerce_comment_only_rewrites(payload: dict[str, Any]) -> dict[str, Any]:
+    """Treat a reviewer comment on a pending case as rewrite intent."""
+    normalized_payload = copy.deepcopy(payload)
+    reviews = normalized_payload.get("reviews")
+    if not isinstance(reviews, list):
+        return normalized_payload
+    for review in reviews:
+        if not isinstance(review, dict):
+            continue
+        decision = normalize_human_review_decision(
+            review.get("review_decision", "") or review.get("decision", "")
+        )
+        comment = str(review.get("human_comment") or "")
+        if decision == "pending" and comment.strip():
+            review["review_decision"] = "rewrite"
+    return normalized_payload
 
 
 @dataclass
@@ -158,7 +177,10 @@ class ReviewSessionManager:
             raise ValueError("Session is already finalized and cannot accept new reviews.")
         iteration = int(state["current_iteration"])
         reviews_dir = ensure_dir(self._iteration_dir(iteration) / "reviews")
-        normalized = validate_human_review_payload(payload, expected_case_map=self._current_case_map(state))
+        normalized = validate_human_review_payload(
+            _coerce_comment_only_rewrites(payload),
+            expected_case_map=self._current_case_map(state),
+        )
         timestamp = timestamp_slug()
         snapshot_path = reviews_dir / f"human_reviews_{timestamp}.json"
         latest_path = reviews_dir / "human_reviews_latest.json"
@@ -230,6 +252,28 @@ class ReviewSessionManager:
             "has_bdd": True,
             "scenarios_by_rule": scenarios_by_rule,
             "total_count": total_count,
+        }
+
+    def current_maker_cases_path(self) -> Path:
+        state = self._load_state()
+        return Path(state["current_maker_cases_path"])
+
+    def attach_bdd_outputs(self, normalized_bdd_path: Path, step_registry_path: Path) -> dict[str, Any]:
+        state = self._load_state()
+        iteration = int(state["current_iteration"])
+        normalized = str(normalized_bdd_path.resolve())
+        registry = str(step_registry_path.resolve())
+        state["normalized_bdd_path"] = normalized
+        state["step_registry_path"] = registry
+        state["source_normalized_bdd_path"] = normalized
+        state["iterations"][str(iteration)]["normalized_bdd_path"] = normalized
+        state["iterations"][str(iteration)]["step_registry_path"] = registry
+        state["iterations"][str(iteration)]["source_normalized_bdd_path"] = normalized
+        self._save_manifest(state)
+        return {
+            "normalized_bdd_path": normalized,
+            "step_registry_path": registry,
+            "iteration": iteration,
         }
 
     def save_bdd_edits(self, payload: dict[str, Any]) -> dict[str, Any]:
@@ -712,31 +756,13 @@ class ReviewSessionManager:
                 previous_reviews_path=Path(state["current_checker_reviews_path"]) if rewritten_case_ids else None,
             )
 
-            # Re-run BDD pipeline so rewritten maker cases get fresh normalized_bdd
-            # with human (BDD tab + Scripts tab) edits applied.
-            bdd_dir = ensure_dir(self._iteration_dir(iteration) / "bdd")
-            human_scripts_path = state.get("human_scripts_edits_latest_path")
+            # BDD is intentionally generated only in the BDD workflow stage.
+            # Rewritten test cases invalidate prior BDD/script artifacts, so the
+            # next iteration starts with empty BDD pointers until the reviewer
+            # clicks Generate BDD.
             bdd_summary = None
-            if human_scripts_path and Path(human_scripts_path).exists():
-                try:
-                    bdd_summary = run_bdd_pipeline(
-                        config=self.config,
-                        maker_cases_path=Path(rewrite_summary["merged_cases_path"]),
-                        output_dir=bdd_dir,
-                        limit=None,
-                        batch_size=self.checker_batch_size,
-                        resume_from=None,
-                        human_scripts_edits_path=Path(human_scripts_path),
-                    )
-                    curr_normalized = bdd_summary.get("results_path") or state.get("normalized_bdd_path")
-                    state["iterations"][str(iteration)]["normalized_bdd_path"] = curr_normalized
-                    logger.info("BDD pipeline re-run after rewrite. session_id=%s iteration=%s results_path=%s", self.session_id, iteration, curr_normalized)
-                except Exception:
-                    logger.warning("BDD pipeline re-run failed after rewrite (BDD tab edits not applied). session_id=%s error=%s", self.session_id, traceback.format_exc())
-                    curr_normalized = state.get("normalized_bdd_path") or state["iterations"][str(iteration)].get("normalized_bdd_path")
-            else:
-                curr_normalized = state.get("normalized_bdd_path") or state["iterations"][str(iteration)].get("normalized_bdd_path")
-            curr_step_reg = state.get("step_registry_path") or state["iterations"][str(iteration)].get("step_registry_path")
+            curr_normalized = None
+            curr_step_reg = None
 
             self._set_phase(job_id, "report")
             state["history"].append(

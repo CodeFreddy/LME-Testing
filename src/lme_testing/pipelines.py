@@ -11,7 +11,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-from .config import ProjectConfig
+from .config import ConfigError, ProjectConfig, ProviderConfig
 from .prompts import (
     BDD_SYSTEM_PROMPT,
     CHECKER_SYSTEM_PROMPT,
@@ -63,6 +63,29 @@ RULE_TYPE_CASE_REQUIREMENTS = {
     "calculation": {"required": ["positive", "boundary", "data_validation"], "optional": ["negative"]},
     "reference_only": {"required": [], "optional": []},
 }
+
+BDD_GENERATION_MODES = {"llm", "llm-with-fallback", "deterministic"}
+
+
+def _bdd_provider_config(config: ProjectConfig) -> tuple[str, ProviderConfig]:
+    try:
+        return "bdd", config.provider_for_role("bdd")
+    except ConfigError:
+        return "maker", config.provider_for_role("maker")
+
+
+def _finish_reason(raw_response: dict) -> str | None:
+    try:
+        return raw_response["choices"][0].get("finish_reason")
+    except (KeyError, IndexError, TypeError, AttributeError):
+        return None
+
+
+def _bdd_failure_reason(exc: SchemaError, raw_response: dict | None) -> str:
+    finish_reason = _finish_reason(raw_response or {})
+    if finish_reason == "length":
+        return f"truncated_output: {exc}"
+    return str(exc)
 
 
 def _artifact_hash(path: Path) -> str:
@@ -818,6 +841,8 @@ def run_bdd_pipeline(
     batch_size: int,
     resume_from: Path | None,
     human_scripts_edits_path: Path | None = None,
+    deterministic_fallback_only: bool = False,
+    bdd_generation_mode: str = "llm-with-fallback",
 ) -> dict:
     """Generate normalized BDD artifacts from maker test cases.
 
@@ -841,8 +866,16 @@ def run_bdd_pipeline(
             if record.get("semantic_rule_id") not in completed_ids
         ]
 
-    provider_cfg = config.provider_for_role("maker")
-    provider = build_provider(provider_cfg)
+    if deterministic_fallback_only:
+        bdd_generation_mode = "deterministic"
+    if bdd_generation_mode not in BDD_GENERATION_MODES:
+        raise ValueError(
+            "bdd_generation_mode must be one of: "
+            + ", ".join(sorted(BDD_GENERATION_MODES))
+        )
+
+    provider_role, provider_cfg = _bdd_provider_config(config)
+    provider = None if bdd_generation_mode == "deterministic" else build_provider(provider_cfg)
     run_id = timestamp_slug()
     run_dir = ensure_dir(output_dir / run_id)
     results_path = run_dir / "normalized_bdd.jsonl"
@@ -857,45 +890,69 @@ def run_bdd_pipeline(
         batch_rule_ids = [item["semantic_rule_id"] for item in batch]
         payload = None
         last_error = ""
-        for attempt in range(1, 3):
-            response = provider.generate(
-                system_prompt=BDD_SYSTEM_PROMPT,
-                user_prompt=build_bdd_user_prompt(batch),
+        if bdd_generation_mode == "deterministic":
+            fallback_results = _maker_records_to_normalized_bdd(batch)
+            payload = validate_normalized_bdd_payload(
+                {"results": fallback_results},
+                expected_rule_ids=batch_rule_ids,
             )
-            raw_record = {
-                "run_id": run_id,
-                "batch_semantic_rule_ids": batch_rule_ids,
-                "attempt": attempt,
-                "response": response.raw_response,
-            }
-            append_jsonl(raw_path, [raw_record])
-            try:
-                payload = validate_normalized_bdd_payload(
-                    parse_json_object(response.content),
-                    expected_rule_ids=batch_rule_ids,
+            fallback_records.append(
+                {
+                    "batch_num": batch_num,
+                    "batch_semantic_rule_ids": batch_rule_ids,
+                    "reason": "deterministic",
+                }
+            )
+            print(
+                f"[bdd] Batch {batch_num}: using deterministic fallback from maker cases.",
+                flush=True,
+            )
+        else:
+            assert provider is not None
+            for attempt in range(1, 3):
+                response = provider.generate(
+                    system_prompt=BDD_SYSTEM_PROMPT,
+                    user_prompt=build_bdd_user_prompt(batch),
                 )
-                break
-            except SchemaError as exc:
-                last_error = str(exc)
-                if attempt == 1:
-                    print(f"[bdd] Batch {batch_num}: invalid JSON/schema output, retrying once...", flush=True)
-                    continue
-                fallback_results = _maker_records_to_normalized_bdd(batch)
-                payload = validate_normalized_bdd_payload(
-                    {"results": fallback_results},
-                    expected_rule_ids=batch_rule_ids,
-                )
-                fallback_records.append(
-                    {
-                        "batch_num": batch_num,
-                        "batch_semantic_rule_ids": batch_rule_ids,
-                        "reason": last_error,
-                    }
-                )
-                print(
-                    f"[bdd] Batch {batch_num}: using deterministic fallback from maker cases after invalid model output.",
-                    flush=True,
-                )
+                raw_record = {
+                    "run_id": run_id,
+                    "batch_semantic_rule_ids": batch_rule_ids,
+                    "attempt": attempt,
+                    "response": response.raw_response,
+                }
+                append_jsonl(raw_path, [raw_record])
+                try:
+                    payload = validate_normalized_bdd_payload(
+                        parse_json_object(response.content),
+                        expected_rule_ids=batch_rule_ids,
+                    )
+                    break
+                except SchemaError as exc:
+                    last_error = _bdd_failure_reason(exc, response.raw_response)
+                    if attempt == 1:
+                        if last_error.startswith("truncated_output:"):
+                            print(f"[bdd] Batch {batch_num}: model output was truncated, retrying once...", flush=True)
+                        else:
+                            print(f"[bdd] Batch {batch_num}: invalid JSON/schema output, retrying once...", flush=True)
+                        continue
+                    if bdd_generation_mode == "llm":
+                        raise SchemaError(f"BDD batch {batch_num} failed: {last_error}") from exc
+                    fallback_results = _maker_records_to_normalized_bdd(batch)
+                    payload = validate_normalized_bdd_payload(
+                        {"results": fallback_results},
+                        expected_rule_ids=batch_rule_ids,
+                    )
+                    fallback_records.append(
+                        {
+                            "batch_num": batch_num,
+                            "batch_semantic_rule_ids": batch_rule_ids,
+                            "reason": last_error,
+                        }
+                    )
+                    print(
+                        f"[bdd] Batch {batch_num}: using deterministic fallback from maker cases after invalid model output.",
+                        flush=True,
+                    )
         if payload is None:
             raise SchemaError(f"BDD batch {batch_num} did not produce a payload.")
         for item in payload["results"]:
@@ -948,6 +1005,9 @@ def run_bdd_pipeline(
         "batch_count": total_batches,
         "fallback_batch_count": len(fallback_records),
         "fallback_reasons_path": str(fallback_path) if fallback_records else None,
+        "bdd_generation_mode": bdd_generation_mode,
+        "bdd_provider_role": provider_role,
+        "deterministic_fallback_only": bdd_generation_mode == "deterministic",
         "results_path": str(results_path),
         "raw_path": str(raw_path),
         "feature_files_count": len(feature_files),

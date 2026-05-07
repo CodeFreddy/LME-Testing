@@ -1,0 +1,19 @@
+{
+  "run_id": "20260506T234632Z",
+  "role": "checker",
+  "pipeline_version": "2.1",
+  "prompt_version": "1.3",
+  "provider": "checker_minimax",
+  "model": "MiniMax-M2.5",
+  "input_rules": ".tmp_rule_workflow_sessions\\server_runs\\20260506T234307Z\\artifacts\\im_hk_v14\\rule_review\\reviewed_semantic_rules.json",
+  "source_rules_hash": "fecacb2fa8283299",
+  "input_cases": ".tmp_rule_workflow_sessions\\server_runs\\20260506T234307Z\\generated_cases\\20260506T234430Z\\maker\\20260506T234430Z\\maker_cases.jsonl",
+  "output_dir": ".tmp_rule_workflow_sessions\\server_runs\\20260506T234307Z\\generated_cases\\20260506T234430Z\\checker\\20260506T234632Z",
+  "review_count": 15,
+  "new_review_count": 15,
+  "inherited_review_count": 0,
+  "remaining_after_resume": 0,
+  "results_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T234307Z\\generated_cases\\20260506T234430Z\\checker\\20260506T234632Z\\checker_reviews.jsonl",
+  "coverage_report_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T234307Z\\generated_cases\\20260506T234430Z\\checker\\20260506T234632Z\\coverage_report.json",
+  "raw_path": ".tmp_rule_workflow_sessions\\server_runs\\20260506T234307Z\\generated_cases\\20260506T234430Z\\checker\\20260506T234632Z\\checker_raw_responses.jsonl"
+}

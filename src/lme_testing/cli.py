@@ -97,7 +97,13 @@ def build_parser() -> argparse.ArgumentParser:
     bdd.add_argument("--cases", required=True, help="Path to maker_cases.jsonl")
     bdd.add_argument("--output-dir", default="runs/bdd")
     bdd.add_argument("--limit", type=int, default=None)
-    bdd.add_argument("--batch-size", type=int, default=4)
+    bdd.add_argument("--batch-size", type=int, default=1)
+    bdd.add_argument(
+        "--bdd-generation-mode",
+        choices=["llm", "llm-with-fallback", "deterministic"],
+        default="llm-with-fallback",
+        help="BDD generation strategy. Default: llm-with-fallback.",
+    )
     bdd.add_argument("--resume-from", default=None)
     bdd.add_argument(
         "--human-scripts-edits",
@@ -254,9 +260,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="Start a local Rule Review workflow server for document intake, rule review, and case generation.",
     )
     rule_workflow_session.add_argument("--output-dir", default="runs/rule_workflow_sessions")
-    rule_workflow_session.add_argument("--maker-batch-size", type=int, default=2)
-    rule_workflow_session.add_argument("--checker-batch-size", type=int, default=2)
-    rule_workflow_session.add_argument("--bdd-batch-size", type=int, default=2)
+    rule_workflow_session.add_argument("--maker-batch-size", type=int, default=5)
+    rule_workflow_session.add_argument("--checker-batch-size", type=int, default=5)
+    rule_workflow_session.add_argument("--bdd-batch-size", type=int, default=1)
+    rule_workflow_session.add_argument(
+        "--bdd-generation-mode",
+        choices=["llm", "llm-with-fallback", "deterministic"],
+        default="llm-with-fallback",
+        help="BDD generation strategy. Default: llm-with-fallback.",
+    )
     rule_workflow_session.add_argument("--maker-concurrency", type=int, default=1)
     rule_workflow_session.add_argument("--checker-concurrency", type=int, default=1)
     rule_workflow_session.add_argument("--host", default="127.0.0.1")
@@ -438,6 +450,7 @@ def main() -> int:
             batch_size=args.batch_size,
             resume_from=Path(args.resume_from) if args.resume_from else None,
             human_scripts_edits_path=Path(args.human_scripts_edits) if args.human_scripts_edits else None,
+            bdd_generation_mode=args.bdd_generation_mode,
         )
     elif args.command == "bdd-export":
         result = run_bdd_export(
@@ -585,6 +598,7 @@ def main() -> int:
             maker_batch_size=args.maker_batch_size,
             checker_batch_size=args.checker_batch_size,
             bdd_batch_size=args.bdd_batch_size,
+            bdd_generation_mode=args.bdd_generation_mode,
             maker_concurrency=args.maker_concurrency,
             checker_concurrency=args.checker_concurrency,
         )

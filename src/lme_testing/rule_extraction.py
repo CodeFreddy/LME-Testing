@@ -17,7 +17,7 @@ from scripts.generate_semantic_rules import build_semantic_rule
 from .storage import ensure_dir, write_json
 
 
-DEFAULT_HKEX_SECTIONS = {"3.2.4.2", "3.2.5.1", "3.2.5.2", "3.2.5.3", "3.2.8"}
+DEFAULT_HKEX_SECTIONS = {"3.2.5.1", "3.2.5.3"}
 SECTION_HEADING_RE = re.compile(r"^\s*(\d+(?:\.\d+)+)\s+(.+?)\s*$")
 
 

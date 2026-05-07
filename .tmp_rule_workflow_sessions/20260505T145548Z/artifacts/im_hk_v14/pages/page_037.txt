@@ -1,0 +1,74 @@
+Clearing Participant B
+
+Marginable positions before unposted credit offset
+
+Instrument  Position  Position  Currency  Instrument  Position  MTM       FX Haircut Due
+    Code     long /   contract                price   market
+             (short)                                    value   -1,000    rate     rate     today
+                        value                                   -2,500
+            quantity
+                                                                     50
+700         -50 -20,000 HKD               380 -19,000                           1        0  Y
+
+80737       5,000 15,000 CNY              3.5 17,500                      1.15     3%       Y
+
+9167        -100        -900 USD          9.5         -950                7.8      1%       Y
+
+Marginable positions after unposted credit offset (i.e., offset ratio = 100%)
+
+Instrument  Position  Position  Currency  Instrument  Position  MTM       FX Haircut         Due
+    Code     long /   contract                price   market                                today
+             (short)                                    value             rate     rate
+                        value                                                                  Y
+            quantity                                                                           Y
+                                                                                               Y
+700         -50 -20,000 HKD               380 -19,000 -1,000                    1        0
+
+80737       0           0 CNY             3.5         0              0 1.15        3%
+
+9167        -100        -900 USD          9.5         -950      50        7.8      1%
+
+MTM (HKD equivalent)
+= (-1,000) + ((0) x (1.15) x (1 - 3%)) + ((50) x (7.8) x (1 + 1%))
+= (-1,000) + (0) + (394)
+= -606 (+ve MTM means loss and –ve MTM means gain to CP)
+
+Favorable MTM for Clearing Participant B = HKD606
+MTM requirement for Clearing Participant B = HKD0
+
+4.8.2 Intra-day MTM Requirement Calculation (2:00 p.m. HKT)
+
+Since the collection time of the intra-day MTM and the settlement obligation are the same
+upon the launch of VaR Platform, any stock position to be settled today including unposted
+debit, unposted credit, cash prepayment and allocated shares are excluded from the intra-
+day MTM and margin requirement calculation to avoid the collection of MTM and margin
+requirement from those positions which will be settled at the time of collection.
+
+Clearing Participant A
+
+Marginable positions before excluding due positions
+
+Instrument  Position  Position  Currency  Instrument  Position   MTM      FX Haircut Due
+    Code     long /   contract                price   market
+             (short)                                    value   -18,000   rate     rate     today
+                        value                                     2,500
+            quantity                                                 -50
+
+700         100 20,000 HKD                380 38,000            20,000          1        0  Y
+
+80737       -5,000 -15,000 CNY            3.5 -17,500                     1.15     3%       N
+
+9167        100         900 USD           9.5         950                 7.8      1%       Y
+
+Unposted    0 20,000 HKD                  0           0                         1        0  Y
+   debit
+
+Marginable position after excluding due positions
+
+Instrument  Position  Position  Currency  Instrument  Position  MTM       FX Haircut Due
+    Code     long /   contract                price   market     2,500
+             (short)                                    value             rate     rate     today
+                        value
+            quantity
+
+80737       -5,000 -15,000 CNY            3.5 -17,500                     1.15     3%       N

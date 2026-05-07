@@ -16,6 +16,7 @@ from lme_testing.pipelines import (
     run_maker_pipeline,
     run_rewrite_pipeline,
 )
+from lme_testing.schemas import SchemaError
 
 
 class FakeProvider:
@@ -67,6 +68,21 @@ class TextProvider:
             "Response",
             (),
             {"content": content, "raw_response": {"content": content}},
+        )()
+
+
+class RawTextProvider:
+    def __init__(self, responses: list[tuple[str, dict]]):
+        self.responses = responses
+        self.index = 0
+
+    def generate(self, system_prompt: str, user_prompt: str):
+        content, raw_response = self.responses[self.index]
+        self.index += 1
+        return type(
+            "Response",
+            (),
+            {"content": content, "raw_response": raw_response},
         )()
 
 
@@ -700,6 +716,8 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(summary["processed_rule_count"], 2)
         self.assertEqual(summary["batch_count"], 1)
         self.assertEqual(summary["feature_files_count"], 2)
+        self.assertEqual(summary["bdd_provider_role"], "maker")
+        self.assertEqual(summary["bdd_generation_mode"], "llm-with-fallback")
 
     def test_bdd_pipeline_falls_back_when_model_returns_invalid_json(self) -> None:
         maker_records = [
@@ -741,6 +759,171 @@ class PipelineTests(unittest.TestCase):
         normalized = [json.loads(line) for line in Path(summary["results_path"]).read_text(encoding="utf-8").splitlines()]
         self.assertEqual(normalized[0]["scenarios"][0]["given_steps"][0]["step_text"], "system has a trade")
         self.assertEqual(normalized[0]["scenarios"][0]["then_steps"][0]["step_pattern"], "initial margin is produced")
+
+    def test_bdd_pipeline_llm_mode_fails_without_fallback(self) -> None:
+        maker_record = {
+            "run_id": "maker-run",
+            "semantic_rule_id": "SR-MR-001-01",
+            "feature": "Strict LLM Feature",
+            "scenarios": [
+                {
+                    "scenario_id": "TC-1",
+                    "case_type": "positive",
+                    "given": ["system has a trade"],
+                    "when": ["margin is calculated"],
+                    "then": ["initial margin is produced"],
+                }
+            ],
+        }
+        cases_path = self.work_tmp / "maker_cases_llm_only.jsonl"
+        output_dir = self.work_tmp / "bdd_llm_only"
+        cases_path.write_text(json.dumps(maker_record) + "\n", encoding="utf-8")
+
+        with patch("lme_testing.pipelines.build_provider", return_value=TextProvider(["not json", "still not json"])):
+            with self.assertRaises(SchemaError):
+                run_bdd_pipeline(
+                    config=make_config(),
+                    maker_cases_path=cases_path,
+                    output_dir=output_dir,
+                    limit=None,
+                    batch_size=1,
+                    resume_from=None,
+                    bdd_generation_mode="llm",
+                )
+
+    def test_bdd_pipeline_records_truncated_output_reason(self) -> None:
+        maker_record = {
+            "run_id": "maker-run",
+            "semantic_rule_id": "SR-MR-001-01",
+            "feature": "Truncated Feature",
+            "scenarios": [
+                {
+                    "scenario_id": "TC-1",
+                    "case_type": "positive",
+                    "given": ["system has a trade"],
+                    "when": ["margin is calculated"],
+                    "then": ["initial margin is produced"],
+                }
+            ],
+        }
+        cases_path = self.work_tmp / "maker_cases_truncated_bdd.jsonl"
+        output_dir = self.work_tmp / "bdd_truncated"
+        cases_path.write_text(json.dumps(maker_record) + "\n", encoding="utf-8")
+        raw = {"choices": [{"finish_reason": "length", "message": {"content": "{\"results\": ["}}]}
+
+        with patch("lme_testing.pipelines.build_provider", return_value=RawTextProvider([("{\"results\": [", raw), ("{\"results\": [", raw)])):
+            summary = run_bdd_pipeline(
+                config=make_config(),
+                maker_cases_path=cases_path,
+                output_dir=output_dir,
+                limit=None,
+                batch_size=1,
+                resume_from=None,
+                bdd_generation_mode="llm-with-fallback",
+            )
+
+        reasons = json.loads(Path(summary["fallback_reasons_path"]).read_text(encoding="utf-8"))
+        self.assertTrue(reasons[0]["reason"].startswith("truncated_output:"))
+
+    def test_bdd_pipeline_can_use_deterministic_fallback_without_model_call(self) -> None:
+        maker_record = {
+            "run_id": "maker-run",
+            "semantic_rule_id": "SR-MR-001-01",
+            "feature": "Fast Demo Feature",
+            "paragraph_ids": ["p1"],
+            "scenarios": [
+                {
+                    "scenario_id": "TC-1",
+                    "title": "Fast scenario",
+                    "case_type": "positive",
+                    "priority": "high",
+                    "given": ["system has a trade"],
+                    "when": ["margin is calculated"],
+                    "then": ["initial margin is produced"],
+                    "assumptions": [],
+                }
+            ],
+        }
+        cases_path = self.work_tmp / "maker_cases_fast_bdd.jsonl"
+        output_dir = self.work_tmp / "bdd_fast_fallback"
+        cases_path.write_text(json.dumps(maker_record) + "\n", encoding="utf-8")
+
+        with patch("lme_testing.pipelines.build_provider") as build_provider:
+            summary = run_bdd_pipeline(
+                config=make_config(),
+                maker_cases_path=cases_path,
+                output_dir=output_dir,
+                limit=None,
+                batch_size=1,
+                resume_from=None,
+                deterministic_fallback_only=True,
+            )
+
+        build_provider.assert_not_called()
+        self.assertTrue(summary["deterministic_fallback_only"])
+        self.assertEqual(summary["bdd_generation_mode"], "deterministic")
+        self.assertEqual(summary["processed_rule_count"], 1)
+        self.assertEqual(summary["fallback_batch_count"], 1)
+        normalized = [json.loads(line) for line in Path(summary["results_path"]).read_text(encoding="utf-8").splitlines()]
+        self.assertEqual(normalized[0]["scenarios"][0]["when_steps"][0]["step_text"], "margin is calculated")
+
+    def test_bdd_pipeline_prefers_bdd_provider_role_when_configured(self) -> None:
+        maker_provider = ProviderConfig(
+            name="maker_provider",
+            provider_type="openai_compatible",
+            model="maker-model",
+            base_url="https://example.com/v1",
+            api_key="secret",
+        )
+        bdd_provider = ProviderConfig(
+            name="bdd_provider",
+            provider_type="openai_compatible",
+            model="bdd-model",
+            base_url="https://example.com/v1",
+            api_key="secret",
+        )
+        config = ProjectConfig(
+            providers={"maker_provider": maker_provider, "bdd_provider": bdd_provider},
+            roles={"maker": "maker_provider", "checker": "maker_provider", "bdd": "bdd_provider"},
+            output_root=Path("runs"),
+            maker_defaults=RoleDefaults(),
+            checker_defaults=RoleDefaults(),
+        )
+        maker_record = {
+            "run_id": "r1",
+            "semantic_rule_id": "SR-MR-001-01",
+            "feature": "Feature A",
+            "scenarios": [{"scenario_id": "TC-1", "case_type": "positive"}],
+        }
+        bdd_response = json.dumps({
+            "results": [{
+                "semantic_rule_id": "SR-MR-001-01",
+                "feature_title": "Feature A",
+                "scenarios": [{
+                    "scenario_id": "TC-1",
+                    "case_type": "positive",
+                    "given_steps": [{"step_text": "g", "step_pattern": "g"}],
+                    "when_steps": [{"step_text": "w", "step_pattern": "w"}],
+                    "then_steps": [{"step_text": "t", "step_pattern": "t"}],
+                }],
+            }]
+        })
+        cases_path = self.work_tmp / "maker_cases_bdd_provider.jsonl"
+        output_dir = self.work_tmp / "bdd_provider"
+        cases_path.write_text(json.dumps(maker_record) + "\n", encoding="utf-8")
+
+        with patch("lme_testing.pipelines.build_provider", return_value=FakeProvider([bdd_response])) as build_provider:
+            summary = run_bdd_pipeline(
+                config=config,
+                maker_cases_path=cases_path,
+                output_dir=output_dir,
+                limit=None,
+                batch_size=1,
+                resume_from=None,
+            )
+
+        self.assertEqual(build_provider.call_args.args[0].name, "bdd_provider")
+        self.assertEqual(summary["bdd_provider_role"], "bdd")
 
 
 if __name__ == "__main__":

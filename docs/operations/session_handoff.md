@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-05-06 13:42:13 UTC`
+- `2026-05-07 00:27:28 UTC`
 
 ---
 
@@ -60,11 +60,11 @@ Current branch:
 
 Recent commit subjects:
 
-- `Implement rule extraction review workflow`
-- `Merge Darcy and backup review-session code`
-- `add zip and pdf for now`
-- `Add Phase 3 planning docs and architecture updates`
-- `Add Phase 2 deliverables: Mock API implementations and documentation`
+- `Merge remote rule extraction review branch`
+- `Update status docs after rule workflow GUI integration`
+- `Fix rule workflow GUI startup and PDF extraction`
+- `Record rule extraction merge checkpoint`
+- `Integrate rule extraction review workflow slice`
 
 ---
 

@@ -50,6 +50,7 @@ class RuleWorkflowSessionManager:
         maker_batch_size: int = 1,
         checker_batch_size: int = 1,
         bdd_batch_size: int = 1,
+        bdd_generation_mode: str = "llm-with-fallback",
         maker_concurrency: int = 1,
         checker_concurrency: int = 1,
     ) -> None:
@@ -61,6 +62,7 @@ class RuleWorkflowSessionManager:
         self.maker_batch_size = maker_batch_size
         self.checker_batch_size = checker_batch_size
         self.bdd_batch_size = bdd_batch_size
+        self.bdd_generation_mode = bdd_generation_mode
         self.maker_concurrency = maker_concurrency
         self.checker_concurrency = checker_concurrency
         self.session_id = timestamp_slug()
@@ -178,6 +180,7 @@ class RuleWorkflowSessionManager:
             "session_id": self.session_id,
             "metadata": self.current_metadata,
             "has_rules": bool(self.current_semantic_rules),
+            "has_review_session": self.review_manager is not None,
             "atomic_rules": annotate_atomic_rules(
                 self.current_atomic_rules,
                 atomic_edited_ids,
@@ -314,6 +317,17 @@ class RuleWorkflowSessionManager:
         thread.start()
         return {"job_id": job_id, "status": "queued"}
 
+    def generate_bdd(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        if not self.review_manager:
+            raise ValueError("Generate test cases before generating BDD.")
+        job_id = timestamp_slug()
+        status = RuleWorkflowJobStatus(job_id=job_id, status="queued", phase="queued")
+        with self._lock:
+            self._jobs[job_id] = status
+        thread = threading.Thread(target=self._run_generate_bdd_job, args=(job_id,), daemon=True)
+        thread.start()
+        return {"job_id": job_id, "status": "queued"}
+
     def job_status(self, job_id: str) -> dict[str, Any]:
         with self._lock:
             status = self._jobs.get(job_id)
@@ -359,26 +373,6 @@ class RuleWorkflowSessionManager:
             checker_summary_path = checker_dir / checker_summary["run_id"] / "summary.json"
             coverage_report_path = Path(checker_summary["coverage_report_path"])
 
-            self._set_job(job_id, status="running", phase="bdd")
-            bdd_dir = ensure_dir(workflow_dir / "bdd")
-            bdd_summary = run_bdd_pipeline(
-                config=self.config,
-                maker_cases_path=maker_cases_path,
-                output_dir=bdd_dir,
-                limit=None,
-                batch_size=self.bdd_batch_size,
-                resume_from=None,
-            )
-            normalized_bdd_path = Path(bdd_summary["results_path"])
-
-            self._set_job(job_id, status="running", phase="step_registry")
-            step_registry_dir = ensure_dir(workflow_dir / "step_registry" / timestamp_slug())
-            step_registry_path = step_registry_dir / "step_visibility.json"
-            bdd_inventory = extract_steps_from_normalized_bdd(normalized_bdd_path)
-            library_inventory = extract_steps_from_python_step_defs(self.repo_root / "src/lme_testing/step_library.py")
-            match_report = compute_step_matches(bdd_inventory, library_inventory)
-            render_step_visibility_report(bdd_inventory, match_report, step_registry_path)
-
             self._set_job(job_id, status="running", phase="review_session")
             self.review_manager = ReviewSessionManager(
                 config=self.config,
@@ -394,21 +388,60 @@ class RuleWorkflowSessionManager:
                 initial_maker_summary_path=maker_summary_path,
                 initial_checker_summary_path=checker_summary_path,
                 initial_coverage_report_path=coverage_report_path,
-                normalized_bdd_path=normalized_bdd_path,
-                step_registry_path=step_registry_path,
+                normalized_bdd_path=None,
+                step_registry_path=None,
             )
             result = {
-                "review_url": "/scenario-review",
+                "review_url": "/",
                 "maker_summary": maker_summary,
                 "checker_summary": checker_summary,
-                "bdd_summary": bdd_summary,
-                "step_registry_path": str(step_registry_path),
+                "bdd_summary": None,
+                "step_registry_path": None,
                 "review_session_id": self.review_manager.session_id,
             }
             self._write_history_snapshot("cases_generated", extra=result)
             self._set_job(job_id, status="succeeded", phase="done", result=result)
         except Exception as exc:
             logger.exception("Rule workflow generate-cases job failed")
+            self._set_job(job_id, status="failed", phase="failed", error=f"{exc}\n{traceback.format_exc()}")
+
+    def _run_generate_bdd_job(self, job_id: str) -> None:
+        try:
+            if not self.review_manager:
+                raise ValueError("Generate test cases before generating BDD.")
+            self._set_job(job_id, status="running", phase="bdd")
+            workflow_dir = ensure_dir(self.session_dir / "generated_bdd" / job_id)
+            bdd_dir = ensure_dir(workflow_dir / "bdd")
+            bdd_summary = run_bdd_pipeline(
+                config=self.config,
+                maker_cases_path=self.review_manager.current_maker_cases_path(),
+                output_dir=bdd_dir,
+                limit=None,
+                batch_size=self.bdd_batch_size,
+                resume_from=None,
+                bdd_generation_mode=self.bdd_generation_mode,
+            )
+            normalized_bdd_path = Path(bdd_summary["results_path"])
+
+            self._set_job(job_id, status="running", phase="step_registry")
+            step_registry_dir = ensure_dir(workflow_dir / "step_registry" / timestamp_slug())
+            step_registry_path = step_registry_dir / "step_visibility.json"
+            bdd_inventory = extract_steps_from_normalized_bdd(normalized_bdd_path)
+            library_inventory = extract_steps_from_python_step_defs(self.repo_root / "src/lme_testing/step_library.py")
+            match_report = compute_step_matches(bdd_inventory, library_inventory)
+            render_step_visibility_report(bdd_inventory, match_report, step_registry_path)
+            attached = self.review_manager.attach_bdd_outputs(normalized_bdd_path, step_registry_path)
+            result = {
+                "bdd_summary": bdd_summary,
+                "bdd_generation_mode": self.bdd_generation_mode,
+                "normalized_bdd_path": str(normalized_bdd_path),
+                "step_registry_path": str(step_registry_path),
+                "review_session_id": self.review_manager.session_id,
+                **attached,
+            }
+            self._set_job(job_id, status="succeeded", phase="done", result=result)
+        except Exception as exc:
+            logger.exception("Rule workflow generate-bdd job failed")
             self._set_job(job_id, status="failed", phase="failed", error=f"{exc}\n{traceback.format_exc()}")
 
     def _set_job(
@@ -576,7 +609,7 @@ def _build_handler(manager: RuleWorkflowSessionManager):
             try:
                 parsed = urlparse(self.path)
                 if parsed.path == "/":
-                    self._send_html(render_rule_workflow_shell())
+                    self._send_html(render_rule_workflow_shell(manager.bdd_generation_mode))
                     return
                 if parsed.path == "/scenario-review":
                     if not manager.review_manager:
@@ -629,6 +662,9 @@ def _build_handler(manager: RuleWorkflowSessionManager):
                     return
                 if parsed.path == "/api/rule-workflow/generate-cases":
                     self._send_json(manager.generate_cases(payload), status=HTTPStatus.ACCEPTED)
+                    return
+                if parsed.path == "/api/rule-workflow/generate-bdd":
+                    self._send_json(manager.generate_bdd(payload), status=HTTPStatus.ACCEPTED)
                     return
                 if parsed.path == "/api/rule-workflow/history/apply":
                     self._send_json(manager.apply_history(payload))
@@ -938,8 +974,8 @@ def strip_private_rule_fields(rule: dict) -> dict:
     return item
 
 
-def render_rule_workflow_shell() -> str:
-    return RULE_WORKFLOW_HTML
+def render_rule_workflow_shell(bdd_generation_mode: str = "llm-with-fallback") -> str:
+    return RULE_WORKFLOW_HTML.replace("__BDD_GENERATION_MODE__", bdd_generation_mode)
 
 
 RULE_WORKFLOW_HTML = r"""<!DOCTYPE html>
@@ -993,11 +1029,61 @@ RULE_WORKFLOW_HTML = r"""<!DOCTYPE html>
     .field-guide dd { margin: 0; color: #475569; }
     .technical { font-size: 12px; color: #64748b; }
     .hidden { display: none; }
+    .workflow-progress { display: flex; align-items: center; gap: 0; margin: 16px 0 18px; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px 18px; }
+    .workflow-step { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; color: #64748b; }
+    .workflow-step.active, .workflow-step.completed { color: #047857; font-weight: 700; }
+    .workflow-dot { width: 28px; height: 28px; border-radius: 999px; background: #e5e7eb; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .workflow-step.active .workflow-dot, .workflow-step.completed .workflow-dot { background: #16a34a; color: #fff; }
+    .workflow-arrow { color: #cbd5e1; font-size: 20px; }
+    .workflow-panel { display: none; }
+    .workflow-panel.active { display: block; }
+    .case-toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+    .metric-grid { display: grid; grid-template-columns: repeat(3, minmax(160px, 1fr)); gap: 12px; }
+    .metric { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; }
+    th, td { border: 1px solid #cbd5e1; padding: 9px; text-align: left; vertical-align: top; font-size: 12px; }
+    th { background: #e2e8f0; }
+    .issue-picker { margin-top: 4px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; }
+    .issue-table th, .issue-table td { padding: 5px 7px; font-size: 11px; }
+    .suggestion-yes { display: inline-block; color: #166534; background: #dcfce7; border: 1px solid #86efac; border-radius: 999px; padding: 2px 8px; font-weight: 700; }
+    .suggestion-no { display: inline-block; color: #991b1b; background: #fee2e2; border: 1px solid #fecaca; border-radius: 999px; padding: 2px 8px; font-weight: 700; }
+    .progress-wrap { margin-top: 8px; background: #e2e8f0; border-radius: 8px; height: 18px; overflow: hidden; }
+    .progress-bar { height: 100%; background: #16a34a; width: 0%; transition: width 0.4s ease; }
+    .progress-label { font-size: 12px; color: #334155; margin-top: 4px; }
+    .status-running { color: #92400e; }
+    .status-succeeded { color: #166534; }
+    .status-failed { color: #991b1b; }
+    .history-row { padding: 7px 0; border-bottom: 1px dashed #e2e8f0; }
+    .history-row.current { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 8px 10px; }
+    .bdd-rule-block, .step-block { background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+    .bdd-scenario-card { margin: 8px 0 8px 12px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; }
+    .step-label { font-weight: 700; font-size: 12px; color: #475569; margin: 6px 0 4px; }
+    .step-textarea { width: 100%; box-sizing: border-box; font-family: Consolas, monospace; font-size: 12px; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px; resize: vertical; }
+    .scripts-metrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .scripts-metric { background: #eff6ff; border-radius: 8px; padding: 10px; border: 1px solid #bfdbfe; text-align: center; }
+    .scripts-metric strong { display: block; font-size: 20px; }
+    .scripts-metric span { font-size: 11px; color: #64748b; }
+    .step-item { margin-bottom: 8px; padding: 6px 8px; border: 1px solid #e2e8f0; border-radius: 6px; }
+    .step-item.unmatched { border-left: 3px solid #991b1b; background: #fff5f5; }
+    .step-item-badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 700; background: #e2e8f0; }
   </style>
 </head>
 <body>
-  <header><h1>Rule Extraction Review</h1></header>
+  <header><h1>HKEX AI Assisted Workflow</h1></header>
   <main>
+    <div class="workflow-progress" id="workflowProgress">
+      <div class="workflow-step active" data-workflow-step="rule_extraction"><div class="workflow-dot">1</div><div>Rule Extraction</div></div>
+      <div class="workflow-arrow">-&gt;</div>
+      <div class="workflow-step" data-workflow-step="test_case"><div class="workflow-dot">2</div><div>Test Case</div></div>
+      <div class="workflow-arrow">-&gt;</div>
+      <div class="workflow-step" data-workflow-step="bdd"><div class="workflow-dot">3</div><div>BDD</div></div>
+      <div class="workflow-arrow">-&gt;</div>
+      <div class="workflow-step" data-workflow-step="scripts"><div class="workflow-dot">4</div><div>Scripts</div></div>
+      <div class="workflow-arrow">-&gt;</div>
+      <div class="workflow-step" data-workflow-step="finalize"><div class="workflow-dot">5</div><div>Finalize</div></div>
+    </div>
+
+    <div class="workflow-panel active" data-workflow-panel="rule_extraction">
     <section class="band">
       <div class="row">
         <label>Requirement document <input id="sourceFile" type="file" accept=".pdf,.md,.markdown,.docx"></label>
@@ -1021,8 +1107,7 @@ RULE_WORKFLOW_HTML = r"""<!DOCTYPE html>
     <section class="band">
       <div class="row">
         <button id="saveRulesBtn" disabled>Save Rule Edits</button>
-        <button id="generateBtn" class="primary" disabled>Generate Cases</button>
-        <a id="scenarioLink" class="hidden" href="/scenario-review">Open Scenario Review</a>
+        <button id="ruleNextBtn" class="primary" disabled>Next Step</button>
       </div>
       <div id="status" class="status">Ready.</div>
     </section>
@@ -1051,18 +1136,157 @@ RULE_WORKFLOW_HTML = r"""<!DOCTYPE html>
     <section>
       <div id="rules" class="rule-list"></div>
     </section>
+    </div>
+
+    <div class="workflow-panel" data-workflow-panel="test_case">
+      <section class="band" id="summaryCard">Loading test cases...</section>
+      <section class="band">
+        <div class="case-toolbar">
+          <label>Overall <select id="overallFilter"><option value="">All</option><option value="pass">pass</option><option value="fail">fail</option><option value="missing">missing</option></select></label>
+          <label>Coverage <select id="coverageFilter"><option value="">All</option><option value="covered">covered</option><option value="partial">partial</option><option value="uncovered">uncovered</option><option value="missing">missing</option></select></label>
+          <label>Checker Suggestion <select id="blockingFilter"><option value="">All</option><option value="false">Yes</option><option value="true">No</option></select></label>
+          <button id="saveRerunBtn" class="primary" disabled>Save &amp; Rerun</button>
+          <button id="testCaseReportBtn">Check Reports</button>
+          <button id="auditBtn">Audit Trail</button>
+          <button id="testCaseNextBtn">Next Step</button>
+        </div>
+        <p class="muted">Choose rewrite to rerun a case. A non-empty comment on a pending case is also treated as rewrite feedback.</p>
+      </section>
+      <section class="band" id="resultCard" style="display:none"></section>
+      <section class="band"><h2>History</h2><div id="reviewHistoryCard" class="muted">No history.</div></section>
+      <section class="band">
+        <table>
+          <thead>
+            <tr>
+              <th>Semantic Rule</th>
+              <th>Case ID</th>
+              <th>Feature</th>
+              <th>Case Type</th>
+              <th>Overall</th>
+              <th>Coverage</th>
+              <th>Checker Suggestion</th>
+              <th>Blocking Reason</th>
+              <th>Detail</th>
+              <th>Human Review</th>
+            </tr>
+          </thead>
+          <tbody id="reviewRows"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <div class="workflow-panel" data-workflow-panel="bdd">
+      <section class="band">
+        <div class="row">
+          <button id="saveBddBtn">Save BDD Edits</button>
+          <button id="bddNextBtn">Next Step</button>
+          <span id="bddStatus" class="muted"></span>
+        </div>
+        <div id="bddModeNotice" class="muted"></div>
+      </section>
+      <section class="band" id="bddProgressCard" style="display:none"></section>
+      <section id="bddContent"><em>Loading BDD...</em></section>
+    </div>
+
+    <div class="workflow-panel" data-workflow-panel="scripts">
+      <section class="band">
+        <div class="row">
+          <button id="saveScriptsBtn">Save Scripts Edits</button>
+          <button id="scriptsNextBtn">Next Step</button>
+          <span id="scriptsStatus" class="muted"></span>
+        </div>
+      </section>
+      <section id="scriptsContent"><em>Loading scripts...</em></section>
+    </div>
+
+    <div class="workflow-panel" data-workflow-panel="finalize">
+      <section class="band">
+        <div class="row">
+          <button id="finalizeWorkflowBtn" class="primary">Finalize Workflow</button>
+          <button id="finalAuditBtn">Audit Trail</button>
+        </div>
+        <div id="finalizeStatus" class="status">Ready to finalize the workflow.</div>
+      </section>
+    </div>
   </main>
 <script>
 let state = { semantic_rules: [], atomic_rules: [] };
 let historyPage = 1;
 let historyPageSize = 10;
 let historyPagination = { page: 1, page_size: 10, total: 0, total_pages: 1 };
+let activeWorkflowStep = localStorage.getItem('hkexWorkflowStep') || 'rule_extraction';
+let casesGenerated = false;
+let casesGenerating = false;
+let sessionPayload = null;
+let reviewMap = new Map();
+let reviewBaselineMap = new Map();
+let pollTimer = null;
+let bddPayload = null;
+let scriptsPayload = null;
+let bddDirty = false;
+const BDD_GENERATION_MODE = '__BDD_GENERATION_MODE__';
+const WORKFLOW_STEPS = ['rule_extraction', 'test_case', 'bdd', 'scripts', 'finalize'];
+const GENERATE_PROGRESS = { queued: 5, maker: 25, checker: 55, bdd: 75, step_registry: 88, review_session: 95, done: 100 };
+const GENERATE_LABEL = { queued: 'Queued', maker: 'Generating test cases', checker: 'Checking test cases', bdd: 'Generating BDD', step_registry: 'Preparing scripts', review_session: 'Preparing review session', done: 'Cases generated' };
+const BDD_PROGRESS = { queued: 5, bdd: 75, step_registry: 92, done: 100 };
+const BDD_LABEL = { queued: 'Queued', bdd: 'Generating BDD from reviewed test cases', step_registry: 'Preparing script visibility', done: 'BDD generated' };
+const PHASE_PROGRESS = { queued: 5, rewrite: 20, checker: 55, report: 90, done: 100, failed: 100 };
+const PHASE_LABEL = { queued: 'Queued', rewrite: 'Rewriting selected cases', checker: 'Running checker', report: 'Generating report', done: 'Completed', failed: 'Failed' };
 
 function $(id) { return document.getElementById(id); }
 function esc(value) {
   return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
 function setStatus(text) { $('status').textContent = text; }
+function updateBddModeNotice(extra) {
+  const suffix = extra ? ` ${extra}` : '';
+  $('bddModeNotice').textContent = `BDD generation mode: ${BDD_GENERATION_MODE}.${suffix}`;
+}
+function cloneJson(value) { return JSON.parse(JSON.stringify(value)); }
+function workflowStepAllowed(step) {
+  const idx = WORKFLOW_STEPS.indexOf(step);
+  if (idx <= 0) return true;
+  if (idx === 1) return casesGenerated || casesGenerating;
+  return casesGenerated;
+}
+function setWorkflowStep(step) {
+  if (!WORKFLOW_STEPS.includes(step)) step = 'rule_extraction';
+  if (!workflowStepAllowed(step)) step = 'rule_extraction';
+  activeWorkflowStep = step;
+  localStorage.setItem('hkexWorkflowStep', step);
+  document.querySelectorAll('[data-workflow-panel]').forEach(panel => {
+    panel.classList.toggle('active', panel.dataset.workflowPanel === step);
+  });
+  const activeIdx = WORKFLOW_STEPS.indexOf(step);
+  document.querySelectorAll('[data-workflow-step]').forEach(el => {
+    const idx = WORKFLOW_STEPS.indexOf(el.dataset.workflowStep);
+    el.classList.remove('active', 'completed');
+    if (idx < activeIdx) el.classList.add('completed');
+    if (idx === activeIdx) el.classList.add('active');
+    const dot = el.querySelector('.workflow-dot');
+    if (dot) dot.textContent = idx < activeIdx ? '✓' : String(idx + 1);
+  });
+  if (step === 'test_case') {
+    if (casesGenerating && !casesGenerated) {
+      $('summaryCard').innerHTML = '<div class="metric"><strong>Generating test cases</strong><br>Maker/checker is running. The generated cases will appear here when ready.</div>';
+      $('reviewRows').innerHTML = '';
+    } else {
+      refreshSession().catch(err => renderResult('Load failed', `<pre>${esc(err.message)}</pre>`, 'status-failed'));
+    }
+  }
+  if (step === 'bdd') loadBddData();
+  if (step === 'scripts') loadScriptsData();
+}
+function nextWorkflowStep() {
+  const idx = WORKFLOW_STEPS.indexOf(activeWorkflowStep);
+  if (idx >= 0 && idx < WORKFLOW_STEPS.length - 1) setWorkflowStep(WORKFLOW_STEPS[idx + 1]);
+}
+function renderInlineProgress(targetId, percent, label) {
+  const el = $(targetId);
+  if (!el) return;
+  const safe = Math.max(0, Math.min(100, percent));
+  el.innerHTML = `<div class="progress-wrap"><div class="progress-bar" style="width:${safe}%"></div></div><div class="progress-label">${esc(label)} - ${safe}%</div>`;
+}
 async function fileToBase64(file) {
   const buf = await file.arrayBuffer();
   let binary = '';
@@ -1085,7 +1309,12 @@ async function refreshRules() {
   renderRules();
   renderHistory(state.history || [], historyPagination);
   $('saveRulesBtn').disabled = !state.has_rules;
-  $('generateBtn').disabled = !state.has_rules;
+  casesGenerated = !!state.has_review_session;
+  $('ruleNextBtn').disabled = !state.has_rules || casesGenerating;
+  if (casesGenerated && activeWorkflowStep === 'rule_extraction') {
+    setStatus('Cases are ready. Click Next Step to review test cases or regenerate them.');
+  }
+  setWorkflowStep(activeWorkflowStep);
 }
 async function loadHistoryPage(page) {
   const nextPage = Math.max(1, page || 1);
@@ -1363,9 +1592,362 @@ async function applyHistory(attemptId) {
   renderHistory(state.history || [], historyPagination);
   setStatus(`Applied ${data.applied_from_label || attemptId}. Current badges show reviewed changes from that history snapshot.`);
 }
+function issueOptionMap() {
+  return new Map(((sessionPayload && sessionPayload.issue_type_options) || []).map(item => [item.code, item]));
+}
+function issueSummaryText(review) {
+  const selected = review.issue_types || [];
+  if (!selected.length) return 'None selected';
+  const map = issueOptionMap();
+  return selected.map(code => (map.get(code) && map.get(code).label) || code).join(', ');
+}
+function issueTableHtml(review) {
+  return ((sessionPayload && sessionPayload.issue_type_options) || []).map(item => `
+    <tr>
+      <td><input type="checkbox" data-field="issue_type_option" data-case-id="${esc(review.case_id)}" data-issue-code="${esc(item.code)}" ${review.issue_types?.includes(item.code) ? 'checked' : ''}></td>
+      <td>${esc(item.label)}</td>
+      <td>${esc(item.code)}</td>
+      <td>${esc(item.description)}</td>
+    </tr>
+  `).join('');
+}
+function reviewControls(review) {
+  const caseId = esc(review.case_id);
+  return `<div><label>Decision<select data-field="review_decision" data-case-id="${caseId}">
+    <option value="pending" ${review.review_decision === 'pending' ? 'selected' : ''}>pending</option>
+    <option value="approve" ${review.review_decision === 'approve' ? 'selected' : ''}>approve</option>
+    <option value="rewrite" ${review.review_decision === 'rewrite' ? 'selected' : ''}>rewrite</option>
+  </select></label></div>
+  <div><label>Issue Types</label><details class="issue-picker"><summary class="issue-summary" data-issue-summary="${caseId}">${esc(issueSummaryText(review))}</summary><table class="issue-table"><thead><tr><th>Select</th><th>Label</th><th>Code</th><th>Description</th></tr></thead><tbody>${issueTableHtml(review)}</tbody></table></details></div>
+  <div><label>Comment<textarea data-field="human_comment" data-case-id="${caseId}" rows="4">${esc(review.human_comment || '')}</textarea></label></div>`;
+}
+function checkerSuggestionHtml(value) {
+  return value ? '<span class="suggestion-no">No</span>' : '<span class="suggestion-yes">Yes</span>';
+}
+function renderReviewRows() {
+  if (!sessionPayload) return;
+  $('reviewRows').innerHTML = sessionPayload.table_rows.map(row => {
+    const review = reviewMap.get(row.case_id) || {};
+    return `<tr data-overall="${esc(row.overall)}" data-coverage="${esc(row.coverage)}" data-blocking="${String(row.checker_blocking)}">
+      <td>${esc(row.semantic_rule_id)}</td>
+      <td>${esc(row.case_id)}</td>
+      <td>${esc(row.feature)}</td>
+      <td>${esc(row.case_type)}</td>
+      <td>${esc(row.overall)}</td>
+      <td>${esc(row.coverage)}</td>
+      <td>${checkerSuggestionHtml(!!row.checker_blocking)}</td>
+      <td>${esc(row.blocking_reason)}</td>
+      <td><details><summary>Details</summary>${row.detail_html}</details></td>
+      <td>${reviewControls(review)}</td>
+    </tr>`;
+  }).join('');
+  hydrateReviewControls();
+}
+function hydrateReviewControls() {
+  for (const review of reviewMap.values()) {
+    for (const el of document.querySelectorAll(`[data-case-id="${CSS.escape(review.case_id)}"]`)) {
+      const field = el.dataset.field;
+      if (!field) continue;
+      if (field === 'issue_type_option') el.checked = (review.issue_types || []).includes(el.dataset.issueCode);
+      else if (field === 'human_comment') el.value = review.human_comment || '';
+      else el.value = review[field] || '';
+      el.addEventListener('change', () => syncReviewField(el));
+      el.addEventListener('input', () => syncReviewField(el));
+    }
+    syncIssueSummary(review.case_id);
+  }
+  updateSaveRerunState();
+}
+function syncIssueSummary(caseId) {
+  const review = reviewMap.get(caseId);
+  const summary = document.querySelector(`[data-issue-summary="${CSS.escape(caseId)}"]`);
+  if (review && summary) summary.textContent = issueSummaryText(review);
+}
+function syncReviewField(el) {
+  const review = reviewMap.get(el.dataset.caseId);
+  if (!review) return;
+  const field = el.dataset.field;
+  if (field === 'issue_type_option') {
+    const selected = new Set(review.issue_types || []);
+    if (el.checked) selected.add(el.dataset.issueCode);
+    else selected.delete(el.dataset.issueCode);
+    review.issue_types = Array.from(selected);
+    syncIssueSummary(el.dataset.caseId);
+  } else {
+    review[field] = el.value;
+  }
+  updateSaveRerunState();
+}
+function reviewRequiresRerun(review) {
+  const decision = review.review_decision || 'pending';
+  const comment = String(review.human_comment || '');
+  return decision === 'rewrite' || (decision === 'pending' && /\S/.test(comment));
+}
+function hasRerunEdits() {
+  return Array.from(reviewMap.values()).some(reviewRequiresRerun);
+}
+function normalizedReviewForSubmit(review) {
+  const item = cloneJson(review);
+  if ((item.review_decision || 'pending') === 'pending' && /\S/.test(String(item.human_comment || ''))) {
+    item.review_decision = 'rewrite';
+  }
+  return item;
+}
+function updateSaveRerunState() {
+  const btn = $('saveRerunBtn');
+  if (btn) btn.disabled = !hasRerunEdits();
+}
+function applyReviewFilters() {
+  const overall = $('overallFilter').value;
+  const coverage = $('coverageFilter').value;
+  const blocking = $('blockingFilter').value;
+  for (const row of document.querySelectorAll('#reviewRows tr')) {
+    const show = (!overall || row.dataset.overall === overall) && (!coverage || row.dataset.coverage === coverage) && (!blocking || row.dataset.blocking === blocking);
+    row.style.display = show ? '' : 'none';
+  }
+}
+function currentReviewPayload({ forRerun = false } = {}) {
+  const reviews = Array.from(reviewMap.values()).map(item => forRerun ? normalizedReviewForSubmit(item) : cloneJson(item));
+  return { metadata: sessionPayload ? sessionPayload.metadata : {}, reviews };
+}
+function renderResult(title, bodyHtml, cssClass='') {
+  const card = $('resultCard');
+  card.style.display = '';
+  card.innerHTML = `<h2 class="${cssClass}">${esc(title)}</h2>${bodyHtml}`;
+}
+function compareLinkHtml(item) {
+  if (!item || !item.compare_path) return '';
+  return `<a href="/files?path=${encodeURIComponent(item.compare_path)}" target="_blank">View Changes</a>`;
+}
+function renderReviewHistory(currentIteration = null) {
+  const items = (sessionPayload && sessionPayload.history) || [];
+  const container = $('reviewHistoryCard');
+  if (!items.length) { container.textContent = 'No history.'; return; }
+  container.innerHTML = items.map(item => {
+    const isCurrent = currentIteration !== null && Number(item.iteration) === Number(currentIteration);
+    const nextIteration = item.next_iteration ?? (Number.isFinite(Number(item.iteration)) ? Number(item.iteration) + 1 : '');
+    const title = nextIteration === '' ? `Iteration ${esc(String(item.iteration))} changes` : `Iteration ${esc(String(item.iteration))} -> ${esc(String(nextIteration))} changes`;
+    const compare = compareLinkHtml(item) || '<span class="muted">No case changes in this iteration.</span>';
+    return `<div class="history-row ${isCurrent ? 'current' : ''}"><strong>${title}</strong>${isCurrent ? ' <span class="status-succeeded">Current iteration</span>' : ''}<div>${compare}</div></div>`;
+  }).join('');
+}
+async function refreshSession(currentIteration = null) {
+  const response = await fetch('/api/session');
+  if (!response.ok) throw new Error('Test Case review is not ready. Generate cases first.');
+  sessionPayload = await response.json();
+  reviewMap = new Map(sessionPayload.reviews.map(item => [item.case_id, cloneJson(item)]));
+  reviewBaselineMap = new Map(sessionPayload.reviews.map(item => [item.case_id, cloneJson(item)]));
+  $('summaryCard').innerHTML = `<div class="metric-grid">
+    <div class="metric"><strong>Session ID</strong><br>${esc(sessionPayload.session_id)}</div>
+    <div class="metric"><strong>Status</strong><br>${esc(sessionPayload.session_status)}</div>
+    <div class="metric"><strong>Current Iteration</strong><br>${esc(String(sessionPayload.current_iteration))}</div>
+  </div>`;
+  renderReviewRows();
+  renderReviewHistory(currentIteration);
+  applyReviewFilters();
+}
+async function saveAndRerun() {
+  if (!hasRerunEdits()) return;
+  if (pollTimer) clearTimeout(pollTimer);
+  renderInlineProgress('resultCard', 0, 'Submitting');
+  $('resultCard').style.display = '';
+  const result = await postJson('/api/submit', currentReviewPayload({ forRerun: true }));
+  pollReviewJob(result.job_id);
+}
+async function pollReviewJob(jobId) {
+  const response = await fetch(`/api/status/${encodeURIComponent(jobId)}`);
+  const payload = await response.json();
+  const phase = payload.phase || payload.status || 'queued';
+  if (payload.status === 'queued' || payload.status === 'running') {
+    renderInlineProgress('resultCard', PHASE_PROGRESS[phase] ?? 10, PHASE_LABEL[phase] || phase);
+    pollTimer = setTimeout(() => pollReviewJob(jobId), 2000);
+    return;
+  }
+  if (payload.status === 'failed') {
+    renderResult('Rerun failed', `<pre>${esc(payload.error || '')}</pre>`, 'status-failed');
+    return;
+  }
+  const result = payload.result || {};
+  const iteration = result.next_iteration || '';
+  const historyIteration = result.history_iteration ?? iteration;
+  await refreshSession(historyIteration);
+  const compare = result.links?.case_compare_html ? `<a href="${result.links.case_compare_html}" target="_blank">View Changes</a>` : '';
+  renderResult('Rerun completed', `<div class="status-succeeded">Iteration ${esc(String(iteration))} generated.</div>${compare ? `<div>${compare}</div>` : '<div class="muted">No comparable case changes generated.</div>'}`, 'status-succeeded');
+}
+async function openAuditTrail() {
+  const resp = await fetch('/api/audit_trail');
+  const data = await resp.json();
+  if (data.audit_trail_url) window.open(data.audit_trail_url, '_blank');
+}
+function checkTestCaseReports() {
+  const links = [
+    '<a href="/report.html" target="_blank">Test Case Report</a>',
+    '<a href="/maker_readable.html" target="_blank">Maker Report</a>',
+    '<a href="/checker_readable.html" target="_blank">Checker Report</a>',
+  ].join('<br>');
+  renderResult('Reports', `<div class="status-succeeded">Reports are ready.</div>${links}`, 'status-succeeded');
+  window.open('/report.html', '_blank');
+}
+async function goFromTestCaseToBdd() {
+  if (hasRerunEdits()) {
+    renderResult('Rerun needed', '<div class="warning">There are rewrite comments or decisions. Use Save &amp; Rerun before moving to BDD.</div>');
+    return;
+  }
+  if (sessionPayload) await postJson('/api/reviews/save', currentReviewPayload());
+  setWorkflowStep('bdd');
+  await generateBdd();
+}
+function loadBddData() {
+  fetch('/api/bdd').then(r => r.json()).then(data => {
+    bddPayload = data;
+    renderBddPanel(data);
+  }).catch(err => { $('bddContent').innerHTML = `<section class="band status-failed">${esc(err.message)}</section>`; });
+}
+function renderBddPanel(data) {
+  const el = $('bddContent');
+  updateBddModeNotice('');
+  $('saveBddBtn').disabled = !data.has_bdd;
+  $('bddNextBtn').disabled = !data.has_bdd;
+  if (!data.has_bdd) {
+    el.innerHTML = '<section class="band muted">BDD has not been generated for the current Test Case output. Use Next Step from Test Case to generate BDD.</section>';
+    return;
+  }
+  el.innerHTML = data.scenarios_by_rule.map(rule => `
+    <div class="bdd-rule-block">
+      <strong>${esc(rule.semantic_rule_id)} - ${esc(rule.feature_title)}</strong>
+      ${rule.scenarios.map(s => `
+        <div class="bdd-scenario-card">
+          <div><strong>${esc(s.scenario_id)}</strong> <em>${esc(s.case_type)} / ${esc(s.priority)}</em></div>
+          ${['given','when','then'].map(type => `<div class="step-label">${type.toUpperCase()}</div>${(s[type + '_steps'] || []).map((st,i) => `<textarea class="step-textarea" rows="2" data-scenario="${esc(s.scenario_id)}" data-step-type="${type}" data-step-index="${i}">${esc(st.step_text || '')}</textarea>`).join('')}`).join('')}
+        </div>`).join('')}
+    </div>`).join('');
+  bddDirty = false;
+  document.querySelectorAll('#bddContent textarea[data-scenario]').forEach(ta => ta.addEventListener('input', () => { bddDirty = true; }));
+}
+async function generateBdd() {
+  $('bddProgressCard').style.display = '';
+  renderInlineProgress('bddProgressCard', 5, 'Starting BDD generation');
+  $('bddStatus').textContent = 'Starting BDD generation...';
+  updateBddModeNotice('');
+  const data = await postJson('/api/rule-workflow/generate-bdd', {});
+  pollBddJob(data.job_id);
+}
+async function pollBddJob(jobId) {
+  const response = await fetch('/api/rule-workflow/status/' + encodeURIComponent(jobId));
+  const payload = await response.json();
+  if (payload.status === 'failed') {
+    $('bddProgressCard').style.display = '';
+    $('bddProgressCard').innerHTML = `<div class="status-failed">${esc(payload.error || 'BDD generation failed.')}</div>`;
+    $('bddStatus').textContent = payload.error || 'BDD generation failed.';
+    return;
+  }
+  if (payload.status !== 'succeeded') {
+    const phase = payload.phase || payload.status || 'queued';
+    const progress = BDD_PROGRESS[phase] || 10;
+    renderInlineProgress('bddProgressCard', progress, BDD_LABEL[phase] || phase);
+    $('bddStatus').textContent = `${BDD_LABEL[phase] || phase} - ${progress}%`;
+    setTimeout(() => pollBddJob(jobId), 1500);
+    return;
+  }
+  const summary = payload.result && payload.result.bdd_summary ? payload.result.bdd_summary : {};
+  const fallbackCount = Number(summary.fallback_batch_count || 0);
+  const fallbackNote = fallbackCount > 0 ? `Deterministic fallback was used for ${fallbackCount} batch(es).` : 'Generated by LLM without fallback.';
+  renderInlineProgress('bddProgressCard', 100, 'BDD generated. Review BDD below.');
+  $('bddStatus').textContent = `BDD generated. ${fallbackNote}`;
+  updateBddModeNotice(fallbackNote);
+  scriptsPayload = null;
+  await loadBddData();
+}
+async function saveBddEdits() {
+  const byScenario = {};
+  document.querySelectorAll('#bddContent textarea[data-scenario]').forEach(ta => {
+    const sid = String(ta.dataset.scenario || '');
+    const stype = String(ta.dataset.stepType || '').toLowerCase();
+    const sidx = parseInt(ta.dataset.stepIndex || '0', 10);
+    if (!sid || !stype) return;
+    if (!byScenario[sid]) byScenario[sid] = { scenario_id: sid, given_steps: [], when_steps: [], then_steps: [] };
+    byScenario[sid][stype + '_steps'][sidx] = { step_text: ta.value, step_pattern: '' };
+  });
+  const result = await postJson('/api/bdd/save', { edits: Object.values(byScenario) });
+  $('bddStatus').textContent = `Saved ${result.edit_count} BDD edits.`;
+  scriptsPayload = null;
+  bddDirty = false;
+}
+async function saveBddAndNext() {
+  if (bddDirty) await saveBddEdits();
+  nextWorkflowStep();
+}
+function loadScriptsData() {
+  fetch('/api/scripts').then(r => r.json()).then(data => {
+    scriptsPayload = data;
+    renderScriptsPanel(data);
+  }).catch(err => { $('scriptsContent').innerHTML = `<section class="band status-failed">${esc(err.message)}</section>`; });
+}
+function renderScriptsPanel(data) {
+  const el = $('scriptsContent');
+  if (!data.has_registry) { el.innerHTML = '<section class="band muted">No step registry linked.</section>'; return; }
+  const s = data.summary || {};
+  el.innerHTML = `<div class="scripts-metrics">
+    <div class="scripts-metric"><strong>${s.total_steps || 0}</strong><span>Total Steps</span></div>
+    <div class="scripts-metric"><strong>${s.exact_matches || 0}</strong><span>Exact Matches</span></div>
+    <div class="scripts-metric"><strong>${s.parameterized_matches || 0}</strong><span>Parameterized</span></div>
+    <div class="scripts-metric"><strong>${s.unmatched || 0}</strong><span>Unmatched</span></div>
+    <div class="scripts-metric"><strong>${s.candidates || 0}</strong><span>Candidates</span></div>
+  </div>
+  ${['given','when','then'].map(type => {
+    const steps = (data.steps_by_type && data.steps_by_type[type]) || [];
+    if (!steps.length) return '';
+    return `<div class="step-block"><h3>${type.toUpperCase()}</h3>${steps.map((step, idx) => `
+      <div class="step-item ${step.match_type || ''}">
+        <span class="step-item-badge">${esc(step.match_type || 'unmatched')}</span>
+        <textarea class="step-textarea" data-step-type="${type}" data-step-index="${idx}" rows="2">${esc(step.step_text || '')}</textarea>
+      </div>`).join('')}</div>`;
+  }).join('')}
+  ${(data.gaps && data.gaps.length) ? `<div class="step-block"><h3>GAPS (${data.gaps.length})</h3>${data.gaps.map((g, idx) => `
+    <div class="step-item unmatched">
+      <span class="step-item-badge">GAP</span>
+      <textarea class="step-textarea" data-gap-index="${idx}" data-step-type="${esc(g.step_type || '')}" rows="2">${esc(g.step_text || '')}</textarea>
+    </div>`).join('')}</div>` : ''}`;
+}
+async function saveScriptsEdits() {
+  const edits = [];
+  document.querySelectorAll('#scriptsContent .step-textarea[data-step-type]:not([data-gap-index])').forEach(ta => {
+    edits.push({ step_type: ta.dataset.stepType, step_index: parseInt(ta.dataset.stepIndex || '0', 10), step_text: ta.value });
+  });
+  document.querySelectorAll('#scriptsContent .step-textarea[data-gap-index]').forEach(ta => {
+    edits.push({ is_gap: true, gap_index: parseInt(ta.dataset.gapIndex || '0', 10), step_type: ta.dataset.stepType, step_text: ta.value });
+  });
+  const result = await postJson('/api/scripts/save', { edits });
+  $('scriptsStatus').textContent = `Saved scripts edits.`;
+  scriptsPayload = null;
+  if (result.refreshed_step_registry_path) loadScriptsData();
+}
+async function saveScriptsAndNext() {
+  await saveScriptsEdits();
+  nextWorkflowStep();
+}
+async function finalizeWorkflow() {
+  try {
+    const result = await postJson('/api/finalize', {});
+    const links = [
+      result.final_report_url ? `<a href="${result.final_report_url}" target="_blank">Final Report</a>` : '',
+      result.final_maker_url ? `<a href="${result.final_maker_url}" target="_blank">Maker Report</a>` : '',
+      result.final_checker_url ? `<a href="${result.final_checker_url}" target="_blank">Checker Report</a>` : '',
+    ].filter(Boolean).join('<br>');
+    $('finalizeStatus').innerHTML = `<div class="status-succeeded">Workflow finalized.</div>${links}`;
+  } catch (err) {
+    $('finalizeStatus').innerHTML = `<div class="status-failed">${esc(err.message)}</div>`;
+  }
+}
 async function generateCases() {
   await saveRules();
-  setStatus('Generating cases...');
+  casesGenerating = true;
+  casesGenerated = false;
+  $('ruleNextBtn').disabled = true;
+  setWorkflowStep('test_case');
+  renderInlineProgress('resultCard', 5, 'Starting test case generation');
+  $('resultCard').style.display = '';
+  setStatus('Generating test cases...');
   const data = await postJson('/api/rule-workflow/generate-cases', {});
   pollGenerate(data.job_id);
 }
@@ -1374,19 +1956,39 @@ async function pollGenerate(jobId) {
   const data = await resp.json();
   if (data.status === 'failed') { setStatus(data.error || 'Generate cases failed.'); return; }
   if (data.status !== 'succeeded') {
-    setStatus(`Generate cases: ${data.phase} (${data.status})`);
+    const phase = data.phase || data.status || 'queued';
+    renderInlineProgress('resultCard', GENERATE_PROGRESS[phase] ?? 10, GENERATE_LABEL[phase] || phase);
+    setStatus(`Generate cases: ${GENERATE_LABEL[phase] || phase}`);
     setTimeout(() => pollGenerate(jobId), 1500);
     return;
   }
-  setStatus('Generate cases succeeded. Scenario Review is ready.');
-  $('scenarioLink').classList.remove('hidden');
+  casesGenerating = false;
+  casesGenerated = true;
+  $('ruleNextBtn').disabled = false;
+  await refreshRules();
+  await refreshSession();
+  renderInlineProgress('resultCard', 100, 'Test cases generated. Review cases below.');
+  setStatus('Test cases generated.');
 }
 
 $('uploadBtn').addEventListener('click', () => uploadSource().catch(err => setStatus(err.message)));
 $('extractBtn').addEventListener('click', () => extractSource().catch(err => setStatus(err.message)));
 $('artifactBtn').addEventListener('click', () => loadArtifactFolder().catch(err => setStatus(err.message)));
 $('saveRulesBtn').addEventListener('click', () => saveRules().catch(err => setStatus(err.message)));
-$('generateBtn').addEventListener('click', () => generateCases().catch(err => setStatus(err.message)));
+$('ruleNextBtn').addEventListener('click', () => generateCases().catch(err => setStatus(err.message)));
+$('overallFilter').addEventListener('change', applyReviewFilters);
+$('coverageFilter').addEventListener('change', applyReviewFilters);
+$('blockingFilter').addEventListener('change', applyReviewFilters);
+$('saveRerunBtn').addEventListener('click', () => saveAndRerun().catch(err => renderResult('Rerun failed', `<pre>${esc(err.message)}</pre>`, 'status-failed')));
+$('testCaseReportBtn').addEventListener('click', () => checkTestCaseReports());
+$('auditBtn').addEventListener('click', () => openAuditTrail().catch(err => renderResult('Audit Trail failed', `<pre>${esc(err.message)}</pre>`, 'status-failed')));
+$('testCaseNextBtn').addEventListener('click', () => goFromTestCaseToBdd().catch(err => renderResult('Next Step failed', `<pre>${esc(err.message)}</pre>`, 'status-failed')));
+$('saveBddBtn').addEventListener('click', () => saveBddEdits().catch(err => { $('bddStatus').textContent = err.message; }));
+$('bddNextBtn').addEventListener('click', () => saveBddAndNext().catch(err => { $('bddStatus').textContent = err.message; }));
+$('saveScriptsBtn').addEventListener('click', () => saveScriptsEdits().catch(err => { $('scriptsStatus').textContent = err.message; }));
+$('scriptsNextBtn').addEventListener('click', () => saveScriptsAndNext().catch(err => { $('scriptsStatus').textContent = err.message; }));
+$('finalizeWorkflowBtn').addEventListener('click', () => finalizeWorkflow());
+$('finalAuditBtn').addEventListener('click', () => openAuditTrail().catch(err => { $('finalizeStatus').textContent = err.message; }));
 refreshRules().catch(() => {});
 </script>
 </body>

@@ -1,0 +1,67 @@
+Not applicable                                                                     0
+                                                                      30,000,000
+                Total for the underlying group 2823
+                                                                       7,000,000
+3690            100,000                                  70                        0
+
+Not applicable                                                         7,000,000
+
+                Total for the underlying group 3690
+
+Step 2: Calculate the instrument-level LRA based on the respective bucket
+           rates and the portion of delta-equivalent position market value which
+           exceeds the thresholds for each underlying group and subsequently
+           aggregate the LRAs for all underlying groups shown as follows:
+
+Underlying       Market value of           Threshold         Bucket   Liquidation risk add-on
+   Group         delta equivalent            In HKD            rate                  (D)
+                                                               (C)
+     700               position           equivalent                   = Maximum [Absolute
+    1299        in HKD equivalent               (B)          0.0022  value of ((A))-(B) , 0] x (C)
+    1876                                                     0.0025
+    2823                  (A)             300,000,000         0.002                         176,827.2
+    3690                   -380,376,000   100,000,000         0.002                                     0
+                                          200,000,000        0.0022                                     0
+                               4,199,600  250,000,000                                                   0
+                                                                                                        0
+                               3,000,000  300,000,000
+                                                                                            176,827.2
+                              30,000,000
+
+                               7,000,000
+
+                                   Total
+
+Instrument-level LRA = 176,827 (rounded off to the nearest integer)
+
+3.2.4.3.2 Portfolio-level LRA
+Portfolio-level LRA is calculated according to the steps as follows:
+
+Step 1: Calculate market values of beta hedge positions for each of the
+           underlying groups and subsequently aggregate the results.
+
+Underlying            Market value of                        Beta         Market value of
+   group        delta equivalent position                     (B)    beta hedge position (C)
+
+     700            in HKD Equivalent                         0.9             = (A) x (B)
+    1299                       (A)                            1.1
+    1876                                 -380,376,000         1.2                      -342,338,400
+    2823                                      4,199,600        1                           4,619,560
+    3690                                      3,000,000       1.3                          3,600,000
+                                            30,000,000
+                                              7,000,000                                   30,000,000
+                                                                                           9,100,000
+                             Total
+                                                                                       -295,018,840
+
+               Step 2: Calculate portfolio-level LRA with the aid of a portfolio hedging
+                           instrument.
+
+               The sample portfolio’s hedging instrument is currently set as the Tracker Fund of
+               Hong Kong (2800.HK)33.
+
+               Hedging market value threshold = 250,000,000
+               Hedging instrument bucket rate = 0.002
+
+33 The Tracker Fund of Hong Kong (2800.HK) is set as the default portfolio hedging instrument and subject to change from time to
+time. HKSCC will issue circulars to notify the market before any change is made.

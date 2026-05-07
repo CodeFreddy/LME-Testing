@@ -1,0 +1,47 @@
+[
+  {
+    "clause_id": "IMHK-3_2_4_2",
+    "clause_number": "3.2.4.2",
+    "section": "3.2.4.2 Flat Rate Margin",
+    "start_page": 15,
+    "end_page": 16,
+    "raw_text": "3.2.4.2 Flat Rate Margin\nFlat rate margin is calculated according to the steps as follows:\nStep 1: Aggregate absolute market value of long positions and absolute market\n value of short positions separately for each position identified as per\n instructions in §3.2.2. and compare the total absolute market value of long\n positions and short positions separately for each sub-margin group of flat\n rate margin calculations defined on HKEX website31.\nFor example:\nSub-group 1 positions\nInstrumentID Quantity Absolute market value Absolute market value\n of long positions of short positions\n658 <0 in HKD equivalent in HKD equivalent\n 0 60,000,000\n3606 0\n 30,000,000 0\nTotal\n 30,000,000 60,000,000\nFor the sub-group 1 positions above, the total absolute short market value is higher than\nthe total absolute long market value. Therefore, all short sub-group 1 positions will be\nincluded in the flat rate margin calculation while all long sub-group 1 positions will be\nexcluded.\nInstrumentID Quantity Contract value Market value\n in HKD Equivalent in HKD Equivalent\n658 -10,000,000 -62,000,000 -60,000,000\nSub-group 2 positions\nInstrumentID Quantity Contract value Market value\n in HKD Equivalent in HKD Equivalent\n3456 10,000\n 910,000 750,000\nSub-group 3 positions\nInstrumentID Quantity Contract value Market value\n in HKD Equivalent in HKD Equivalent\n3457 -50,000\n -360,000 -300,000\nSimilarly for sub-group 2 and sub-group 3 to take the higher of long and short absolute\nmarket value for each of them, all long sub-group 2 positions and all short sub-group 3\npositions will be included in the flat rate margin calculation.\nStep 2: Sum the product of absolute position market value and the flat margin rate\n under FieldType 3.\n31 https://www.hkex.com.hk/Services/Clearing/Securities/Risk-Management/Margin?sc_lang=en\nStep 3: Apply flat rate margin multiplier32 by referring to the “Daily Participant\n Margin Multiplier Report” (“DWH0081C”) to obtain the flat rate margin after\n margin multiplier.\nFor example, assigning a flat rate margin multiplier of 2 is assigned,\nFlat rate margin after applying margin multiplier\n= (60,000,000 × 12% + 750,000 × 30% + 300,000 × 55%) × 2\n= 15,180,000",
+    "source_block_id": "SRC-3_2_4_2"
+  },
+  {
+    "clause_id": "IMHK-3_2_5_1",
+    "clause_number": "3.2.5.1",
+    "section": "3.2.5.1 Rounding on Aggregated Market-risk-component Margin",
+    "start_page": 20,
+    "end_page": 20,
+    "raw_text": "3.2.5.1 Rounding on Aggregated Market-risk-component Margin\n Margin rounding is performed on all market risk components according to the steps as\n follows:\n Step 1: Calculate aggregated margin derived from market risk components.\n Aggregated market-risk-component margin\n = Portfolio margin + Flat rate margin + Liquidation risk add-on + Structured product add-\n on + Corporate action position margin + Holiday add-on\n = 10,000,000 + 15,180,000 + 266,865 + 550,000 + 2,500,000 + 18,433,039\n = 46,929,904\n Step 2: Round up the aggregated margin with reference to the rounding parameter\n stated in the Initial Margin Risk Parameter File (e.g., 10,000 in the sample\n Initial Margin Risk Parameter File).\n In our example, 46,929,904 is to be rounded up to the nearest 10,000.\n Rounded aggregated market-risk-component margin = 46,930,000",
+    "source_block_id": "SRC-3_2_5_1"
+  },
+  {
+    "clause_id": "IMHK-3_2_5_2",
+    "clause_number": "3.2.5.2",
+    "section": "3.2.5.2 Consideration on Favorable MTM",
+    "start_page": 20,
+    "end_page": 21,
+    "raw_text": "3.2.5.2 Consideration on Favorable MTM\n Favorable MTM (or MTM requirement)41 could be determined by the steps as follows:\n Step 1: Calculate favorable MTM (or MTM requirement) by using the formula as\n follows:\n Favorable MTM (or MTM requirement)42\n = Market valuePortfolio - Contract valuePortfolio\n39 The Holiday_Factor parameter is 0.7320508075 which implies the number of consecutive holidays is 3. Please refer to §2.2 for\nthe conversion methodology.\n40 Favorable MTM and MTM requirement are mutually exclusive. See §3.2.5.2 for details.\n41 Favorable MTM and MTM requirement are mutually exclusive. In the MTM and Margin Requirement Report, absolute value of\nfavorable MTM (or MTM requirement) will be shown.\n42 The aggregated value of HKD equivalent contract value and HKD equivalent market value. Numbers are rounded off on position\nlevel. Please refer to Appendix 4.6 for calculation logic that involve multiple currencies in the portfolio.\n= (-300,550,000) – (-287,850,000)\n = -12,700,000\n The negative number refers to a MTM requirement, which its absolute value will be added\n after applying margin credit (See §3.2.6.1). In such case, favorable MTM is zero.\n Step 2: Deduct favorable MTM from rounded aggregated market-risk-component\n margin to derive net margin.\n Net margin\n = Maximum (0 , Rounded aggregated market-risk-component margin – Favorable MTM)\n = Maximum [0 , (46,930,000 – 0)]\n = 46,930,000",
+    "source_block_id": "SRC-3_2_5_2"
+  },
+  {
+    "clause_id": "IMHK-3_2_5_3",
+    "clause_number": "3.2.5.3",
+    "section": "3.2.5.3 Application of Margin Credit",
+    "start_page": 21,
+    "end_page": 21,
+    "raw_text": "3.2.5.3 Application of Margin Credit\n A margin credit (normally 5,000,000)43 is granted to each CP and applied for margin\n calculation44.\n Net margin after credit is calculated as follows:\n Net margin after credit\n = Maximum [0 , (Net margin – Margin credit)]\n = Maximum [0 , (46,930,000 – 5,000,000)]\n = 41,930,000",
+    "source_block_id": "SRC-3_2_5_3"
+  },
+  {
+    "clause_id": "IMHK-3_2_8",
+    "clause_number": "3.2.8",
+    "section": "3.2.8 Derive Total MTM and Margin Requirement from Results under §3.2.5 & §3.2.6",
+    "start_page": 22,
+    "end_page": 23,
+    "raw_text": "3.2.8 Derive Total MTM and Margin Requirement from Results under §3.2.5 & §3.2.6\nEventually, total MTM and margin requirement could be derived by adding the net margin\nafter credit to other risk components.\nTotal MTM and margin requirement\n= Net margin after credit + Other risk components\n= Net margin after credit + MTM requirement + Position limit add-on + Credit risk add-on +\n Ad-hoc add-on\n= 41,930,000 + 12,700,000 + 487,332 + 12,000,000 + 600,000\n= 67,717,332\n46 Please note that the credit risk add-on will not be applicable upon the launch of VaR Platform. HKSCC will notify CPs before the\nimplementation.\n4. APPENDIX",
+    "source_block_id": "SRC-3_2_8"
+  }
+]

@@ -1,0 +1,58 @@
+For example:
+
+Portfolio return20 in scenario 1 for IPO instrument group 1876
+= (Market value1876 × Return1876)
+
+= (3,000,000 × 0.011128)
+
+= 33,384
+
+Portfolio return21 in scenario 1 for IPO instrument group 3690
+= (Market value3690 × Return3690)
+
+= (7,000,000 × 0.012241)
+
+= 85,687
+
+Portfolio return22 in scenario 1 for non-IPO instruments
+= (Market value700 × Return700) + (Market value1299 × Return1299) + (Market value2823
+
+  × Return2823) + (Market value26883 × Return26883) + (Market value60954 × Return60954)
+
+= (-400,000,000 × 0.01391) + (80,000,000 × 0.01125) + (30,000,000 × 0.011628) +
+  (2,000,000 × 0.136461) + (10,000,000 × -0.104288)
+
+= -5,085,118
+
+Step 2: Repeat step 1 for all HVaR scenarios under FieldType 1 (i.e., 1,000
+           referring to HVaR_Scen_Count in the Initial Margin Risk Parameter
+           File).
+
+A set of scenario returns under FieldType 1 will be obtained as follows:
+
+      FieldType 1         Scenario 1           Scenario 2  …  Scenario 1,000
+                                       33,384                                        -9
+Portfolio return for IPO               85,687  -44,367 …
+       stock 1876                                                                  -21
+                                  -5,805,118   -113,876 …                       6,738
+Portfolio return for IPO
+       stock 3690                              5,202,132 …
+
+   Portfolio return for
+ non-IPO instruments
+
+Step 3: Calculate HVaR component of the portfolios by averaging the worst 6
+           scenarios 23 , where HVaR_Measure parameter indicates an ES
+           (Discrete) risk measure, and HVaR_CL parameter indicates a
+           confidence level of 99.4%.
+
+HVaR for IPO instrument group 1876 = -7,546.5
+
+HVaR for IPO instrument group 3690 = -19,369
+
+HVaR for non-IPO instruments = -4,793,885.67
+
+20 Round off any (Market valuei x Returni) term to the nearest integer if the result is a decimal number.
+21 Round off any (Market valuei x Returni) term to the nearest integer if the result is a decimal number.
+22 Round off any (Market valuei x Returni) term to the nearest integer if the result is a decimal number.
+23 (1-99.4% (HVaR_CL)) x 1,000 (HVaR_Scen_Count) scenarios = 6 scenarios, rounding up to the nearest integer.
