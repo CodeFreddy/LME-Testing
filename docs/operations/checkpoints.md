@@ -6,6 +6,195 @@ Keep the latest checkpoint at the top. Preserve prior checkpoints below it unles
 
 ---
 
+## 2026-05-07 - Compact Checkpoint: Stash Merge, S2-F7 Plan, Rule Workflow POC Reruns
+
+### Original Goal
+
+The immediate goal was to evaluate and merge a previously stashed local change set into the current `main` worktree without conflicts, after drafting and saving a plan for three HKv14 rule workflow GUI gaps:
+
+1. Scripts view does not expose API-backed step definitions under BDD steps.
+2. Rule Extraction through Finalize stages cannot be revisited without restarting.
+3. Unmatched or otherwise unusable Scripts steps need a controlled way to generate or attach matching step definitions.
+
+### Current Implementation Status
+
+- Stashed files from `stash@{0}` were merged manually into the current working tree rather than popped blindly.
+- No source-code files were restored from the stash; the stash contained docs and local `.claude` settings only.
+- The planning ID collision was resolved:
+  - `S2-F5` remains **Governed Pipeline Concurrency**.
+  - `S2-F6` remains **Rewrite Prompt Governance** planned work.
+  - the new rule workflow Scripts/stage-navigation plan is now `S2-F7`.
+- The new plan is saved as `docs/planning/rule_workflow_scripts_stage_navigation_plan.md`.
+- `docs/operations/session_handoff.md` was refreshed after the merge.
+- The stash itself still exists as a backup; it has not been dropped.
+
+### Files Changed
+
+Current working-tree changes related to this task:
+
+- `.claude/settings.local.json` — restored from stash; local tooling config, should usually stay out of commits unless explicitly requested.
+- `README.md` — restored/merged S2-F5 status and added S2-F7 plan note.
+- `TODO.md` — restored/merged S2-F5/S2-F6 status and added S2-F7 planned checklist; trailing whitespace cleaned.
+- `docs/governance/acceptance.md` — restored S2-F2 COMPLETE status/evidence and added S2-F5 governed concurrency gate.
+- `docs/index.md` — linked S2-F5, S2-F6, and S2-F7 planning references.
+- `docs/operations/checkpoints.md` — restored previous stash checkpoint and this new compact checkpoint.
+- `docs/operations/session_handoff.md` — refreshed via `scripts/update_session_handoff.ps1`.
+- `docs/planning/implementation_plan.md` — added S2-F5 concurrency, S2-F6 rewrite prompt governance, and S2-F7 Scripts/stage-navigation planning sections.
+- `docs/planning/rule_workflow_scripts_stage_navigation_plan.md` — new S2-F7 plan for Scripts view API-backed definitions, step generation, and stage navigation.
+
+Unrelated pre-existing working-tree item:
+
+- `artifacts/im_hk_v13_poc_two_rules/` remains untracked and was not modified.
+
+### Key Design Decisions
+
+- Do not apply the stash directly with `git stash pop`; merge it manually to avoid overwriting current planning work.
+- Preserve historical `S2-F5` as the implemented pipeline concurrency slice because current source already contains `ThreadPoolExecutor` maker/checker concurrency.
+- Preserve `S2-F6` as planned rewrite prompt governance from the stashed checkpoint.
+- Assign the new rule workflow GUI plan to `S2-F7` to avoid governance/documentation ambiguity.
+- Keep generated step definitions in the future S2-F7 workflow as draft artifacts until human approval.
+- Keep `.claude/settings.local.json` visible but treat it as local configuration, not normal project content.
+
+### Tests Already Run And Results
+
+- `git diff --check` — passed after cleaning restored `TODO.md` trailing whitespace.
+- `python scripts/check_docs_governance.py` using bundled Python — passed.
+- `python scripts/check_artifact_governance.py` using bundled Python — passed.
+- `rg -n "<<<<<<<|=======|>>>>>>>" .claude README.md TODO.md docs` — no conflict markers found.
+- Earlier HKv14 rule workflow POC rerun on `http://127.0.0.1:8769/` completed upload, extraction, case generation, BDD generation, Scripts registry, and finalize successfully.
+
+### Known Failures Or Unresolved Risks
+
+- The stash still exists; it should only be dropped after human review confirms the manual merge is satisfactory.
+- `.claude/settings.local.json` is dirty and restored from stash; decide whether to keep, ignore, or revert before committing.
+- `artifacts/im_hk_v13_poc_two_rules/` is untracked and unrelated; do not include it accidentally.
+- `main` was previously reported ahead/behind remote; re-check before any push.
+- S2-F7 is planning only; no implementation has started.
+- The generated BDD step definitions from the rule workflow POC are scaffolds, not executable mock API-backed definitions yet.
+
+### Exact Next Steps
+
+1. Review `git diff` for the manually merged docs and `.claude/settings.local.json`.
+2. Decide whether `.claude/settings.local.json` should be kept in the working tree, reverted, or excluded from any commit.
+3. Decide whether to stage only the documentation plan/merge files and leave unrelated `artifacts/im_hk_v13_poc_two_rules/` untouched.
+4. If committing, refresh `docs/operations/session_handoff.md` again immediately before commit.
+5. Run:
+   - `python scripts/check_docs_governance.py`
+   - `python scripts/check_artifact_governance.py`
+   - any focused docs or pipeline tests requested by the human.
+6. After the user confirms the merge is good, optionally drop `stash@{0}`.
+
+### Constraints That Must Not Be Forgotten
+
+- Do not claim Stage 3 real LME execution readiness.
+- Do not claim HKv14 production downstream automation readiness.
+- Do not change schemas, prompts, default models, or review decision contracts as part of S2-F7 planning.
+- Do not silently trust generated step definitions; future S2-F7 generated steps must remain draft/reviewable until human approval.
+- Do not hide unmatched, stale, or failed states in the workflow UI to make the flow appear cleaner.
+- Do not overwrite or replace the HKv13 mock API preservation baseline.
+- Do not include unrelated untracked artifacts or local tooling settings in a commit unless explicitly approved.
+
+---
+
+## 2026-05-06 - Checkpoint: S2-F5 Concurrency Complete, S2-F6 Rewrite Prompt Plan Agreed
+
+### Original Goal
+
+Plan and execute governed CodeFreddy follow-up slices after S2-F4 rule-workflow-session GUI integration.
+
+### Current Implementation Status
+
+Two slices completed in this session:
+
+**S2-F5 — Governed Pipeline Concurrency** ✅ COMMITTED (`1d805a7`)
+- Maker/checker batch execution with `ThreadPoolExecutor`; `concurrency=1` default rollback path preserved.
+- Deterministic JSONL output ordering via sorted batch results.
+- Checker partial failures visible in `summary.json` metadata (`failed_batch_nums`, `remaining_after_resume`).
+- 3 new tests + 5 existing = 8 pipeline tests all pass.
+- Docs/artifact governance checks pass.
+
+**S2-F2 stale status fix** ✅ COMMITTED (`64dfd22`)
+- Acceptance.md S2-F2 gate updated from PLANNING APPROVED to COMPLETE with evidence.
+
+**S2-F6 — Rewrite Prompt Governance Plan** ✅ AGREED (not yet implemented)
+- User reviewed and accepted the scope: dedicated `REWRITE_SYSTEM_PROMPT` + `REWRITE_PROMPT_VERSION` + `build_rewrite_user_prompt()` in prompts.py, update pipelines.py to use dedicated prompt, fix silent `except: pass`, add summary metadata, focused tests, and acceptance gate.
+- Concurrency for rewrite excluded from minimum scope.
+- Full benchmark suite excluded from minimum scope (poc_two_rules baseline only).
+
+### Files Changed
+
+Committed:
+- `src/lme_testing/pipelines.py` — maker/checker concurrency
+- `tests/test_pipelines.py` — 3 new concurrency tests
+- `docs/governance/acceptance.md` — S2-F5 gate + S2-F2 fix
+- `docs/planning/implementation_plan.md` — S2-F5 marked IMPLEMENTED
+
+Uncommitted (docs refresh):
+- `docs/operations/checkpoints.md` — this entry
+- `docs/operations/session_handoff.md`
+- `TODO.md`
+- `README.md`
+- `docs/index.md`
+
+### Remaining CodeFreddy Follow-Up Candidates
+
+| Slice | Status |
+|-------|--------|
+| 1. Pipeline concurrency (S2-F5) | ✅ Done |
+| 2. Rewrite prompt governance (S2-F6) | 📋 Planned — scope agreed |
+| 3. Human review decision contract changes | ❌ Not started |
+| 4. BDD fallback behavior | ❌ Not started |
+| 5. UI progress/history/audit/compare polish | ❌ Not started |
+
+### Key Design Decisions
+
+- S2-F6 minimum scope excludes concurrency and full benchmark; add those as tracked follow-up if evidence shows need.
+- `REWRITE_SYSTEM_PROMPT` must follow prompt governance: versioned, benchmarked, with rollback notes.
+- The silent `except: pass` in the current rewrite pipeline must be fixed to surface failures.
+- No schema, default model, or review decision contract changes in S2-F6.
+
+### Tests Already Run And Results
+
+- `python -m unittest tests.test_pipelines.PipelineTests` — 8 tests OK
+- `python scripts/check_docs_governance.py` — passed
+- `python scripts/check_artifact_governance.py` — passed
+
+### Known Failures Or Unresolved Risks
+
+- `.claude/settings.local.json` still dirty (unrelated local permissions).
+- Stage 3 remains blocked by real LME VM/API access.
+- S2-F6 rewrite prompt benchmark evidence will be poc_two_rules only — limited confidence for full rule set.
+- Full rewrite concurrency deferred; serial only for now.
+
+### Constraints That Must Not Be Forgotten
+
+- Do not claim Stage 3 real execution readiness.
+- Do not claim HKv14 production downstream automation readiness.
+- Do not accept CodeFreddy prompt/schema/review-decision changes without governance.
+- Do not remove `reject` or `block_recommendation_review` without explicit approval.
+- Do not introduce or promote `REWRITE_SYSTEM_PROMPT` without prompt governance, benchmark evidence, traceability, validation, and rollback notes.
+- Keep `.claude/settings.local.json` out of commits unless explicitly requested.
+
+### Resume Prompt
+
+```text
+Continue in C:\Code\LME-Testing. Read AGENTS.md and the latest checkpoint in docs/operations/checkpoints.md.
+
+Current state:
+- Branch: codex/codefreddy-pipeline-concurrency
+- S2-F5 maker/checker concurrency committed (1d805a7).
+- S2-F2 stale acceptance.md status fixed (64dfd22).
+- S2-F6 rewrite prompt governance scope agreed: add REWRITE_SYSTEM_PROMPT, REWRITE_PROMPT_VERSION, build_rewrite_user_prompt, fix silent except:pass, add focused tests, add acceptance gate. No concurrency, no full benchmark.
+- Remaining CodeFreddy slices: 3 (review contract), 4 (BDD fallback), 5 (UI polish) — not started.
+
+Next action:
+Implement S2-F6: add REWRITE_SYSTEM_PROMPT + REWRITE_PROMPT_VERSION to prompts.py, add build_rewrite_user_prompt with human review decision context, update run_rewrite_pipeline to use dedicated prompt and fix error handling, add focused tests, update acceptance.md with S2-F6 gate, run governance checks.
+
+Do not claim Stage 3 or HKv14 production readiness. Do not change schemas, default models, or review decision contracts in S2-F6.
+```
+
+---
+
 ## 2026-05-06 - Compact Checkpoint: Governed CodeFreddy Follow-Up Planning
 
 ### Original Goal

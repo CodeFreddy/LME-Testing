@@ -242,6 +242,36 @@ It defines:
 - follow-up startup/PDF extraction fixes,
 - and the broader CodeFreddy prompt/schema/concurrency changes that remain out of scope.
 
+### 19. `docs/planning/implementation_plan.md` section `S2-F5`
+
+Use this for the implemented governed pipeline concurrency slice.
+
+It defines:
+
+- bounded maker/checker batch concurrency,
+- deterministic output ordering,
+- checker partial failure visibility,
+- serial rollback behavior,
+- and the prompt/schema/default-model boundaries that remain unchanged.
+
+### 20. `docs/planning/implementation_plan.md` section `S2-F6`
+
+Use this for the planned rewrite prompt governance slice.
+
+It defines the agreed future scope for a dedicated rewrite prompt, prompt versioning, visible rewrite error handling, focused tests, and acceptance-gate updates.
+
+### 21. `docs/planning/rule_workflow_scripts_stage_navigation_plan.md`
+
+Use this for the proposed HKv14 rule workflow GUI follow-up covering Scripts view implementation visibility, controlled generation of missing step definitions, and stage navigation without restarting.
+
+It defines:
+
+- how Scripts view should show API-backed step definitions under BDD steps,
+- how unmatched or unusable steps can generate reviewable draft definitions,
+- how Rule Extraction through Finalize navigation should work,
+- stale-artifact behavior,
+- and the POC/mock/stub boundaries that must remain visible.
+
 ### 17. `docs/planning/mvp_input_document_contract_plan.md`
 
 Use this for the implemented S2-F3 slice that defines the minimum Test Plan and Regression Pack Index input contracts.
@@ -266,6 +296,9 @@ It defines:
 - `docs/planning/im_hk_v14_role_review_plan.md` preserves the implemented S2-F1 role-friendly impact decision review plan and package boundaries.
 - `docs/planning/mvp_document_readiness_plan.md` preserves the implemented S2-F2 MVP document readiness registry plan and package boundaries.
 - `docs/planning/mvp_input_document_contract_plan.md` preserves the implemented S2-F3 Test Plan and Regression Pack Index input contract slice.
+- `docs/planning/implementation_plan.md` section `S2-F5` preserves the implemented governed pipeline concurrency slice.
+- `docs/planning/implementation_plan.md` section `S2-F6` preserves the planned rewrite prompt governance slice.
+- `docs/planning/rule_workflow_scripts_stage_navigation_plan.md` preserves the proposed S2-F7 rule workflow GUI Scripts and stage navigation plan.
 
 ---
 
@@ -295,6 +328,7 @@ Then read supporting docs only as needed:
 14. `docs/planning/im_hk_v14_promotion_scope.md`
 15. `docs/planning/im_hk_v14_role_review_plan.md`
 16. `docs/planning/mvp_document_readiness_plan.md`
+17. `docs/planning/rule_workflow_scripts_stage_navigation_plan.md`
 
 ### If you are implementing a task
 

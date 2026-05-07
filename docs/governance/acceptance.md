@@ -392,9 +392,9 @@ Evidence：
 
 ### Gate S2-F2：MVP Document Readiness Registry
 
-**Verification Type 目标：** `stub_verified` for deterministic local artifact generation and validation; no document platform or real execution readiness claim.
+**Verification Type：** `stub_verified` for deterministic local artifact generation and validation; no document platform or real execution readiness claim.
 
-**状态：** 🔄 PLANNING APPROVED（implementation not started）
+**状态：** ✅ COMPLETE（2026-04-29；deterministic readiness registry and S2-F3 optional-input validation）
 
 **Source plan：**
 - `docs/planning/mvp_document_readiness_plan.md`
@@ -408,6 +408,15 @@ Evidence：
 - Deterministic validation rejects unsupported document roles, unsupported readiness states, missing required metadata, and missing sources marked as ready.
 - Focused tests cover valid registry generation, missing source handling, placeholder handling, and validation failure.
 - Docs governance and artifact governance checks pass.
+
+**Evidence（2026-04-29）：**
+- S2-F2 generator: `src/lme_testing/mvp_document_readiness.py`
+- S2-F3 optional-input validation: extended `mvp_document_readiness.py` with `--test-plan` / `--regression-pack-index` CLI flags
+- CLI: `python main.py mvp-document-readiness`
+- Evidence: `evidence/mvp_document_readiness/20260429T075702Z/` (default placeholders), `evidence/mvp_document_readiness/20260429T083211Z/` (optional real inputs)
+- Tests: `tests/test_mvp_document_readiness.py`
+- Deterministic validation rejects unsupported roles/states and missing-ready-source
+- Placeholder fallback preserved when real files omitted; real files accepted via CLI flags with hashing and content checks
 
 **Non-acceptance boundaries：**
 - No generic upload UI or document platform is accepted under this gate.
@@ -453,6 +462,39 @@ Evidence：
 - No CodeFreddy prompt or schema contract change is accepted under this gate.
 - No removal of `reject` or `block_recommendation_review` from the existing governed review contract is accepted under this gate.
 - No concurrent maker/checker execution or Stage 3 real execution claim is accepted under this gate.
+
+---
+
+### Gate S2-F5：Governed Pipeline Concurrency
+
+**Verification Type：** `stub_verified` for focused maker/checker batch concurrency behavior; no real execution readiness claim.
+
+**状态：** ✅ COMPLETE（2026-05-06；stub-verified focused concurrency）
+
+**验收标准：**
+- Maker and checker retain `concurrency=1` as the default rollback path.
+- `concurrency > 1` is bounded to existing batch execution and does not change prompts, schemas, default models, or review decision contracts.
+- Maker concurrent batch execution writes JSONL results in deterministic batch order.
+- Checker concurrent batch execution writes JSONL reviews in deterministic batch order.
+- Checker partial failures remain visible in summary metadata, including failed batch numbers and remaining work, rather than being silently counted as complete.
+- Focused pipeline tests cover `concurrency > 1`.
+- Docs governance and artifact governance checks pass.
+
+**Evidence（2026-05-06）：**
+- `_require_serial_concurrency` removed from `run_maker_pipeline` and `run_checker_pipeline`; concurrent branch via `ThreadPoolExecutor` with `_effective_concurrency` bounding to batch count.
+- Maker concurrent execution collects results indexed by batch number, writes in sorted order: `test_maker_pipeline_concurrency_preserves_output_order` passes.
+- Checker concurrent execution collects results/errors indexed by batch number, writes successful batches in sorted order: `test_checker_pipeline_concurrency_preserves_output_order` passes.
+- Checker partial failures surface `failed_batch_nums` and `remaining_after_resume` in `summary.json`: `test_checker_pipeline_concurrency_records_partial_failure` passes.
+- `concurrency=1` remains the default rollback path; all 5 existing serial pipeline tests still pass (8 total pipeline tests).
+- `scripts/check_docs_governance.py` and `scripts/check_artifact_governance.py` pass.
+- No schema, prompt, model default, or review decision contract changes.
+
+**Non-acceptance boundaries：**
+- No rewrite prompt or rewrite-stage contract promotion is accepted under this gate.
+- No human review schema simplification, removal of `reject`, or removal of `block_recommendation_review` is accepted under this gate.
+- No BDD deterministic fallback behavior change is accepted under this gate.
+- No UI progress/history/audit/compare polish is accepted under this gate.
+- No Stage 3 real execution claim is accepted under this gate.
 
 ---
 

@@ -25,6 +25,7 @@
 | HKv14 role-friendly impact review | ✅ Stub | S2-F1 CLI generates canonical decision JSON, Markdown summary, and local review HTML |
 | MVP document readiness registry | ✅ Stub | S2-F2 CLI generates canonical readiness JSON and derived Markdown summary |
 | Rule extraction review GUI | ✅ Stub | S2-F4 `rule-workflow-session` document/rule review GUI, HKv14 smoke-reviewed |
+| Pipeline batch concurrency | ✅ Stub | S2-F5 maker/checker ThreadPoolExecutor, deterministic output order, partial failure visibility |
 | Real LME API execution | ⏳ Blocked | Stage 3, LME VM access needed |
 
 ### Verification Type Key
@@ -51,6 +52,8 @@ Stage 1 (real data access) is complete. Stage 2 scoped work is complete:
 - **S2-F1**: Role-friendly HKv14 impact decision review package generation complete; local HTML review surface plus canonical structured JSON
 - **S2-F2**: MVP document readiness registry generation complete; Test Plan and Regression Pack Index remain explicit placeholders/blockers
 - **S2-F4**: CodeFreddy rule extraction review GUI integrated on `main`; HKv14 PDF upload/extraction and scenario review smoke path validated with stub config
+- **S2-F5**: Governed maker/checker batch concurrency implemented; deterministic JSONL ordering and partial failure visibility
+- **S2-F7**: Rule workflow Scripts view and stage navigation follow-up plan recorded; implementation not started
 - **Stage 3**: Still blocked pending real LME VM/API access
 
 See `docs/planning/roadmap.md` and `TODO.md` for Stage 2 details.

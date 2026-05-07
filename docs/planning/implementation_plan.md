@@ -51,6 +51,9 @@ Stage 2 规划（Stage 1 完成后展开）
 └── S2-F2: MVP document readiness registry
 └── S2-F3: MVP input document contract
 └── S2-F4: Rule extraction review workflow merge slice and GUI startup/PDF fix
+└── S2-F5: Governed pipeline concurrency
+└── S2-F6: Rewrite prompt governance
+└── S2-F7: Rule workflow Scripts view and stage navigation UX plan
 ```
 
 ---
@@ -819,6 +822,126 @@ Document upload/import -> deterministic rule extraction -> atomic/semantic rule 
 - HKv14 direct rule workflow extraction found 5 target sections.
 
 **自评：** PASS for this controlled merge slice and follow-up GUI fix package. Broader CodeFreddy changes remain candidates for separate governed review.
+
+---
+
+### S2-F5 — Governed Pipeline Concurrency Slice
+
+**状态：✅ IMPLEMENTED（2026-05-06）；stub-verified focused maker/checker concurrency**
+
+**目标：** Enable bounded concurrent maker/checker batch execution from the CodeFreddy follow-up ideas while preserving existing artifact contracts, prompt/model governance, and deterministic downstream readability.
+
+**输出契约：**
+- `src/lme_testing/pipelines.py`
+- `tests/test_pipelines.py`
+- docs/acceptance updates for the governed concurrency gate
+
+**实现要点：**
+- Apply concurrency only to existing maker and checker batch execution.
+- Keep `concurrency=1` behavior as the rollback path and baseline-compatible default.
+- Require `concurrency > 0`; cap effective workers at the number of batches.
+- Preserve deterministic JSONL output ordering by writing completed batch results in original batch order.
+- Keep partial failures visible through surfaced exceptions or checker summary metadata; do not silently count skipped batches as success.
+- Do not change schemas, prompts, default models, review decision contracts, or rewrite prompt behavior.
+
+**验收：**
+- [x] Maker `concurrency > 1` processes independent batches and writes `maker_cases.jsonl` in stable batch order.
+- [x] Checker `concurrency > 1` processes independent batches and writes `checker_reviews.jsonl` in stable batch order.
+- [x] Checker partial failures remain visible in `summary.json` metadata and do not hide remaining/unprocessed work.
+- [x] Existing serial focused pipeline tests still pass.
+- [x] Docs and artifact governance checks pass.
+
+**验证：**
+- `.venv\Scripts\python.exe -m unittest tests.test_pipelines.PipelineTests -v`: 8 tests OK (3 new concurrency tests).
+- `.venv\Scripts\python.exe scripts/check_docs_governance.py`: passed.
+- `.venv\Scripts\python.exe scripts/check_artifact_governance.py`: passed.
+- `concurrency=1` default path verified: no behavioral change to existing serial execution.
+
+**不在范围：**
+- Rewrite prompt or rewrite-stage contract promotion
+- Human review decision schema changes
+- BDD fallback behavior changes
+- UI progress/history/audit/compare polish
+- Stage 3 real execution readiness claims
+
+**自评：** PASS. Bounded maker/checker batch concurrency is implemented and verified while preserving deterministic output order, visible partial failures, and serial rollback behavior.
+
+---
+
+### S2-F6 — Rewrite Prompt Governance
+
+**状态：📋 PLANNED（2026-05-06）；scope agreed, implementation not started**
+
+**目标：** Introduce a dedicated governed rewrite prompt path without accepting broader CodeFreddy schema, review-decision, BDD fallback, or UI changes.
+
+**范围（planned）：**
+- Add `REWRITE_SYSTEM_PROMPT` and `REWRITE_PROMPT_VERSION`.
+- Add `build_rewrite_user_prompt()` with human review decision context.
+- Update `run_rewrite_pipeline` to use the dedicated prompt.
+- Fix silent rewrite error handling.
+- Add summary metadata for provider, model, and prompt version.
+- Add focused rewrite pipeline tests.
+- Add an acceptance gate before implementation is marked complete.
+
+**不在范围：**
+- Rewrite concurrency
+- Full benchmark suite beyond the agreed small baseline
+- Schema changes
+- Default model changes
+- Review decision contract changes
+
+**自评：** PLANNED. Scope is recorded from the stashed checkpoint; no implementation has started.
+
+---
+
+### S2-F7 — Rule Workflow Scripts View and Stage Navigation UX Plan
+
+**状态：📝 PROPOSED（2026-05-07）**
+
+**目标：** Record a governed follow-up plan for three HKv14 rule workflow GUI gaps found during end-to-end POC reruns: Scripts view implementation visibility, controlled generation of missing step definitions, and navigation between workflow stages without restarting.
+
+**为什么现在做：**
+- The HKv14 rule workflow POC can complete extraction, case generation, BDD generation, Scripts visibility, and Finalize.
+- The generated Scripts view does not yet expose executable mock API step definitions beneath matching steps.
+- Unmatched steps lack a controlled path to generate or attach executable definitions.
+- Users cannot freely revisit prior stages after reaching later workflow stages.
+
+**输入契约：**
+- `docs/planning/rule_workflow_scripts_stage_navigation_plan.md`
+- `src/lme_testing/rule_workflow_session.py`
+- `src/lme_testing/review_session.py`
+- `deliverables/im_hk_v14_mock_api/`
+- `deliverables/im_hk_mock_api_common/`
+
+**输出契约（proposed）：**
+- Scripts view can show API-backed step definition metadata.
+- Scripts view can create reviewable draft step-definition artifacts for unmatched or unusable steps.
+- Rule workflow GUI can navigate between Rule Extraction, Scenario Review, BDD Review, Scripts, and Finalize without restarting when prerequisites are present.
+- Stale downstream artifacts remain visible and explicitly marked.
+
+**实现要点：**
+- Keep all generated step definitions as draft artifacts until human approval.
+- Parse Python step definitions for decorator patterns, function names, implementation snippets, and mock API endpoint calls.
+- Do not hide unmatched or stale states to make the workflow appear cleaner.
+- Preserve finalized reports as immutable snapshots.
+- Keep schema, prompt, default model, and production readiness impact at none unless separately approved.
+
+**验收（proposed）：**
+- A matched step can show the source implementation and API endpoint, such as `POST /margin/aggregate`.
+- An unmatched step has a visible controlled generate/attach/manual action.
+- Generated step definitions include provenance and approval status before promotion.
+- A user can navigate backward across workflow stages without restarting.
+- Forward navigation is gated by prerequisite artifacts.
+- Upstream edits mark downstream stages stale rather than silently reusing old outputs.
+
+**不在范围：**
+- Production HKv14 execution readiness claims
+- Stage 3 real execution environment integration
+- Schema, prompt, or default model changes
+- Automatic trust or promotion of generated step definitions
+- Replacing the preserved HKv13 mock API baseline
+
+**自评：** PLANNED. This is a saved planning slice only; implementation has not started.
 
 ---
 

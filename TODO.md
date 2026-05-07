@@ -1,7 +1,7 @@
 # LME Testing — TODO v3.1
 
 **修订日期：** 2026-05-06
-**说明：** 整合 master 分支合并分析、S2-T01 v1.5 结果、S2-B1/B2 集成状态、S2-C1/S2-C2/S2-C3/S2-C4/S2-C5 mock API bridge and deliverables policy work，S2-D1 browser-level review UI E2E，S2-F1 role-friendly HKv14 impact decision review package generator，S2-F2/S2-F3 MVP document readiness registry and input contract implementation，以及 S2-F4 CodeFreddy rule extraction review GUI integration and follow-up GUI fixes。
+**说明：** 整合 master 分支合并分析、S2-T01 v1.5 结果、S2-B1/B2 集成状态、S2-C1/S2-C2/S2-C3/S2-C4/S2-C5 mock API bridge and deliverables policy work，S2-D1 browser-level review UI E2E，S2-F1 role-friendly HKv14 impact decision review package generator，S2-F2/S2-F3 MVP document readiness registry and input contract implementation，S2-F4 CodeFreddy rule extraction review GUI integration and follow-up GUI fixes，S2-F5 governed pipeline concurrency，以及 S2-F7 rule workflow Scripts/stage navigation plan。
 
 ---
 
@@ -171,6 +171,9 @@
 - ✅ S2-F2 已完成：MVP document readiness registry generator；canonical JSON + derived summary under `evidence/mvp_document_readiness/20260429T075702Z/`。
 - ✅ S2-F3 已完成：MVP input document contract and optional-input readiness validation。
 - ✅ S2-F4 已完成：CodeFreddy rule extraction review workflow integrated on `main`; `rule-workflow-session` GUI smoke-reviewed with HKv14; config fallback and pypdf PDF extraction fixes committed.
+- ✅ S2-F5 已完成：Governed maker/checker batch concurrency with ThreadPoolExecutor; deterministic JSONL ordering; checker partial failure visibility in summary metadata.
+- 📋 S2-F6 已计划：Rewrite prompt governance — scope agreed, dedicated prompt/version/user-prompt-builder, fix silent error handling, focused tests, acceptance gate. Concurrency for rewrite excluded from minimum scope.
+- 📋 S2-F7 已计划：Rule workflow Scripts view API-backed definition visibility, missing-step generation, and stage navigation without restart.
 - ⏳ Stage 3 仍阻塞于真实 LME VM/API 权限；mock API 不代表真实 LME execution readiness。
 
 ### S2-B1：audit_trail.py 实现（来自 master 概念）
@@ -369,6 +372,47 @@
 
 ---
 
+### S2-F5：Governed Pipeline Concurrency
+- [x] Maker/checker uses `ThreadPoolExecutor` for concurrent batch execution
+- [x] `concurrency=1` default rollback path preserved
+- [x] `concurrency > 1` bounded to batch count; `concurrency <= 0` raises ValueError
+- [x] Deterministic JSONL output ordering via sorted batch results index
+- [x] Checker partial failures visible in `summary.json` (`failed_batch_nums`, `remaining_after_resume`)
+- [x] 3 new focused tests cover maker order, checker order, and checker partial failure
+- [x] All 5 existing serial tests still pass (8 total)
+- [x] Docs and artifact governance checks pass
+
+**状态：** ✅ COMPLETE（2026-05-06；stub-verified）
+
+**边界：** 不改变 schemas/prompts/default models/review decision contracts；不声明 Stage 3 readiness。
+
+---
+
+### S2-F6：Rewrite Prompt Governance（已计划）
+- [ ] Add `REWRITE_SYSTEM_PROMPT` + `REWRITE_PROMPT_VERSION` to prompts.py
+- [ ] Add `build_rewrite_user_prompt()` with human review decision context
+- [ ] Update `run_rewrite_pipeline` to use dedicated prompt; fix silent `except: pass`
+- [ ] Add summary metadata (provider, model, prompt_version)
+- [ ] Add focused tests for rewrite pipeline
+- [ ] Add S2-F6 gate to acceptance.md
+- [ ] Run governance checks
+
+**状态：** 📋 PLANNED — scope agreed; concurrency for rewrite and full benchmark excluded from minimum scope.
+
+---
+
+### S2-F7：Rule Workflow Scripts View and Stage Navigation（已计划）
+- [ ] Show API-backed step implementation metadata under matched/candidate Scripts view steps
+- [ ] Add controlled generate/attach/manual actions for unmatched or unusable steps
+- [ ] Save generated step definitions as draft artifacts with provenance and approval state
+- [ ] Add stage navigation across Rule Extraction, Scenario Review, BDD Review, Scripts, and Finalize
+- [ ] Add stale downstream artifact marking and explicit regeneration controls
+- [ ] Add focused HTTP/browser tests for Scripts definition expansion, generation actions, and stage navigation
+
+**状态：** 📋 PLANNED — saved in `docs/planning/rule_workflow_scripts_stage_navigation_plan.md`; implementation not started.
+
+---
+
 ## Stage 3（阻塞于外部）
 
 - ⏳ LME VM 访问权限（ETA：未知）
@@ -397,5 +441,8 @@
 - [x] ✅ S2-F2　MVP document readiness registry
 - [x] ✅ S2-F3　MVP input document contract and optional-input readiness validation
 - [x] ✅ S2-F4　CodeFreddy rule extraction review GUI integration and HKv14 smoke review
+- [x] ✅ S2-F5　Governed maker/checker batch concurrency
+- [ ] 📋 S2-F6　Rewrite prompt governance (scope agreed, not started)
+- [ ] 📋 S2-F7　Rule workflow Scripts view and stage navigation plan
 - [ ] ⏳ 真实 LME API 接入（Stage 3，待 VM 权限）
 - [ ] 🧊 S2-E　LLM 非决定性稳定化（SR-MR-015-B3-4、SR-MR-071-C-1；已明确暂跳过，未来需 benchmark 成本/收益批准）

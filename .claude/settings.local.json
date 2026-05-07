@@ -9,7 +9,10 @@
       "Bash(ls -d 'C:\\\\Codes\\\\GenAI\\\\LME-Testing'/*/)",
       "Bash(ls -d 'C:\\\\Codes\\\\GenAI\\\\LME-Testing\\\\LME-Testing-master'/*/)",
       "Bash(xargs cat:*)",
-      "Bash(start:*)"
+      "Bash(start:*)",
+      "Bash(git status *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

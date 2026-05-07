@@ -1,0 +1,229 @@
+[
+  {
+    "semantic_rule_id": "SR-MR-001-B1-1",
+    "version": "1.0",
+    "source": {
+      "doc_id": "im_hk_v13",
+      "doc_title": "Initial Margin Calculation Guide HKv13",
+      "doc_version": "HKv13",
+      "section": "Initial Margin Calculation Guide HKv13",
+      "clause_refs": [
+        "1"
+      ],
+      "atomic_rule_ids": [
+        "MR-001-B1-1"
+      ],
+      "pages": [
+        4,
+        5
+      ]
+    },
+    "classification": {
+      "rule_type": "data_constraint",
+      "rule_tags": [
+        "matching"
+      ],
+      "testability": "testable",
+      "priority": "high",
+      "coverage_eligible": true
+    },
+    "statement": {
+      "actor": {
+        "value": "unspecified_actor",
+        "source_type": "inferred"
+      },
+      "action": {
+        "value": "unspecified_action",
+        "source_type": "inferred"
+      },
+      "object": {
+        "value": "unspecified_object",
+        "source_type": "inferred"
+      },
+      "conditions": [],
+      "constraints": [],
+      "outcome": {
+        "kind": "field_population",
+        "expected_state": "field_constraint_satisfied",
+        "details": {}
+      },
+      "exceptions": []
+    },
+    "type_payload": {
+      "data_constraint": {
+        "field": "unspecified_field",
+        "constraint_kind": "value_restriction",
+        "format": null,
+        "allowed_values": [],
+        "applies_when": [
+          "matching"
+        ]
+      }
+    },
+    "execution_mapping": {
+      "business_inputs": [
+        "unspecified_object"
+      ],
+      "observable_outputs": [
+        "validation_result",
+        "processing_result"
+      ],
+      "system_events": [
+        "unspecified_action"
+      ],
+      "preconditions_for_execution": [],
+      "postconditions_for_execution": [
+        "data_constraint"
+      ],
+      "dsl_assertions": [
+        {
+          "target": "processing_result",
+          "operator": "not_equals",
+          "value": null
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "target": "statement",
+        "quote": "To promote transparency of the model, a file containing the key risk parameters required for calculating IM(a.k.a., “Initial Margin Risk Parameter File”, or “IMRPF”) will be disseminated to all HKSCC’s CPs on a daily basis upon the launch of VaR Platform.",
+        "page": 4,
+        "atomic_rule_id": "MR-001-B1-1"
+      }
+    ],
+    "review": {
+      "confidence": 0.65,
+      "inference_flags": [
+        "first_pass_semantic_generation"
+      ],
+      "ambiguities": []
+    },
+    "test_design_hints": {
+      "gherkin_intent": "To promote transparency of the model, a file containing the key risk parameters required for calculating IM(a.k.a., “Initial Margin Risk Parameter File”, or “IMRPF”) will be disseminated to all HKSCC’s CPs on a daily basis upon the launch of VaR Platform.",
+      "positive_scenarios": [
+        "happy path for data_constraint"
+      ],
+      "negative_scenarios": [
+        "invalid input path"
+      ],
+      "boundary_scenarios": [],
+      "data_requirements": [
+        "matching"
+      ],
+      "oracle_notes": [
+        "First-pass machine-generated semantic rule."
+      ]
+    }
+  },
+  {
+    "semantic_rule_id": "SR-MR-002-B2-2",
+    "version": "1.0",
+    "source": {
+      "doc_id": "im_hk_v13",
+      "doc_title": "Initial Margin Calculation Guide HKv13",
+      "doc_version": "HKv13",
+      "section": "Initial Margin Calculation Guide HKv13",
+      "clause_refs": [
+        "2"
+      ],
+      "atomic_rule_ids": [
+        "MR-002-B2-2"
+      ],
+      "pages": [
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    "classification": {
+      "rule_type": "obligation",
+      "rule_tags": [
+        "matching"
+      ],
+      "testability": "testable",
+      "priority": "high",
+      "coverage_eligible": true
+    },
+    "statement": {
+      "actor": {
+        "value": "unspecified_actor",
+        "source_type": "inferred"
+      },
+      "action": {
+        "value": "unspecified_action",
+        "source_type": "inferred"
+      },
+      "object": {
+        "value": "unspecified_object",
+        "source_type": "inferred"
+      },
+      "conditions": [],
+      "constraints": [],
+      "outcome": {
+        "kind": "acceptance",
+        "expected_state": "action_required",
+        "details": {}
+      },
+      "exceptions": []
+    },
+    "type_payload": {
+      "obligation": {
+        "mode": "must",
+        "fulfillment": "required"
+      }
+    },
+    "execution_mapping": {
+      "business_inputs": [
+        "unspecified_object"
+      ],
+      "observable_outputs": [
+        "validation_result",
+        "processing_result"
+      ],
+      "system_events": [
+        "unspecified_action"
+      ],
+      "preconditions_for_execution": [],
+      "postconditions_for_execution": [
+        "obligation"
+      ],
+      "dsl_assertions": [
+        {
+          "target": "processing_result",
+          "operator": "not_equals",
+          "value": null
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "target": "statement",
+        "quote": "There is no interpolation required between discrete data points.",
+        "page": 5,
+        "atomic_rule_id": "MR-002-B2-2"
+      }
+    ],
+    "review": {
+      "confidence": 0.65,
+      "inference_flags": [
+        "first_pass_semantic_generation"
+      ],
+      "ambiguities": []
+    },
+    "test_design_hints": {
+      "gherkin_intent": "There is no interpolation required between discrete data points.",
+      "positive_scenarios": [
+        "happy path for obligation"
+      ],
+      "negative_scenarios": [],
+      "boundary_scenarios": [],
+      "data_requirements": [
+        "matching"
+      ],
+      "oracle_notes": [
+        "First-pass machine-generated semantic rule."
+      ]
+    }
+  }
+]
