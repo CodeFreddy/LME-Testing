@@ -95,6 +95,8 @@ class ReviewSessionTests(unittest.TestCase):
         self.assertNotIn('Block Recommendation Review', html)
         self.assertIn('View Changes', html)
         self.assertIn('PHASE_PROGRESS', html)
+        self.assertNotIn('id="overallFilter"', html)
+        self.assertNotIn('<th>Overall</th>', html)
         self.assertIn('正在 checker 复检', html)
         self.assertNotIn('rewrite_summary', html)
         self.assertNotIn('checker_summary', html)
@@ -252,6 +254,95 @@ class ReviewSessionTests(unittest.TestCase):
         registry = json.loads(registry_path.read_text(encoding='utf-8'))
         self.assertEqual(registry['unmatched'], 0)
         self.assertGreaterEqual(registry['exact_matches'], 1)
+
+    def test_create_scripts_by_ai_generates_editable_code_for_unmatched_steps(self) -> None:
+        manager = self._build_manager(include_bdd=True)
+        manager.repo_root = WORK_TMP
+        api_dir = WORK_TMP / 'api-endpoint'
+        api_dir.mkdir(exist_ok=True)
+        (api_dir / 'mock-hkex-api').write_text(
+            json.dumps(
+                {
+                    'title': 'Mock HKEX API',
+                    'endpoints': [
+                        {
+                            'name': 'getInitialMarginRiskParameters',
+                            'method': 'GET',
+                            'path': '/api/margin/risk-parameters',
+                            'description': 'Returns initial margin risk parameters.',
+                        }
+                    ],
+                },
+                ensure_ascii=False,
+            ),
+            encoding='utf-8',
+        )
+        response_payload = {
+            'scripts': [
+                {
+                    'step_id': 'given:0',
+                    'step_type': 'given',
+                    'step_text': 'custom unmatched setup',
+                    'endpoint_name': 'getInitialMarginRiskParameters',
+                    'code': '@given("custom unmatched setup")\ndef step_custom_unmatched_setup(context):\n    context.risk_parameters = context.api.get("/api/margin/risk-parameters")',
+                    'notes': 'demo',
+                }
+            ]
+        }
+        config = make_config()
+        config.providers['scripts_provider'] = ProviderConfig(
+            name='scripts_provider',
+            provider_type='openai_compatible',
+            model='kimi-k2.5',
+            base_url='https://example.com/v1',
+            api_key='secret',
+        )
+        config.roles['scripts'] = 'scripts_provider'
+        manager.config = config
+
+        with patch('lme_testing.review_session.build_provider', return_value=FakeProvider([json.dumps(response_payload)])):
+            job = manager.create_scripts_by_ai({})
+            for _ in range(50):
+                status = manager.job_status(job['job_id'])
+                if status['status'] not in {'queued', 'running'}:
+                    break
+                time.sleep(0.05)
+
+        status = manager.job_status(job['job_id'])
+        self.assertEqual(status['status'], 'succeeded')
+        scripts_payload = manager.scripts_payload()
+        first_step = scripts_payload['steps_by_type']['given'][0]
+        self.assertEqual(first_step['script_source'], 'ai')
+        self.assertIn('context.api.get', first_step['code'])
+        self.assertTrue(scripts_payload['scripts_ready_to_save'])
+        self.assertTrue(scripts_payload['generated_scripts_path'])
+        with self.assertRaisesRegex(ValueError, 'already been generated'):
+            manager.create_scripts_by_ai({})
+
+    def test_save_scripts_edits_preserves_user_script_code(self) -> None:
+        manager = self._build_manager(include_bdd=True)
+        code = '@given("custom unmatched setup")\ndef step_custom_unmatched_setup(context):\n    context.value = 1'
+        result = manager.save_scripts_edits(
+            {
+                'edits': [
+                    {
+                        'step_type': 'given',
+                        'step_index': 0,
+                        'step_text': 'custom unmatched setup',
+                        'code': code,
+                    }
+                ]
+            }
+        )
+        reviewed = [
+            json.loads(line)
+            for line in Path(result['reviewed_bdd_path']).read_text(encoding='utf-8').splitlines()
+            if line.strip()
+        ]
+        self.assertEqual(reviewed[0]['step_definitions']['given'][0]['code'], code)
+        step_files = result.get('step_definitions_files', [])
+        self.assertTrue(step_files)
+        self.assertIn('context.value = 1', Path(step_files[0]).read_text(encoding='utf-8'))
 
     def test_scripts_save_preserves_previous_bdd_edits(self) -> None:
         manager = self._build_manager(include_bdd=True)

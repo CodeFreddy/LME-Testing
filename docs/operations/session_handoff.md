@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-05-07 00:27:28 UTC`
+- `2026-05-07 16:23:54 UTC`
 
 ---
 
@@ -56,15 +56,15 @@ If the task touches the CodeFreddy rule extraction review workflow, also read:
 
 Current branch:
 
-- `feature/rule-extraction-review`
+- `feature/hkex-ai-workflow`
 
 Recent commit subjects:
 
+- `ignore commit api key`
+- `Add rule workflow BDD mode updates and run artifacts`
 - `Merge remote rule extraction review branch`
 - `Update status docs after rule workflow GUI integration`
 - `Fix rule workflow GUI startup and PDF extraction`
-- `Record rule extraction merge checkpoint`
-- `Integrate rule extraction review workflow slice`
 
 ---
 

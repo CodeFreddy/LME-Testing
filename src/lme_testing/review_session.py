@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+import ast
 import json
 import logging
 import mimetypes
@@ -14,13 +15,15 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, quote, urlparse
 
-from .config import ProjectConfig
+from .config import ConfigError, ProjectConfig
 from .human_review import _render_case_detail
-from .bdd_export import apply_human_step_edits
+from .bdd_export import apply_human_step_edits, render_steps_from_normalized_bdd
 from .pipelines import _case_map_from_maker_records, run_checker_pipeline, run_rewrite_pipeline
+from .prompts import SCRIPTS_PROMPT_VERSION, SCRIPTS_SYSTEM_PROMPT, build_scripts_user_prompt
+from .providers import build_provider
 from .reporting import generate_html_report
-from .schemas import load_issue_type_options, normalize_human_review_decision, validate_human_review_payload
-from .storage import atomic_write_json, ensure_dir, load_json, load_jsonl, timestamp_slug
+from .schemas import SchemaError, load_issue_type_options, normalize_human_review_decision, parse_json_object, validate_human_review_payload
+from .storage import atomic_write_json, ensure_dir, load_json, load_jsonl, timestamp_slug, write_json
 from .step_registry import (
     compute_step_matches,
     extract_steps_from_normalized_bdd,
@@ -49,6 +52,85 @@ def _coerce_comment_only_rewrites(payload: dict[str, Any]) -> dict[str, Any]:
         if decision == "pending" and comment.strip():
             review["review_decision"] = "rewrite"
     return normalized_payload
+
+
+def _scripts_provider_config(config: ProjectConfig):
+    for role in ("scripts", "bdd", "maker"):
+        try:
+            return role, config.provider_for_role(role)
+        except ConfigError:
+            continue
+    raise ConfigError("No provider is configured for scripts, bdd, or maker.")
+
+
+def _script_key(step_type: str, index: int | None = None, gap_index: int | None = None) -> str:
+    if gap_index is not None:
+        return f"gap:{step_type}:{gap_index}"
+    return f"{step_type}:{index if index is not None else 0}"
+
+
+def _load_api_catalog(repo_root: Path) -> dict[str, Any]:
+    catalog_path = repo_root / "api-endpoint" / "mock-hkex-api"
+    if not catalog_path.exists():
+        raise FileNotFoundError(f"API catalog not found: {catalog_path}")
+    catalog = load_json(catalog_path)
+    if not isinstance(catalog, dict):
+        raise ValueError("API catalog must be a JSON object.")
+    endpoints = catalog.get("endpoints")
+    if not isinstance(endpoints, list) or not endpoints:
+        raise ValueError("API catalog must contain a non-empty endpoints list.")
+    required = {"name", "method", "path", "description"}
+    for index, endpoint in enumerate(endpoints):
+        if not isinstance(endpoint, dict):
+            raise ValueError(f"API endpoint #{index + 1} must be an object.")
+        missing = [field for field in sorted(required) if not endpoint.get(field)]
+        if missing:
+            raise ValueError(f"API endpoint #{index + 1} is missing: {', '.join(missing)}")
+    return catalog
+
+
+def _validate_script_ai_payload(payload: dict[str, Any], expected_step_ids: set[str], endpoint_names: set[str]) -> list[dict[str, Any]]:
+    scripts = payload.get("scripts")
+    if not isinstance(scripts, list):
+        raise SchemaError("Scripts AI payload must contain a scripts list.")
+    seen: set[str] = set()
+    validated: list[dict[str, Any]] = []
+    for item in scripts:
+        if not isinstance(item, dict):
+            raise SchemaError("Each generated script must be an object.")
+        step_id = str(item.get("step_id") or "")
+        if step_id not in expected_step_ids:
+            raise SchemaError(f"Unexpected script step_id: {step_id}")
+        if step_id in seen:
+            raise SchemaError(f"Duplicate script step_id: {step_id}")
+        seen.add(step_id)
+        step_type = str(item.get("step_type") or "")
+        code = str(item.get("code") or "")
+        endpoint_name = str(item.get("endpoint_name") or "")
+        if step_type not in {"given", "when", "then"}:
+            raise SchemaError(f"Invalid script step_type for {step_id}: {step_type}")
+        if endpoint_name and endpoint_name not in endpoint_names:
+            raise SchemaError(f"Unknown API endpoint for {step_id}: {endpoint_name}")
+        if f"@{step_type}(" not in code:
+            raise SchemaError(f"Generated code for {step_id} must include @{step_type}(...) decorator.")
+        try:
+            ast.parse(code)
+        except SyntaxError as exc:
+            raise SchemaError(f"Generated code for {step_id} is not valid Python: {exc}") from exc
+        validated.append(
+            {
+                "step_id": step_id,
+                "step_type": step_type,
+                "step_text": str(item.get("step_text") or ""),
+                "endpoint_name": endpoint_name,
+                "code": code,
+                "notes": str(item.get("notes") or ""),
+            }
+        )
+    missing = expected_step_ids - seen
+    if missing:
+        raise SchemaError(f"Scripts AI payload is missing step_id values: {', '.join(sorted(missing))}")
+    return validated
 
 
 @dataclass
@@ -408,18 +490,227 @@ class ReviewSessionManager:
         for step_type in ("given", "when", "then"):
             key = f"{step_type}_steps"
             if key in registry_data:
-                steps_by_type[step_type] = registry_data[key]
+                steps_by_type[step_type] = [dict(item) for item in registry_data[key]]
             elif step_type in registry_data:
-                steps_by_type[step_type] = registry_data[step_type]
+                steps_by_type[step_type] = [dict(item) for item in registry_data[step_type]]
+
+        ai_scripts = self._load_ai_scripts(state, iteration)
+        ai_by_key = {item.get("step_id"): item for item in ai_scripts}
+        library_inventory = extract_steps_from_python_step_defs(self.repo_root / "src" / "lme_testing" / "step_library.py")
+        library_code_by_text = {step.step_text: step.code for step in library_inventory.all_steps() if step.code}
+
+        unmatched_total = 0
+        generated_unmatched = 0
+        seen_unmatched_steps: set[tuple[str, str]] = set()
+        for step_type, steps in steps_by_type.items():
+            for index, step in enumerate(steps):
+                key = _script_key(step_type, index=index)
+                ai_item = ai_by_key.get(key)
+                if ai_item:
+                    step["code"] = ai_item.get("code", "")
+                    step["script_source"] = "ai"
+                    step["endpoint_name"] = ai_item.get("endpoint_name", "")
+                elif step.get("code"):
+                    step["script_source"] = "bdd"
+                else:
+                    library_text = step.get("library_step_text") or step.get("step_text")
+                    code = library_code_by_text.get(library_text or "")
+                    if not code and step.get("suggestions"):
+                        first_suggestion = step["suggestions"][0]
+                        if isinstance(first_suggestion, dict):
+                            code = library_code_by_text.get(first_suggestion.get("library_step_text", ""))
+                    step["code"] = code or ""
+                    step["script_source"] = "library" if code else "pending"
+                if step.get("match_type") == "unmatched":
+                    seen_unmatched_steps.add((step_type, str(step.get("step_text", ""))))
+                    unmatched_total += 1
+                    if step.get("code"):
+                        generated_unmatched += 1
+
+        gaps = [dict(item) for item in registry_data.get("gaps", [])]
+        filtered_gaps: list[dict] = []
+        for index, gap in enumerate(gaps):
+            gap_key_tuple = (str(gap.get("step_type") or ""), str(gap.get("step_text", "")))
+            if gap_key_tuple in seen_unmatched_steps:
+                continue
+            key = _script_key(gap.get("step_type", ""), gap_index=index)
+            ai_item = ai_by_key.get(key)
+            if ai_item:
+                gap["code"] = ai_item.get("code", "")
+                gap["script_source"] = "ai"
+                gap["endpoint_name"] = ai_item.get("endpoint_name", "")
+                generated_unmatched += 1
+            else:
+                gap["code"] = ""
+                gap["script_source"] = "pending"
+            unmatched_total += 1
+            filtered_gaps.append(gap)
 
         return {
             "has_registry": True,
             "registry_path": str(step_registry_path),
             "summary": summary,
             "steps_by_type": steps_by_type,
-            "gaps": registry_data.get("gaps", []),
+            "gaps": filtered_gaps,
             "candidates": registry_data.get("candidates", []),
+            "generated_scripts_path": state.get("generated_scripts_latest_path")
+            or state["iterations"][str(iteration)].get("generated_scripts_latest_path"),
+            "scripts_ready_to_save": unmatched_total == 0 or generated_unmatched >= unmatched_total,
         }
+
+    def _load_ai_scripts(self, state: dict[str, Any], iteration: int) -> list[dict[str, Any]]:
+        path = state.get("generated_scripts_latest_path") or state["iterations"][str(iteration)].get("generated_scripts_latest_path")
+        if not path or not Path(path).exists():
+            return []
+        payload = load_json(Path(path))
+        if not isinstance(payload, dict):
+            return []
+        scripts = payload.get("scripts", [])
+        return scripts if isinstance(scripts, list) else []
+
+    def create_scripts_by_ai(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        state = self._load_state()
+        if state["status"] != "running":
+            raise ValueError("Session is already finalized and cannot accept new scripts.")
+        iteration = int(state["current_iteration"])
+        existing_path = state.get("generated_scripts_latest_path") or state["iterations"][str(iteration)].get("generated_scripts_latest_path")
+        if existing_path:
+            raise ValueError("Scripts have already been generated for this iteration. Edit and save the generated scripts instead.")
+        job_id = timestamp_slug()
+        status = ReviewJobStatus(job_id=job_id, status="queued", iteration=iteration, phase="queued")
+        with self._lock:
+            self._jobs[job_id] = status
+        thread = threading.Thread(target=self._run_scripts_ai_job, args=(job_id, iteration), daemon=True)
+        thread.start()
+        return {"job_id": job_id, "status": "queued"}
+
+    def _run_scripts_ai_job(self, job_id: str, iteration: int) -> None:
+        try:
+            self._set_phase(job_id, "loading_api_catalog")
+            state = self._load_state()
+            if iteration != int(state["current_iteration"]):
+                raise ValueError("Session iteration has advanced; stale Scripts generation is rejected.")
+            api_catalog = _load_api_catalog(self.repo_root)
+            endpoint_names = {str(item.get("name")) for item in api_catalog.get("endpoints", []) if isinstance(item, dict)}
+
+            payload = self.scripts_payload()
+            steps_for_model: list[dict[str, Any]] = []
+            seen_unmatched_steps: set[tuple[str, str]] = set()
+            for step_type in ("given", "when", "then"):
+                for index, step in enumerate((payload.get("steps_by_type") or {}).get(step_type, [])):
+                    if step.get("match_type") != "unmatched" or step.get("code"):
+                        continue
+                    seen_unmatched_steps.add((step_type, str(step.get("step_text", ""))))
+                    steps_for_model.append(
+                        {
+                            "step_id": _script_key(step_type, index=index),
+                            "step_type": step_type,
+                            "step_text": step.get("step_text", ""),
+                            "step_pattern": step.get("step_pattern", ""),
+                            "source_scenario_ids": step.get("source_scenario_ids", []),
+                        }
+                    )
+            for index, gap in enumerate(payload.get("gaps", [])):
+                if gap.get("code"):
+                    continue
+                step_type = str(gap.get("step_type") or "")
+                if (step_type, str(gap.get("step_text", ""))) in seen_unmatched_steps:
+                    continue
+                steps_for_model.append(
+                    {
+                        "step_id": _script_key(step_type, gap_index=index),
+                        "step_type": step_type,
+                        "step_text": gap.get("step_text", ""),
+                        "step_pattern": gap.get("step_pattern", ""),
+                        "source_scenario_ids": gap.get("source_scenario_ids", []),
+                    }
+                )
+            if not steps_for_model:
+                result = {"generated_count": 0, "message": "No need-to-create scripts were found."}
+                with self._lock:
+                    self._jobs[job_id].status = "succeeded"
+                    self._jobs[job_id].phase = "done"
+                    self._jobs[job_id].result = result
+                return
+
+            provider_role, provider_cfg = _scripts_provider_config(self.config)
+            provider = build_provider(provider_cfg)
+            scripts_dir = ensure_dir(self._iteration_dir(iteration) / "scripts")
+            timestamp = timestamp_slug()
+            raw_path = scripts_dir / f"scripts_ai_raw_{timestamp}.json"
+            snapshot_path = scripts_dir / f"scripts_ai_generated_{timestamp}.json"
+            latest_path = scripts_dir / "scripts_ai_generated_latest.json"
+
+            logger.info(
+                "Scripts AI job started. session_id=%s iteration=%s job_id=%s steps=%s provider_role=%s model=%s",
+                self.session_id,
+                iteration,
+                job_id,
+                len(steps_for_model),
+                provider_role,
+                provider_cfg.model,
+            )
+            print(
+                f"[scripts] Starting: {len(steps_for_model)} need-to-create steps "
+                f"(provider_role={provider_role}, model={provider_cfg.model})",
+                flush=True,
+            )
+            self._set_phase(job_id, "calling_llm")
+            response = provider.generate(
+                system_prompt=SCRIPTS_SYSTEM_PROMPT,
+                user_prompt=build_scripts_user_prompt(steps_for_model, api_catalog),
+            )
+            write_json(
+                raw_path,
+                {
+                    "run_id": job_id,
+                    "provider": provider_cfg.name,
+                    "model": provider_cfg.model,
+                    "prompt_version": SCRIPTS_PROMPT_VERSION,
+                    "response": response.raw_response,
+                },
+            )
+            self._set_phase(job_id, "validating")
+            generated = _validate_script_ai_payload(
+                parse_json_object(response.content),
+                {item["step_id"] for item in steps_for_model},
+                endpoint_names,
+            )
+            output = {
+                "timestamp": timestamp,
+                "provider": provider_cfg.name,
+                "provider_role": provider_role,
+                "model": provider_cfg.model,
+                "prompt_version": SCRIPTS_PROMPT_VERSION,
+                "api_catalog_path": str(self.repo_root / "api-endpoint" / "mock-hkex-api"),
+                "raw_response_path": str(raw_path),
+                "scripts": generated,
+            }
+            self._set_phase(job_id, "writing_scripts")
+            atomic_write_json(snapshot_path, output)
+            atomic_write_json(latest_path, output)
+            state = self._load_state()
+            state["generated_scripts_latest_path"] = str(latest_path)
+            state["iterations"][str(iteration)]["generated_scripts_latest_path"] = str(latest_path)
+            self._save_manifest(state)
+            result = {
+                "generated_count": len(generated),
+                "generated_scripts_path": str(latest_path),
+                "raw_response_path": str(raw_path),
+                "provider": provider_cfg.name,
+                "model": provider_cfg.model,
+            }
+            print(f"[scripts] Generated {len(generated)} scripts.", flush=True)
+            with self._lock:
+                self._jobs[job_id].status = "succeeded"
+                self._jobs[job_id].phase = "done"
+                self._jobs[job_id].result = result
+        except Exception as exc:
+            logger.exception("Scripts AI job failed")
+            with self._lock:
+                self._jobs[job_id].status = "failed"
+                self._jobs[job_id].phase = "failed"
+                self._jobs[job_id].error = f"{exc}\n{traceback.format_exc()}"
 
     def stage_payload(self) -> dict[str, Any]:
         """Return current stage gates and allowed transitions."""
@@ -551,6 +842,7 @@ class ReviewSessionManager:
         reviewed_records = apply_human_step_edits(bdd_records, human_scripts_path_obj)
         self._atomic_write_jsonl(reviewed_snapshot, reviewed_records)
         self._atomic_write_jsonl(reviewed_latest, reviewed_records)
+        step_files = render_steps_from_normalized_bdd(reviewed_records, bdd_dir)
 
         library_path = self.repo_root / "src" / "lme_testing" / "step_library.py"
         bdd_inventory = extract_steps_from_normalized_bdd(reviewed_latest)
@@ -568,6 +860,7 @@ class ReviewSessionManager:
             "refreshed_step_registry_path": str(registry_latest),
             "reviewed_bdd_snapshot_path": str(reviewed_snapshot),
             "refreshed_step_registry_snapshot_path": str(registry_snapshot),
+            "step_definitions_files": [str(path) for path in step_files],
         }
 
     def _source_normalized_bdd_path(self, state: dict[str, Any], iteration: int) -> str | None:
@@ -1076,6 +1369,9 @@ def _build_handler(manager: ReviewSessionManager):
                 if parsed.path == "/api/scripts/save":
                     self._send_json(manager.save_scripts_edits(payload))
                     return
+                if parsed.path == "/api/scripts/create-by-ai":
+                    self._send_json(manager.create_scripts_by_ai(payload), status=HTTPStatus.ACCEPTED)
+                    return
                 if parsed.path == "/api/stage/advance":
                     target = payload.get("to_stage", "")
                     self._send_json(manager.advance_stage(target))
@@ -1287,7 +1583,6 @@ def _render_review_session_shell() -> str:
   </div>
   <div class="card">
     <div class="toolbar">
-      <label>Overall <select id="overallFilter"><option value="">全部</option><option value="pass">pass</option><option value="fail">fail</option><option value="missing">missing</option></select></label>
       <label>Coverage <select id="coverageFilter"><option value="">全部</option><option value="covered">covered</option><option value="partial">partial</option><option value="uncovered">uncovered</option><option value="missing">missing</option></select></label>
       <label>Checker Blocking <select id="blockingFilter"><option value="">全部</option><option value="true">true</option><option value="false">false</option></select></label>
       <button id="saveBtn">保存草稿</button>
@@ -1307,7 +1602,6 @@ def _render_review_session_shell() -> str:
           <th>Case ID</th>
           <th>Feature</th>
           <th>Case Type</th>
-          <th>Overall</th>
           <th>Coverage</th>
           <th>Checker Blocking</th>
           <th>Blocking Category</th>
@@ -1565,7 +1859,7 @@ function reviewControls(review) {
   return `<div><label>Decision<br/><select data-field="review_decision" data-case-id="${caseId}"><option value="pending" ${review.review_decision === 'pending' ? 'selected' : ''}>pending</option><option value="approve" ${review.review_decision === 'approve' ? 'selected' : ''}>approve</option><option value="rewrite" ${review.review_decision === 'rewrite' ? 'selected' : ''}>rewrite</option></select></label></div><div><label>Issue Types</label><details class="issue-picker"><summary class="issue-summary" data-issue-summary="${caseId}">${escapeHtml(issueSummaryText(review))}</summary><table class="issue-table"><thead><tr><th>Select</th><th>Label</th><th>Code</th><th>Description</th></tr></thead><tbody>${issueTableHtml(review)}</tbody></table></details></div><div><label>Comment<br/><textarea data-field="human_comment" data-case-id="${caseId}" rows="4"></textarea></label></div>`;
 }
 function renderRows() {
-  document.getElementById('reviewRows').innerHTML = sessionPayload.table_rows.map(row => { const review = reviewMap.get(row.case_id); return `<tr data-overall="${escapeHtml(row.overall)}" data-coverage="${escapeHtml(row.coverage)}" data-blocking="${String(row.checker_blocking)}"><td>${escapeHtml(row.semantic_rule_id)}</td><td>${escapeHtml(row.case_id)}</td><td>${escapeHtml(row.feature)}</td><td>${escapeHtml(row.case_type)}</td><td>${escapeHtml(row.overall)}</td><td>${escapeHtml(row.coverage)}</td><td>${escapeHtml(String(row.checker_blocking))}</td><td>${escapeHtml(row.blocking_category)}</td><td>${escapeHtml(row.blocking_reason)}</td><td><details><summary>展开</summary>${row.detail_html}</details></td><td>${reviewControls(review)}</td></tr>`; }).join('');
+  document.getElementById('reviewRows').innerHTML = sessionPayload.table_rows.map(row => { const review = reviewMap.get(row.case_id); return `<tr data-coverage="${escapeHtml(row.coverage)}" data-blocking="${String(row.checker_blocking)}"><td>${escapeHtml(row.semantic_rule_id)}</td><td>${escapeHtml(row.case_id)}</td><td>${escapeHtml(row.feature)}</td><td>${escapeHtml(row.case_type)}</td><td>${escapeHtml(row.coverage)}</td><td>${escapeHtml(String(row.checker_blocking))}</td><td>${escapeHtml(row.blocking_category)}</td><td>${escapeHtml(row.blocking_reason)}</td><td><details><summary>展开</summary>${row.detail_html}</details></td><td>${reviewControls(review)}</td></tr>`; }).join('');
   hydrateControls();
 }
 function hydrateControls() {
@@ -1582,7 +1876,7 @@ function hydrateControls() {
 }
 function syncIssueSummary(caseId) { const review = reviewMap.get(caseId); const summary = document.querySelector(`[data-issue-summary="${caseId}"]`); if (review && summary) summary.textContent = issueSummaryText(review); }
 function syncField(el) { const review = reviewMap.get(el.dataset.caseId); if (!review) return; const field = el.dataset.field; if (field === 'issue_type_option') { const code = el.dataset.issueCode; const selected = new Set(review.issue_types || []); if (el.checked) selected.add(code); else selected.delete(code); review.issue_types = Array.from(selected); syncIssueSummary(el.dataset.caseId); } else review[field] = el.value; }
-function applyFilters() { const overall = document.getElementById('overallFilter').value; const coverage = document.getElementById('coverageFilter').value; const blocking = document.getElementById('blockingFilter').value; for (const row of document.querySelectorAll('#reviewRows tr')) { const show = (!overall || row.dataset.overall === overall) && (!coverage || row.dataset.coverage === coverage) && (!blocking || row.dataset.blocking === blocking); row.style.display = show ? '' : 'none'; } }
+function applyFilters() { const coverage = document.getElementById('coverageFilter').value; const blocking = document.getElementById('blockingFilter').value; for (const row of document.querySelectorAll('#reviewRows tr')) { const show = (!coverage || row.dataset.coverage === coverage) && (!blocking || row.dataset.blocking === blocking); row.style.display = show ? '' : 'none'; } }
 async function postJson(url, payload) { const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload || {}) }); const data = await response.json(); if (!response.ok) throw new Error(data.error || JSON.stringify(data)); return data; }
 function currentPayload() { return { metadata: sessionPayload.metadata, reviews: Array.from(reviewMap.values()) }; }
 function renderResult(title, bodyHtml, cssClass='') { const card = document.getElementById('resultCard'); card.style.display = ''; card.innerHTML = `<h2 class="${cssClass}">${escapeHtml(title)}</h2>${bodyHtml}`; }
@@ -1599,7 +1893,7 @@ async function submitAndRun() { if (pollTimer) clearTimeout(pollTimer); renderPr
 async function openAuditTrail() { const resp = await fetch('/api/audit_trail'); const data = await resp.json(); if (data.audit_trail_url) window.open(data.audit_trail_url, '_blank'); }
 async function finalizeSession() { try { const result = await postJson('/api/finalize', {}); if (result.error) { renderResult('Finalize Failed', `<div class="status-failed">${escapeHtml(result.error)}</div>`, 'status-failed'); return; } if (result.final_report_url) { window.location.href = result.final_report_url; return; } await refreshSession(); renderResult('Session Finalized', `<div class="status-finalized">Status: ${escapeHtml(result.status || '')}</div><div><strong>Final Report</strong>: ${escapeHtml(result.final_report_path || "")}</div><div>${resultLinksHtml({ report_html: result.final_report_url, maker_html: result.final_maker_url, checker_html: result.final_checker_url })}</div>`, 'status-finalized'); } catch (err) { renderResult('Finalize Failed', `<div class="status-failed">${escapeHtml(err.message)}</div>`, 'status-failed'); } }
 async function bootstrap() { await refreshSession(); attachHandlers(); }
-function attachHandlers() { document.getElementById('overallFilter').addEventListener('change', applyFilters); document.getElementById('coverageFilter').addEventListener('change', applyFilters); document.getElementById('blockingFilter').addEventListener('change', applyFilters); document.getElementById('saveBtn').addEventListener('click', saveDraft); document.getElementById('submitBtn').addEventListener('click', submitAndRun); document.getElementById('auditBtn').addEventListener('click', openAuditTrail); document.getElementById('finalizeBtn').addEventListener('click', finalizeSession); document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab))); document.getElementById('saveBddBtn').addEventListener('click', saveBddEdits); document.getElementById('saveScriptsBtn').addEventListener('click', saveScriptsEdits); document.querySelectorAll('.stage-step').forEach(el => el.addEventListener('click', () => { const stage = el.dataset.stage; if (stage === 'finalize') { if (confirm('Finalize this review session? No further edits will be possible.')) finalizeSession(); } else { const tab = STAGE_TAB_MAP[stage]; if (tab) switchTab(tab); } })); }
+function attachHandlers() { document.getElementById('coverageFilter').addEventListener('change', applyFilters); document.getElementById('blockingFilter').addEventListener('change', applyFilters); document.getElementById('saveBtn').addEventListener('click', saveDraft); document.getElementById('submitBtn').addEventListener('click', submitAndRun); document.getElementById('auditBtn').addEventListener('click', openAuditTrail); document.getElementById('finalizeBtn').addEventListener('click', finalizeSession); document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab))); document.getElementById('saveBddBtn').addEventListener('click', saveBddEdits); document.getElementById('saveScriptsBtn').addEventListener('click', saveScriptsEdits); document.querySelectorAll('.stage-step').forEach(el => el.addEventListener('click', () => { const stage = el.dataset.stage; if (stage === 'finalize') { if (confirm('Finalize this review session? No further edits will be possible.')) finalizeSession(); } else { const tab = STAGE_TAB_MAP[stage]; if (tab) switchTab(tab); } })); }
 // Re-attach handlers and refresh state when navigating via browser back/forward (bfcache restore)
 window.addEventListener('pageshow', async (event) => { if (event.persisted) { await refreshSession(); attachHandlers(); } });
 bootstrap();

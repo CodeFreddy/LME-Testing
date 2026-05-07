@@ -16,7 +16,8 @@ CHECKER_PROMPT_VERSION = "1.3"
 
 # Increment BDD_PROMPT_VERSION when BDD_SYSTEM_PROMPT or
 # build_bdd_user_prompt changes in a way that affects output quality.
-BDD_PROMPT_VERSION = "3.0"
+BDD_PROMPT_VERSION = "3.1"
+SCRIPTS_PROMPT_VERSION = "1.0"
 
 # Increment PLANNER_PROMPT_VERSION when PLANNER_SYSTEM_PROMPT or
 # build_planner_user_prompt changes in a way that affects output quality.
@@ -201,7 +202,8 @@ Hard requirements:
 - step_pattern is the regex-extracted pattern for step binding (copy step_text as-is for simple patterns).
 - Use tags derived from case_type and priority (e.g., @positive, @high).
 - Do not invent additional steps beyond what is in the input.
-- step_definitions code should use Python with LME.Client, LME.API, LME.PostTrade patterns.
+- Do not generate Python step implementation code; the Scripts workflow stage owns code generation.
+- Return step_definitions as empty lists grouped by given/when/then when no reviewed implementation exists.
 - Return structured JSON only.
 """
 
@@ -237,29 +239,7 @@ def build_bdd_user_prompt(batch: list[dict]) -> str:
                         "required_case_types": ["positive"]
                     }
                 ],
-                "step_definitions": {
-                    "given": [
-                        {
-                            "step_text": "a registered_intermediating_broker submits a document containing capitalised terms",
-                            "step_pattern": "a registered_intermediating_broker submits a document containing capitalised terms",
-                            "code": "@given(\"a registered_intermediating_broker submits a document containing capitalised terms\")\ndef step_broker_submits_document():\n    broker = LME.Client.registered_intermediary\n    document = LME.API.create_document(broker=broker, terms='capitalised')"
-                        }
-                    ],
-                    "when": [
-                        {
-                            "step_text": "the system processes the document terminology",
-                            "step_pattern": "the system processes the document terminology",
-                            "code": "@when(\"the system processes the document terminology\")\ndef step_system_processes_terminology():\n    response = LME.API.process_terminology(document)"
-                        }
-                    ],
-                    "then": [
-                        {
-                            "step_text": "the terms are assigned the meaning ascribed in the LME Rulebook",
-                            "step_pattern": "the terms are assigned the meaning ascribed in the LME Rulebook",
-                            "code": "@then(\"the terms are assigned the meaning ascribed in the LME Rulebook\")\ndef step_terms_assigned_rulebook():\n    assert response.meaning_source == 'LME_Rulebook'"
-                        }
-                    ]
-                }
+                "step_definitions": {"given": [], "when": [], "then": []}
             }
         ]
     }
@@ -270,6 +250,45 @@ def build_bdd_user_prompt(batch: list[dict]) -> str:
         f"{json.dumps(schema, ensure_ascii=False, indent=2)}\n"
         "Input maker test cases:\n"
         f"{json.dumps(batch, ensure_ascii=False, indent=2)}"
+    )
+
+
+SCRIPTS_SYSTEM_PROMPT = """You generate Behave Python step implementation code for a governed test-design workflow.
+Use only the provided API catalog as the target system interface.
+Hard requirements:
+- Return structured JSON only.
+- Return exactly one script per input step_id.
+- Do not invent API endpoints that are absent from the catalog.
+- Each code field must include a Behave decorator matching step_type: @given, @when, or @then.
+- Code should be demo-friendly, readable Python that calls the selected API path through a simple client object on context.
+- If no endpoint is suitable, set endpoint_name to an empty string and generate a pending implementation that raises NotImplementedError with a clear message.
+"""
+
+
+def build_scripts_user_prompt(steps: list[dict], api_catalog: dict) -> str:
+    """Build the Scripts-stage prompt from unmatched BDD steps and API catalog."""
+    schema = {
+        "scripts": [
+            {
+                "step_id": "given:0",
+                "step_type": "given",
+                "step_text": "the rounding parameter is defined in the Initial Margin Risk Parameter File",
+                "endpoint_name": "getInitialMarginRiskParameters",
+                "code": "@given(\"the rounding parameter is defined in the Initial Margin Risk Parameter File\")\ndef step_rounding_parameter_defined(context):\n    context.risk_parameters = context.api.get('/api/margin/risk-parameters')\n    assert 'rounding_parameter' in context.risk_parameters",
+                "notes": "Uses the mock HKEX API catalog endpoint for risk parameters."
+            }
+        ]
+    }
+    return (
+        "Generate Python Behave step scripts for the following BDD steps.\n"
+        "The API catalog represents the tested system's Swagger-like interface. "
+        "Do not rely on semantic rule IDs or internal workflow concepts.\n"
+        "Return JSON matching this schema shape:\n"
+        f"{json.dumps(schema, ensure_ascii=False, indent=2)}\n"
+        "API catalog:\n"
+        f"{json.dumps(api_catalog, ensure_ascii=False, indent=2)}\n"
+        "Input steps:\n"
+        f"{json.dumps(steps, ensure_ascii=False, indent=2)}"
     )
 
 

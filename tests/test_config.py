@@ -78,6 +78,13 @@ class ConfigTests(unittest.TestCase):
         with self.assertRaises(ConfigError):
             load_project_config(config_path)
 
+    def test_example_config_defines_scripts_provider(self) -> None:
+        config = load_project_config(Path("config/llm_profiles.example.json"))
+        provider = config.provider_for_role("scripts")
+        self.assertEqual(provider.model, "kimi-k2.5")
+        self.assertEqual(provider.base_url, config.provider_for_role("maker").base_url)
+        self.assertEqual(provider.max_output_tokens, 12000)
+
 
 if __name__ == "__main__":
     unittest.main()
