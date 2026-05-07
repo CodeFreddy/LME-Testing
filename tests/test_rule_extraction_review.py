@@ -17,7 +17,12 @@ from lme_testing.rule_extraction import (
     extract_rule_artifacts,
     fix_pdf_text_artifacts,
 )
-from lme_testing.rule_workflow_session import RuleWorkflowJobStatus, RuleWorkflowSessionManager, render_rule_workflow_shell
+from lme_testing.rule_workflow_session import (
+    RuleWorkflowJobStatus,
+    RuleWorkflowSessionManager,
+    render_rule_workflow_shell,
+    serve_rule_workflow_session,
+)
 
 
 WORK_TMP = Path(".tmp_rule_extraction_review")
@@ -136,6 +141,7 @@ class RuleExtractionReviewTests(unittest.TestCase):
         self.assertIn("updateScriptsSaveButton", html)
         self.assertIn("await saveScriptsEdits({ reload: false, silent: true })", html)
         self.assertIn("pendingCount === 0 || !!data.generated_scripts_path", html)
+        self.assertIn("history.replaceState({ workflowStep: 'rule_extraction' }, '', '#rule_extraction')", html)
         self.assertIn("Checker Suggestion", html)
         self.assertIn("Business Rule Summary", html)
         self.assertIn("business_rule_type", html)
@@ -157,6 +163,20 @@ class RuleExtractionReviewTests(unittest.TestCase):
         self.assertNotIn("Generate BDD", html)
         self.assertNotIn("<th>Blocking Category</th>", html)
         self.assertNotIn("Open Scenario Review", html)
+
+    def test_rule_workflow_server_url_uses_rule_extraction_hash(self) -> None:
+        manager = RuleWorkflowSessionManager(
+            config=make_config(),
+            repo_root=Path.cwd(),
+            output_root=WORK_TMP / "sessions",
+            host="127.0.0.1",
+            port=0,
+        )
+        server, url = serve_rule_workflow_session(manager)
+        try:
+            self.assertTrue(url.endswith("/#rule_extraction"))
+        finally:
+            server.server_close()
 
     def test_generate_cases_does_not_run_bdd_until_bdd_stage(self) -> None:
         manager = make_extracted_manager(WORK_TMP)

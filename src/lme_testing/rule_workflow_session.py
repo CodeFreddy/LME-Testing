@@ -601,7 +601,7 @@ def serve_rule_workflow_session(manager: RuleWorkflowSessionManager) -> tuple[Th
     handler = _build_handler(manager)
     server = ThreadingHTTPServer((manager.host, manager.port), handler)
     actual_port = server.server_address[1]
-    return server, f"http://{manager.host}:{actual_port}/"
+    return server, f"http://{manager.host}:{actual_port}/#rule_extraction"
 
 
 def _build_handler(manager: RuleWorkflowSessionManager):
@@ -766,6 +766,9 @@ def _build_handler(manager: RuleWorkflowSessionManager):
             encoded = html_text.encode("utf-8")
             self.send_response(HTTPStatus.OK)
             self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
             self.send_header("Content-Length", str(len(encoded)))
             self.end_headers()
             self.wfile.write(encoded)
@@ -2151,7 +2154,12 @@ async function pollGenerate(jobId) {
 }
 
 const initialStageFromUrl = stageFromLocation();
-if (initialStageFromUrl) activeWorkflowStep = initialStageFromUrl;
+if (initialStageFromUrl) {
+  activeWorkflowStep = initialStageFromUrl;
+} else {
+  activeWorkflowStep = 'rule_extraction';
+  history.replaceState({ workflowStep: 'rule_extraction' }, '', '#rule_extraction');
+}
 document.querySelectorAll('[data-workflow-step]').forEach(el => {
   el.addEventListener('click', () => setWorkflowStep(el.dataset.workflowStep));
 });

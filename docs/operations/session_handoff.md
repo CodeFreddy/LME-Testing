@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-05-07 16:40:03 UTC`
+- `2026-05-07 16:47:43 UTC`
 
 ---
 
@@ -60,11 +60,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `Hide artifact folder import from rule workflow`
 - `Refine HKEX workflow review experience`
 - `ignore commit api key`
 - `Add rule workflow BDD mode updates and run artifacts`
 - `Merge remote rule extraction review branch`
-- `Update status docs after rule workflow GUI integration`
 
 ---
 
