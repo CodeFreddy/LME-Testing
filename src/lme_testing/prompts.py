@@ -19,6 +19,10 @@ CHECKER_PROMPT_VERSION = "1.3"
 BDD_PROMPT_VERSION = "3.1"
 SCRIPTS_PROMPT_VERSION = "1.0"
 
+# Increment REWRITE_PROMPT_VERSION when REWRITE_SYSTEM_PROMPT or
+# build_rewrite_user_prompt changes in a way that affects output quality.
+REWRITE_PROMPT_VERSION = "1.0"
+
 # Increment PLANNER_PROMPT_VERSION when PLANNER_SYSTEM_PROMPT or
 # build_planner_user_prompt changes in a way that affects output quality.
 PLANNER_PROMPT_VERSION = "1.0"
