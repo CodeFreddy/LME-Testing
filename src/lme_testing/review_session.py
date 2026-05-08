@@ -6,6 +6,7 @@ import ast
 import json
 import logging
 import mimetypes
+import re
 import threading
 import traceback
 from dataclasses import dataclass
@@ -131,6 +132,47 @@ def _validate_script_ai_payload(payload: dict[str, Any], expected_step_ids: set[
     if missing:
         raise SchemaError(f"Scripts AI payload is missing step_id values: {', '.join(sorted(missing))}")
     return validated
+
+
+def _draft_script_ai_payload(steps: list[dict[str, Any]], api_catalog: dict[str, Any], reason: str) -> list[dict[str, Any]]:
+    endpoints = [item for item in api_catalog.get("endpoints", []) if isinstance(item, dict)]
+    endpoint = endpoints[0] if endpoints else {}
+    endpoint_name = str(endpoint.get("name") or "")
+    endpoint_path = str(endpoint.get("path") or "")
+    generated: list[dict[str, Any]] = []
+    for item in steps:
+        step_id = str(item.get("step_id") or "")
+        step_type = str(item.get("step_type") or "")
+        step_text = str(item.get("step_text") or "")
+        if not step_id or step_type not in {"given", "when", "then"}:
+            continue
+        func_name = re.sub(r"\W+", "_", f"step_{step_id}_{step_text}".lower()).strip("_")
+        if not func_name:
+            func_name = f"step_{step_type}"
+        if endpoint_path:
+            code = (
+                f"@{step_type}({json.dumps(step_text)})\n"
+                f"def {func_name}(context):\n"
+                f"    context.last_response = context.api.request({json.dumps(endpoint_path)})\n"
+                f"    assert context.last_response is not None"
+            )
+        else:
+            code = (
+                f"@{step_type}({json.dumps(step_text)})\n"
+                f"def {func_name}(context):\n"
+                f"    raise NotImplementedError({json.dumps('No API catalog endpoint was suitable for this step.')})"
+            )
+        generated.append(
+            {
+                "step_id": step_id,
+                "step_type": step_type,
+                "step_text": step_text,
+                "endpoint_name": endpoint_name,
+                "code": code,
+                "notes": f"Deterministic draft generated after Scripts AI validation failed: {reason}",
+            }
+        )
+    return generated
 
 
 @dataclass
@@ -671,11 +713,22 @@ class ReviewSessionManager:
                 },
             )
             self._set_phase(job_id, "validating")
-            generated = _validate_script_ai_payload(
-                parse_json_object(response.content),
-                {item["step_id"] for item in steps_for_model},
-                endpoint_names,
-            )
+            fallback_reason = ""
+            try:
+                generated = _validate_script_ai_payload(
+                    parse_json_object(response.content),
+                    {item["step_id"] for item in steps_for_model},
+                    endpoint_names,
+                )
+            except (SchemaError, ValueError, TypeError) as exc:
+                fallback_reason = str(exc)
+                logger.warning(
+                    "Scripts AI output failed validation; using deterministic draft scripts. session_id=%s job_id=%s reason=%s",
+                    self.session_id,
+                    job_id,
+                    fallback_reason,
+                )
+                generated = _draft_script_ai_payload(steps_for_model, api_catalog, fallback_reason)
             output = {
                 "timestamp": timestamp,
                 "provider": provider_cfg.name,
@@ -684,6 +737,7 @@ class ReviewSessionManager:
                 "prompt_version": SCRIPTS_PROMPT_VERSION,
                 "api_catalog_path": str(self.repo_root / "api-endpoint" / "mock-hkex-api"),
                 "raw_response_path": str(raw_path),
+                "fallback_reason": fallback_reason or None,
                 "scripts": generated,
             }
             self._set_phase(job_id, "writing_scripts")
@@ -699,6 +753,7 @@ class ReviewSessionManager:
                 "raw_response_path": str(raw_path),
                 "provider": provider_cfg.name,
                 "model": provider_cfg.model,
+                "fallback_reason": fallback_reason or None,
             }
             print(f"[scripts] Generated {len(generated)} scripts.", flush=True)
             with self._lock:

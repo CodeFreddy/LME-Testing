@@ -200,7 +200,37 @@ class RuleWorkflowSessionManager:
             "history": history["history"],
             "history_pagination": history["pagination"],
             "reviewed_semantic_rules_path": str(self._reviewed_semantic_path()) if self.current_artifacts_dir else None,
+            "workflow_state": self._workflow_state(),
         }
+
+    def _workflow_state(self) -> dict[str, Any]:
+        state = {
+            "has_rules": bool(self.current_semantic_rules),
+            "has_review_session": self.review_manager is not None,
+            "has_bdd": False,
+            "has_scripts": False,
+            "finalized": False,
+            "max_reached_stage": "rule_extraction",
+        }
+        if not self.review_manager:
+            return state
+
+        review_state = self.review_manager._load_state()
+        iteration = int(review_state["current_iteration"])
+        normalized_bdd_path = review_state.get("normalized_bdd_path") or review_state["iterations"][str(iteration)].get("normalized_bdd_path")
+        step_registry_path = review_state.get("step_registry_path") or review_state["iterations"][str(iteration)].get("step_registry_path")
+        state["finalized"] = review_state.get("status") == "finalized"
+        state["has_bdd"] = bool(normalized_bdd_path and Path(normalized_bdd_path).exists())
+        state["has_scripts"] = bool(step_registry_path and Path(step_registry_path).exists())
+        if state["finalized"]:
+            state["max_reached_stage"] = "finalize"
+        elif state["has_scripts"]:
+            state["max_reached_stage"] = "scripts"
+        elif state["has_bdd"]:
+            state["max_reached_stage"] = "bdd"
+        else:
+            state["max_reached_stage"] = "test_case"
+        return state
 
     def save_rules(self, payload: dict[str, Any]) -> dict[str, Any]:
         if not self.current_artifacts_dir:
@@ -1299,6 +1329,13 @@ function markWorkflowReached(step) {
     localStorage.setItem('hkexMaxReachedWorkflowIndex', String(idx));
   }
 }
+function markWorkflowFromServer(workflowState) {
+  workflowState = workflowState || {};
+  if (workflowState.has_review_session) markWorkflowReached('test_case');
+  if (workflowState.has_bdd) markWorkflowReached('bdd');
+  if (workflowState.has_scripts) markWorkflowReached('scripts');
+  if (workflowState.finalized || workflowState.max_reached_stage === 'finalize') markWorkflowReached('finalize');
+}
 workflowStepAllowed = function(step) {
   const idx = WORKFLOW_STEPS.indexOf(step);
   return idx >= 0 && idx <= maxReachedWorkflowIndex;
@@ -1377,6 +1414,7 @@ async function refreshRules() {
   renderHistory(state.history || [], historyPagination);
   $('saveRulesBtn').disabled = !state.has_rules;
   casesGenerated = !!state.has_review_session;
+  markWorkflowFromServer(state.workflow_state);
   if (casesGenerated || casesGenerating) markWorkflowReached('test_case');
   $('ruleNextBtn').disabled = !state.has_rules || casesGenerating;
   if (casesGenerated && activeWorkflowStep === 'rule_extraction') {

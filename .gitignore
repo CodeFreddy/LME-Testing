@@ -15,6 +15,7 @@ __pycache__/
 # Runtime outputs
 runs/
 reports/
+.tmp*/
 
 # Preserved evidence (keep these versioned)
 !evidence/

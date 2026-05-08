@@ -319,6 +319,71 @@ class ReviewSessionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'already been generated'):
             manager.create_scripts_by_ai({})
 
+    def test_create_scripts_by_ai_uses_stub_provider_when_scripts_role_is_absent(self) -> None:
+        manager = self._build_manager(include_bdd=True)
+        manager.repo_root = Path.cwd()
+        provider = ProviderConfig(
+            name='stub',
+            provider_type='stub',
+            model='stub-model',
+            base_url='http://stub',
+            api_key='stub',
+        )
+        manager.config = ProjectConfig(
+            providers={'stub': provider},
+            roles={'maker': 'stub', 'checker': 'stub'},
+            output_root=Path('runs'),
+            maker_defaults=RoleDefaults(),
+            checker_defaults=RoleDefaults(),
+        )
+
+        job = manager.create_scripts_by_ai({})
+        for _ in range(50):
+            status = manager.job_status(job['job_id'])
+            if status['status'] not in {'queued', 'running'}:
+                break
+            time.sleep(0.05)
+
+        self.assertEqual(status['status'], 'succeeded')
+        scripts_payload = manager.scripts_payload()
+        first_step = scripts_payload['steps_by_type']['given'][0]
+        self.assertEqual(first_step['script_source'], 'ai')
+        self.assertIn('@given("custom unmatched setup")', first_step['code'])
+        self.assertTrue(scripts_payload['scripts_ready_to_save'])
+
+    def test_create_scripts_by_ai_falls_back_when_model_payload_is_invalid(self) -> None:
+        manager = self._build_manager(include_bdd=True)
+        manager.repo_root = Path.cwd()
+        config = make_config()
+        config.providers['scripts_provider'] = ProviderConfig(
+            name='scripts_provider',
+            provider_type='openai_compatible',
+            model='demo-scripts-model',
+            base_url='https://example.com/v1',
+            api_key='secret',
+        )
+        config.roles['scripts'] = 'scripts_provider'
+        manager.config = config
+
+        with patch('lme_testing.review_session.build_provider', return_value=FakeProvider([json.dumps({'results': []})])):
+            job = manager.create_scripts_by_ai({})
+            for _ in range(50):
+                status = manager.job_status(job['job_id'])
+                if status['status'] not in {'queued', 'running'}:
+                    break
+                time.sleep(0.05)
+
+        self.assertEqual(status['status'], 'succeeded')
+        self.assertEqual(status['result']['generated_count'], 1)
+        self.assertIn('scripts list', status['result']['fallback_reason'])
+        generated_payload = json.loads(Path(status['result']['generated_scripts_path']).read_text(encoding='utf-8'))
+        self.assertIn('scripts list', generated_payload['fallback_reason'])
+        self.assertIn('Deterministic draft', generated_payload['scripts'][0]['notes'])
+        scripts_payload = manager.scripts_payload()
+        first_step = scripts_payload['steps_by_type']['given'][0]
+        self.assertEqual(first_step['script_source'], 'ai')
+        self.assertIn('@given("custom unmatched setup")', first_step['code'])
+
     def test_save_scripts_edits_preserves_user_script_code(self) -> None:
         manager = self._build_manager(include_bdd=True)
         code = '@given("custom unmatched setup")\ndef step_custom_unmatched_setup(context):\n    context.value = 1'
