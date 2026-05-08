@@ -4,6 +4,8 @@
 **Source:** End-user POC feedback from SVP, Product Owner, Test Lead, Automation Lead, and testers  
 **POC scope:** HKv14 rule workflow GUI and end-to-end test generation flow  
 **Status:** Feedback captured for planning. This note does not approve new roadmap scope, schema changes, prompt changes, default model changes, or production readiness claims.
+**Canonical owner:** `docs/planning/next_phase_plan.md` section S2-F8
+**Related roadmap task:** S2-F8
 
 ---
 

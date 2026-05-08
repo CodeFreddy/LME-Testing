@@ -3,6 +3,8 @@
 **Date:** 2026-05-06
 **Scope:** Long-range product and platform planning
 **Status:** Draft
+**Canonical owner:** `docs/planning/next_phase_plan.md` for near-term sequencing; this document remains long-range planning support
+**Related roadmap task:** S2-F8 planning support, later enterprise slices E1-E7
 
 ---
 

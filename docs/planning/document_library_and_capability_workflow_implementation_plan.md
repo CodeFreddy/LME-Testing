@@ -2,6 +2,8 @@
 
 **Status:** Proposed implementation plan
 **Created:** 2026-04-26
+**Canonical owner:** `docs/planning/next_phase_plan.md` for sequencing; this document remains future planning support
+**Related roadmap task:** Later enterprise/document-workflow slices
 **Source proposal:** `docs/planning/document_library_and_capability_workflow_proposal.md`
 **Related architecture proposal:** `docs/architecture/Executable_Engineering_Knowledge_Contract.md`
 **Current baseline impact:** None until tasks are implemented. This plan does not by itself change schemas, prompts, model defaults, pipeline behavior, or acceptance status.

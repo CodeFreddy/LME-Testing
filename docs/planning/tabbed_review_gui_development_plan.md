@@ -3,6 +3,8 @@
 **Date:** 2026-05-06
 **Scope:** S2-F4 continuation planning slice
 **Status:** Draft, human-approved direction
+**Canonical owner:** `docs/planning/next_phase_plan.md` for sequencing and `docs/planning/rule_workflow_scripts_stage_navigation_plan.md` for S2-F7 implementation boundaries
+**Related roadmap task:** S2-F7 and later E1 local tabbed workflow
 
 ---
 

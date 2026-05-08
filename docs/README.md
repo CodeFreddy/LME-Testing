@@ -92,6 +92,22 @@ If you need the documentation map, read:
 
 - `docs/index.md`
 
+For local folder maps, read:
+
+- `docs/planning/README.md`
+- `docs/governance/README.md`
+- `docs/architecture/README.md`
+- `docs/archives/README.md`
+- `docs/operations/README.md`
+- `docs/guides/README.md`
+- `docs/references/README.md`
+- `docs/releases/README.md`
+- `docs/materials/README.md`
+
+If you are cleaning or reorganizing documentation, read:
+
+- `docs/governance/docs_housekeeping.md`
+
 ---
 
 ## Folder Layout
@@ -106,6 +122,18 @@ If you need the documentation map, read:
 - `docs/materials/` holds source materials used by the project.
 - `docs/references/` holds historical or external reference notes.
 - `docs/archives/` holds completed or superseded planning records.
+
+Folders with local maps:
+
+- `docs/planning/README.md`
+- `docs/governance/README.md`
+- `docs/architecture/README.md`
+- `docs/archives/README.md`
+- `docs/operations/README.md`
+- `docs/guides/README.md`
+- `docs/references/README.md`
+- `docs/releases/README.md`
+- `docs/materials/README.md`
 
 ---
 
@@ -128,6 +156,9 @@ If you need the documentation map, read:
 
 - `docs/governance/agent_guidelines.md`
   Operating rules for AI coding agents contributing to this repo.
+
+- `docs/governance/docs_housekeeping.md`
+  Rules for labeling, summarizing, archiving, and safely deleting documentation.
 
 Supporting governance documents live under `docs/governance/`.
 Supporting task plans and guides live under `docs/planning/` and `docs/guides/`.

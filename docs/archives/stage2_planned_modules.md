@@ -2,6 +2,9 @@
 
 **Created:** 2026-04-19  
 **Stage:** Stage M → Stage 2 entry requirement  
+**Status:** Complete historical planning record
+**Canonical owner:** `docs/planning/implementation_plan.md` sections S2-B1 and S2-B2
+**Related roadmap task:** S2-B1, S2-B2
 **Purpose:** Document the two missing modules identified from master branch analysis.
 
 ---

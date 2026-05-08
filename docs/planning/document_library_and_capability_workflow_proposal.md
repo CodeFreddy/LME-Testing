@@ -2,6 +2,8 @@
 
 **Status:** Proposal / future direction  
 **Created:** 2026-04-26  
+**Canonical owner:** `docs/planning/next_phase_plan.md` for sequencing; this document remains future planning support
+**Related roadmap task:** Later enterprise/document-workflow slices
 **Current baseline impact:** None. This document does not change artifact schemas, prompts, models, pipeline behavior, review-session behavior, or roadmap completion claims.
 
 ---

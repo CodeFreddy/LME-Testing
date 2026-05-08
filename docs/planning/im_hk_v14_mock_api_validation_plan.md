@@ -2,6 +2,8 @@
 
 **Status:** Promoted S2-C4 validation plan
 **Created:** 2026-04-26
+**Canonical owner:** `docs/planning/implementation_plan.md` section S2-C4 and `docs/governance/acceptance.md` Gate S2.7
+**Related roadmap task:** S2-C4
 **Related decision:** `docs/planning/im_hk_v14_downstream_decision.md`
 **Related diff:** `docs/planning/im_hk_v14_diff_report.md`
 **Related treatment mapping:** `docs/planning/im_hk_v14_downstream_treatment_mapping.md`

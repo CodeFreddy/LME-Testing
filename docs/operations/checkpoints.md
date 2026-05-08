@@ -6,6 +6,90 @@ Keep the latest checkpoint at the top. Preserve prior checkpoints below it unles
 
 ---
 
+## 2026-05-08 - Checkpoint: Docs Housekeeping And Folder Navigation Baseline
+
+### Current Task Goal
+
+Implement the agreed documentation housekeeping plan: make `docs/` easier to navigate, add safe cleanup rules, archive only clearly completed planning records, and preserve all governance/evidence context.
+
+### Confirmed Key Facts
+
+- Documentation cleanup is now governed by `docs/governance/docs_housekeeping.md`.
+- Local folder maps now exist for planning, governance, architecture, operations, guides, materials, references, releases, and archives.
+- `docs/references/references_README.md` was normalized to `docs/references/README.md`.
+- Completed planning records `s2t01_coverage_analysis.md` and `stage2_planned_modules.md` were moved from `docs/planning/` to `docs/archives/`.
+- Links to the archived planning records were updated in roadmap, implementation plan, acceptance, index, and archive notes.
+- `scripts/update_session_handoff.ps1` was updated so generated handoff content preserves the docs-housekeeping context.
+- `docs/operations/session_handoff.md` was regenerated from the updated script.
+- No schemas, prompts, default models, roadmap phase boundaries, or artifact contracts were changed.
+
+### Files Modified Or Inspected
+
+Modified:
+
+- `docs/README.md`
+- `docs/index.md`
+- `docs/governance/docs_housekeeping.md`
+- `docs/governance/README.md`
+- `docs/architecture/README.md`
+- `docs/planning/README.md`
+- `docs/operations/README.md`
+- `docs/guides/README.md`
+- `docs/materials/README.md`
+- `docs/references/README.md`
+- `docs/releases/README.md`
+- `docs/archives/README.md`
+- `docs/archives/s2t01_coverage_analysis.md`
+- `docs/archives/stage2_planned_modules.md`
+- `docs/archives/20260419_master_merge_strategy.md`
+- `docs/governance/acceptance.md`
+- multiple `docs/planning/*.md` files with metadata or archived-link updates
+- `docs/operations/session_handoff.md`
+- `docs/operations/checkpoints.md`
+- `scripts/update_session_handoff.ps1`
+
+Inspected:
+
+- `docs/operations/checkpoints.md`
+- `docs/operations/session_handoff.md`
+- `scripts/update_session_handoff.ps1`
+- current docs folder structure and README coverage
+
+### Remaining Work
+
+- Review `git status --short` and the full doc diff.
+- Decide whether this docs-only housekeeping batch should be committed as one commit.
+- If committing, refresh `docs/operations/session_handoff.md` again immediately before commit.
+- Optionally run `git diff --check` before staging.
+
+### Next Single Action
+
+Review the working tree:
+
+```text
+git status --short
+git diff --stat -- docs scripts/update_session_handoff.ps1
+```
+
+Then decide whether to prepare a commit for the docs housekeeping batch.
+
+### Constraints That Must Not Be Violated
+
+- Do not delete evidence, source materials, checkpoints, or decision records as ordinary cleanup.
+- Do not prune `docs/operations/checkpoints.md` unless a human explicitly asks.
+- Do not treat archived docs as current implementation approval.
+- Do not change schemas, prompts, default models, or phase boundaries as part of housekeeping.
+- Do not hide partial/blocked status or production-readiness boundaries to make docs look cleaner.
+- Keep HKv14, mock API bridges, and enterprise plans within their documented POC/planning/stub boundaries.
+
+### Reusable Resume Prompt
+
+```text
+Resume from docs/operations/checkpoints.md latest checkpoint dated 2026-05-08 for "Docs Housekeeping And Folder Navigation Baseline". Continue by reviewing git status and the docs diff, running git diff --check plus docs/artifact governance checks, then prepare a concise change summary or commit if approved. Preserve the docs_housekeeping rules: no evidence deletion, no checkpoint pruning, no schema/prompt/model/phase changes, and archived docs remain historical context rather than current approval.
+```
+
+---
+
 ## 2026-05-08 - Checkpoint: Planning Refactor, Next Phase Plan, Enterprise Options
 
 ### Current Task Goal

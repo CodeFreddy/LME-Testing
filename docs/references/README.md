@@ -1,5 +1,10 @@
 # Reference Materials
 
+**Status:** Active references index
+**Date:** 2026-05-08
+**Canonical owner:** `docs/index.md` and `docs/governance/REFERENCE_POLICY.md`
+**Scope:** Historical, external, chat-derived, and exploratory reference materials.
+
 ## Purpose
 
 This directory stores reference materials that informed or influenced the repository documentation and planning.

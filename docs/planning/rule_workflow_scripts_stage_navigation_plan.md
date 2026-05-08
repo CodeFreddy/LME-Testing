@@ -2,6 +2,8 @@
 
 **Status:** Proposed S2-F7
 **Date:** 2026-05-07
+**Canonical owner:** `docs/planning/implementation_plan.md` section S2-F7
+**Related roadmap task:** S2-F7
 **Scope:** HKv14 rule workflow GUI POC, Scripts view, stage navigation, and mock API step-definition bridge
 
 ## Purpose

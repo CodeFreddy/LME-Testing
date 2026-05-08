@@ -270,7 +270,7 @@ MiniMax API 连接随机断开，全量 322-case 测量无法完成。参见 S2-
 - maker/checker run artifacts
 
 **输出契约：**
-- `docs/planning/s2t01_coverage_analysis.md`
+- `docs/archives/s2t01_coverage_analysis.md`
 - maker/checker prompt version notes
 - v1.5 run artifacts：`runs/maker/20260421T074319Z/`、`runs/checker/20260421T083003Z/`
 

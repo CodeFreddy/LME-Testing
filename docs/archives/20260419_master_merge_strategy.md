@@ -197,4 +197,4 @@ Master 的 `docs/` 只有 4 个文档，Main 有 20+。不存在合并冲突，M
 - [x] `config.py` 加入 max_retries 和 retry_backoff_seconds
 - [x] CI smoke test 在合并后通过
 - [x] `20260419_master_merge_strategy.md` 存档到 `docs/archives/` 目录
-- [x] `docs/planning/stage2_planned_modules.md` 创建（audit_trail + case_compare 需求文档化）
+- [x] `docs/archives/stage2_planned_modules.md` 创建并在 S2-B1/S2-B2 完成后归档（audit_trail + case_compare 需求文档化）

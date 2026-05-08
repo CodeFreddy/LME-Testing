@@ -1,5 +1,11 @@
 # Step Integration Plan
 
+**Status:** Future planning support
+**Date:** 2026-04-18
+**Canonical owner:** `docs/architecture/architecture.md` and `docs/planning/implementation_plan.md`
+**Related roadmap task:** Stage 3 / future execution readiness
+**Scope:** Future BDD-to-step integration; not current execution baseline
+
 ## Purpose
 
 This document defines the future bridge from governed BDD artifacts to executable, step-definition-aware workflows.

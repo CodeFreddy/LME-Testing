@@ -3,6 +3,7 @@
 **Status:** Implemented local review package generator
 **Created:** 2026-04-27
 **Task ID:** S2-F1
+**Canonical owner:** `docs/planning/implementation_plan.md` section S2-F1 and `docs/governance/acceptance.md` Gate S2-F1
 **Source proposal:** `docs/architecture/Executable_Engineering_Knowledge_Contract.md` section "03 MVP Scope and Delivery Plan"
 **Baseline impact:** Adds a deterministic S2-F1 CLI package generator. This document does not change schemas, prompts, default models, maker/checker pipeline behavior, review-session behavior, or Stage 3 readiness claims.
 

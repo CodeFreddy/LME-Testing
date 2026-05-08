@@ -2,6 +2,8 @@
 
 **Status:** Deterministic candidate diff for human review
 **Generated:** 2026-04-26T09:32:20Z
+**Canonical owner:** `docs/planning/im_hk_v14_downstream_decision.md` and `docs/governance/acceptance.md` Gate S2.6
+**Related roadmap task:** S2-C3
 
 ## Sources
 

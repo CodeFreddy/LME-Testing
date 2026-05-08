@@ -4,6 +4,7 @@
 **Created:** 2026-04-27
 **Implemented:** 2026-04-29
 **Task ID:** S2-F2
+**Canonical owner:** `docs/planning/implementation_plan.md` section S2-F2 and `docs/governance/acceptance.md` Gate S2-F2
 **Source proposal:** `docs/architecture/Executable_Engineering_Knowledge_Contract.md` section "03 MVP Scope and Delivery Plan"
 **Baseline impact:** This slice adds deterministic registry generation only. It does not change schemas, prompts, default models, pipeline behavior, review-session behavior, or Stage 3 readiness claims.
 

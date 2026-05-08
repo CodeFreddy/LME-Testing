@@ -2,6 +2,8 @@
 
 **Status:** Current Stage 2 policy
 **Decision date:** 2026-04-26
+**Canonical owner:** `docs/planning/implementation_plan.md` sections S2-C1 through S2-C4
+**Related roadmap task:** S2-C1, S2-C2, S2-C3, S2-C4
 **Decision:** Keep current mock API samples under `deliverables/`; do not move to `samples/` or `tools/` now.
 
 ---

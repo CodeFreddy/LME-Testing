@@ -26,16 +26,26 @@ The documentation set is intentionally layered.
 - `docs/architecture/architecture.md` defines system boundaries and artifact contracts.
 - `docs/governance/model_governance.md` defines model and prompt change controls.
 - `docs/governance/agent_guidelines.md` defines how AI agents are allowed to operate.
+- `docs/governance/docs_housekeeping.md` defines how documentation may be labeled, summarized, archived, or deleted without losing governance history.
 
 Those documents are the core control documents. Supporting documents are grouped by purpose:
 
 - `docs/governance/` for supporting governance policies.
+- `docs/governance/README.md` for the local governance-folder map.
 - `docs/planning/` for task plans, validation plans, and stage analysis.
+- `docs/planning/README.md` for the local planning-folder map.
 - `docs/architecture/` for the main architecture contract and architecture support references.
+- `docs/architecture/README.md` for the local architecture-folder map.
 - `docs/guides/` for operator and developer guides.
+- `docs/guides/README.md` for the local guides-folder map.
 - `docs/operations/` for session handoff and checkpoint state.
+- `docs/operations/README.md` for the local operations-folder map.
 - `docs/releases/` for release notes and baseline records.
+- `docs/releases/README.md` for the local releases-folder map.
 - `docs/materials/`, `docs/references/`, and `docs/archives/` for source material, historical references, and completed records.
+- `docs/materials/README.md` for the local source-materials map.
+- `docs/references/README.md` for the local references-folder map.
+- `docs/archives/README.md` indexes archived records and explains how to use them safely.
 
 ---
 
@@ -64,6 +74,8 @@ It defines:
 - phase scope and non-scope,
 - what is core versus deferred.
 
+For the local planning-folder map, use `docs/planning/README.md`.
+
 ### 3. `docs/planning/implementation_plan.md`
 
 Use this for execution-oriented work planning.
@@ -90,6 +102,8 @@ It defines:
 - gate conditions,
 - what counts as completion.
 
+For the local governance-folder map, use `docs/governance/README.md`.
+
 ### 5. `docs/architecture/architecture.md`
 
 Use this for system boundaries and artifact design.
@@ -102,6 +116,8 @@ It defines:
 - module boundaries,
 - traceability model,
 - validation architecture.
+
+For the local architecture-folder map, use `docs/architecture/README.md`.
 
 ### 6. `docs/governance/model_governance.md`
 
@@ -142,6 +158,21 @@ Use this for the future bridge between generated BDD and existing executable ste
 
 This is not the current execution baseline.
 It is a later-phase bridge document.
+
+### 10A. `docs/governance/docs_housekeeping.md`
+
+Use this before cleaning, pruning, or moving documentation.
+
+It defines:
+
+- document classes,
+- required status metadata for planning docs,
+- safe archiving rules,
+- safe deletion rules,
+- line-level cleanup expectations,
+- and the recommended housekeeping workflow.
+
+Its core principle is curation before deletion: label, summarize, cross-link, archive, and delete only when explicitly safe.
 
 ### 11. `docs/planning/mock_api_validation_plan.md`
 
@@ -317,12 +348,21 @@ It defines:
 
 ### Supporting Guide And Reference Folders
 
+- `docs/governance/README.md` explains the governance folder's core policies, supporting policies, and quick routing by task type.
+- `docs/planning/README.md` explains the planning folder's current, active, complete, future-support, and archived document buckets.
+- `docs/architecture/README.md` explains the architecture folder's current contract and supporting design references.
+- `docs/guides/README.md` explains operator and developer guide placement rules.
 - `docs/guides/maker_checker_usage.md` explains the maker/checker CLI workflow.
 - `docs/guides/rule_extraction_script_guide.md` explains rule extraction operations.
 - `docs/archives/20260422_ai_test_generation_demo.md` preserves demo-oriented usage notes.
+- `docs/archives/README.md` explains archive scope, preservation reasons, and current archived records.
 - `docs/architecture/rule_model_and_parsing_design.md` captures rule model and parsing design detail.
 - `docs/architecture/run_directory_structure.md` documents run output layout.
-- `docs/archives/20260422_script_generation_investigation.md`, `docs/planning/stage2_planned_modules.md`, and `docs/planning/s2t01_coverage_analysis.md` preserve supporting Stage 2 planning and analysis.
+- `docs/operations/README.md` explains session handoff and checkpoint preservation rules.
+- `docs/references/README.md` explains how to use historical and external reference materials without treating them as current governance.
+- `docs/releases/README.md` explains release-note and baseline-record placement rules.
+- `docs/materials/README.md` explains source material lineage and preservation rules.
+- `docs/archives/20260422_script_generation_investigation.md`, `docs/archives/stage2_planned_modules.md`, and `docs/archives/s2t01_coverage_analysis.md` preserve supporting Stage 2 planning and analysis.
 - `docs/planning/im_hk_v14_downstream_treatment_mapping.md` preserves the S2-C4 deterministic treatment mapping for HKv14 diff candidates.
 - `docs/planning/im_hk_v14_role_review_plan.md` preserves the implemented S2-F1 role-friendly impact decision review plan and package boundaries.
 - `docs/planning/mvp_document_readiness_plan.md` preserves the implemented S2-F2 MVP document readiness registry plan and package boundaries.
@@ -333,6 +373,46 @@ It defines:
 - `docs/planning/next_phase_plan.md` preserves the recommended next-phase order and S2-F8 planning scope.
 - `docs/planning/enterprise_target_architecture_plan.md` preserves enterprise architecture option tradeoffs.
 - `docs/planning/assets/tabbed_review_gui_mockups/` preserves the target GUI look-and-feel reference for future tabbed workflow discussion.
+
+---
+
+## Housekeeping Snapshot
+
+Use this snapshot as the starting inventory for the next cleanup pass. It is intentionally conservative: no deletion is implied by these labels.
+
+| Area | Current Role | Suggested Action |
+|------|--------------|------------------|
+| `docs/planning/roadmap.md` | Current control doc for phase direction | Keep current |
+| `docs/planning/implementation_plan.md` | Current control doc for task contracts | Keep current; summarize repeated history only after acceptance evidence remains linked |
+| `docs/planning/README.md` | Local planning-folder index | Keep current when planning docs are added, archived, or reclassified |
+| `docs/governance/acceptance.md` | Current control doc for gates and evidence | Keep current |
+| `docs/governance/README.md` | Local governance-folder index | Keep current when governance docs are added or reclassified |
+| `docs/architecture/architecture.md` | Current control doc for boundaries and module map | Keep current |
+| `docs/architecture/README.md` | Local architecture-folder index | Keep current when architecture docs are added, superseded, or reclassified |
+| `docs/guides/README.md` | Local guides-folder index | Keep current when guides are added, deprecated, or archived |
+| `docs/operations/README.md` | Local operations-folder index | Keep current when operations files or handoff rules change |
+| `docs/references/README.md` | Local references-folder index | Keep current when reference files are added, promoted, archived, or pruned |
+| `docs/releases/README.md` | Local releases-folder index | Keep current when release records or baselines are added |
+| `docs/materials/README.md` | Local materials-folder index | Keep current when source materials or source-derived inputs are added |
+| `docs/planning/next_phase_plan.md` | Active planning and sequencing | Keep active; use as canonical near-term order |
+| `docs/planning/rule_workflow_scripts_stage_navigation_plan.md` | Active S2-F7 planning | Keep active until S2-F7 is accepted or superseded |
+| `docs/planning/enterprise_poc_feedback_summary.md` | Input summary for S2-F8 | Keep active as planning input; archive after S2-F8 response package captures the outcome |
+| `docs/planning/enterprise_target_architecture_plan.md` | Long-range enterprise support planning | Keep as planning support; do not treat as approved implementation scope |
+| `docs/planning/tabbed_review_gui_development_plan.md` | Future GUI direction and mockup reference | Keep as planning support for S2-F7 and later E1 |
+| `docs/archives/s2t01_coverage_analysis.md` | Complete S2-T01 evidence summary | Archived; current status is owned by implementation/acceptance docs |
+| `docs/archives/stage2_planned_modules.md` | Complete historical planning record for S2-B1/B2 | Archived; S2-B1/B2 are implemented and owned by implementation/acceptance docs |
+| `docs/planning/mock_api_validation_plan.md` | Complete S2-C1 validation plan | Keep until mock API bridge docs are consolidated; later archive candidate |
+| `docs/planning/im_hk_v13_mock_api_validation_plan.md` | Complete S2-C2 validation plan | Keep until Initial Margin bridge docs are consolidated; later archive candidate |
+| `docs/planning/im_hk_v14_diff_report.md` | Deterministic HKv13-to-HKv14 diff evidence summary | Preserve as evidence-linked planning record |
+| `docs/planning/im_hk_v14_downstream_decision.md` | Human POC downstream decision record | Preserve as decision record |
+| `docs/planning/im_hk_v14_downstream_treatment_mapping.md` | Complete S2-C4 deterministic treatment mapping | Preserve as treatment evidence; archive only after acceptance links remain stable |
+| `docs/planning/document_library_and_capability_workflow_proposal.md` | Future document/capability workflow proposal | Keep as future planning support; do not implement from this alone |
+| `docs/planning/document_library_and_capability_workflow_implementation_plan.md` | Future implementation proposal | Keep as future planning support; may be superseded by later enterprise slices |
+| `docs/planning/step_integration_plan.md` | Future Stage 3 execution-readiness bridge | Keep as future planning support |
+| `docs/planning/ui_test_plan.md` | Complete S2-D1 UI test plan | Keep while browser test scope remains current; later archive candidate if replaced by acceptance evidence |
+| `docs/archives/` | Historical completed or superseded records | Preserve and link when useful |
+| `docs/references/` | Historical prompts and external comparison notes | Preserve unless a human approves pruning |
+| `docs/operations/checkpoints.md` | Recoverable session history | Preserve; do not prune without explicit human request |
 
 ---
 
@@ -354,18 +434,19 @@ Then read supporting docs only as needed:
 
 8. `docs/governance/testing_governance.md`
 9. `docs/governance/prompt_lifecycle.md`
-10. `docs/planning/step_integration_plan.md`
-11. `docs/planning/mock_api_validation_plan.md`
-12. `docs/operations/checkpoints.md`
-13. `docs/planning/ui_test_plan.md`
-14. `docs/planning/mvp_input_document_contract_plan.md`
-14. `docs/planning/im_hk_v14_promotion_scope.md`
-15. `docs/planning/im_hk_v14_role_review_plan.md`
-16. `docs/planning/mvp_document_readiness_plan.md`
-17. `docs/planning/rule_workflow_scripts_stage_navigation_plan.md`
-18. `docs/planning/next_phase_plan.md`
-19. `docs/planning/enterprise_target_architecture_plan.md`
-20. `docs/planning/tabbed_review_gui_development_plan.md`
+10. `docs/governance/docs_housekeeping.md`
+11. `docs/planning/step_integration_plan.md`
+12. `docs/planning/mock_api_validation_plan.md`
+13. `docs/operations/checkpoints.md`
+14. `docs/planning/ui_test_plan.md`
+15. `docs/planning/mvp_input_document_contract_plan.md`
+16. `docs/planning/im_hk_v14_promotion_scope.md`
+17. `docs/planning/im_hk_v14_role_review_plan.md`
+18. `docs/planning/mvp_document_readiness_plan.md`
+19. `docs/planning/rule_workflow_scripts_stage_navigation_plan.md`
+20. `docs/planning/next_phase_plan.md`
+21. `docs/planning/enterprise_target_architecture_plan.md`
+22. `docs/planning/tabbed_review_gui_development_plan.md`
 
 ### If you are implementing a task
 
@@ -420,6 +501,7 @@ To avoid overlap and drift:
 - **architecture** should hold system structure and artifact boundaries.
 - **model_governance** should hold model, prompt, rollout, and rollback rules.
 - **agent_guidelines** should hold AI implementation rules.
+- **docs_housekeeping** should hold cleanup, archiving, and deletion rules for the documentation set.
 - **testing_governance** should hold broader testing operations governance.
 - **prompt_lifecycle** should hold prompt lifecycle rules.
 - **planning docs** should hold future BDD-to-step bridge logic, validation plans, and stage-specific analyses.
@@ -460,6 +542,15 @@ This index should be updated whenever:
 - responsibilities shift between documents.
 
 The goal is to keep the documentation set easy to navigate for both humans and AI agents.
+
+For documentation housekeeping, follow `docs/governance/docs_housekeeping.md`:
+
+1. classify files before changing them,
+2. add status metadata to active planning docs,
+3. summarize or cross-link repeated status instead of deleting it first,
+4. archive completed or superseded work only after canonical status is preserved,
+5. delete only when the safe deletion rule is satisfied,
+6. run `python scripts/check_docs_governance.py` after structural changes.
 
 ---
 

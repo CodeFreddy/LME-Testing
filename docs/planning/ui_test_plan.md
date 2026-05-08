@@ -1,5 +1,11 @@
 # UI Test Plan
 
+**Status:** Complete S2-D1 test plan with known coverage limits
+**Date:** 2026-04-23
+**Canonical owner:** `docs/governance/acceptance.md` Gate S2.4 and `docs/planning/implementation_plan.md` section S2-D1
+**Related roadmap task:** S2-D1
+**Scope:** Browser-level review-session BDD/Scripts path validation
+
 ## Purpose
 
 This plan verifies the governed review UI flow from source-derived artifacts to BDD and script review artifacts.

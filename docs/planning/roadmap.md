@@ -217,7 +217,7 @@
 13. 🟡 S2-F7 Scripts/stage-navigation partial；Scripts AI generation and basic review-session gates exist, but API-backed implementation metadata, draft-step governance, stale-state rules, and full rule-workflow navigation remain open
 14. 📋 S2-F8 enterprise POC response planning should produce deployment assumptions, HKEX/source-code access checklist, role MVP workflow, maker/checker quality controls, and architecture option tradeoffs
 
-详见：`docs/planning/s2t01_coverage_analysis.md`
+详见：`docs/archives/s2t01_coverage_analysis.md`
 
 ### 方向 B：Master 缺失模块实现（新增）
 

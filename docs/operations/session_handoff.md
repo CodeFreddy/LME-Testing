@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-05-08 13:36:54 UTC`
+- `2026-05-08 14:43:10 UTC`
 
 ---
 
@@ -50,6 +50,19 @@ If the task touches the CodeFreddy rule extraction review workflow, also read:
 
 - `docs/planning/implementation_plan.md` section `S2-F4`
 
+If the task touches documentation cleanup or navigation, also read:
+
+- `docs/governance/docs_housekeeping.md`
+- `docs/planning/README.md`
+- `docs/governance/README.md`
+- `docs/architecture/README.md`
+- `docs/operations/README.md`
+- `docs/guides/README.md`
+- `docs/materials/README.md`
+- `docs/references/README.md`
+- `docs/releases/README.md`
+- `docs/archives/README.md`
+
 ---
 
 ## Current Branch and Recent Commit Direction
@@ -60,17 +73,25 @@ Current branch:
 
 Recent commit subjects:
 
+- `Add documentation structure and update governance artifacts`
 - `Update planning documents and TODO list`
 - `Add next phase plan and update documentation`
 - `Add enterprise POC feedback summary`
 - `Update rule workflow and review session components`
-- `Merge CodeFreddy HKEX workflow branch`
 
 ---
 
 ## What Was Just Done
 
 Recent completed work:
+
+- **Docs housekeeping and navigation cleanup (2026-05-08)**
+  - Added `docs/governance/docs_housekeeping.md` with document classes, safe archiving, safe deletion, and cleanup workflow rules
+  - Added local folder maps: `docs/planning/README.md`, `docs/governance/README.md`, `docs/architecture/README.md`, `docs/operations/README.md`, `docs/guides/README.md`, `docs/materials/README.md`, `docs/references/README.md`, `docs/releases/README.md`, and `docs/archives/README.md`
+  - Normalized `docs/references/references_README.md` to `docs/references/README.md`
+  - Archived completed planning records to `docs/archives/s2t01_coverage_analysis.md` and `docs/archives/stage2_planned_modules.md`
+  - Updated `docs/index.md` and `docs/README.md` so folder maps and archive records are discoverable
+  - Validation: docs governance and artifact governance checks passed
 
 - **S2-F4 CodeFreddy rule extraction review workflow and GUI fixes (2026-05-06)**
   - Integrated the controlled CodeFreddy `feature/rule-extraction-review` slice into `main` without overwriting newer HKv14/MVP work
@@ -153,6 +174,7 @@ Key repo state:
 - Mock API deliverables policy is documented in `docs/planning/mock_api_deliverables_policy.md`; current Stage 2 bridge samples stay under `deliverables/` and this policy should be revisited before adding a new mock bridge or promoting the bridges into maintained tools
 - Remote status as of 2026-05-06: `origin/main` and `CodeFreddy/LME-Testing` `feature/rule-extraction-review` both point to the latest local `main` commit
 - Phase 1/2 acceptance gates are updated in `docs/governance/acceptance.md`; Stage 3 real LME API remains blocked
+- Docs housekeeping policy and local folder maps are in place; completed S2-T01 and S2-B1/B2 planning records are now archived with updated links
 
 Governance checks available:
 
@@ -164,12 +186,12 @@ Governance checks available:
 
 ## Recommended Next Step
 
-**Stage 2 is current through completed S2-F4 rule extraction review GUI integration. Remaining:**
+**Stage 2 is current through completed S2-F4 rule extraction review GUI integration, and docs housekeeping/navigation has a governed baseline. Remaining:**
 
-1. **Stage 3**: Blocked on LME VM access (ETA unknown); replace mock API target with real LME API only when access is available.
-2. **Real MVP input documents**: Provide real Test Plan and Regression Pack Index if readiness should move beyond placeholder/blocked status.
-3. **LLM non-determinism stabilization**: SR-MR-015-B3-4 boundary and SR-MR-071-C-1 negative still fluctuate - multi-run voting or consolidated scenario design, if separately approved with benchmark cost/benefit.
-4. **Broader CodeFreddy changes**: Full concurrency, rewrite prompt/schema simplification, and review-decision contract changes require separate governed approval and benchmark evidence.
+1. **Review and commit the docs housekeeping cleanup** after checking the working tree and deciding whether the current doc-only batch should be one commit.
+2. **S2-F6A rewrite prompt governance completion** remains the recommended next implementation slice from `docs/planning/next_phase_plan.md`.
+3. **Stage 3** remains blocked on LME VM access (ETA unknown); replace mock API target with real LME API only when access is available.
+4. **Real MVP input documents**: Provide real Test Plan and Regression Pack Index if readiness should move beyond placeholder/blocked status.
 5. **Before adding any new mock API bridge**, revisit `docs/planning/mock_api_deliverables_policy.md` and decide whether `deliverables/` remains the right long-lived location.
 
 ---
@@ -181,6 +203,8 @@ Governance checks available:
 - Do not treat `semantic_rule` as a substitute for planner outputs, normalized BDD, or execution-ready artifacts.
 - Do not reintroduce absolute local paths in Markdown files.
 - Do not mix future enterprise or platform assumptions into current baseline work unless explicitly requested.
+- Do not delete or prune documentation records unless the safe deletion rule in `docs/governance/docs_housekeeping.md` is satisfied.
+- Do not prune `docs/operations/checkpoints.md` unless a human explicitly asks.
 - Every commit should refresh `docs/operations/session_handoff.md`; if hooks are unavailable, run the update script manually before committing.
 
 ---
@@ -188,7 +212,10 @@ Governance checks available:
 ## Reference Material
 
 - `docs/planning/roadmap.md` - current Stage 2 priorities
+- `docs/index.md` - documentation map
+- `docs/governance/docs_housekeeping.md` - documentation cleanup, archive, and deletion rules
 - `docs/architecture/architecture.md` - system architecture and module boundaries
+- `docs/planning/README.md` - planning folder map
 - `docs/planning/mock_api_validation_plan.md` - S2-C1 mock execution bridge
 - `docs/planning/mock_api_deliverables_policy.md` - current policy for mock bridge source and zip locations
 - `docs/references/Claude-roadmap-compare.md` - historical comparison

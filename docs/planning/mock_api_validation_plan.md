@@ -2,6 +2,8 @@
 
 **Status:** COMPLETE for S2-C1 mock execution bridge  
 **Date:** 2026-04-23  
+**Canonical owner:** `docs/planning/implementation_plan.md` section S2-C1 and `docs/governance/acceptance.md` Gate S2.3
+**Related roadmap task:** S2-C1
 **Scope:** Validate that generated or reviewed BDD-style scripts can call a deterministic API under test before real LME API access is available.
 
 ---

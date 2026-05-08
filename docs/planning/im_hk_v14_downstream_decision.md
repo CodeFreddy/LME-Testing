@@ -3,6 +3,8 @@
 **Status:** Human accepted for POC
 **Date:** 2026-04-26
 **Reviewer:** Human project owner
+**Canonical owner:** `docs/planning/im_hk_v14_promotion_scope.md` and `docs/governance/acceptance.md` Gate S2.7
+**Related roadmap task:** S2-C3, S2-C4
 **Related diff report:** `docs/planning/im_hk_v14_diff_report.md`
 **Evidence JSON:** `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json`
 

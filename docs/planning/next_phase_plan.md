@@ -2,6 +2,8 @@
 
 **Date:** 2026-05-08  
 **Status:** Draft for review  
+**Canonical owner:** `docs/planning/implementation_plan.md` and `docs/governance/acceptance.md`
+**Related roadmap task:** S2-F6, S2-F7, S2-F8, later enterprise slices
 **Scope:** Planning only. This document does not approve schema changes, prompt changes, default model changes, new LLM stages, enterprise deployment, HKEX integration, or production readiness claims.
 
 ---

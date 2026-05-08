@@ -633,7 +633,7 @@ Evidence：
 - 剩余 gap 有 root-cause 分类
 
 **Evidence（2026-04-21）：**
-- `docs/planning/s2t01_coverage_analysis.md`
+- `docs/archives/s2t01_coverage_analysis.md`
 - v1.5 maker/checker runs：`runs/maker/20260421T074319Z/`、`runs/checker/20260421T083003Z/`
 - Coverage：78.89%（142/180 fully covered）
 - 结论：剩余 gap 为 evidence-constrained 或 LLM non-determinism

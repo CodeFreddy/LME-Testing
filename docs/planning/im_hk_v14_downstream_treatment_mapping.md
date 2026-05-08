@@ -2,6 +2,8 @@
 
 **Status:** S2-C4 deterministic treatment mapping complete
 **Created:** 2026-04-26
+**Canonical owner:** `docs/planning/implementation_plan.md` section S2-C4 and `docs/governance/acceptance.md` Gate S2.7
+**Related roadmap task:** S2-C4
 **Promotion scope:** `docs/planning/im_hk_v14_promotion_scope.md`
 **Diff evidence:** `evidence/im_hk_v14_diff/im_hk_v13_to_v14_diff.json`
 

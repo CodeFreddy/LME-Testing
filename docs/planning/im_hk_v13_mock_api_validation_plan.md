@@ -2,6 +2,8 @@
 
 **Status:** COMPLETE for S2-C2 mock execution bridge  
 **Date:** 2026-04-26  
+**Canonical owner:** `docs/planning/implementation_plan.md` section S2-C2 and `docs/governance/acceptance.md` Gate S2.5
+**Related roadmap task:** S2-C2
 **Scope:** Validate that generated or reviewed BDD-style scripts can call a deterministic API under test for Initial Margin HKv13 before real execution environment access is available.
 
 ---
