@@ -380,6 +380,7 @@ def compute_step_matches(
                     "library_name": library_inventory.library_name,
                     "similarity": round(sim, 3),
                     "capture_groups": _extract_capture_groups(lib_step.step_pattern),
+                    "code": lib_step.code,
                 })
 
         # Sort by similarity descending and take top-K
@@ -446,6 +447,7 @@ def compute_step_matches(
                         "library_step_pattern": lib_step.step_pattern,
                         "library_name": library_inventory.library_name,
                         "similarity": round(sim, 3),
+                        "code": lib_step.code,
                     })
             cands.sort(key=lambda c: c["similarity"], reverse=True)
             candidate_results.append({
@@ -812,6 +814,7 @@ def render_step_visibility_report(
                     result.append({
                         "step_text": entry.step_text,
                         "step_pattern": entry.step_pattern,
+                        "code": entry.code,
                         "match_type": entry.match_type,
                         "library_step_text": entry.library_step_text,
                         "confidence": entry.confidence,
@@ -842,6 +845,7 @@ def render_step_visibility_report(
                     "step_text": g.step_text,
                     "step_pattern": g.step_pattern,
                     "step_type": g.step_type,
+                    "code": g.code,
                     "source_scenario_ids": g.source_scenario_ids,
                 }
                 for g in gaps

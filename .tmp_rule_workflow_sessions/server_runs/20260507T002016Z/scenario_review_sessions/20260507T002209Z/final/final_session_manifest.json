@@ -40,5 +40,5 @@
   "source_normalized_bdd_path": "G:\\Develop\\python\\LME-Testing\\.tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\generated_bdd\\20260507T002353Z\\bdd\\20260507T002353Z\\normalized_bdd.jsonl",
   "human_scripts_edits_latest_path": ".tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\scenario_review_sessions\\20260507T002209Z\\iterations\\000\\scripts\\human_scripts_edits_latest.json",
   "human_bdd_edits_latest_path": ".tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\scenario_review_sessions\\20260507T002209Z\\iterations\\000\\bdd\\human_bdd_edits_latest.json",
-  "audit_trail_path": ".tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\scenario_review_sessions\\20260507T002209Z\\audit_trail.html"
+  "audit_trail_path": ".tmp_rule_workflow_sessions\\server_runs\\20260507T002016Z\\scenario_review_sessions\\20260507T002209Z\\final\\audit_trail.html"
 }

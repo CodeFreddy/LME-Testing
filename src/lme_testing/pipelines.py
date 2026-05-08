@@ -843,6 +843,7 @@ def run_bdd_pipeline(
     human_scripts_edits_path: Path | None = None,
     deterministic_fallback_only: bool = False,
     bdd_generation_mode: str = "llm-with-fallback",
+    concurrency: int = 1,
 ) -> dict:
     """Generate normalized BDD artifacts from maker test cases.
 
@@ -886,41 +887,55 @@ def run_bdd_pipeline(
     total_batches = 0
     fallback_records: list[dict] = []
 
-    for batch_num, batch in enumerate(_chunked(maker_records, batch_size), start=1):
+    batches = list(_chunked(maker_records, batch_size))
+    total_batch_count = len(batches)
+    if concurrency <= 0:
+        raise ValueError("concurrency must be greater than zero.")
+    effective_concurrency = min(concurrency, total_batch_count or 1)
+    print(
+        f"[bdd] Starting: {len(maker_records)} maker records in {total_batch_count} batches "
+        f"(batch_size={batch_size}, concurrency={effective_concurrency}, mode={bdd_generation_mode}, "
+        f"provider_role={provider_role}, model={provider_cfg.model})",
+        flush=True,
+    )
+
+    def _run_bdd_batch(batch_num: int, batch: list[dict]) -> dict:
         batch_rule_ids = [item["semantic_rule_id"] for item in batch]
         payload = None
         last_error = ""
+        raw_records: list[dict] = []
+        fallback_record: dict | None = None
         if bdd_generation_mode == "deterministic":
             fallback_results = _maker_records_to_normalized_bdd(batch)
             payload = validate_normalized_bdd_payload(
                 {"results": fallback_results},
                 expected_rule_ids=batch_rule_ids,
             )
-            fallback_records.append(
-                {
-                    "batch_num": batch_num,
-                    "batch_semantic_rule_ids": batch_rule_ids,
-                    "reason": "deterministic",
-                }
-            )
+            fallback_record = {
+                "batch_num": batch_num,
+                "batch_semantic_rule_ids": batch_rule_ids,
+                "reason": "deterministic",
+            }
             print(
-                f"[bdd] Batch {batch_num}: using deterministic fallback from maker cases.",
+                f"[bdd] Batch {batch_num}/{total_batch_count}: using deterministic fallback from maker cases.",
                 flush=True,
             )
         else:
             assert provider is not None
+            print(f"[bdd] Batch {batch_num}/{total_batch_count}: calling API for rules {batch_rule_ids}...", flush=True)
             for attempt in range(1, 3):
                 response = provider.generate(
                     system_prompt=BDD_SYSTEM_PROMPT,
                     user_prompt=build_bdd_user_prompt(batch),
                 )
-                raw_record = {
-                    "run_id": run_id,
-                    "batch_semantic_rule_ids": batch_rule_ids,
-                    "attempt": attempt,
-                    "response": response.raw_response,
-                }
-                append_jsonl(raw_path, [raw_record])
+                raw_records.append(
+                    {
+                        "run_id": run_id,
+                        "batch_semantic_rule_ids": batch_rule_ids,
+                        "attempt": attempt,
+                        "response": response.raw_response,
+                    }
+                )
                 try:
                     payload = validate_normalized_bdd_payload(
                         parse_json_object(response.content),
@@ -942,19 +957,18 @@ def run_bdd_pipeline(
                         {"results": fallback_results},
                         expected_rule_ids=batch_rule_ids,
                     )
-                    fallback_records.append(
-                        {
-                            "batch_num": batch_num,
-                            "batch_semantic_rule_ids": batch_rule_ids,
-                            "reason": last_error,
-                        }
-                    )
+                    fallback_record = {
+                        "batch_num": batch_num,
+                        "batch_semantic_rule_ids": batch_rule_ids,
+                        "reason": last_error,
+                    }
                     print(
-                        f"[bdd] Batch {batch_num}: using deterministic fallback from maker cases after invalid model output.",
+                        f"[bdd] Batch {batch_num}/{total_batch_count}: using deterministic fallback from maker cases after invalid model output.",
                         flush=True,
                     )
         if payload is None:
             raise SchemaError(f"BDD batch {batch_num} did not produce a payload.")
+        records: list[dict] = []
         for item in payload["results"]:
             item["run_id"] = run_id
             # Carry planner/maker traceability from source records
@@ -973,8 +987,49 @@ def run_bdd_pipeline(
             item.setdefault("metadata", {})
             item["metadata"]["maker_run_id"] = source_record.get("run_id", "")
             item["metadata"]["paragraph_ids"] = item.get("paragraph_ids", [])
-            append_jsonl(results_path, [item])
+            records.append(item)
+        return {
+            "batch_num": batch_num,
+            "raw_records": raw_records,
+            "records": records,
+            "fallback_record": fallback_record,
+        }
+
+    def _write_bdd_batch(batch_num: int, result: dict) -> None:
+        nonlocal total_batches
+        if result["raw_records"]:
+            append_jsonl(raw_path, result["raw_records"])
+        append_jsonl(results_path, result["records"])
+        if result.get("fallback_record"):
+            fallback_records.append(result["fallback_record"])
         total_batches += 1
+        print(
+            f"[bdd] Batch {batch_num}/{total_batch_count} done: normalized {len(result['records'])} rules",
+            flush=True,
+        )
+
+    if effective_concurrency == 1:
+        for batch_num, batch in enumerate(batches, start=1):
+            _write_bdd_batch(batch_num, _run_bdd_batch(batch_num, batch))
+    else:
+        batch_results: dict[int, dict] = {}
+        first_error: Exception | None = None
+        with ThreadPoolExecutor(max_workers=effective_concurrency) as executor:
+            futures = {
+                executor.submit(_run_bdd_batch, batch_num, batch): batch_num
+                for batch_num, batch in enumerate(batches, start=1)
+            }
+            for future in as_completed(futures):
+                batch_num = futures[future]
+                try:
+                    batch_results[batch_num] = future.result()
+                except Exception as exc:
+                    if first_error is None:
+                        first_error = exc
+        for batch_num in sorted(batch_results):
+            _write_bdd_batch(batch_num, batch_results[batch_num])
+        if first_error is not None:
+            raise first_error
 
     # Render Gherkin feature files and step definitions from normalized BDD
     processed_rule_count = 0
@@ -991,6 +1046,10 @@ def run_bdd_pipeline(
             step_files = render_steps_from_normalized_bdd(
                 bdd_results, run_dir, human_scripts_edits_path=human_scripts_edits_path
             )
+            print(
+                f"[bdd] Rendered {len(feature_files)} feature files and {len(step_files)} step definition files.",
+                flush=True,
+            )
 
     summary = {
         "run_id": run_id,
@@ -1003,6 +1062,7 @@ def run_bdd_pipeline(
         "output_dir": str(run_dir),
         "processed_rule_count": processed_rule_count,
         "batch_count": total_batches,
+        "concurrency": effective_concurrency,
         "fallback_batch_count": len(fallback_records),
         "fallback_reasons_path": str(fallback_path) if fallback_records else None,
         "bdd_generation_mode": bdd_generation_mode,

@@ -107,6 +107,9 @@ class ReportingTests(unittest.TestCase):
             self.assertIn("Audit Trail", report_html)
             self.assertIn("/files?path=audit", maker_html)
             self.assertIn("Checker", checker_html)
+            self.assertNotIn('id="overallFilter"', report_html)
+            self.assertNotIn("<th>Overall</th>", report_html)
+            self.assertNotIn("<th>Overall</th>", checker_html)
 
 
 if __name__ == "__main__":

@@ -53,6 +53,7 @@ class RuleWorkflowSessionManager:
         bdd_generation_mode: str = "llm-with-fallback",
         maker_concurrency: int = 1,
         checker_concurrency: int = 1,
+        bdd_concurrency: int = 1,
     ) -> None:
         self.config = config
         self.repo_root = repo_root.resolve()
@@ -65,6 +66,7 @@ class RuleWorkflowSessionManager:
         self.bdd_generation_mode = bdd_generation_mode
         self.maker_concurrency = maker_concurrency
         self.checker_concurrency = checker_concurrency
+        self.bdd_concurrency = bdd_concurrency
         self.session_id = timestamp_slug()
         self.session_dir = ensure_dir(self.output_root / self.session_id)
         self.upload_dir = ensure_dir(self.session_dir / "uploads")
@@ -420,6 +422,7 @@ class RuleWorkflowSessionManager:
                 batch_size=self.bdd_batch_size,
                 resume_from=None,
                 bdd_generation_mode=self.bdd_generation_mode,
+                concurrency=self.bdd_concurrency,
             )
             normalized_bdd_path = Path(bdd_summary["results_path"])
 
@@ -598,7 +601,7 @@ def serve_rule_workflow_session(manager: RuleWorkflowSessionManager) -> tuple[Th
     handler = _build_handler(manager)
     server = ThreadingHTTPServer((manager.host, manager.port), handler)
     actual_port = server.server_address[1]
-    return server, f"http://{manager.host}:{actual_port}/"
+    return server, f"http://{manager.host}:{actual_port}/#rule_extraction"
 
 
 def _build_handler(manager: RuleWorkflowSessionManager):
@@ -738,6 +741,9 @@ def _build_handler(manager: RuleWorkflowSessionManager):
             if parsed.path == "/api/scripts/save":
                 self._send_json(review.save_scripts_edits(payload))
                 return True
+            if parsed.path == "/api/scripts/create-by-ai":
+                self._send_json(review.create_scripts_by_ai(payload), status=HTTPStatus.ACCEPTED)
+                return True
             if parsed.path == "/api/stage/advance":
                 self._send_json(review.advance_stage(payload.get("to_stage", "")))
                 return True
@@ -760,6 +766,9 @@ def _build_handler(manager: RuleWorkflowSessionManager):
             encoded = html_text.encode("utf-8")
             self.send_response(HTTPStatus.OK)
             self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
             self.send_header("Content-Length", str(len(encoded)))
             self.end_headers()
             self.wfile.write(encoded)
@@ -1030,7 +1039,8 @@ RULE_WORKFLOW_HTML = r"""<!DOCTYPE html>
     .technical { font-size: 12px; color: #64748b; }
     .hidden { display: none; }
     .workflow-progress { display: flex; align-items: center; gap: 0; margin: 16px 0 18px; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px 18px; }
-    .workflow-step { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; color: #64748b; }
+    .workflow-step { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; color: #64748b; cursor: pointer; }
+    .workflow-step.locked { cursor: not-allowed; opacity: .55; }
     .workflow-step.active, .workflow-step.completed { color: #047857; font-weight: 700; }
     .workflow-dot { width: 28px; height: 28px; border-radius: 999px; background: #e5e7eb; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 700; }
     .workflow-step.active .workflow-dot, .workflow-step.completed .workflow-dot { background: #16a34a; color: #fff; }
@@ -1066,6 +1076,7 @@ RULE_WORKFLOW_HTML = r"""<!DOCTYPE html>
     .step-item { margin-bottom: 8px; padding: 6px 8px; border: 1px solid #e2e8f0; border-radius: 6px; }
     .step-item.unmatched { border-left: 3px solid #991b1b; background: #fff5f5; }
     .step-item-badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 700; background: #e2e8f0; }
+    .script-code-textarea { width: 100%; box-sizing: border-box; min-height: 180px; font-family: Consolas, monospace; font-size: 12px; }
   </style>
 </head>
 <body>
@@ -1098,14 +1109,6 @@ RULE_WORKFLOW_HTML = r"""<!DOCTYPE html>
 
     <section class="band">
       <div class="row">
-        <label>Existing artifact folder <input id="artifactFolder" type="file" webkitdirectory multiple></label>
-        <button id="artifactBtn">Load Artifact Folder</button>
-      </div>
-      <p class="muted">The selected folder must contain atomic_rules.json and semantic_rules.json.</p>
-    </section>
-
-    <section class="band">
-      <div class="row">
         <button id="saveRulesBtn" disabled>Save Rule Edits</button>
         <button id="ruleNextBtn" class="primary" disabled>Next Step</button>
       </div>
@@ -1119,7 +1122,7 @@ RULE_WORKFLOW_HTML = r"""<!DOCTYPE html>
       <div id="historyPager" class="pager hidden"></div>
     </section>
 
-    <section class="band">
+    <section class="band hidden">
       <details class="field-guide">
         <summary>Semantic Field Guide</summary>
         <dl>
@@ -1142,7 +1145,6 @@ RULE_WORKFLOW_HTML = r"""<!DOCTYPE html>
       <section class="band" id="summaryCard">Loading test cases...</section>
       <section class="band">
         <div class="case-toolbar">
-          <label>Overall <select id="overallFilter"><option value="">All</option><option value="pass">pass</option><option value="fail">fail</option><option value="missing">missing</option></select></label>
           <label>Coverage <select id="coverageFilter"><option value="">All</option><option value="covered">covered</option><option value="partial">partial</option><option value="uncovered">uncovered</option><option value="missing">missing</option></select></label>
           <label>Checker Suggestion <select id="blockingFilter"><option value="">All</option><option value="false">Yes</option><option value="true">No</option></select></label>
           <button id="saveRerunBtn" class="primary" disabled>Save &amp; Rerun</button>
@@ -1158,11 +1160,10 @@ RULE_WORKFLOW_HTML = r"""<!DOCTYPE html>
         <table>
           <thead>
             <tr>
-              <th>Semantic Rule</th>
+              <th>Business Rule</th>
               <th>Case ID</th>
               <th>Feature</th>
               <th>Case Type</th>
-              <th>Overall</th>
               <th>Coverage</th>
               <th>Checker Suggestion</th>
               <th>Blocking Reason</th>
@@ -1191,10 +1192,12 @@ RULE_WORKFLOW_HTML = r"""<!DOCTYPE html>
     <div class="workflow-panel" data-workflow-panel="scripts">
       <section class="band">
         <div class="row">
-          <button id="saveScriptsBtn">Save Scripts Edits</button>
+          <button id="createScriptsAiBtn" class="primary">Create Scripts By AI</button>
+          <button id="saveScriptsBtn" class="hidden">Save</button>
           <button id="scriptsNextBtn">Next Step</button>
           <span id="scriptsStatus" class="muted"></span>
         </div>
+        <div id="scriptsProgressCard" class="hidden"></div>
       </section>
       <section id="scriptsContent"><em>Loading scripts...</em></section>
     </div>
@@ -1224,14 +1227,18 @@ let pollTimer = null;
 let bddPayload = null;
 let scriptsPayload = null;
 let bddDirty = false;
+let scriptsDirty = false;
 const BDD_GENERATION_MODE = '__BDD_GENERATION_MODE__';
 const WORKFLOW_STEPS = ['rule_extraction', 'test_case', 'bdd', 'scripts', 'finalize'];
 const GENERATE_PROGRESS = { queued: 5, maker: 25, checker: 55, bdd: 75, step_registry: 88, review_session: 95, done: 100 };
 const GENERATE_LABEL = { queued: 'Queued', maker: 'Generating test cases', checker: 'Checking test cases', bdd: 'Generating BDD', step_registry: 'Preparing scripts', review_session: 'Preparing review session', done: 'Cases generated' };
 const BDD_PROGRESS = { queued: 5, bdd: 75, step_registry: 92, done: 100 };
 const BDD_LABEL = { queued: 'Queued', bdd: 'Generating BDD from reviewed test cases', step_registry: 'Preparing script visibility', done: 'BDD generated' };
+const SCRIPTS_PROGRESS = { queued: 5, loading_api_catalog: 18, calling_llm: 55, validating: 78, writing_scripts: 92, done: 100 };
+const SCRIPTS_LABEL = { queued: 'Queued', loading_api_catalog: 'Loading API catalog', calling_llm: 'Generating scripts with AI', validating: 'Validating generated scripts', writing_scripts: 'Writing scripts', done: 'Scripts generated' };
 const PHASE_PROGRESS = { queued: 5, rewrite: 20, checker: 55, report: 90, done: 100, failed: 100 };
 const PHASE_LABEL = { queued: 'Queued', rewrite: 'Rewriting selected cases', checker: 'Running checker', report: 'Generating report', done: 'Completed', failed: 'Failed' };
+let maxReachedWorkflowIndex = Number(localStorage.getItem('hkexMaxReachedWorkflowIndex') || '0');
 
 function $(id) { return document.getElementById(id); }
 function esc(value) {
@@ -1281,6 +1288,66 @@ function nextWorkflowStep() {
   const idx = WORKFLOW_STEPS.indexOf(activeWorkflowStep);
   if (idx >= 0 && idx < WORKFLOW_STEPS.length - 1) setWorkflowStep(WORKFLOW_STEPS[idx + 1]);
 }
+function stageFromLocation() {
+  const stage = (window.location.hash || '').replace('#', '');
+  return WORKFLOW_STEPS.includes(stage) ? stage : null;
+}
+function markWorkflowReached(step) {
+  const idx = WORKFLOW_STEPS.indexOf(step);
+  if (idx > maxReachedWorkflowIndex) {
+    maxReachedWorkflowIndex = idx;
+    localStorage.setItem('hkexMaxReachedWorkflowIndex', String(idx));
+  }
+}
+workflowStepAllowed = function(step) {
+  const idx = WORKFLOW_STEPS.indexOf(step);
+  return idx >= 0 && idx <= maxReachedWorkflowIndex;
+};
+setWorkflowStep = function(step, options = {}) {
+  const push = options.push !== false;
+  if (!WORKFLOW_STEPS.includes(step)) step = 'rule_extraction';
+  if (!workflowStepAllowed(step)) {
+    setStatus(`You can open ${step.replaceAll('_', ' ')} after the workflow reaches that stage.`);
+    return false;
+  }
+  activeWorkflowStep = step;
+  localStorage.setItem('hkexWorkflowStep', step);
+  if (push && window.location.hash !== '#' + step) {
+    history.pushState({ workflowStep: step }, '', '#' + step);
+  }
+  document.querySelectorAll('[data-workflow-panel]').forEach(panel => {
+    panel.classList.toggle('active', panel.dataset.workflowPanel === step);
+  });
+  const activeIdx = WORKFLOW_STEPS.indexOf(step);
+  document.querySelectorAll('[data-workflow-step]').forEach(el => {
+    const idx = WORKFLOW_STEPS.indexOf(el.dataset.workflowStep);
+    el.classList.remove('active', 'completed', 'locked');
+    if (idx < activeIdx) el.classList.add('completed');
+    if (idx === activeIdx) el.classList.add('active');
+    if (idx > maxReachedWorkflowIndex) el.classList.add('locked');
+    const dot = el.querySelector('.workflow-dot');
+    if (dot) dot.textContent = idx < activeIdx ? '✓' : String(idx + 1);
+  });
+  if (step === 'test_case') {
+    if (casesGenerating && !casesGenerated) {
+      $('summaryCard').innerHTML = '<div class="metric"><strong>Generating test cases</strong><br>Maker/checker is running. The generated cases will appear here when ready.</div>';
+      $('reviewRows').innerHTML = '';
+    } else {
+      refreshSession().catch(err => renderResult('Load failed', `<pre>${esc(err.message)}</pre>`, 'status-failed'));
+    }
+  }
+  if (step === 'bdd') loadBddData();
+  if (step === 'scripts') loadScriptsData();
+  return true;
+};
+nextWorkflowStep = function() {
+  const idx = WORKFLOW_STEPS.indexOf(activeWorkflowStep);
+  if (idx >= 0 && idx < WORKFLOW_STEPS.length - 1) {
+    const next = WORKFLOW_STEPS[idx + 1];
+    markWorkflowReached(next);
+    setWorkflowStep(next);
+  }
+};
 function renderInlineProgress(targetId, percent, label) {
   const el = $(targetId);
   if (!el) return;
@@ -1310,6 +1377,7 @@ async function refreshRules() {
   renderHistory(state.history || [], historyPagination);
   $('saveRulesBtn').disabled = !state.has_rules;
   casesGenerated = !!state.has_review_session;
+  if (casesGenerated || casesGenerating) markWorkflowReached('test_case');
   $('ruleNextBtn').disabled = !state.has_rules || casesGenerating;
   if (casesGenerated && activeWorkflowStep === 'rule_extraction') {
     setStatus('Cases are ready. Click Next Step to review test cases or regenerate them.');
@@ -1358,8 +1426,8 @@ function renderHistory(items, pagination) {
 }
 function ruleDiffHtml(rule) {
   const diff = rule._review && rule._review.diff;
-  if (!diff || !diff.fields || !diff.fields.length) return '<div class="muted">No semantic rule changes.</div>';
-  return `<h4>Semantic rule changes</h4>` + diff.fields.map(f => `<div class="diff-item"><strong>${esc(f.change_type)}</strong> ${esc(f.path)}<br><em>before</em>: ${esc(JSON.stringify(f.before))}<br><em>after</em>: ${esc(JSON.stringify(f.after))}</div>`).join('');
+  if (!diff || !diff.fields || !diff.fields.length) return '<div class="muted">No business rule changes.</div>';
+  return `<h4>Business rule changes</h4>` + diff.fields.map(f => `<div class="diff-item"><strong>${esc(f.change_type)}</strong> ${esc(f.path)}<br><em>before</em>: ${esc(JSON.stringify(f.before))}<br><em>after</em>: ${esc(JSON.stringify(f.after))}</div>`).join('');
 }
 function atomicDiffHtml(item) {
   const atomic = item && item.rule;
@@ -1401,9 +1469,9 @@ function renderRules() {
         </div>
       </div>
       <div class="fields">
-        <label>rule_type <select data-field="classification.rule_type">${['calculation','data_constraint','workflow','obligation','reference_only'].map(v => `<option value="${v}" ${cls.rule_type===v?'selected':''}>${v}</option>`).join('')}</select></label>
-        <label>testability <select data-field="classification.testability">${['testable','partially_testable','non_testable'].map(v => `<option value="${v}" ${cls.testability===v?'selected':''}>${v}</option>`).join('')}</select></label>
-        <label>priority <select data-field="classification.priority">${['high','medium','low'].map(v => `<option value="${v}" ${cls.priority===v?'selected':''}>${v}</option>`).join('')}</select></label>
+        <label>business_rule_type <select data-field="classification.rule_type">${['calculation','data_constraint','workflow','obligation','reference_only'].map(v => `<option value="${v}" ${cls.rule_type===v?'selected':''}>${v}</option>`).join('')}</select></label>
+        <label>business_testability <select data-field="classification.testability">${['testable','partially_testable','non_testable'].map(v => `<option value="${v}" ${cls.testability===v?'selected':''}>${v}</option>`).join('')}</select></label>
+        <label>business_priority <select data-field="classification.priority">${['high','medium','low'].map(v => `<option value="${v}" ${cls.priority===v?'selected':''}>${v}</option>`).join('')}</select></label>
         <label>actor <input data-field="statement.actor.value" value="${esc(actor)}"></label>
         <label>action <input data-field="statement.action.value" value="${esc(action)}"></label>
         <label>object <input data-field="statement.object.value" value="${esc(object)}"></label>
@@ -1418,9 +1486,8 @@ function renderRules() {
         <label class="wide">Reviewer Notes<textarea data-field="review.reviewer_notes">${esc(review.reviewer_notes || '')}</textarea></label>
       </div>
       <details open><summary>Source text</summary><pre class="source">${esc(evidence)}</pre></details>
-      ${atomic ? atomicHtml(atomic) : ''}
       <details><summary>Reviewed changes</summary>${ruleDiffHtml(rule)}${atomicDiffHtml(atomic)}</details>
-      <details><summary>Advanced / Technical Raw JSON</summary><textarea class="json-editor" data-json-index="${idx}">${esc(JSON.stringify(stripPrivate(rule), null, 2))}</textarea><button data-apply-json="${idx}">Apply JSON</button></details>
+      <details><summary>Advanced / Technical Raw JSON</summary><textarea class="json-editor" data-json-index="${idx}">${esc(JSON.stringify(businessRuleJsonForDisplay(rule), null, 2))}</textarea><button data-apply-json="${idx}">Apply JSON</button></details>
     </div>`;
   }).join('');
   document.querySelectorAll('[data-field]').forEach(el => el.addEventListener('change', updateFieldFromInput));
@@ -1459,6 +1526,52 @@ function stripPrivate(rule) {
   const cloned = JSON.parse(JSON.stringify(rule));
   delete cloned._review;
   return cloned;
+}
+const BUSINESS_JSON_KEY_MAP = {
+  semantic_rule_id: 'business_rule_id',
+  semantic_rule_ref: 'business_rule_ref',
+  semantic_rules: 'business_rules',
+};
+const SCHEMA_JSON_KEY_MAP = {
+  business_rule_id: 'semantic_rule_id',
+  business_rule_ref: 'semantic_rule_ref',
+  business_rules: 'semantic_rules',
+};
+function replaceBusinessTerms(value, toBusiness) {
+  if (typeof value !== 'string') return value;
+  if (toBusiness) {
+    return value
+      .replaceAll('semantic_rule_id', 'business_rule_id')
+      .replaceAll('semantic_rule_ref', 'business_rule_ref')
+      .replaceAll('semantic rules', 'business rules')
+      .replaceAll('Semantic Rules', 'Business Rules')
+      .replaceAll('semantic rule', 'business rule')
+      .replaceAll('Semantic Rule', 'Business Rule');
+  }
+  return value
+    .replaceAll('business_rule_id', 'semantic_rule_id')
+    .replaceAll('business_rule_ref', 'semantic_rule_ref')
+    .replaceAll('business rules', 'semantic rules')
+    .replaceAll('Business Rules', 'Semantic Rules')
+    .replaceAll('business rule', 'semantic rule')
+    .replaceAll('Business Rule', 'Semantic Rule');
+}
+function renameRuleJson(value, keyMap, toBusiness) {
+  if (Array.isArray(value)) return value.map(item => renameRuleJson(item, keyMap, toBusiness));
+  if (value && typeof value === 'object') {
+    const out = {};
+    for (const [key, item] of Object.entries(value)) {
+      out[keyMap[key] || key] = renameRuleJson(item, keyMap, toBusiness);
+    }
+    return out;
+  }
+  return replaceBusinessTerms(value, toBusiness);
+}
+function businessRuleJsonForDisplay(rule) {
+  return renameRuleJson(stripPrivate(rule), BUSINESS_JSON_KEY_MAP, true);
+}
+function schemaRuleJsonFromDisplay(rule) {
+  return renameRuleJson(rule, SCHEMA_JSON_KEY_MAP, false);
 }
 function setPath(obj, path, value) {
   const parts = path.split('.');
@@ -1504,7 +1617,7 @@ function updateAtomicFieldFromInput(event) {
 function applyRawJson(event) {
   const idx = Number(event.target.dataset.applyJson);
   const textarea = document.querySelector(`[data-json-index="${idx}"]`);
-  state.semantic_rules[idx] = JSON.parse(textarea.value);
+  state.semantic_rules[idx] = schemaRuleJsonFromDisplay(JSON.parse(textarea.value));
   renderRules();
 }
 async function uploadSource() {
@@ -1531,31 +1644,15 @@ async function extractSource() {
     doc_title: $('docTitle').value,
     doc_version: $('docVersion').value,
   });
-  setStatus(`Extracted ${data.semantic_rule_count} semantic rules.\nSections:\n` + (data.sections || []).join('\n'));
+  setStatus(`Extracted ${data.semantic_rule_count} business rules.\nSections:\n` + (data.sections || []).join('\n'));
   await refreshRules();
-}
-async function loadArtifactFolder() {
-  const files = Array.from($('artifactFolder').files || []);
-  if (!files.length) throw new Error('Choose an artifact folder first.');
-  setStatus('Reading artifact folder...');
-  const payload = { files: [] };
-  for (const file of files) {
-    payload.files.push({
-      filename: file.name,
-      relative_path: file.webkitRelativePath || file.name,
-      content_base64: await fileToBase64(file),
-    });
-  }
-  await postJson('/api/rule-workflow/upload-artifacts', payload);
-  await refreshRules();
-  setStatus('Artifact folder loaded.');
 }
 async function saveRules() {
   setStatus('Saving reviewed rules...');
   const payload = { atomic_rules: state.atomic_rules, semantic_rules: state.semantic_rules.map(stripPrivate) };
   const data = await postJson('/api/rule-workflow/rules/save', payload);
   const label = (data.history_snapshot && data.history_snapshot.display_label) || 'new iteration';
-  setStatus(`Saved as ${label}. Semantic changes=${data.semantic_diff_count || 0}; rule split changes=${data.atomic_diff_count || 0}.`);
+  setStatus(`Saved as ${label}. Business rule changes=${data.semantic_diff_count || 0}.`);
   await refreshRules();
 }
 async function viewHistory(attemptId) {
@@ -1628,12 +1725,11 @@ function renderReviewRows() {
   if (!sessionPayload) return;
   $('reviewRows').innerHTML = sessionPayload.table_rows.map(row => {
     const review = reviewMap.get(row.case_id) || {};
-    return `<tr data-overall="${esc(row.overall)}" data-coverage="${esc(row.coverage)}" data-blocking="${String(row.checker_blocking)}">
+    return `<tr data-coverage="${esc(row.coverage)}" data-blocking="${String(row.checker_blocking)}">
       <td>${esc(row.semantic_rule_id)}</td>
       <td>${esc(row.case_id)}</td>
       <td>${esc(row.feature)}</td>
       <td>${esc(row.case_type)}</td>
-      <td>${esc(row.overall)}</td>
       <td>${esc(row.coverage)}</td>
       <td>${checkerSuggestionHtml(!!row.checker_blocking)}</td>
       <td>${esc(row.blocking_reason)}</td>
@@ -1698,11 +1794,10 @@ function updateSaveRerunState() {
   if (btn) btn.disabled = !hasRerunEdits();
 }
 function applyReviewFilters() {
-  const overall = $('overallFilter').value;
   const coverage = $('coverageFilter').value;
   const blocking = $('blockingFilter').value;
   for (const row of document.querySelectorAll('#reviewRows tr')) {
-    const show = (!overall || row.dataset.overall === overall) && (!coverage || row.dataset.coverage === coverage) && (!blocking || row.dataset.blocking === blocking);
+    const show = (!coverage || row.dataset.coverage === coverage) && (!blocking || row.dataset.blocking === blocking);
     row.style.display = show ? '' : 'none';
   }
 }
@@ -1794,6 +1889,7 @@ async function goFromTestCaseToBdd() {
     return;
   }
   if (sessionPayload) await postJson('/api/reviews/save', currentReviewPayload());
+  markWorkflowReached('bdd');
   setWorkflowStep('bdd');
   await generateBdd();
 }
@@ -1812,6 +1908,7 @@ function renderBddPanel(data) {
     el.innerHTML = '<section class="band muted">BDD has not been generated for the current Test Case output. Use Next Step from Test Case to generate BDD.</section>';
     return;
   }
+  markWorkflowReached('bdd');
   el.innerHTML = data.scenarios_by_rule.map(rule => `
     <div class="bdd-rule-block">
       <strong>${esc(rule.semantic_rule_id)} - ${esc(rule.feature_title)}</strong>
@@ -1855,6 +1952,7 @@ async function pollBddJob(jobId) {
   renderInlineProgress('bddProgressCard', 100, 'BDD generated. Review BDD below.');
   $('bddStatus').textContent = `BDD generated. ${fallbackNote}`;
   updateBddModeNotice(fallbackNote);
+  markWorkflowReached('bdd');
   scriptsPayload = null;
   await loadBddData();
 }
@@ -1875,23 +1973,42 @@ async function saveBddEdits() {
 }
 async function saveBddAndNext() {
   if (bddDirty) await saveBddEdits();
+  markWorkflowReached('scripts');
   nextWorkflowStep();
 }
 function loadScriptsData() {
   fetch('/api/scripts').then(r => r.json()).then(data => {
     scriptsPayload = data;
+    if (data.has_registry) markWorkflowReached('scripts');
     renderScriptsPanel(data);
   }).catch(err => { $('scriptsContent').innerHTML = `<section class="band status-failed">${esc(err.message)}</section>`; });
+}
+function scriptStatusLabel(type) {
+  return type === 'unmatched' ? 'need to create' : (type || 'need to create');
+}
+function scriptCodeBlock(step, attrs) {
+  const code = step.code || '';
+  const source = step.script_source ? ` (${step.script_source})` : '';
+  const disabled = code ? '' : ' disabled';
+  return `<details class="script-code"><summary>Script Code${esc(source)}</summary>
+    ${step.endpoint_name ? `<div class="muted">endpoint: ${esc(step.endpoint_name)}</div>` : ''}
+    <textarea class="script-code-textarea" ${attrs}${disabled}>${esc(code || 'Script code has not been generated yet.')}</textarea>
+  </details>`;
 }
 function renderScriptsPanel(data) {
   const el = $('scriptsContent');
   if (!data.has_registry) { el.innerHTML = '<section class="band muted">No step registry linked.</section>'; return; }
   const s = data.summary || {};
+  const pendingCount = ((data.steps_by_type && ['given','when','then'].flatMap(t => data.steps_by_type[t] || []).filter(st => st.match_type === 'unmatched' && !st.code).length) || 0)
+    + ((data.gaps || []).filter(g => !g.code).length);
+  $('createScriptsAiBtn').disabled = pendingCount === 0 || !!data.generated_scripts_path;
+  scriptsDirty = false;
+  updateScriptsSaveButton();
   el.innerHTML = `<div class="scripts-metrics">
     <div class="scripts-metric"><strong>${s.total_steps || 0}</strong><span>Total Steps</span></div>
     <div class="scripts-metric"><strong>${s.exact_matches || 0}</strong><span>Exact Matches</span></div>
     <div class="scripts-metric"><strong>${s.parameterized_matches || 0}</strong><span>Parameterized</span></div>
-    <div class="scripts-metric"><strong>${s.unmatched || 0}</strong><span>Unmatched</span></div>
+    <div class="scripts-metric"><strong>${s.unmatched || 0}</strong><span>Need to Create</span></div>
     <div class="scripts-metric"><strong>${s.candidates || 0}</strong><span>Candidates</span></div>
   </div>
   ${['given','when','then'].map(type => {
@@ -1899,31 +2016,94 @@ function renderScriptsPanel(data) {
     if (!steps.length) return '';
     return `<div class="step-block"><h3>${type.toUpperCase()}</h3>${steps.map((step, idx) => `
       <div class="step-item ${step.match_type || ''}">
-        <span class="step-item-badge">${esc(step.match_type || 'unmatched')}</span>
+        <span class="step-item-badge">${esc(scriptStatusLabel(step.match_type))}</span>
         <textarea class="step-textarea" data-step-type="${type}" data-step-index="${idx}" rows="2">${esc(step.step_text || '')}</textarea>
+        ${scriptCodeBlock(step, `data-script-step-type="${type}" data-script-step-index="${idx}"`)}
       </div>`).join('')}</div>`;
   }).join('')}
   ${(data.gaps && data.gaps.length) ? `<div class="step-block"><h3>GAPS (${data.gaps.length})</h3>${data.gaps.map((g, idx) => `
     <div class="step-item unmatched">
-      <span class="step-item-badge">GAP</span>
+      <span class="step-item-badge">need to create</span>
       <textarea class="step-textarea" data-gap-index="${idx}" data-step-type="${esc(g.step_type || '')}" rows="2">${esc(g.step_text || '')}</textarea>
+      ${scriptCodeBlock(g, `data-script-gap-index="${idx}" data-script-step-type="${esc(g.step_type || '')}"`)}
     </div>`).join('')}</div>` : ''}`;
+  document.querySelectorAll('#scriptsContent .step-textarea, #scriptsContent .script-code-textarea').forEach(el => {
+    el.addEventListener('input', markScriptsDirty);
+    el.addEventListener('change', markScriptsDirty);
+  });
 }
-async function saveScriptsEdits() {
+function markScriptsDirty() {
+  scriptsDirty = true;
+  updateScriptsSaveButton();
+}
+function updateScriptsSaveButton() {
+  const btn = $('saveScriptsBtn');
+  if (!btn) return;
+  btn.classList.toggle('hidden', !scriptsDirty);
+}
+function collectScriptsEdits() {
   const edits = [];
   document.querySelectorAll('#scriptsContent .step-textarea[data-step-type]:not([data-gap-index])').forEach(ta => {
-    edits.push({ step_type: ta.dataset.stepType, step_index: parseInt(ta.dataset.stepIndex || '0', 10), step_text: ta.value });
+    const selector = `.script-code-textarea[data-script-step-type="${ta.dataset.stepType}"][data-script-step-index="${ta.dataset.stepIndex}"]`;
+    const codeEl = document.querySelector(selector);
+    edits.push({ step_type: ta.dataset.stepType, step_index: parseInt(ta.dataset.stepIndex || '0', 10), step_text: ta.value, code: codeEl && !codeEl.disabled ? codeEl.value : '' });
   });
   document.querySelectorAll('#scriptsContent .step-textarea[data-gap-index]').forEach(ta => {
-    edits.push({ is_gap: true, gap_index: parseInt(ta.dataset.gapIndex || '0', 10), step_type: ta.dataset.stepType, step_text: ta.value });
+    const selector = `.script-code-textarea[data-script-gap-index="${ta.dataset.gapIndex}"]`;
+    const codeEl = document.querySelector(selector);
+    edits.push({ is_gap: true, gap_index: parseInt(ta.dataset.gapIndex || '0', 10), step_type: ta.dataset.stepType, step_text: ta.value, code: codeEl && !codeEl.disabled ? codeEl.value : '' });
   });
+  return edits;
+}
+async function saveScriptsEdits({ reload = true, silent = false } = {}) {
+  const edits = collectScriptsEdits();
+  if (!edits.length) {
+    scriptsDirty = false;
+    updateScriptsSaveButton();
+    return {};
+  }
   const result = await postJson('/api/scripts/save', { edits });
-  $('scriptsStatus').textContent = `Saved scripts edits.`;
+  scriptsDirty = false;
+  updateScriptsSaveButton();
+  if (!silent) $('scriptsStatus').textContent = `Saved scripts edits.`;
   scriptsPayload = null;
-  if (result.refreshed_step_registry_path) loadScriptsData();
+  if (reload && result.refreshed_step_registry_path) loadScriptsData();
+  return result;
+}
+async function createScriptsByAi() {
+  $('scriptsProgressCard').classList.remove('hidden');
+  renderInlineProgress('scriptsProgressCard', 5, 'Starting Scripts AI generation');
+  $('scriptsStatus').textContent = 'Starting Scripts AI generation...';
+  $('createScriptsAiBtn').disabled = true;
+  $('saveScriptsBtn').classList.add('hidden');
+  const data = await postJson('/api/scripts/create-by-ai', {});
+  pollScriptsAiJob(data.job_id);
+}
+async function pollScriptsAiJob(jobId) {
+  const response = await fetch(`/api/status/${encodeURIComponent(jobId)}`);
+  const payload = await response.json();
+  if (payload.status === 'failed') {
+    $('scriptsProgressCard').innerHTML = `<div class="status-failed">${esc(payload.error || 'Scripts generation failed.')}</div>`;
+    $('scriptsStatus').textContent = payload.error || 'Scripts generation failed.';
+    $('createScriptsAiBtn').disabled = false;
+    return;
+  }
+  if (payload.status !== 'succeeded') {
+    const phase = payload.phase || payload.status || 'queued';
+    const progress = SCRIPTS_PROGRESS[phase] || 10;
+    renderInlineProgress('scriptsProgressCard', progress, SCRIPTS_LABEL[phase] || phase);
+    $('scriptsStatus').textContent = `${SCRIPTS_LABEL[phase] || phase} - ${progress}%`;
+    setTimeout(() => pollScriptsAiJob(jobId), 1500);
+    return;
+  }
+  const result = payload.result || {};
+  renderInlineProgress('scriptsProgressCard', 100, `Generated ${result.generated_count || 0} scripts`);
+  $('scriptsStatus').textContent = `Generated ${result.generated_count || 0} scripts. Review or edit the code. Edits are saved by Save or Next Step.`;
+  await loadScriptsData();
 }
 async function saveScriptsAndNext() {
-  await saveScriptsEdits();
+  await saveScriptsEdits({ reload: false, silent: true });
+  markWorkflowReached('finalize');
   nextWorkflowStep();
 }
 async function finalizeWorkflow() {
@@ -1943,6 +2123,7 @@ async function generateCases() {
   await saveRules();
   casesGenerating = true;
   casesGenerated = false;
+  markWorkflowReached('test_case');
   $('ruleNextBtn').disabled = true;
   setWorkflowStep('test_case');
   renderInlineProgress('resultCard', 5, 'Starting test case generation');
@@ -1964,6 +2145,7 @@ async function pollGenerate(jobId) {
   }
   casesGenerating = false;
   casesGenerated = true;
+  markWorkflowReached('test_case');
   $('ruleNextBtn').disabled = false;
   await refreshRules();
   await refreshSession();
@@ -1971,12 +2153,29 @@ async function pollGenerate(jobId) {
   setStatus('Test cases generated.');
 }
 
+const initialStageFromUrl = stageFromLocation();
+if (initialStageFromUrl) {
+  activeWorkflowStep = initialStageFromUrl;
+} else {
+  activeWorkflowStep = 'rule_extraction';
+  history.replaceState({ workflowStep: 'rule_extraction' }, '', '#rule_extraction');
+}
+document.querySelectorAll('[data-workflow-step]').forEach(el => {
+  el.addEventListener('click', () => setWorkflowStep(el.dataset.workflowStep));
+});
+window.addEventListener('popstate', () => {
+  const stage = stageFromLocation() || 'rule_extraction';
+  setWorkflowStep(stage, { push: false });
+});
+window.addEventListener('hashchange', () => {
+  const stage = stageFromLocation() || 'rule_extraction';
+  if (stage !== activeWorkflowStep) setWorkflowStep(stage, { push: false });
+});
+
 $('uploadBtn').addEventListener('click', () => uploadSource().catch(err => setStatus(err.message)));
 $('extractBtn').addEventListener('click', () => extractSource().catch(err => setStatus(err.message)));
-$('artifactBtn').addEventListener('click', () => loadArtifactFolder().catch(err => setStatus(err.message)));
 $('saveRulesBtn').addEventListener('click', () => saveRules().catch(err => setStatus(err.message)));
 $('ruleNextBtn').addEventListener('click', () => generateCases().catch(err => setStatus(err.message)));
-$('overallFilter').addEventListener('change', applyReviewFilters);
 $('coverageFilter').addEventListener('change', applyReviewFilters);
 $('blockingFilter').addEventListener('change', applyReviewFilters);
 $('saveRerunBtn').addEventListener('click', () => saveAndRerun().catch(err => renderResult('Rerun failed', `<pre>${esc(err.message)}</pre>`, 'status-failed')));
@@ -1985,6 +2184,7 @@ $('auditBtn').addEventListener('click', () => openAuditTrail().catch(err => rend
 $('testCaseNextBtn').addEventListener('click', () => goFromTestCaseToBdd().catch(err => renderResult('Next Step failed', `<pre>${esc(err.message)}</pre>`, 'status-failed')));
 $('saveBddBtn').addEventListener('click', () => saveBddEdits().catch(err => { $('bddStatus').textContent = err.message; }));
 $('bddNextBtn').addEventListener('click', () => saveBddAndNext().catch(err => { $('bddStatus').textContent = err.message; }));
+$('createScriptsAiBtn').addEventListener('click', () => createScriptsByAi().catch(err => { $('scriptsStatus').textContent = err.message; $('createScriptsAiBtn').disabled = false; }));
 $('saveScriptsBtn').addEventListener('click', () => saveScriptsEdits().catch(err => { $('scriptsStatus').textContent = err.message; }));
 $('scriptsNextBtn').addEventListener('click', () => saveScriptsAndNext().catch(err => { $('scriptsStatus').textContent = err.message; }));
 $('finalizeWorkflowBtn').addEventListener('click', () => finalizeWorkflow());

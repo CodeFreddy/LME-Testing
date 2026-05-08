@@ -98,6 +98,7 @@ def build_parser() -> argparse.ArgumentParser:
     bdd.add_argument("--output-dir", default="runs/bdd")
     bdd.add_argument("--limit", type=int, default=None)
     bdd.add_argument("--batch-size", type=int, default=1)
+    bdd.add_argument("--bdd-concurrency", type=int, default=1)
     bdd.add_argument(
         "--bdd-generation-mode",
         choices=["llm", "llm-with-fallback", "deterministic"],
@@ -271,6 +272,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     rule_workflow_session.add_argument("--maker-concurrency", type=int, default=1)
     rule_workflow_session.add_argument("--checker-concurrency", type=int, default=1)
+    rule_workflow_session.add_argument("--bdd-concurrency", type=int, default=1)
     rule_workflow_session.add_argument("--host", default="127.0.0.1")
     rule_workflow_session.add_argument("--port", type=int, default=8765)
 
@@ -451,6 +453,7 @@ def main() -> int:
             resume_from=Path(args.resume_from) if args.resume_from else None,
             human_scripts_edits_path=Path(args.human_scripts_edits) if args.human_scripts_edits else None,
             bdd_generation_mode=args.bdd_generation_mode,
+            concurrency=args.bdd_concurrency,
         )
     elif args.command == "bdd-export":
         result = run_bdd_export(
@@ -601,6 +604,7 @@ def main() -> int:
             bdd_generation_mode=args.bdd_generation_mode,
             maker_concurrency=args.maker_concurrency,
             checker_concurrency=args.checker_concurrency,
+            bdd_concurrency=args.bdd_concurrency,
         )
         server, url = serve_rule_workflow_session(manager)
         print(json.dumps({"session_id": manager.session_id, "url": url, "output_dir": str(manager.session_dir)}, ensure_ascii=False, indent=2))

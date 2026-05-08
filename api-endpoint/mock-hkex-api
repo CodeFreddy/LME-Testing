@@ -1,0 +1,30 @@
+{
+  "title": "Mock HKEX API",
+  "description": "Demo Swagger-style API catalog for an already-running system under test.",
+  "endpoints": [
+    {
+      "name": "getInitialMarginRiskParameters",
+      "method": "GET",
+      "path": "/api/margin/risk-parameters",
+      "description": "Returns configured initial margin risk parameters, including the rounding parameter used by market-risk-component margin calculations."
+    },
+    {
+      "name": "calculateAggregatedMarketRiskMargin",
+      "method": "POST",
+      "path": "/api/margin/market-risk/aggregate",
+      "description": "Calculates aggregated market-risk-component margin from submitted margin components and applies the configured rounding parameter."
+    },
+    {
+      "name": "getMarginCreditBalance",
+      "method": "GET",
+      "path": "/api/margin/credits/{clearingParticipantId}",
+      "description": "Returns available margin credit balance for a clearing participant."
+    },
+    {
+      "name": "applyMarginCredit",
+      "method": "POST",
+      "path": "/api/margin/credits/apply",
+      "description": "Applies available margin credit to an initial margin requirement and returns the adjusted payable amount."
+    }
+  ]
+}

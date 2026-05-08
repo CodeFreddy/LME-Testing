@@ -1,0 +1,874 @@
+{
+  "edits": [
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-positive-01",
+      "step_type": "given",
+      "step_index": 0,
+      "step_text": "Portfolio margin is 10,000,000"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-positive-01",
+      "step_type": "given",
+      "step_index": 1,
+      "step_text": "Flat rate margin is 15,180,000"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-positive-01",
+      "step_type": "given",
+      "step_index": 2,
+      "step_text": "Liquidation risk add-on is 266,865"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-positive-01",
+      "step_type": "given",
+      "step_index": 3,
+      "step_text": "Structured product add-on is 550,000"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-positive-01",
+      "step_type": "given",
+      "step_index": 4,
+      "step_text": "Corporate action position margin is 2,500,000"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-positive-01",
+      "step_type": "given",
+      "step_index": 5,
+      "step_text": "Holiday add-on is 18,433,039"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-positive-01",
+      "step_type": "given",
+      "step_index": 6,
+      "step_text": "Rounding parameter in Initial Margin Risk Parameter File is 10,000"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-positive-01",
+      "step_type": "when",
+      "step_index": 0,
+      "step_text": "the clearing participant calculates the aggregated market-risk-component margin"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-positive-01",
+      "step_type": "when",
+      "step_index": 1,
+      "step_text": "the system applies rounding up to the nearest 10,000"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-positive-01",
+      "step_type": "then",
+      "step_index": 0,
+      "step_text": "the aggregated margin before rounding is calculated as 46,929,904"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-positive-01",
+      "step_type": "then",
+      "step_index": 1,
+      "step_text": "the rounded aggregated market-risk-component margin is 46,930,000"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-boundary-01",
+      "step_type": "given",
+      "step_index": 0,
+      "step_text": "Aggregated margin before rounding is exactly 46,930,000"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-boundary-01",
+      "step_type": "given",
+      "step_index": 1,
+      "step_text": "Rounding parameter in Initial Margin Risk Parameter File is 10,000"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-boundary-01",
+      "step_type": "when",
+      "step_index": 0,
+      "step_text": "the system applies rounding up to the nearest 10,000"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-boundary-01",
+      "step_type": "then",
+      "step_index": 0,
+      "step_text": "the rounded aggregated market-risk-component margin remains 46,930,000"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-boundary-01",
+      "step_type": "then",
+      "step_index": 1,
+      "step_text": "no upward adjustment is applied since value is already at the rounding boundary"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-data_validation-01",
+      "step_type": "given",
+      "step_index": 0,
+      "step_text": "A clearing participant portfolio with margin calculation request"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-data_validation-01",
+      "step_type": "when",
+      "step_index": 0,
+      "step_text": "the system validates the presence of all margin components"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-data_validation-01",
+      "step_type": "when",
+      "step_index": 1,
+      "step_text": "the system validates the rounding parameter from the Initial Margin Risk Parameter File"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-data_validation-01",
+      "step_type": "then",
+      "step_index": 0,
+      "step_text": "Portfolio margin is present and valid"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-data_validation-01",
+      "step_type": "then",
+      "step_index": 1,
+      "step_text": "Flat rate margin is present and valid"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-data_validation-01",
+      "step_type": "then",
+      "step_index": 2,
+      "step_text": "Liquidation risk add-on is present and valid"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-data_validation-01",
+      "step_type": "then",
+      "step_index": 3,
+      "step_text": "Structured product add-on is present and valid"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-data_validation-01",
+      "step_type": "then",
+      "step_index": 4,
+      "step_text": "Corporate action position margin is present and valid"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-data_validation-01",
+      "step_type": "then",
+      "step_index": 5,
+      "step_text": "Holiday add-on is present and valid"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_1-01-data_validation-01",
+      "step_type": "then",
+      "step_index": 6,
+      "step_text": "Rounding parameter is retrieved from the Initial Margin Risk Parameter File"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_3-01-positive-01",
+      "step_type": "given",
+      "step_index": 0,
+      "step_text": "Net margin before credit is 46,930,000"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_3-01-positive-01",
+      "step_type": "given",
+      "step_index": 1,
+      "step_text": "Margin credit is 5,000,000"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_3-01-positive-01",
+      "step_type": "when",
+      "step_index": 0,
+      "step_text": "the system calculates net margin after credit"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_3-01-positive-01",
+      "step_type": "when",
+      "step_index": 1,
+      "step_text": "the system applies the Maximum[0, (Net margin – Margin credit)] formula"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_3-01-positive-01",
+      "step_type": "then",
+      "step_index": 0,
+      "step_text": "net margin after credit is calculated as 41,930,000"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_3-01-boundary-01",
+      "step_type": "given",
+      "step_index": 0,
+      "step_text": "Net margin before credit is exactly 5,000,000"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_3-01-boundary-01",
+      "step_type": "given",
+      "step_index": 1,
+      "step_text": "Margin credit is 5,000,000"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_3-01-boundary-01",
+      "step_type": "when",
+      "step_index": 0,
+      "step_text": "the system calculates net margin after credit"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_3-01-boundary-01",
+      "step_type": "when",
+      "step_index": 1,
+      "step_text": "the system applies the Maximum[0, (Net margin – Margin credit)] formula"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_3-01-boundary-01",
+      "step_type": "then",
+      "step_index": 0,
+      "step_text": "net margin after credit is 0"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_3-01-boundary-01",
+      "step_type": "then",
+      "step_index": 1,
+      "step_text": "the Maximum function ensures the result is not negative"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_3-01-data_validation-01",
+      "step_type": "given",
+      "step_index": 0,
+      "step_text": "A clearing participant with margin calculation request"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_3-01-data_validation-01",
+      "step_type": "when",
+      "step_index": 0,
+      "step_text": "the system validates the margin credit value"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_3-01-data_validation-01",
+      "step_type": "when",
+      "step_index": 1,
+      "step_text": "the system validates the Maximum function logic for net margin calculation"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_3-01-data_validation-01",
+      "step_type": "then",
+      "step_index": 0,
+      "step_text": "margin credit is a valid positive numeric value"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_3-01-data_validation-01",
+      "step_type": "then",
+      "step_index": 1,
+      "step_text": "the Maximum[0, (Net margin – Margin credit)] formula is correctly implemented"
+    },
+    {
+      "scenario_id": "TC-SR-IMHK-3_2_5_3-01-data_validation-01",
+      "step_type": "then",
+      "step_index": 2,
+      "step_text": "net margin after credit is never negative regardless of input values"
+    },
+    {
+      "step_type": "given",
+      "step_index": 0,
+      "step_text": "Portfolio margin is 10,000,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "original_step_text": "Portfolio margin is 10,000,000",
+      "original_step_pattern": "Portfolio margin is \\d+,\\d+,\\d+"
+    },
+    {
+      "step_type": "given",
+      "step_index": 1,
+      "step_text": "Flat rate margin is 15,180,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "original_step_text": "Flat rate margin is 15,180,000",
+      "original_step_pattern": "Flat rate margin is \\d+,\\d+,\\d+"
+    },
+    {
+      "step_type": "given",
+      "step_index": 2,
+      "step_text": "Liquidation risk add-on is 266,865",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "original_step_text": "Liquidation risk add-on is 266,865",
+      "original_step_pattern": "Liquidation risk add-on is \\d+,\\d+"
+    },
+    {
+      "step_type": "given",
+      "step_index": 3,
+      "step_text": "Structured product add-on is 550,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "original_step_text": "Structured product add-on is 550,000",
+      "original_step_pattern": "Structured product add-on is \\d+,\\d+"
+    },
+    {
+      "step_type": "given",
+      "step_index": 4,
+      "step_text": "Corporate action position margin is 2,500,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "original_step_text": "Corporate action position margin is 2,500,000",
+      "original_step_pattern": "Corporate action position margin is \\d+,\\d+,\\d+"
+    },
+    {
+      "step_type": "given",
+      "step_index": 5,
+      "step_text": "Holiday add-on is 18,433,039",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "original_step_text": "Holiday add-on is 18,433,039",
+      "original_step_pattern": "Holiday add-on is \\d+,\\d+,\\d+"
+    },
+    {
+      "step_type": "given",
+      "step_index": 6,
+      "step_text": "Rounding parameter in Initial Margin Risk Parameter File is 10,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "original_step_text": "Rounding parameter in Initial Margin Risk Parameter File is 10,000",
+      "original_step_pattern": "Rounding parameter in Initial Margin Risk Parameter File is \\d+,\\d+"
+    },
+    {
+      "step_type": "given",
+      "step_index": 7,
+      "step_text": "Aggregated margin before rounding is exactly 46,930,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-boundary-01"
+      ],
+      "original_step_text": "Aggregated margin before rounding is exactly 46,930,000",
+      "original_step_pattern": "Aggregated margin before rounding is exactly \\d+,\\d+,\\d+"
+    },
+    {
+      "step_type": "given",
+      "step_index": 8,
+      "step_text": "A clearing participant portfolio with margin calculation request",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "original_step_text": "A clearing participant portfolio with margin calculation request",
+      "original_step_pattern": "(?:a|an|the) clearing participant portfolio with margin calculation request"
+    },
+    {
+      "step_type": "given",
+      "step_index": 9,
+      "step_text": "Net margin before credit is 46,930,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-positive-01"
+      ],
+      "original_step_text": "Net margin before credit is 46,930,000",
+      "original_step_pattern": "Net margin before credit is \\d+,\\d+,\\d+"
+    },
+    {
+      "step_type": "given",
+      "step_index": 10,
+      "step_text": "Margin credit is 5,000,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-positive-01"
+      ],
+      "original_step_text": "Margin credit is 5,000,000",
+      "original_step_pattern": "Margin credit is \\d+,\\d+,\\d+"
+    },
+    {
+      "step_type": "given",
+      "step_index": 11,
+      "step_text": "Net margin before credit is exactly 5,000,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-boundary-01"
+      ],
+      "original_step_text": "Net margin before credit is exactly 5,000,000",
+      "original_step_pattern": "Net margin before credit is exactly \\d+,\\d+,\\d+"
+    },
+    {
+      "step_type": "given",
+      "step_index": 12,
+      "step_text": "A clearing participant with margin calculation request",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "original_step_text": "A clearing participant with margin calculation request",
+      "original_step_pattern": "(?:a|an|the) clearing participant with margin calculation request"
+    },
+    {
+      "step_type": "when",
+      "step_index": 0,
+      "step_text": "the clearing participant calculates the aggregated market-risk-component margin",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "original_step_text": "the clearing participant calculates the aggregated market-risk-component margin",
+      "original_step_pattern": "(?:a|an|the) clearing participant calculates (?:a|an|the) aggregated market-risk-component margin"
+    },
+    {
+      "step_type": "when",
+      "step_index": 1,
+      "step_text": "the system applies rounding up to the nearest 10,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "original_step_text": "the system applies rounding up to the nearest 10,000",
+      "original_step_pattern": "(?:a|an|the) system applies rounding up to (?:a|an|the) nearest \\d+,\\d+"
+    },
+    {
+      "step_type": "when",
+      "step_index": 2,
+      "step_text": "the system validates the presence of all margin components",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "original_step_text": "the system validates the presence of all margin components",
+      "original_step_pattern": "(?:a|an|the) system validates (?:a|an|the) presence of all margin components"
+    },
+    {
+      "step_type": "when",
+      "step_index": 3,
+      "step_text": "the system validates the rounding parameter from the Initial Margin Risk Parameter File",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "original_step_text": "the system validates the rounding parameter from the Initial Margin Risk Parameter File",
+      "original_step_pattern": "(?:a|an|the) system validates (?:a|an|the) rounding parameter from (?:a|an|the) Initial Margin Risk Parameter File"
+    },
+    {
+      "step_type": "when",
+      "step_index": 4,
+      "step_text": "the system calculates net margin after credit",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-positive-01"
+      ],
+      "original_step_text": "the system calculates net margin after credit",
+      "original_step_pattern": "(?:a|an|the) system calculates net margin after credit"
+    },
+    {
+      "step_type": "when",
+      "step_index": 5,
+      "step_text": "the system applies the Maximum[0, (Net margin – Margin credit)] formula",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-positive-01"
+      ],
+      "original_step_text": "the system applies the Maximum[0, (Net margin – Margin credit)] formula",
+      "original_step_pattern": "(?:a|an|the) system applies (?:a|an|the) Maximum[\\d+, (Net margin – Margin credit)] formula"
+    },
+    {
+      "step_type": "when",
+      "step_index": 6,
+      "step_text": "the system validates the margin credit value",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "original_step_text": "the system validates the margin credit value",
+      "original_step_pattern": "(?:a|an|the) system validates (?:a|an|the) margin credit value"
+    },
+    {
+      "step_type": "when",
+      "step_index": 7,
+      "step_text": "the system validates the Maximum function logic for net margin calculation",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "original_step_text": "the system validates the Maximum function logic for net margin calculation",
+      "original_step_pattern": "(?:a|an|the) system validates (?:a|an|the) Maximum function logic for net margin calculation"
+    },
+    {
+      "step_type": "then",
+      "step_index": 0,
+      "step_text": "the aggregated margin before rounding is calculated as 46,929,904",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "original_step_text": "the aggregated margin before rounding is calculated as 46,929,904",
+      "original_step_pattern": "(?:a|an|the) aggregated margin before rounding is calculated as \\d+,\\d+,\\d+"
+    },
+    {
+      "step_type": "then",
+      "step_index": 1,
+      "step_text": "the rounded aggregated market-risk-component margin is 46,930,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "original_step_text": "the rounded aggregated market-risk-component margin is 46,930,000",
+      "original_step_pattern": "(?:a|an|the) rounded aggregated market-risk-component margin is \\d+,\\d+,\\d+"
+    },
+    {
+      "step_type": "then",
+      "step_index": 2,
+      "step_text": "the rounded aggregated market-risk-component margin remains 46,930,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-boundary-01"
+      ],
+      "original_step_text": "the rounded aggregated market-risk-component margin remains 46,930,000",
+      "original_step_pattern": "(?:a|an|the) rounded aggregated market-risk-component margin remains \\d+,\\d+,\\d+"
+    },
+    {
+      "step_type": "then",
+      "step_index": 3,
+      "step_text": "no upward adjustment is applied since value is already at the rounding boundary",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-boundary-01"
+      ],
+      "original_step_text": "no upward adjustment is applied since value is already at the rounding boundary",
+      "original_step_pattern": "no upward adjustment is applied since value is already at (?:a|an|the) rounding boundary"
+    },
+    {
+      "step_type": "then",
+      "step_index": 4,
+      "step_text": "Portfolio margin is present and valid",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "original_step_text": "Portfolio margin is present and valid",
+      "original_step_pattern": "Portfolio margin is present and valid"
+    },
+    {
+      "step_type": "then",
+      "step_index": 5,
+      "step_text": "Flat rate margin is present and valid",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "original_step_text": "Flat rate margin is present and valid",
+      "original_step_pattern": "Flat rate margin is present and valid"
+    },
+    {
+      "step_type": "then",
+      "step_index": 6,
+      "step_text": "Liquidation risk add-on is present and valid",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "original_step_text": "Liquidation risk add-on is present and valid",
+      "original_step_pattern": "Liquidation risk add-on is present and valid"
+    },
+    {
+      "step_type": "then",
+      "step_index": 7,
+      "step_text": "Structured product add-on is present and valid",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "original_step_text": "Structured product add-on is present and valid",
+      "original_step_pattern": "Structured product add-on is present and valid"
+    },
+    {
+      "step_type": "then",
+      "step_index": 8,
+      "step_text": "Corporate action position margin is present and valid",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "original_step_text": "Corporate action position margin is present and valid",
+      "original_step_pattern": "Corporate action position margin is present and valid"
+    },
+    {
+      "step_type": "then",
+      "step_index": 9,
+      "step_text": "Holiday add-on is present and valid",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "original_step_text": "Holiday add-on is present and valid",
+      "original_step_pattern": "Holiday add-on is present and valid"
+    },
+    {
+      "step_type": "then",
+      "step_index": 10,
+      "step_text": "Rounding parameter is retrieved from the Initial Margin Risk Parameter File",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "original_step_text": "Rounding parameter is retrieved from the Initial Margin Risk Parameter File",
+      "original_step_pattern": "Rounding parameter is retrieved from (?:a|an|the) Initial Margin Risk Parameter File"
+    },
+    {
+      "step_type": "then",
+      "step_index": 11,
+      "step_text": "net margin after credit is calculated as 41,930,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-positive-01"
+      ],
+      "original_step_text": "net margin after credit is calculated as 41,930,000",
+      "original_step_pattern": "net margin after credit is calculated as \\d+,\\d+,\\d+"
+    },
+    {
+      "step_type": "then",
+      "step_index": 12,
+      "step_text": "net margin after credit is 0",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-boundary-01"
+      ],
+      "original_step_text": "net margin after credit is 0",
+      "original_step_pattern": "net margin after credit is \\d+"
+    },
+    {
+      "step_type": "then",
+      "step_index": 13,
+      "step_text": "the Maximum function ensures the result is not negative",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-boundary-01"
+      ],
+      "original_step_text": "the Maximum function ensures the result is not negative",
+      "original_step_pattern": "(?:a|an|the) Maximum function ensures (?:a|an|the) result is not negative"
+    },
+    {
+      "step_type": "then",
+      "step_index": 14,
+      "step_text": "margin credit is a valid positive numeric value",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "original_step_text": "margin credit is a valid positive numeric value",
+      "original_step_pattern": "margin credit is (?:a|an|the) valid positive numeric value"
+    },
+    {
+      "step_type": "then",
+      "step_index": 15,
+      "step_text": "the Maximum[0, (Net margin – Margin credit)] formula is correctly implemented",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "original_step_text": "the Maximum[0, (Net margin – Margin credit)] formula is correctly implemented",
+      "original_step_pattern": "(?:a|an|the) Maximum[\\d+, (Net margin – Margin credit)] formula is correctly implemented"
+    },
+    {
+      "step_type": "then",
+      "step_index": 16,
+      "step_text": "net margin after credit is never negative regardless of input values",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "original_step_text": "net margin after credit is never negative regardless of input values",
+      "original_step_pattern": "net margin after credit is never negative regardless of input values"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 0,
+      "step_type": "given",
+      "step_text": "Portfolio margin is 10,000,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "original_step_text": "Portfolio margin is 10,000,000",
+      "original_step_pattern": "Portfolio margin is \\d+,\\d+,\\d+"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 1,
+      "step_type": "given",
+      "step_text": "Flat rate margin is 15,180,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "original_step_text": "Flat rate margin is 15,180,000",
+      "original_step_pattern": "Flat rate margin is \\d+,\\d+,\\d+"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 2,
+      "step_type": "given",
+      "step_text": "Corporate action position margin is 2,500,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "original_step_text": "Corporate action position margin is 2,500,000",
+      "original_step_pattern": "Corporate action position margin is \\d+,\\d+,\\d+"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 3,
+      "step_type": "given",
+      "step_text": "Aggregated margin before rounding is exactly 46,930,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-boundary-01"
+      ],
+      "original_step_text": "Aggregated margin before rounding is exactly 46,930,000",
+      "original_step_pattern": "Aggregated margin before rounding is exactly \\d+,\\d+,\\d+"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 4,
+      "step_type": "given",
+      "step_text": "Net margin before credit is 46,930,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-positive-01"
+      ],
+      "original_step_text": "Net margin before credit is 46,930,000",
+      "original_step_pattern": "Net margin before credit is \\d+,\\d+,\\d+"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 5,
+      "step_type": "given",
+      "step_text": "Margin credit is 5,000,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-positive-01"
+      ],
+      "original_step_text": "Margin credit is 5,000,000",
+      "original_step_pattern": "Margin credit is \\d+,\\d+,\\d+"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 6,
+      "step_type": "given",
+      "step_text": "Net margin before credit is exactly 5,000,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-boundary-01"
+      ],
+      "original_step_text": "Net margin before credit is exactly 5,000,000",
+      "original_step_pattern": "Net margin before credit is exactly \\d+,\\d+,\\d+"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 7,
+      "step_type": "when",
+      "step_text": "the clearing participant calculates the aggregated market-risk-component margin",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "original_step_text": "the clearing participant calculates the aggregated market-risk-component margin",
+      "original_step_pattern": "(?:a|an|the) clearing participant calculates (?:a|an|the) aggregated market-risk-component margin"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 8,
+      "step_type": "when",
+      "step_text": "the system validates the presence of all margin components",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "original_step_text": "the system validates the presence of all margin components",
+      "original_step_pattern": "(?:a|an|the) system validates (?:a|an|the) presence of all margin components"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 9,
+      "step_type": "when",
+      "step_text": "the system validates the rounding parameter from the Initial Margin Risk Parameter File",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "original_step_text": "the system validates the rounding parameter from the Initial Margin Risk Parameter File",
+      "original_step_pattern": "(?:a|an|the) system validates (?:a|an|the) rounding parameter from (?:a|an|the) Initial Margin Risk Parameter File"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 10,
+      "step_type": "then",
+      "step_text": "the rounded aggregated market-risk-component margin is 46,930,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-positive-01"
+      ],
+      "original_step_text": "the rounded aggregated market-risk-component margin is 46,930,000",
+      "original_step_pattern": "(?:a|an|the) rounded aggregated market-risk-component margin is \\d+,\\d+,\\d+"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 11,
+      "step_type": "then",
+      "step_text": "the rounded aggregated market-risk-component margin remains 46,930,000",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-boundary-01"
+      ],
+      "original_step_text": "the rounded aggregated market-risk-component margin remains 46,930,000",
+      "original_step_pattern": "(?:a|an|the) rounded aggregated market-risk-component margin remains \\d+,\\d+,\\d+"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 12,
+      "step_type": "then",
+      "step_text": "no upward adjustment is applied since value is already at the rounding boundary",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-boundary-01"
+      ],
+      "original_step_text": "no upward adjustment is applied since value is already at the rounding boundary",
+      "original_step_pattern": "no upward adjustment is applied since value is already at (?:a|an|the) rounding boundary"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 13,
+      "step_type": "then",
+      "step_text": "Portfolio margin is present and valid",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "original_step_text": "Portfolio margin is present and valid",
+      "original_step_pattern": "Portfolio margin is present and valid"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 14,
+      "step_type": "then",
+      "step_text": "Flat rate margin is present and valid",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "original_step_text": "Flat rate margin is present and valid",
+      "original_step_pattern": "Flat rate margin is present and valid"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 15,
+      "step_type": "then",
+      "step_text": "Liquidation risk add-on is present and valid",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "original_step_text": "Liquidation risk add-on is present and valid",
+      "original_step_pattern": "Liquidation risk add-on is present and valid"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 16,
+      "step_type": "then",
+      "step_text": "Structured product add-on is present and valid",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "original_step_text": "Structured product add-on is present and valid",
+      "original_step_pattern": "Structured product add-on is present and valid"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 17,
+      "step_type": "then",
+      "step_text": "Holiday add-on is present and valid",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_1-01-data_validation-01"
+      ],
+      "original_step_text": "Holiday add-on is present and valid",
+      "original_step_pattern": "Holiday add-on is present and valid"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 18,
+      "step_type": "then",
+      "step_text": "net margin after credit is 0",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-boundary-01"
+      ],
+      "original_step_text": "net margin after credit is 0",
+      "original_step_pattern": "net margin after credit is \\d+"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 19,
+      "step_type": "then",
+      "step_text": "margin credit is a valid positive numeric value",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "original_step_text": "margin credit is a valid positive numeric value",
+      "original_step_pattern": "margin credit is (?:a|an|the) valid positive numeric value"
+    },
+    {
+      "is_gap": true,
+      "gap_index": 20,
+      "step_type": "then",
+      "step_text": "the Maximum[0, (Net margin – Margin credit)] formula is correctly implemented",
+      "source_scenario_ids": [
+        "TC-SR-IMHK-3_2_5_3-01-data_validation-01"
+      ],
+      "original_step_text": "the Maximum[0, (Net margin – Margin credit)] formula is correctly implemented",
+      "original_step_pattern": "(?:a|an|the) Maximum[\\d+, (Net margin – Margin credit)] formula is correctly implemented"
+    }
+  ],
+  "timestamp": "20260507T003502Z"
+}

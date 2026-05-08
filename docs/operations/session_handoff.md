@@ -11,7 +11,7 @@ It captures the current repo state, the most relevant documents, the recent chan
 
 Generated at:
 
-- `2026-05-07 08:08:48 UTC`
+- `2026-05-08 02:50:41 UTC`
 
 ---
 
@@ -60,11 +60,11 @@ Current branch:
 
 Recent commit subjects:
 
+- `Merge CodeFreddy HKEX workflow branch`
+- `修复前端仍然有Existing artifact folder的问题。`
+- `Hide artifact folder import from rule workflow`
+- `Refine HKEX workflow review experience`
 - `Merge remote-tracking branch 'origin/main' - resolve session_handoff.md conflicts`
-- `Update project files and artifacts`
-- `Merge CodeFreddy rule extraction review update into main`
-- `ignore commit api key`
-- `Add rule workflow BDD mode updates and run artifacts`
 
 ---
 

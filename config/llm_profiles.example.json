@@ -12,7 +12,7 @@
             "api_format": "openai_chat_completions",
             "base_url": "https://coding.dashscope.aliyuncs.com/v1",
             "model": "glm-5",
-            "api_key_env": "AUTH_TOKEN",
+            "api_key_env": "API_KEY",
             "timeout_seconds": 300,
             "temperature": 0.1,
             "max_output_tokens": 8000
@@ -22,7 +22,7 @@
             "api_format": "openai_chat_completions",
             "base_url": "https://coding.dashscope.aliyuncs.com/v1",
             "model": "MiniMax-M2.5",
-            "api_key_env": "AUTH_TOKEN",
+            "api_key_env": "API_KEY",
             "timeout_seconds": 300,
             "temperature": 0.0,
             "max_output_tokens": 6000
@@ -32,16 +32,27 @@
             "api_format": "openai_chat_completions",
             "base_url": "https://coding.dashscope.aliyuncs.com/v1",
             "model": "qwen3.6-plus",
-            "api_key_env": "AUTH_TOKEN",
+            "api_key_env": "API_KEY",
             "timeout_seconds": 300,
             "temperature": 0.0,
             "max_output_tokens": 16000
+        },
+        "scripts_kimi": {
+            "type": "openai_compatible",
+            "api_format": "openai_chat_completions",
+            "base_url": "https://coding.dashscope.aliyuncs.com/v1",
+            "model": "kimi-k2.5",
+            "api_key_env": "API_KEY",
+            "timeout_seconds": 300,
+            "temperature": 0.0,
+            "max_output_tokens": 12000
         }
     },
     "roles": {
         "maker": "maker_glm",
         "checker": "checker_minimax",
         "bdd": "bdd_qwen",
+        "scripts": "scripts_kimi",
         "planner": "maker_glm"
     },
     "maker_defaults": {

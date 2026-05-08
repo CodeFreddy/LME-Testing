@@ -899,6 +899,7 @@ def apply_human_step_edits(
         source_scenario_ids = edit.get("source_scenario_ids") or []
         original_step_text = edit.get("original_step_text", "").strip()
         original_step_pattern = edit.get("original_step_pattern", "").strip()
+        reviewed_code = str(edit.get("code") or edit.get("script_code") or "").strip()
 
         if not step_text:
             continue
@@ -906,13 +907,16 @@ def apply_human_step_edits(
         # Extract pattern from the (possibly new) step text
         step_pattern = extract_step_pattern(step_text)
 
-        # Generate code: prefer template, fall back to implementation generator
-        template_code = map_step_to_template(step_text, step_type, require_exact=False)
-        if template_code:
-            code = template_code
+        # Generate code: prefer reviewed/script AI code, then template, then fallback implementation.
+        if reviewed_code:
+            code = reviewed_code
         else:
-            generated = _generate_python_implementation(step_text, step_type, step_pattern, step_text.capitalize())
-            code = generated or ""
+            template_code = map_step_to_template(step_text, step_type, require_exact=False)
+            if template_code:
+                code = template_code
+            else:
+                generated = _generate_python_implementation(step_text, step_type, step_pattern, step_text.capitalize())
+                code = generated or ""
 
         if is_gap:
             # Scripts tab gap edit: update scenario step text when the registry
@@ -984,7 +988,7 @@ def apply_human_step_edits(
                         new_step_pattern=step_pattern,
                     )
                 step_defs = item.get("step_definitions", {})
-                type_steps = step_defs.get(step_type, [])
+                type_steps = step_defs.setdefault(step_type, [])
                 if step_index is not None and 0 <= step_index < len(type_steps):
                     type_steps[step_index] = {
                         **type_steps[step_index],
@@ -993,6 +997,14 @@ def apply_human_step_edits(
                         "code": code,
                         "human_edited": True,
                     }
+                    break
+                if source_scenario_ids:
+                    type_steps.append({
+                        "step_text": step_text,
+                        "step_pattern": step_pattern,
+                        "code": code,
+                        "human_edited": True,
+                    })
                     break
 
     return bdd_results

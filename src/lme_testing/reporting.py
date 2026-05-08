@@ -389,7 +389,6 @@ def generate_html_report(
     reviews_by_case = {item['case_id']: item for item in checker_reviews}
 
     combined_rows: list[str] = []
-    overall_values: list[str] = []
     coverage_values: list[str] = []
     maker_rows: list[str] = []
     checker_rows: list[str] = []
@@ -415,7 +414,7 @@ def generate_html_report(
         # Sub-header row as anchor for rule-level navigation
         combined_rows.append(
             f"<tr id='rule-detail-{html.escape(semantic_rule_id)}' class='rule-group-header' style='background:#f1f5f9'>"
-            f"<th colspan='6' style='text-align:left;padding:6px 10px;border:none'>"
+            f"<th colspan='5' style='text-align:left;padding:6px 10px;border:none'>"
             f"<span class='rule-group-id' style='font-weight:700;color:#0f172a'>{html.escape(semantic_rule_id)}</span>"
             f"<span style='margin-left:16px;font-weight:normal;color:#64748b;font-size:12px'>"
             f"Coverage: <span class='coverage-{html.escape(rule_status_class)}'>{html.escape(rule_status)}</span>"
@@ -426,16 +425,13 @@ def generate_html_report(
         for scenario in maker_record.get('scenarios', []):
             case_id = scenario.get('scenario_id', '')
             review = reviews_by_case.get(case_id, {})
-            overall = str(review.get('overall_status', 'missing'))
             coverage = str(review.get('coverage_assessment', {}).get('status', 'missing'))
-            overall_values.append(overall)
             coverage_values.append(coverage)
             combined_rows.append(
-                f"<tr data-overall=\"{html.escape(overall)}\" data-coverage=\"{html.escape(coverage)}\" data-rule=\"{html.escape(semantic_rule_id)}\" data-case=\"{html.escape(case_id)}\">"
+                f"<tr data-coverage=\"{html.escape(coverage)}\" data-rule=\"{html.escape(semantic_rule_id)}\" data-case=\"{html.escape(case_id)}\">"
                 f"<td>{html.escape(semantic_rule_id)}</td>"
                 f"<td>{html.escape(case_id)}</td>"
                 f"<td>{html.escape(feature)}</td>"
-                f"<td>{html.escape(overall)}</td>"
                 f"<td>{html.escape(coverage)}</td>"
                 f"<td><details><summary>展开详情</summary>{_render_combined_detail(scenario, review, paragraph_ids=maker_record.get('paragraph_ids', []))}</details></td>"
                 f"</tr>"
@@ -446,14 +442,12 @@ def generate_html_report(
             f"<tr>"
             f"<td>{html.escape(review.get('case_id', ''))}</td>"
             f"<td>{html.escape(review.get('semantic_rule_id', ''))}</td>"
-            f"<td>{html.escape(str(review.get('overall_status', '')))}</td>"
             f"<td>{html.escape(str(review.get('coverage_assessment', {}).get('status', '')))}</td>"
             f"<td><details><summary>展开详情</summary>{_render_checker_detail(review)}</details></td>"
             f"</tr>"
         )
 
     filter_script = """
-const overallFilter = document.getElementById('overallFilter');
 const coverageFilter = document.getElementById('coverageFilter');
 const keywordFilter = document.getElementById('keywordFilter');
 const coverageStatusFilter = document.getElementById('coverageStatusFilter');
@@ -461,22 +455,20 @@ const ruleTypeFilter = document.getElementById('ruleTypeFilter');
 const clearRuleFilters = document.getElementById('clearRuleFilters');
 const ruleVisibleCount = document.getElementById('ruleVisibleCount');
 
-// Scenario detail table rows (data-overall)
-const tableRows = Array.from(document.querySelectorAll('tbody tr[data-overall]'));
+// Scenario detail table rows (data-coverage)
+const tableRows = Array.from(document.querySelectorAll('tbody tr[data-coverage]'));
 // Coverage table rows (data-status)
 const coverageRows = Array.from(document.querySelectorAll('tbody tr[data-status]'));
 
 function applyScenarioFilters() {
-  const overall = overallFilter.value;
   const coverage = coverageFilter.value;
   const keyword = keywordFilter.value.trim().toLowerCase();
   let visible = 0;
   for (const row of tableRows) {
-    const matchesOverall = !overall || row.dataset.overall === overall;
     const matchesCoverage = !coverage || row.dataset.coverage === coverage;
     const haystack = row.innerText.toLowerCase();
     const matchesKeyword = !keyword || haystack.includes(keyword);
-    const show = matchesOverall && matchesCoverage && matchesKeyword;
+    const show = matchesCoverage && matchesKeyword;
     row.style.display = show ? '' : 'none';
     if (show) visible += 1;
   }
@@ -508,7 +500,6 @@ function applyCoverageTableFilters() {
   clearRuleFilters.style.display = (status || ruleType) ? '' : 'none';
 }
 
-overallFilter.addEventListener('change', applyScenarioFilters);
 coverageFilter.addEventListener('change', applyScenarioFilters);
 keywordFilter.addEventListener('input', applyScenarioFilters);
 coverageStatusFilter.addEventListener('change', applyCoverageTableFilters);
@@ -625,9 +616,6 @@ applyCoverageTableFilters();
   <div class="card">
     <h2>筛选</h2>
     <div class="toolbar">
-      <label>Overall
-        <select id="overallFilter">{_status_options(overall_values)}</select>
-      </label>
       <label>Coverage
         <select id="coverageFilter">{_status_options(coverage_values)}</select>
       </label>
@@ -635,7 +623,7 @@ applyCoverageTableFilters();
         <input id="keywordFilter" type="text" placeholder="rule id / case id / finding" />
       </label>
     </div>
-    <div class="muted">可按 Overall、Coverage、关键词组合筛选。</div>
+    <div class="muted">可按 Coverage、关键词组合筛选。</div>
   </div>
   <div class="card">
     <h2>场景审核明细</h2>
@@ -645,7 +633,6 @@ applyCoverageTableFilters();
           <th>Semantic Rule</th>
           <th>Case ID</th>
           <th>Feature</th>
-          <th>Overall</th>
           <th>Coverage</th>
           <th>详细信息</th>
         </tr>
@@ -687,7 +674,6 @@ applyCoverageTableFilters();
         <tr>
           <th>Case ID</th>
           <th>Semantic Rule</th>
-          <th>Overall</th>
           <th>Coverage</th>
           <th>详细信息</th>
         </tr>

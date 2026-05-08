@@ -78,6 +78,21 @@ class ConfigTests(unittest.TestCase):
         with self.assertRaises(ConfigError):
             load_project_config(config_path)
 
+    def test_example_config_defines_scripts_provider(self) -> None:
+        previous_api_key = os.environ.get("API_KEY")
+        os.environ["API_KEY"] = "test-secret"
+        try:
+            config = load_project_config(Path("config/llm_profiles.example.json"))
+        finally:
+            if previous_api_key is None:
+                os.environ.pop("API_KEY", None)
+            else:
+                os.environ["API_KEY"] = previous_api_key
+        provider = config.provider_for_role("scripts")
+        self.assertEqual(provider.model, "kimi-k2.5")
+        self.assertEqual(provider.base_url, config.provider_for_role("maker").base_url)
+        self.assertEqual(provider.max_output_tokens, 12000)
+
 
 if __name__ == "__main__":
     unittest.main()
