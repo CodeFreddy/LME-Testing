@@ -172,8 +172,9 @@
 - ✅ S2-F3 已完成：MVP input document contract and optional-input readiness validation。
 - ✅ S2-F4 已完成：CodeFreddy rule extraction review workflow integrated on `main`; `rule-workflow-session` GUI smoke-reviewed with HKv14; config fallback and pypdf PDF extraction fixes committed.
 - ✅ S2-F5 已完成：Governed maker/checker batch concurrency with ThreadPoolExecutor; deterministic JSONL ordering; checker partial failure visibility in summary metadata.
-- 📋 S2-F6 已计划：Rewrite prompt governance — scope agreed, dedicated prompt/version/user-prompt-builder, fix silent error handling, focused tests, acceptance gate. Concurrency for rewrite excluded from minimum scope.
-- 📋 S2-F7 已计划：Rule workflow Scripts view API-backed definition visibility, missing-step generation, and stage navigation without restart.
+- 🟡 S2-F6 部分实现：code now has `REWRITE_SYSTEM_PROMPT`, `build_rewrite_user_prompt()`, rewrite concurrency, and focused rewrite behavior tests; still missing dedicated `REWRITE_PROMPT_VERSION`, acceptance gate/evidence, and correct rewrite prompt metadata in summary.
+- 🟡 S2-F7 部分实现：Scripts AI generation for unmatched steps, editable generated scripts, fallback draft scripts, and review-session stage gates exist; API-backed implementation metadata, governed draft manifest/promotion workflow, stale-state rules, and full rule-workflow stage navigation remain to-do.
+- 📋 S2-F8 已计划：Enterprise POC response planning package — deployment assumptions, HKEX/source-code access checklist, role workflow, maker/checker quality controls, and architecture option tradeoffs.
 - ⏳ Stage 3 仍阻塞于真实 LME VM/API 权限；mock API 不代表真实 LME execution readiness。
 
 ### S2-B1：audit_trail.py 实现（来自 master 概念）
@@ -388,28 +389,49 @@
 
 ---
 
-### S2-F6：Rewrite Prompt Governance（已计划）
-- [ ] Add `REWRITE_SYSTEM_PROMPT` + `REWRITE_PROMPT_VERSION` to prompts.py
-- [ ] Add `build_rewrite_user_prompt()` with human review decision context
-- [ ] Update `run_rewrite_pipeline` to use dedicated prompt; fix silent `except: pass`
-- [ ] Add summary metadata (provider, model, prompt_version)
-- [ ] Add focused tests for rewrite pipeline
+### S2-F6：Rewrite Prompt Governance（部分实现，需治理补齐）
+- [x] Add `REWRITE_SYSTEM_PROMPT` to prompts.py
+- [ ] Add dedicated `REWRITE_PROMPT_VERSION` to prompts.py
+- [x] Add `build_rewrite_user_prompt()` with human review decision context
+- [x] Update `run_rewrite_pipeline` to use dedicated rewrite prompt
+- [x] Remove silent rewrite failure behavior from the main rewrite path; failures now surface through exceptions/job status
+- [ ] Add summary metadata using dedicated rewrite prompt version instead of `MAKER_PROMPT_VERSION`
+- [x] Add focused tests for rewrite target merge behavior
+- [ ] Add focused tests for rewrite prompt/version metadata and concurrent rewrite ordering/failure behavior
 - [ ] Add S2-F6 gate to acceptance.md
 - [ ] Run governance checks
 
-**状态：** 📋 PLANNED — scope agreed; concurrency for rewrite and full benchmark excluded from minimum scope.
+**状态：** 🟡 PARTIAL — code has a dedicated rewrite prompt path and tests, but the governed slice is not complete until prompt versioning, metadata, acceptance evidence, and focused governance checks are updated. Rewrite concurrency exists in code but was outside the originally agreed minimum scope, so it needs explicit evidence before being claimed as accepted.
 
 ---
 
-### S2-F7：Rule Workflow Scripts View and Stage Navigation（已计划）
+### S2-F7：Rule Workflow Scripts View and Stage Navigation（部分实现，计划仍有效）
 - [ ] Show API-backed step implementation metadata under matched/candidate Scripts view steps
-- [ ] Add controlled generate/attach/manual actions for unmatched or unusable steps
-- [ ] Save generated step definitions as draft artifacts with provenance and approval state
-- [ ] Add stage navigation across Rule Extraction, Scenario Review, BDD Review, Scripts, and Finalize
+- [x] Add controlled AI generation path for unmatched Scripts steps in review-session
+- [ ] Add attach-to-existing-endpoint, stub-only, and intentionally-manual/out-of-scope actions for unmatched or unusable steps
+- [x] Save generated scripts as editable per-iteration artifacts with provider/model/prompt metadata and deterministic fallback when model payload validation fails
+- [ ] Save generated step definitions as governed draft artifacts with provenance, approval state, and explicit promotion target
+- [ ] Add full stage navigation across Rule Extraction, Scenario Review, BDD Review, Scripts, and Finalize in rule-workflow-session
+- [x] Add basic review-session stage gates for Scenario Review -> BDD -> Scripts -> Finalize
 - [ ] Add stale downstream artifact marking and explicit regeneration controls
-- [ ] Add focused HTTP/browser tests for Scripts definition expansion, generation actions, and stage navigation
+- [x] Add focused unit tests for Scripts AI generation and fallback behavior
+- [ ] Add focused HTTP/browser tests for Scripts definition expansion, full generation actions, and stage navigation
 
-**状态：** 📋 PLANNED — saved in `docs/planning/rule_workflow_scripts_stage_navigation_plan.md`; implementation not started.
+**状态：** 🟡 PARTIAL — saved in `docs/planning/rule_workflow_scripts_stage_navigation_plan.md`; review-session now has Scripts AI generation and basic stage gates, but the S2-F7 acceptance target remains open.
+
+---
+
+### S2-F8：Enterprise POC Response Planning（已计划）
+- [x] Refactor next-phase planning into `docs/planning/next_phase_plan.md`
+- [x] Add enterprise architecture option pros/cons to `docs/planning/enterprise_target_architecture_plan.md`
+- [ ] Draft enterprise deployment assumptions
+- [ ] Draft HKEX/source-code access checklist
+- [ ] Draft role-specific MVP workflow map
+- [ ] Draft maker/checker benchmark and sampling proposal
+- [ ] Draft prompt/RAG governance boundaries and non-goals
+- [ ] Package S2-F8 for stakeholder review
+
+**状态：** 📋 PLANNED — documentation-only stakeholder planning. Do not implement Spring AI, micro-services, RAG, HKEX integration, source-code execution, SSO, or database-backed deployment under this item without separate approval.
 
 ---
 
@@ -442,7 +464,8 @@
 - [x] ✅ S2-F3　MVP input document contract and optional-input readiness validation
 - [x] ✅ S2-F4　CodeFreddy rule extraction review GUI integration and HKv14 smoke review
 - [x] ✅ S2-F5　Governed maker/checker batch concurrency
-- [ ] 📋 S2-F6　Rewrite prompt governance (scope agreed, not started)
-- [ ] 📋 S2-F7　Rule workflow Scripts view and stage navigation plan
+- [ ] 🟡 S2-F6　Rewrite prompt governance (partial code exists; governance/version metadata not complete)
+- [ ] 🟡 S2-F7　Rule workflow Scripts view and stage navigation (partial Scripts AI/stage gates exist; full plan open)
+- [ ] 📋 S2-F8　Enterprise POC response planning package
 - [ ] ⏳ 真实 LME API 接入（Stage 3，待 VM 权限）
 - [ ] 🧊 S2-E　LLM 非决定性稳定化（SR-MR-015-B3-4、SR-MR-071-C-1；已明确暂跳过，未来需 benchmark 成本/收益批准）

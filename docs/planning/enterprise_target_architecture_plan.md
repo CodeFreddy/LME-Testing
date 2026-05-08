@@ -378,6 +378,155 @@ Deployment constraints:
 
 ---
 
+## Enterprise Architecture Options
+
+These options are candidates for future discussion. No option is approved for implementation by this document.
+
+### Option A: Spring AI / Java Enterprise Service
+
+Use a Spring Boot / Spring AI service layer as the enterprise orchestration backend, with Python components either wrapped as services or migrated selectively.
+
+**Pros:**
+
+- Fits many enterprise Java estates and existing Spring operational practices.
+- Strong integration path for SSO, RBAC, audit logging, service discovery, config management, and internal platform standards.
+- Good fit if HKEX/source-code systems already expose Java-friendly APIs or sit behind existing Java service layers.
+- Easier for enterprise architecture boards to review if Spring is already the approved backend pattern.
+
+**Cons:**
+
+- Current governed pipeline is Python-native; wrapping or migrating it introduces integration and parity risk.
+- Python artifact generation, PDF extraction, BDD rendering, and current tests would need a stable service boundary or gradual migration.
+- Spring AI adoption still requires prompt/model governance; it does not remove benchmark, rollback, or traceability requirements.
+- Higher upfront architecture cost before the local artifact contracts and approval records are fully stabilized.
+
+**Best fit when:**
+
+- the enterprise already mandates Spring services,
+- Java teams will own long-term operations,
+- SSO/RBAC/audit integration is more important than preserving local Python simplicity.
+
+### Option B: Python Micro-Service Platform
+
+Keep core pipeline logic in Python and expose bounded services for document intake, rule extraction, generation, review, traceability, and evidence export.
+
+**Pros:**
+
+- Preserves current codebase, tests, and governed artifact behavior with less migration risk.
+- Natural fit for PDF/document processing, Python BDD tooling, and current deterministic validators.
+- Enables incremental service boundaries: start with local APIs, then split only where scaling or ownership requires it.
+- Faster path from current POC to a team-shared service.
+
+**Cons:**
+
+- Enterprise operations may require additional work for auth, RBAC, audit, deployment, observability, and support standards.
+- Micro-service boundaries can multiply artifact/version consistency problems if introduced too early.
+- Without strict contracts, services can drift into hidden state instead of preserving repo-readable artifacts.
+- Some enterprises prefer Java/.NET for long-lived governed systems.
+
+**Best fit when:**
+
+- the priority is preserving current governed behavior,
+- Python ownership and deployment support are available,
+- the first shared version is a controlled internal platform rather than a broad enterprise product.
+
+### Option C: Modular Monolith Web Application
+
+Build a single deployable application with internal modules for workspace, documents, rules, BDD, Scripts, traceability, and evidence.
+
+**Pros:**
+
+- Lower operational complexity than micro-services.
+- Easier to preserve transaction boundaries and artifact consistency.
+- Good intermediate step from local POC to shared team usage.
+- Allows later extraction into services when boundaries are proven by real usage.
+
+**Cons:**
+
+- Scaling and team ownership boundaries are less flexible.
+- A poorly structured monolith can become hard to split later.
+- Enterprise teams may still require platform integration work for auth, audit, and deployment.
+- Does not by itself solve model governance, prompt governance, or approval records.
+
+**Best fit when:**
+
+- the next target is team-shared MVP rather than full enterprise platform,
+- artifact consistency matters more than independent service scaling,
+- the team wants to defer micro-service complexity until contracts are stable.
+
+### Option D: Workflow Orchestrator Plus Service Workers
+
+Use a workflow engine or orchestration platform for long-running review/generation jobs, with Python or Java workers for specialized tasks.
+
+**Pros:**
+
+- Strong fit for long-running jobs, retries, audit trails, and review checkpoints.
+- Makes explicit states such as pending, blocked, stale, approved, regenerated, and finalized.
+- Can support review queues and role ownership once approval records exist.
+- Separates orchestration from specialized document/LLM/script workers.
+
+**Cons:**
+
+- Requires a clear canonical artifact and approval model before workflow state can be trusted.
+- Adds platform complexity and operational dependency.
+- Badly designed workflow state can compete with governed JSON artifacts as the source of truth.
+- Needs careful rollback and migration planning.
+
+**Best fit when:**
+
+- approval records and artifact versioning are already designed,
+- the workflow has many long-running or human-in-the-loop steps,
+- audit/event history is a primary enterprise requirement.
+
+### Option E: Existing Enterprise Test Management / DevOps Platform Extension
+
+Integrate the AI-assisted workflow into an existing system such as a test management platform, internal developer portal, CI/CD system, or document-management workflow.
+
+**Pros:**
+
+- Reuses existing access control, audit, ownership, and user adoption paths.
+- Can reduce new-platform governance burden.
+- May fit testers and automation leads better if they already work in a test management system.
+- Good path for importing existing test cases, regression packs, and execution evidence.
+
+**Cons:**
+
+- Existing platforms may not model source-to-rule-to-BDD-to-script lineage cleanly.
+- Plugin/extension constraints may limit artifact governance and review UX.
+- Integration can hide critical state in third-party systems unless contracts are explicit.
+- Vendor/platform constraints can slow iteration.
+
+**Best fit when:**
+
+- the enterprise already has a mandated QA/test management platform,
+- import/export of existing assets is the highest priority,
+- the AI workflow should augment rather than replace current QA operations.
+
+### Option Comparison
+
+| Option | Main Strength | Main Risk | Near-Term Suitability |
+|--------|---------------|-----------|-----------------------|
+| Spring AI / Java service | Enterprise alignment and integration | Python parity/migration risk | Medium, if enterprise Java ownership is confirmed |
+| Python micro-services | Preserves current pipeline behavior | Operational maturity burden | High for controlled internal MVP |
+| Modular monolith | Simple deployable team MVP | Later scaling/splitting risk | High as an intermediate step |
+| Workflow orchestrator + workers | Human-in-loop audit and long-running jobs | Premature workflow state complexity | Medium after approval records exist |
+| Existing enterprise platform extension | User adoption and existing controls | Hidden state and platform constraints | Medium, depends on platform fit |
+
+### Recommended Discussion Position
+
+For the next enterprise review, compare **Python modular monolith**, **Python micro-services**, and **Spring AI / Java service** as the primary candidates.
+
+Recommended default path unless enterprise constraints override it:
+
+1. Keep the local Python workflow as the governed reference implementation.
+2. Build a modular monolith or thin Python service wrapper for team-shared MVP.
+3. Define artifact versioning, approval records, audit events, and access assumptions.
+4. Revisit Spring AI or broader micro-services after ownership, integration, and deployment constraints are known.
+
+This avoids a premature platform rewrite while keeping Spring AI and enterprise micro-services on the table for the right reasons.
+
+---
+
 ## Suggested Roadmap Slices
 
 ### Slice E1: Tabbed Local Workflow

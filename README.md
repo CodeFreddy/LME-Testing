@@ -26,6 +26,8 @@
 | MVP document readiness registry | ✅ Stub | S2-F2 CLI generates canonical readiness JSON and derived Markdown summary |
 | Rule extraction review GUI | ✅ Stub | S2-F4 `rule-workflow-session` document/rule review GUI, HKv14 smoke-reviewed |
 | Pipeline batch concurrency | ✅ Stub | S2-F5 maker/checker ThreadPoolExecutor, deterministic output order, partial failure visibility |
+| Rewrite prompt governance | 🟡 Partial | Dedicated rewrite prompt path exists in code; governance/versioning evidence still incomplete |
+| Scripts generation and stage navigation | 🟡 Partial | Scripts AI generation and review-session gates exist; S2-F7 API-backed metadata and full workflow navigation remain planned |
 | Real LME API execution | ⏳ Blocked | Stage 3, LME VM access needed |
 
 ### Verification Type Key
@@ -53,7 +55,8 @@ Stage 1 (real data access) is complete. Stage 2 scoped work is complete:
 - **S2-F2**: MVP document readiness registry generation complete; Test Plan and Regression Pack Index remain explicit placeholders/blockers
 - **S2-F4**: CodeFreddy rule extraction review GUI integrated on `main`; HKv14 PDF upload/extraction and scenario review smoke path validated with stub config
 - **S2-F5**: Governed maker/checker batch concurrency implemented; deterministic JSONL ordering and partial failure visibility
-- **S2-F7**: Rule workflow Scripts view and stage navigation follow-up plan recorded; implementation not started
+- **S2-F6**: Rewrite now uses a dedicated `REWRITE_SYSTEM_PROMPT` and `build_rewrite_user_prompt()` path, but the slice is not complete because `REWRITE_PROMPT_VERSION`, acceptance evidence, and dedicated rewrite prompt metadata are still missing
+- **S2-F7**: Scripts AI generation for unmatched steps and review-session stage gates exist; API-backed implementation metadata, draft-step provenance/approval manifest, stale-state handling, and full rule-workflow stage navigation remain to-do
 - **Stage 3**: Still blocked pending real LME VM/API access
 
 See `docs/planning/roadmap.md` and `TODO.md` for Stage 2 details.
@@ -455,7 +458,7 @@ The review-session web UI (`http://127.0.0.1:8765`) has 4 stages:
 
 - **Scenario Review** — approve/rewrite/reject each test case
 - **BDD Review** — view normalized BDD scenarios, edit Given/When/Then steps inline
-- **Scripts** — view step registry visibility with match quality badges (exact/parameterized/candidate/unmatched)
+- **Scripts** — view step registry visibility with match quality badges, edit code for unmatched steps, and generate editable draft scripts through the configured scripts provider or deterministic fallback
 - **Finalize** — lock session and generate final HTML report
 
 The HTML report includes:

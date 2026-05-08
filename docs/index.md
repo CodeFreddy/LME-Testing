@@ -256,13 +256,13 @@ It defines:
 
 ### 20. `docs/planning/implementation_plan.md` section `S2-F6`
 
-Use this for the planned rewrite prompt governance slice.
+Use this for the partially implemented rewrite prompt governance slice.
 
-It defines the agreed future scope for a dedicated rewrite prompt, prompt versioning, visible rewrite error handling, focused tests, and acceptance-gate updates.
+It records what exists in code (`REWRITE_SYSTEM_PROMPT`, `build_rewrite_user_prompt()`, and `run_rewrite_pipeline()` usage) and what remains open before the slice can be accepted: dedicated rewrite prompt versioning, metadata tests, acceptance evidence, and governance checks.
 
 ### 21. `docs/planning/rule_workflow_scripts_stage_navigation_plan.md`
 
-Use this for the proposed HKv14 rule workflow GUI follow-up covering Scripts view implementation visibility, controlled generation of missing step definitions, and stage navigation without restarting.
+Use this for the partially implemented HKv14 rule workflow GUI follow-up covering Scripts view implementation visibility, controlled generation of missing step definitions, and stage navigation without restarting.
 
 It defines:
 
@@ -272,7 +272,24 @@ It defines:
 - stale-artifact behavior,
 - and the POC/mock/stub boundaries that must remain visible.
 
-### 17. `docs/planning/mvp_input_document_contract_plan.md`
+### 22. `docs/planning/next_phase_plan.md`
+
+Use this for the consolidated next-phase execution order.
+
+It defines:
+
+- S2-F6A rewrite prompt governance completion,
+- S2-F7A/B/C Scripts metadata, draft-step governance, and stage navigation,
+- S2-F8 enterprise POC response planning,
+- later enterprise slices E1-E7.
+
+### 23. `docs/planning/enterprise_target_architecture_plan.md`
+
+Use this for long-range enterprise architecture discussion.
+
+It includes a pros/cons comparison of Spring AI / Java service, Python micro-services, modular monolith, workflow orchestrator plus service workers, and extension of an existing enterprise platform.
+
+### 24. `docs/planning/mvp_input_document_contract_plan.md`
 
 Use this for the implemented S2-F3 slice that defines the minimum Test Plan and Regression Pack Index input contracts.
 
@@ -297,8 +314,10 @@ It defines:
 - `docs/planning/mvp_document_readiness_plan.md` preserves the implemented S2-F2 MVP document readiness registry plan and package boundaries.
 - `docs/planning/mvp_input_document_contract_plan.md` preserves the implemented S2-F3 Test Plan and Regression Pack Index input contract slice.
 - `docs/planning/implementation_plan.md` section `S2-F5` preserves the implemented governed pipeline concurrency slice.
-- `docs/planning/implementation_plan.md` section `S2-F6` preserves the planned rewrite prompt governance slice.
-- `docs/planning/rule_workflow_scripts_stage_navigation_plan.md` preserves the proposed S2-F7 rule workflow GUI Scripts and stage navigation plan.
+- `docs/planning/implementation_plan.md` section `S2-F6` preserves the partial rewrite prompt governance status and remaining completion work.
+- `docs/planning/rule_workflow_scripts_stage_navigation_plan.md` preserves the S2-F7 rule workflow GUI Scripts and stage navigation plan; review-session Scripts generation exists, while API-backed metadata and full rule-workflow navigation remain open.
+- `docs/planning/next_phase_plan.md` preserves the recommended next-phase order and S2-F8 planning scope.
+- `docs/planning/enterprise_target_architecture_plan.md` preserves enterprise architecture option tradeoffs.
 
 ---
 
@@ -329,6 +348,8 @@ Then read supporting docs only as needed:
 15. `docs/planning/im_hk_v14_role_review_plan.md`
 16. `docs/planning/mvp_document_readiness_plan.md`
 17. `docs/planning/rule_workflow_scripts_stage_navigation_plan.md`
+18. `docs/planning/next_phase_plan.md`
+19. `docs/planning/enterprise_target_architecture_plan.md`
 
 ### If you are implementing a task
 

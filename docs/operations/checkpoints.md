@@ -6,6 +6,81 @@ Keep the latest checkpoint at the top. Preserve prior checkpoints below it unles
 
 ---
 
+## 2026-05-08 - Checkpoint: Planning Refactor, Next Phase Plan, Enterprise Options
+
+### Current Task Goal
+
+Refactor the recent planning docs into a clearer structure, add a next-phase plan, include enterprise architecture pros/cons for Spring AI, micro-services, and other candidates, and update TODO/checkpoints/roadmap/session handoff/relevant docs.
+
+### Confirmed Key Facts
+
+- S2-F4 rule extraction review GUI is implemented and remains bounded to local POC/stub behavior.
+- S2-F5 governed maker/checker concurrency is implemented and stub-verified.
+- S2-F6 is partial, not merely planned: dedicated rewrite prompt code exists, but dedicated rewrite prompt versioning, rewrite metadata correction, and acceptance evidence remain open.
+- S2-F7 is partial: review-session Scripts AI generation and basic stage gates exist, but API-backed implementation metadata, governed draft-step manifests, stale-state rules, and full rule-workflow-session navigation remain open.
+- Enterprise POC feedback is planning input only. It does not approve Spring AI, micro-services, RAG, HKEX integration, source-code execution, SSO, database deployment, prompt changes, model changes, or production readiness claims.
+- The recommended next implementation action is S2-F6A rewrite prompt governance completion.
+
+### Files Modified Or Inspected
+
+Modified:
+
+- `README.md`
+- `TODO.md`
+- `docs/architecture/architecture.md`
+- `docs/governance/acceptance.md`
+- `docs/index.md`
+- `docs/operations/checkpoints.md`
+- `docs/planning/enterprise_poc_feedback_summary.md`
+- `docs/planning/enterprise_target_architecture_plan.md`
+- `docs/planning/implementation_plan.md`
+- `docs/planning/next_phase_plan.md`
+- `docs/planning/roadmap.md`
+
+Inspected:
+
+- `src/lme_testing/prompts.py`
+- `src/lme_testing/pipelines.py`
+- `src/lme_testing/review_session.py`
+- `src/lme_testing/rule_workflow_session.py`
+- `tests/test_pipelines.py`
+- `tests/test_review_session.py`
+
+### Remaining Work
+
+- Refresh `docs/operations/session_handoff.md`.
+- Run governance checks.
+- Run focused tests if docs changed around status claims tied to code behavior.
+- Review `git diff --check`.
+- If committing, refresh session handoff again immediately before commit.
+
+### Next Single Action
+
+Run:
+
+```text
+powershell -ExecutionPolicy Bypass -File scripts/update_session_handoff.ps1
+```
+
+Then run docs/artifact governance checks.
+
+### Constraints That Must Not Be Violated
+
+- Do not claim HKv14 or Stage 3 production execution readiness.
+- Do not implement enterprise deployment under planning-only S2-F8.
+- Do not add a new LLM rule-extraction/RAG stage without a governed contract.
+- Do not change schemas, prompts, default models, or phase boundaries without explicit approval and evidence.
+- Keep generated Scripts code draft/reviewable until a governed promotion path exists.
+- Keep maker/checker `Pass` advisory unless supported by deterministic validation, benchmark evidence, or human review policy.
+
+### Reusable Resume Prompt
+
+```text
+Resume from docs/operations/checkpoints.md latest checkpoint dated 2026-05-08. Continue the planning refactor closeout: refresh docs/operations/session_handoff.md, run governance checks, run focused tests if needed, inspect git diff/status, and summarize the updated planning structure. Preserve the boundaries: S2-F6/S2-F7 are partial, S2-F8 is planning-only, no enterprise implementation or production-readiness claims.
+```
+
+---
+
 ## 2026-05-07 - Compact Checkpoint: Stash Merge, S2-F7 Plan, Rule Workflow POC Reruns
 
 ### Original Goal

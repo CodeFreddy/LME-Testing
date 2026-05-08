@@ -52,8 +52,9 @@ Stage 2 规划（Stage 1 完成后展开）
 └── S2-F3: MVP input document contract
 └── S2-F4: Rule extraction review workflow merge slice and GUI startup/PDF fix
 └── S2-F5: Governed pipeline concurrency
-└── S2-F6: Rewrite prompt governance
-└── S2-F7: Rule workflow Scripts view and stage navigation UX plan
+└── S2-F6: Rewrite prompt governance partial implementation and governance completion
+└── S2-F7: Rule workflow Scripts view and stage navigation UX plan partial implementation
+└── S2-F8: Enterprise POC response planning package
 ```
 
 ---
@@ -870,33 +871,36 @@ Document upload/import -> deterministic rule extraction -> atomic/semantic rule 
 
 ### S2-F6 — Rewrite Prompt Governance
 
-**状态：📋 PLANNED（2026-05-06）；scope agreed, implementation not started**
+**状态：🟡 PARTIAL（verified 2026-05-08）；dedicated rewrite prompt path exists, governance completion still open**
 
 **目标：** Introduce a dedicated governed rewrite prompt path without accepting broader CodeFreddy schema, review-decision, BDD fallback, or UI changes.
 
-**范围（planned）：**
-- Add `REWRITE_SYSTEM_PROMPT` and `REWRITE_PROMPT_VERSION`.
-- Add `build_rewrite_user_prompt()` with human review decision context.
-- Update `run_rewrite_pipeline` to use the dedicated prompt.
-- Fix silent rewrite error handling.
-- Add summary metadata for provider, model, and prompt version.
-- Add focused rewrite pipeline tests.
-- Add an acceptance gate before implementation is marked complete.
+**已验证存在：**
+- `src/lme_testing/prompts.py` defines `REWRITE_SYSTEM_PROMPT`.
+- `src/lme_testing/prompts.py` defines `build_rewrite_user_prompt()` and includes human/checker review context in the rewrite batch payload.
+- `src/lme_testing/pipelines.py` `run_rewrite_pipeline()` calls the dedicated rewrite prompt and surfaces rewrite job failures through exceptions/job status.
+- `run_rewrite_pipeline()` supports bounded `concurrency`, although rewrite concurrency was outside the original minimum scope and therefore needs separate evidence before being treated as accepted.
+- `tests/test_pipelines.py` includes focused rewrite merge behavior coverage.
+
+**仍需完成：**
+- Add dedicated `REWRITE_PROMPT_VERSION`; current prompt metadata still reports `MAKER_PROMPT_VERSION` for rewrite summaries.
+- Add focused tests for rewrite prompt/version metadata and concurrent rewrite ordering/failure behavior.
+- Add S2-F6 acceptance gate/evidence after the above is complete.
+- Run docs/artifact governance checks after updating the gate.
 
 **不在范围：**
-- Rewrite concurrency
 - Full benchmark suite beyond the agreed small baseline
 - Schema changes
 - Default model changes
 - Review decision contract changes
 
-**自评：** PLANNED. Scope is recorded from the stashed checkpoint; no implementation has started.
+**自评：** PARTIAL. The code has moved beyond planning, but the governed slice is not complete until dedicated rewrite versioning, metadata, tests, and acceptance evidence are added.
 
 ---
 
 ### S2-F7 — Rule Workflow Scripts View and Stage Navigation UX Plan
 
-**状态：📝 PROPOSED（2026-05-07）**
+**状态：🟡 PARTIAL（verified 2026-05-08）；planning target remains open**
 
 **目标：** Record a governed follow-up plan for three HKv14 rule workflow GUI gaps found during end-to-end POC reruns: Scripts view implementation visibility, controlled generation of missing step definitions, and navigation between workflow stages without restarting.
 
@@ -918,6 +922,22 @@ Document upload/import -> deterministic rule extraction -> atomic/semantic rule 
 - Scripts view can create reviewable draft step-definition artifacts for unmatched or unusable steps.
 - Rule workflow GUI can navigate between Rule Extraction, Scenario Review, BDD Review, Scripts, and Finalize without restarting when prerequisites are present.
 - Stale downstream artifacts remain visible and explicitly marked.
+
+**已验证存在：**
+- `review_session.py` exposes `/api/scripts/create-by-ai`.
+- `create_scripts_by_ai()` collects unmatched Scripts steps, calls the configured scripts provider with `SCRIPTS_SYSTEM_PROMPT`, validates the returned scripts, and falls back to deterministic draft scripts when validation fails.
+- Generated scripts are saved as per-iteration editable artifacts with provider, model, prompt version, raw response path, and fallback reason.
+- `scripts_payload()` merges generated script code into the Scripts view and marks readiness for saving.
+- `review_session.py` exposes `/api/stage` and `/api/stage/advance` for basic Scenario Review -> BDD -> Scripts -> Finalize gates.
+- `tests/test_review_session.py` covers Scripts AI generation, fallback behavior, and preserving generated code through save.
+
+**仍需完成：**
+- Show API-backed implementation metadata under matched/candidate steps, including source function/file and detected endpoint calls.
+- Add attach-to-existing-endpoint, stub-only, and intentionally-manual/out-of-scope actions.
+- Save generated step definitions through a governed draft manifest with provenance, approval state, and explicit promotion target.
+- Add full `rule-workflow-session` stage navigation across Rule Extraction, Scenario Review, BDD Review, Scripts, and Finalize.
+- Add stale-state invalidation for downstream artifacts and explicit regeneration controls.
+- Add HTTP/browser tests for full stage navigation and Scripts definition expansion.
 
 **实现要点：**
 - Keep all generated step definitions as draft artifacts until human approval.
@@ -941,7 +961,55 @@ Document upload/import -> deterministic rule extraction -> atomic/semantic rule 
 - Automatic trust or promotion of generated step definitions
 - Replacing the preserved HKv13 mock API baseline
 
-**自评：** PLANNED. This is a saved planning slice only; implementation has not started.
+**自评：** PARTIAL. Review-session has useful Scripts generation and basic stage gates, but the larger S2-F7 rule-workflow navigation and API-backed implementation visibility contract is still open.
+
+---
+
+### S2-F8 — Enterprise POC Response Planning Package
+
+**状态：📋 PLANNED（2026-05-08）；planning only**
+
+**目标：** Convert enterprise POC feedback into a bounded stakeholder review package without implementing enterprise infrastructure.
+
+**为什么现在做：**
+- End-user POC feedback asks for enterprise deployment direction, HKEX/source-code access clarity, role-specific workflows, and maker/checker quality measurement.
+- The repo now has enough local POC evidence to discuss enterprise direction, but not enough contract maturity to implement shared deployment.
+- A planning package can separate real near-term engineering work from future platform discussion.
+
+**输入契约：**
+- `docs/planning/enterprise_poc_feedback_summary.md`
+- `docs/planning/enterprise_target_architecture_plan.md`
+- `docs/planning/tabbed_review_gui_development_plan.md`
+- `docs/planning/next_phase_plan.md`
+- Current S2-F4 through S2-F7 status
+
+**输出契约（planned）：**
+- Enterprise deployment assumptions
+- HKEX/source-code access checklist
+- Role-specific MVP workflow map
+- Maker/checker benchmark and sampling proposal
+- Prompt/RAG governance boundaries
+- Architecture option comparison, including Spring AI, Python micro-services, modular monolith, workflow orchestrator, and existing enterprise platform extension
+- Explicit non-goals and approval requirements
+
+**实现要点：**
+- Keep this planning-only unless a human explicitly approves implementation.
+- Treat maker/checker `Pass` as advisory unless supported by deterministic validation, benchmark evidence, or human review policy.
+- Do not introduce RAG, new LLM rule extraction, enterprise deployment, HKEX integration, or source-code execution under this slice.
+- Prefer a modular local/team MVP path before platform rewrite unless enterprise constraints require Spring AI or another standard.
+
+**验收（planned）：**
+- Stakeholders can compare enterprise architecture options with pros/cons.
+- Access prerequisites are explicit and owner-reviewable.
+- Role-specific review needs are mapped to MVP surfaces and outputs.
+- Maker/checker quality controls include benchmark, sampling, and false-positive/false-negative discussion.
+- Non-goals prevent accidental production-readiness claims.
+
+**不在范围：**
+- Implementing Spring AI, micro-services, RAG, SSO, database-backed deployment, HKEX/source-code execution, or generic enterprise workflow.
+- Changing schemas, prompts, default models, or artifact contracts.
+
+**自评：** PLANNED. The recommended next-phase order is captured in `docs/planning/next_phase_plan.md`; S2-F8 should start after S2-F6A or in parallel as documentation-only stakeholder preparation.
 
 ---
 

@@ -498,6 +498,52 @@ Evidence：
 
 ---
 
+## Stage 2 Extension — Verification Notes For Open Follow-Up Slices
+
+These notes record code/doc cross-check status only. They are not acceptance gates and do not mark the slices complete.
+
+### Open Slice S2-F6：Rewrite Prompt Governance
+
+**状态：** 🟡 PARTIAL（verified 2026-05-08；not accepted as complete）
+
+**Verified code state：**
+- `REWRITE_SYSTEM_PROMPT` and `build_rewrite_user_prompt()` exist in `src/lme_testing/prompts.py`.
+- `run_rewrite_pipeline()` uses `REWRITE_SYSTEM_PROMPT` and `build_rewrite_user_prompt()`.
+- Rewrite failures surface through exceptions/job status rather than being silently hidden in the main path.
+- Rewrite concurrency exists in code, but it was outside the original minimum scope and needs explicit evidence before it is accepted.
+
+**Completion blockers before an S2-F6 gate can be marked COMPLETE：**
+- Add a dedicated `REWRITE_PROMPT_VERSION`.
+- Write rewrite summary metadata using the dedicated rewrite prompt version, not `MAKER_PROMPT_VERSION`.
+- Add focused tests for prompt/version metadata and rewrite concurrency/failure behavior.
+- Record acceptance evidence and run governance checks.
+
+**Non-acceptance boundary：** No schema change, default model change, review-decision contract change, or production readiness claim is accepted by this partial status.
+
+---
+
+### Open Slice S2-F7：Rule Workflow Scripts View And Stage Navigation
+
+**状态：** 🟡 PARTIAL（verified 2026-05-08；not accepted as complete）
+
+**Verified code state：**
+- `review_session.py` exposes `/api/scripts/create-by-ai` for unmatched Scripts steps.
+- Generated Scripts artifacts include provider, model, prompt version, raw response path, fallback reason, and editable generated code.
+- Invalid model payloads fall back to deterministic draft scripts.
+- `review_session.py` exposes basic `/api/stage` and `/api/stage/advance` gates for Scenario Review, BDD, Scripts, and Finalize.
+- Focused unit tests cover Scripts AI generation and fallback behavior.
+
+**Completion blockers before an S2-F7 gate can be marked COMPLETE：**
+- Show API-backed implementation metadata for matched/candidate steps.
+- Add attach/stub/manual actions and governed draft-step provenance/approval manifests.
+- Implement full rule-workflow-session navigation across Rule Extraction, Scenario Review, BDD Review, Scripts, and Finalize.
+- Add stale downstream artifact marking and explicit regeneration controls.
+- Add HTTP/browser tests for Scripts implementation expansion and full stage navigation.
+
+**Non-acceptance boundary：** Generated scripts are not trusted executable baseline artifacts until reviewed/promoted through a governed contract. No Stage 3 or HKv14 production execution readiness claim is accepted by this partial status.
+
+---
+
 ## Phase 3 — Execution Readiness
 
 **完成日期：** 2026-04-14（代码实现）  

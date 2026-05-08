@@ -221,6 +221,16 @@ This slice should produce:
 - prompt and RAG governance boundaries,
 - clear non-goals.
 
+This slice is now tracked as S2-F8 in `docs/planning/next_phase_plan.md` and `docs/planning/implementation_plan.md`.
+
+Recommended sequencing:
+
+1. Complete S2-F6A rewrite prompt governance cleanup.
+2. Implement S2-F7A read-only Scripts implementation metadata.
+3. Prepare S2-F8 enterprise POC response package for stakeholder discussion.
+
+S2-F8 may proceed in parallel only if it remains documentation-only.
+
 ---
 
 ## Non-Goals Until Explicitly Approved

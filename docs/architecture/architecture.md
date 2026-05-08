@@ -53,7 +53,7 @@ Source Documents (PDF/TXT)
         ├──── [Planner: LLM] ── planner_results.jsonl（可选）
         │
         ▼
-[Maker: LLM] ◄──────────────── MAKER_SYSTEM_PROMPT v1.1
+[Maker: LLM] ◄──────────────── MAKER_SYSTEM_PROMPT v1.5
         │  maker_cases.jsonl
         ▼
 [BDD Pipeline: LLM] ◄────────── BDD_SYSTEM_PROMPT v3.0
@@ -72,7 +72,7 @@ Source Documents (PDF/TXT)
         │                               /api/bdd（BDD tab）
         └──────────────┬────────────────/api/scripts（Scripts tab）
                        ▼               /api/stage（stage gates）
-              [Rewrite if needed]
+[Rewrite if needed] ◄───────── REWRITE_SYSTEM_PROMPT (dedicated path; version metadata still being completed)
                        │
                        ▼
               [HTML Report + CSV]
@@ -93,9 +93,9 @@ semantic_rules.json
 [Maker: enriched input]
 ```
 
-待实现（Stage 2）：
-[audit_trail.html] ◄──────────── audit_trail.py（来自 master 概念）
-[case_compare.html] ◄─────────── case_compare.py（来自 master 概念）
+Stage 2 implemented review artifacts:
+[audit_trail.html] ◄──────────── audit_trail.py
+[case_compare.html] ◄─────────── case_compare.py
 ```
 
 ### Mock API execution bridge（S2-C1）
@@ -215,7 +215,7 @@ As of 2026-05-06, the slice is on `main` and pushed to both `origin/main` and Co
 
 **Scripts Tab 工作流（Review Session）**
 
-Review Session 启动时传入 `--step-registry step_visibility.json`，Scripts tab 显示三类 step 状态：
+Review Session 启动时传入 `--step-registry step_visibility.json`，Scripts tab 显示 step 状态并允许人工编辑或生成未匹配 step 的 draft code：
 
 | 状态 | 含义 | UI 显示 |
 |------|------|---------|
@@ -233,6 +233,12 @@ Review Session 启动时传入 `--step-registry step_visibility.json`，Scripts 
 5. 下次 Rewrite 时，`apply_human_step_edits()` 读取该文件，用 library 实现替换 pending stub
 
 **注意：** GAP section 的 step 是原始 BDD step，Suggestions 来自 library。直接编辑 GAP textarea 即表示"我要用这条 library text 替代原始 BDD text"。
+
+**Scripts AI generation（partial S2-F7）**
+
+`review_session.py` also exposes `/api/scripts/create-by-ai`. For unmatched Scripts steps, the manager can call the configured `scripts` provider with `SCRIPTS_SYSTEM_PROMPT` and `build_scripts_user_prompt()`, validate the structured response, and persist editable generated code under the current review iteration. If the model payload is invalid, the workflow writes deterministic draft scripts with a visible fallback reason.
+
+This is not yet the full S2-F7 contract. The code does not yet expose API-backed implementation metadata for matched/candidate steps, does not write a governed draft-step promotion manifest, and does not implement full rule-workflow-session navigation across Rule Extraction -> Scenario Review -> BDD Review -> Scripts -> Finalize.
 | `src/lme_testing/human_review.py` | Human review HTML 渲染 | Main | ✅ |
 | `src/lme_testing/schemas.py` | Schema 验证工具 | Main | ✅ |
 | `src/lme_testing/config.py` | 配置加载与类型定义 | Main+Cherry-pick | ✅ SM-T04 重试配置 |

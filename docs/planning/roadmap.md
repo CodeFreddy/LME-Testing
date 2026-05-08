@@ -1,7 +1,7 @@
 # LME Testing — Roadmap v3.1
 
 **修订日期：** 2026-04-26
-**变更说明：** 在 v3.1 基础上，记录 HKv14 POC document intake、HKv13→HKv14 deterministic diff、POC downstream decision note, modular HKv14 mock API bridge, S2-F1 role-friendly impact decision review, and approved S2-F2 document readiness registry planning slice。
+**变更说明：** 在 v3.1 基础上，记录 HKv14 POC document intake、HKv13→HKv14 deterministic diff、POC downstream decision note, modular HKv14 mock API bridge, S2-F1/S2-F4 review workflows, S2-F2/S2-F3 document readiness, S2-F5 concurrency, partial S2-F6/S2-F7 follow-ups, and next-phase planning.
 
 ---
 
@@ -24,6 +24,9 @@
 | HKv14 role-friendly decision review | ✅ S2-F1 local package generator implemented; canonical decision JSON, Markdown summary, and review HTML |
 | MVP document readiness registry | ✅ S2-F2 deterministic registry implemented; evidence at `evidence/mvp_document_readiness/20260429T075702Z/` |
 | Rule extraction review GUI | ✅ S2-F4 `rule-workflow-session` integrated on `main`; HKv14 PDF/rule/scenario review smoke path accepted; CodeFreddy feature branch aligned to `main` |
+| Rewrite prompt governance | 🟡 S2-F6 partial; dedicated rewrite prompt path exists, dedicated version/metadata/acceptance evidence still open |
+| Scripts and stage navigation | 🟡 S2-F7 partial; Scripts AI generation/basic review-session gates exist, API-backed metadata/full rule-workflow navigation still open |
+| Enterprise POC response | 📋 S2-F8 planned; planning-only response package for architecture options, access checklist, role workflow, and maker/checker controls |
 | 真实 LME API 接入 | ⏳ ETA 未知（需内部 VM 权限）|
 
 ---
@@ -210,6 +213,9 @@
 9. ✅ S2-F1 role-friendly HKv14 impact decision review package generator 已实现；canonical JSON is source of truth, Markdown and HTML are derived/review surfaces
 10. ✅ S2-F2 MVP document readiness registry 已实现；canonical `document_readiness.json` and derived summary are under `evidence/mvp_document_readiness/20260429T075702Z/`
 11. ✅ S2-F4 rule extraction review merge slice 已实现并合入/push 到 `main`；document intake + rule artifact review workflow 可通过 `rule-workflow-session` GUI 使用，prompt/schema/concurrency contract changes 未纳入本 slice
+12. 🟡 S2-F6 rewrite prompt governance partial；dedicated rewrite prompt path exists, but rewrite-specific version metadata and acceptance evidence remain open
+13. 🟡 S2-F7 Scripts/stage-navigation partial；Scripts AI generation and basic review-session gates exist, but API-backed implementation metadata, draft-step governance, stale-state rules, and full rule-workflow navigation remain open
+14. 📋 S2-F8 enterprise POC response planning should produce deployment assumptions, HKEX/source-code access checklist, role MVP workflow, maker/checker quality controls, and architecture option tradeoffs
 
 详见：`docs/planning/s2t01_coverage_analysis.md`
 
