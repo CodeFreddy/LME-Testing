@@ -912,6 +912,8 @@ Document upload/import -> deterministic rule extraction -> atomic/semantic rule 
 
 **输入契约：**
 - `docs/planning/rule_workflow_scripts_stage_navigation_plan.md`
+- `docs/planning/tabbed_review_gui_development_plan.md`
+- `docs/planning/assets/tabbed_review_gui_mockups/`
 - `src/lme_testing/rule_workflow_session.py`
 - `src/lme_testing/review_session.py`
 - `deliverables/im_hk_v14_mock_api/`
@@ -989,6 +991,7 @@ Document upload/import -> deterministic rule extraction -> atomic/semantic rule 
 - Role-specific MVP workflow map
 - Maker/checker benchmark and sampling proposal
 - Prompt/RAG governance boundaries
+- Tabbed GUI target look-and-feel reference using `docs/planning/assets/tabbed_review_gui_mockups/`
 - Architecture option comparison, including Spring AI, Python micro-services, modular monolith, workflow orchestrator, and existing enterprise platform extension
 - Explicit non-goals and approval requirements
 

@@ -17,6 +17,8 @@ This plan consolidates the recent planning threads into a clear execution order:
 
 The goal is to keep the next work useful without letting enterprise ambition blur current contracts.
 
+The visual north star for future tabbed GUI work is the mockup set in `docs/planning/assets/tabbed_review_gui_mockups/`, as described in `docs/planning/tabbed_review_gui_development_plan.md`.
+
 ---
 
 ## Current Verified State
@@ -102,7 +104,7 @@ The goal is to keep the next work useful without letting enterprise ambition blu
 
 - deterministic parser for Python step definition metadata,
 - Scripts payload fields for source file, function name, decorator pattern, code snippet, and detected endpoint call,
-- read-only UI panel for implementation details,
+- read-only UI panel for implementation details, visually aligned with `04-scripts-review-tab.png`,
 - focused unit/HTTP tests.
 
 **Acceptance:**
@@ -164,7 +166,8 @@ The goal is to keep the next work useful without letting enterprise ambition blu
 - stale downstream artifact markers,
 - explicit regeneration controls,
 - immutable final snapshots,
-- browser-level happy-path and stale-state tests.
+- browser-level happy-path and stale-state tests,
+- tabbed shell direction aligned with the Documents/Rules/BDD/Scripts/Evidence mockups.
 
 **Acceptance:**
 
@@ -213,7 +216,7 @@ The goal is to keep the next work useful without letting enterprise ambition blu
 
 | Slice | Purpose | Precondition |
 |------|---------|--------------|
-| E1 Local tabbed workflow | Convert local flow into Documents -> Rules -> BDD -> Scripts -> Evidence | S2-F7 direction agreed |
+| E1 Local tabbed workflow | Convert local flow into Documents -> Rules -> BDD -> Scripts -> Evidence using the mockups as visual target | S2-F7 direction agreed |
 | E2 Workspace/document registry | Preserve document identity, hash, version, and lineage | Contract proposal approved |
 | E3 Traceability matrix | Derived source-to-evidence lineage view | Workspace/document lineage available or simulated locally |
 | E4 Canonical approval records | Version-bound review decisions | Approval schema approved |

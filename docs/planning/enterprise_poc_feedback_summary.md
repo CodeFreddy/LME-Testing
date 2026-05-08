@@ -217,6 +217,7 @@ This slice should produce:
 - enterprise deployment assumptions,
 - access checklist,
 - role-specific workflow map,
+- tabbed GUI target look-and-feel reference using `docs/planning/assets/tabbed_review_gui_mockups/`,
 - benchmark/sampling proposal,
 - prompt and RAG governance boundaries,
 - clear non-goals.

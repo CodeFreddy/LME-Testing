@@ -289,7 +289,21 @@ Use this for long-range enterprise architecture discussion.
 
 It includes a pros/cons comparison of Spring AI / Java service, Python micro-services, modular monolith, workflow orchestrator plus service workers, and extension of an existing enterprise platform.
 
-### 24. `docs/planning/mvp_input_document_contract_plan.md`
+### 24. `docs/planning/assets/tabbed_review_gui_mockups/`
+
+Use this folder as the future visual target reference for the tabbed local workflow.
+
+It contains:
+
+- `01-documents-tab.png`
+- `02-rules-bdd-workflow.png`
+- `03-bdd-review-tab.png`
+- `04-scripts-review-tab.png`
+- `05-evidence-traceability-tab.png`
+
+These mockups are not canonical workflow state and do not approve new schemas, permissions, or enterprise features by themselves.
+
+### 25. `docs/planning/mvp_input_document_contract_plan.md`
 
 Use this for the implemented S2-F3 slice that defines the minimum Test Plan and Regression Pack Index input contracts.
 
@@ -318,6 +332,7 @@ It defines:
 - `docs/planning/rule_workflow_scripts_stage_navigation_plan.md` preserves the S2-F7 rule workflow GUI Scripts and stage navigation plan; review-session Scripts generation exists, while API-backed metadata and full rule-workflow navigation remain open.
 - `docs/planning/next_phase_plan.md` preserves the recommended next-phase order and S2-F8 planning scope.
 - `docs/planning/enterprise_target_architecture_plan.md` preserves enterprise architecture option tradeoffs.
+- `docs/planning/assets/tabbed_review_gui_mockups/` preserves the target GUI look-and-feel reference for future tabbed workflow discussion.
 
 ---
 
@@ -350,6 +365,7 @@ Then read supporting docs only as needed:
 17. `docs/planning/rule_workflow_scripts_stage_navigation_plan.md`
 18. `docs/planning/next_phase_plan.md`
 19. `docs/planning/enterprise_target_architecture_plan.md`
+20. `docs/planning/tabbed_review_gui_development_plan.md`
 
 ### If you are implementing a task
 

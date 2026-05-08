@@ -424,6 +424,7 @@
 ### S2-F8：Enterprise POC Response Planning（已计划）
 - [x] Refactor next-phase planning into `docs/planning/next_phase_plan.md`
 - [x] Add enterprise architecture option pros/cons to `docs/planning/enterprise_target_architecture_plan.md`
+- [x] Reference tabbed GUI mockups as future target look-and-feel in planning docs
 - [ ] Draft enterprise deployment assumptions
 - [ ] Draft HKEX/source-code access checklist
 - [ ] Draft role-specific MVP workflow map

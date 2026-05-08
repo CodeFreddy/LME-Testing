@@ -22,6 +22,29 @@ Each tab should preserve the active document context and make the next action ob
 
 ---
 
+## Visual Target Mockups
+
+The mockups under `docs/planning/assets/tabbed_review_gui_mockups/` are the preferred future look-and-feel reference for this planning slice.
+
+Use them as design targets when implementing or refining the tabbed GUI:
+
+| Mockup | Intended Target |
+|--------|-----------------|
+| `01-documents-tab.png` | Documents tab: document registry, active document context, extraction/history status |
+| `02-rules-bdd-workflow.png` | Rules-to-BDD workflow: stage progression, rule review, and generation readiness |
+| `03-bdd-review-tab.png` | BDD review tab: scenario review, Given/When/Then editing, approval context |
+| `04-scripts-review-tab.png` | Scripts review tab: step matching, generated/editable code, implementation inspection |
+| `05-evidence-traceability-tab.png` | Evidence tab: traceability, validation status, outputs, and blockers |
+
+Planning boundary:
+
+- The mockups are UI direction, not canonical workflow state.
+- Governed JSON/JSONL artifacts remain the source of truth.
+- Implementation may adapt layout details to fit existing local code, but should preserve the mockups' main structure: left context/navigation, central review surface, right-side status/traceability details, visible blockers, and stage badges.
+- If a mockup implies a new approval schema, role permission, or enterprise feature, that part remains future scope until separately governed.
+
+---
+
 ## Roadmap Mapping
 
 - **Roadmap area:** Stage 2, S2-F4 rule extraction review workflow continuation
