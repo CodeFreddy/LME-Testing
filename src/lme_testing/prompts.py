@@ -17,7 +17,7 @@ CHECKER_PROMPT_VERSION = "1.3"
 # Increment BDD_PROMPT_VERSION when BDD_SYSTEM_PROMPT or
 # build_bdd_user_prompt changes in a way that affects output quality.
 BDD_PROMPT_VERSION = "3.1"
-SCRIPTS_PROMPT_VERSION = "1.0"
+SCRIPTS_PROMPT_VERSION = "1.2"
 
 # Increment REWRITE_PROMPT_VERSION when REWRITE_SYSTEM_PROMPT or
 # build_rewrite_user_prompt changes in a way that affects output quality.
@@ -264,7 +264,9 @@ Hard requirements:
 - Return exactly one script per input step_id.
 - Do not invent API endpoints that are absent from the catalog.
 - Each code field must include a Behave decorator matching step_type: @given, @when, or @then.
-- Code should be demo-friendly, readable Python that calls the selected API path through a simple client object on context.
+- For every completed Given/When script, endpoint_name must name the selected mock HKEX API catalog endpoint and code must visibly call it through context.api, context.hkex, or context.client.
+- Then scripts may either call the selected endpoint directly or assert against a response saved by a previous API-calling step, such as context.calculation_response, context.last_response, context.response, context.api_response, or context.aggregated_result.
+- For catalog-style calls, prefer context.api.get(path) or context.api.post(path, payload) with the exact path from the selected endpoint, and store calculation responses on context for later Then assertions.
 - If no endpoint is suitable, set endpoint_name to an empty string and generate a pending implementation that raises NotImplementedError with a clear message.
 """
 
@@ -286,7 +288,9 @@ def build_scripts_user_prompt(steps: list[dict], api_catalog: dict) -> str:
     return (
         "Generate Python Behave step scripts for the following BDD steps.\n"
         "The API catalog represents the tested system's Swagger-like interface. "
-        "Do not rely on semantic rule IDs or internal workflow concepts.\n"
+        "Do not rely on semantic rule IDs or internal workflow concepts. "
+        "A generated Given/When script is only considered complete when it calls one listed mock HKEX API endpoint. "
+        "A generated Then script is complete when it calls the endpoint or asserts against a response saved by a previous endpoint call; otherwise return a pending NotImplementedError script.\n"
         "Return JSON matching this schema shape:\n"
         f"{json.dumps(schema, ensure_ascii=False, indent=2)}\n"
         "API catalog:\n"

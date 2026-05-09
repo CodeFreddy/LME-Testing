@@ -2030,6 +2030,7 @@ function scriptCodeBlock(step, attrs) {
   const disabled = code ? '' : ' disabled';
   return `<details class="script-code"><summary>Script Code${esc(source)}</summary>
     ${step.endpoint_name ? `<div class="muted">endpoint: ${esc(step.endpoint_name)}</div>` : ''}
+    ${step.validation_status === 'skipped' ? `<div class="muted">skipped: ${esc(step.skip_reason || step.script_notes || '')}</div>` : ''}
     <textarea class="script-code-textarea" ${attrs}${disabled}>${esc(code || 'Script code has not been generated yet.')}</textarea>
   </details>`;
 }
@@ -2049,6 +2050,7 @@ function renderScriptsPanel(data) {
     <div class="scripts-metric"><strong>${s.unmatched || 0}</strong><span>Need to Create</span></div>
     <div class="scripts-metric"><strong>${s.candidates || 0}</strong><span>Candidates</span></div>
   </div>
+  <div class="muted" style="margin:8px 0 12px;">API catalog: ${esc(data.api_catalog_path || 'api-endpoint/mock-hkex-api')}</div>
   ${['given','when','then'].map(type => {
     const steps = (data.steps_by_type && data.steps_by_type[type]) || [];
     if (!steps.length) return '';
@@ -2105,7 +2107,7 @@ async function saveScriptsEdits({ reload = true, silent = false } = {}) {
   updateScriptsSaveButton();
   if (!silent) $('scriptsStatus').textContent = `Saved scripts edits.`;
   scriptsPayload = null;
-  if (reload && result.refreshed_step_registry_path) loadScriptsData();
+  if (reload) loadScriptsData();
   return result;
 }
 async function createScriptsByAi() {
@@ -2136,7 +2138,8 @@ async function pollScriptsAiJob(jobId) {
   }
   const result = payload.result || {};
   renderInlineProgress('scriptsProgressCard', 100, `Generated ${result.generated_count || 0} scripts`);
-  $('scriptsStatus').textContent = `Generated ${result.generated_count || 0} scripts. Review or edit the code. Edits are saved by Save or Next Step.`;
+  const skipped = result.skipped_count || 0;
+  $('scriptsStatus').textContent = `Generated ${result.generated_count || 0} scripts${skipped ? ` (${skipped} skipped)` : ''}. Review or edit the code. Edits are saved by Save or Next Step.`;
   await loadScriptsData();
 }
 async function saveScriptsAndNext() {

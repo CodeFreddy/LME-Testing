@@ -90,6 +90,43 @@ def _load_api_catalog(repo_root: Path) -> dict[str, Any]:
     return catalog
 
 
+def _uses_mock_hkex_api_client(code: str) -> bool:
+    return any(marker in code for marker in ("context.api.", "context.hkex.", "context.client."))
+
+
+def _uses_mock_hkex_api_response(code: str) -> bool:
+    response_markers = (
+        "context.calculation_response",
+        "context.last_response",
+        "context.response",
+        "context.api_response",
+        "context.aggregated_result",
+        "context.aggregated_response",
+    )
+    return any(marker in code for marker in response_markers)
+
+
+def _safe_script_function_name(step_id: str, step_text: str) -> str:
+    base = re.sub(r"\W+", "_", f"{step_id}_{step_text}".lower()).strip("_")
+    return f"step_skipped_{base[:60] or 'script'}"
+
+
+def _render_skipped_script(step_type: str, step_text: str, reason: str) -> str:
+    keyword = step_type if step_type in {"given", "when", "then"} else "given"
+    escaped_step = step_text.replace("\\", "\\\\").replace('"', '\\"')
+    escaped_reason = reason.replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ")
+    function_name = _safe_script_function_name(keyword, step_text)
+    return (
+        f'@{keyword}("{escaped_step}")\n'
+        f"def {function_name}(context):\n"
+        f'    reason = "{escaped_reason}"\n'
+        f'    if hasattr(context, "scenario") and hasattr(context.scenario, "skip"):\n'
+        f"        context.scenario.skip(reason)\n"
+        f"        return\n"
+        f"    raise NotImplementedError(reason)"
+    )
+
+
 def _validate_script_ai_payload(payload: dict[str, Any], expected_step_ids: set[str], endpoint_names: set[str]) -> list[dict[str, Any]]:
     scripts = payload.get("scripts")
     if not isinstance(scripts, list):
@@ -114,6 +151,15 @@ def _validate_script_ai_payload(payload: dict[str, Any], expected_step_ids: set[
             raise SchemaError(f"Unknown API endpoint for {step_id}: {endpoint_name}")
         if f"@{step_type}(" not in code:
             raise SchemaError(f"Generated code for {step_id} must include @{step_type}(...) decorator.")
+        if endpoint_name:
+            if not _uses_mock_hkex_api_client(code) and not (step_type == "then" and _uses_mock_hkex_api_response(code)):
+                raise SchemaError(
+                    f"Generated code for {step_id} selected {endpoint_name} but does not call or assert against a mock HKEX API result."
+                )
+        elif "NotImplementedError" not in code:
+            raise SchemaError(
+                f"Generated code for {step_id} has no API endpoint and must remain pending with NotImplementedError."
+            )
         try:
             ast.parse(code)
         except SyntaxError as exc:
@@ -134,45 +180,86 @@ def _validate_script_ai_payload(payload: dict[str, Any], expected_step_ids: set[
     return validated
 
 
-def _draft_script_ai_payload(steps: list[dict[str, Any]], api_catalog: dict[str, Any], reason: str) -> list[dict[str, Any]]:
-    endpoints = [item for item in api_catalog.get("endpoints", []) if isinstance(item, dict)]
-    endpoint = endpoints[0] if endpoints else {}
-    endpoint_name = str(endpoint.get("name") or "")
-    endpoint_path = str(endpoint.get("path") or "")
+def _skipped_script_for_step(step: dict[str, Any], reason: str) -> dict[str, Any]:
+    step_id = str(step.get("step_id") or "")
+    step_type = str(step.get("step_type") or "given")
+    step_text = str(step.get("step_text") or "")
+    return {
+        "step_id": step_id,
+        "step_type": step_type,
+        "step_text": step_text,
+        "endpoint_name": "",
+        "code": _render_skipped_script(step_type, step_text, reason),
+        "notes": f"Skipped by Scripts AI validation: {reason}",
+        "validation_status": "skipped",
+        "skip_reason": reason,
+    }
+
+
+def _validate_script_ai_payload_partial(
+    payload: dict[str, Any],
+    steps_by_id: dict[str, dict[str, Any]],
+    endpoint_names: set[str],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    scripts = payload.get("scripts")
+    if not isinstance(scripts, list):
+        reason = "Scripts AI payload did not contain a scripts list."
+        skipped = [_skipped_script_for_step(step, reason) for step in steps_by_id.values()]
+        return skipped, skipped
+
+    seen: set[str] = set()
     generated: list[dict[str, Any]] = []
-    for item in steps:
-        step_id = str(item.get("step_id") or "")
-        step_type = str(item.get("step_type") or "")
-        step_text = str(item.get("step_text") or "")
-        if not step_id or step_type not in {"given", "when", "then"}:
+    skipped: list[dict[str, Any]] = []
+    for item in scripts:
+        if not isinstance(item, dict):
+            skipped.append(
+                {
+                    "step_id": "",
+                    "step_type": "",
+                    "step_text": "",
+                    "endpoint_name": "",
+                    "code": "",
+                    "notes": "Skipped non-object Scripts AI item.",
+                    "validation_status": "skipped",
+                    "skip_reason": "Each generated script must be an object.",
+                }
+            )
             continue
-        func_name = re.sub(r"\W+", "_", f"step_{step_id}_{step_text}".lower()).strip("_")
-        if not func_name:
-            func_name = f"step_{step_type}"
-        if endpoint_path:
-            code = (
-                f"@{step_type}({json.dumps(step_text)})\n"
-                f"def {func_name}(context):\n"
-                f"    context.last_response = context.api.request({json.dumps(endpoint_path)})\n"
-                f"    assert context.last_response is not None"
+        step_id = str(item.get("step_id") or "")
+        step = steps_by_id.get(step_id)
+        if not step:
+            skipped.append(
+                {
+                    "step_id": step_id,
+                    "step_type": str(item.get("step_type") or ""),
+                    "step_text": str(item.get("step_text") or ""),
+                    "endpoint_name": str(item.get("endpoint_name") or ""),
+                    "code": "",
+                    "notes": f"Skipped unexpected script step_id: {step_id}",
+                    "validation_status": "skipped",
+                    "skip_reason": f"Unexpected script step_id: {step_id}",
+                }
             )
-        else:
-            code = (
-                f"@{step_type}({json.dumps(step_text)})\n"
-                f"def {func_name}(context):\n"
-                f"    raise NotImplementedError({json.dumps('No API catalog endpoint was suitable for this step.')})"
-            )
-        generated.append(
-            {
-                "step_id": step_id,
-                "step_type": step_type,
-                "step_text": step_text,
-                "endpoint_name": endpoint_name,
-                "code": code,
-                "notes": f"Deterministic draft generated after Scripts AI validation failed: {reason}",
-            }
-        )
-    return generated
+            continue
+        if step_id in seen:
+            skipped_item = _skipped_script_for_step(step, f"Duplicate script step_id: {step_id}")
+            skipped.append(skipped_item)
+            continue
+        seen.add(step_id)
+        try:
+            validated = _validate_script_ai_payload({"scripts": [item]}, {step_id}, endpoint_names)[0]
+            validated["validation_status"] = "valid"
+            generated.append(validated)
+        except SchemaError as exc:
+            skipped_item = _skipped_script_for_step(step, str(exc))
+            generated.append(skipped_item)
+            skipped.append(skipped_item)
+
+    for step_id in sorted(set(steps_by_id) - seen):
+        skipped_item = _skipped_script_for_step(steps_by_id[step_id], f"Scripts AI payload is missing step_id: {step_id}")
+        generated.append(skipped_item)
+        skipped.append(skipped_item)
+    return generated, skipped
 
 
 @dataclass
@@ -536,8 +623,11 @@ class ReviewSessionManager:
             elif step_type in registry_data:
                 steps_by_type[step_type] = [dict(item) for item in registry_data[step_type]]
 
-        ai_scripts = self._load_ai_scripts(state, iteration)
+        ai_scripts_payload = self._load_ai_scripts_payload(state, iteration)
+        ai_scripts = ai_scripts_payload.get("scripts", []) if isinstance(ai_scripts_payload.get("scripts"), list) else []
         ai_by_key = {item.get("step_id"): item for item in ai_scripts}
+        human_script_edits = self._load_human_script_edits(state, iteration)
+        human_by_key = {item.get("step_id"): item for item in human_script_edits}
         library_inventory = extract_steps_from_python_step_defs(self.repo_root / "src" / "lme_testing" / "step_library.py")
         library_code_by_text = {step.step_text: step.code for step in library_inventory.all_steps() if step.code}
 
@@ -547,11 +637,20 @@ class ReviewSessionManager:
         for step_type, steps in steps_by_type.items():
             for index, step in enumerate(steps):
                 key = _script_key(step_type, index=index)
+                human_item = human_by_key.get(key)
                 ai_item = ai_by_key.get(key)
-                if ai_item:
+                if human_item:
+                    step["step_text"] = human_item.get("step_text", step.get("step_text", ""))
+                    step["code"] = human_item.get("code", "")
+                    step["script_source"] = "human"
+                    step["endpoint_name"] = human_item.get("endpoint_name", "")
+                elif ai_item:
                     step["code"] = ai_item.get("code", "")
                     step["script_source"] = "ai"
                     step["endpoint_name"] = ai_item.get("endpoint_name", "")
+                    step["script_notes"] = ai_item.get("notes", "")
+                    step["validation_status"] = ai_item.get("validation_status", "")
+                    step["skip_reason"] = ai_item.get("skip_reason", "")
                 elif step.get("code"):
                     step["script_source"] = "bdd"
                 else:
@@ -576,11 +675,22 @@ class ReviewSessionManager:
             if gap_key_tuple in seen_unmatched_steps:
                 continue
             key = _script_key(gap.get("step_type", ""), gap_index=index)
+            human_item = human_by_key.get(key)
             ai_item = ai_by_key.get(key)
-            if ai_item:
+            if human_item:
+                gap["step_text"] = human_item.get("step_text", gap.get("step_text", ""))
+                gap["code"] = human_item.get("code", "")
+                gap["script_source"] = "human"
+                gap["endpoint_name"] = human_item.get("endpoint_name", "")
+                if gap.get("code"):
+                    generated_unmatched += 1
+            elif ai_item:
                 gap["code"] = ai_item.get("code", "")
                 gap["script_source"] = "ai"
                 gap["endpoint_name"] = ai_item.get("endpoint_name", "")
+                gap["script_notes"] = ai_item.get("notes", "")
+                gap["validation_status"] = ai_item.get("validation_status", "")
+                gap["skip_reason"] = ai_item.get("skip_reason", "")
                 generated_unmatched += 1
             else:
                 gap["code"] = ""
@@ -597,18 +707,56 @@ class ReviewSessionManager:
             "candidates": registry_data.get("candidates", []),
             "generated_scripts_path": state.get("generated_scripts_latest_path")
             or state["iterations"][str(iteration)].get("generated_scripts_latest_path"),
+            "api_catalog_path": ai_scripts_payload.get("api_catalog_path")
+            or str(self.repo_root / "api-endpoint" / "mock-hkex-api"),
+            "skipped_scripts": ai_scripts_payload.get("skipped_scripts", []),
+            "generation_warning": ai_scripts_payload.get("generation_warning", ""),
             "scripts_ready_to_save": unmatched_total == 0 or generated_unmatched >= unmatched_total,
         }
 
     def _load_ai_scripts(self, state: dict[str, Any], iteration: int) -> list[dict[str, Any]]:
+        payload = self._load_ai_scripts_payload(state, iteration)
+        scripts = payload.get("scripts", [])
+        return scripts if isinstance(scripts, list) else []
+
+    def _load_ai_scripts_payload(self, state: dict[str, Any], iteration: int) -> dict[str, Any]:
         path = state.get("generated_scripts_latest_path") or state["iterations"][str(iteration)].get("generated_scripts_latest_path")
+        if not path or not Path(path).exists():
+            return {}
+        payload = load_json(Path(path))
+        if not isinstance(payload, dict):
+            return {}
+        return payload
+
+    def _load_human_script_edits(self, state: dict[str, Any], iteration: int) -> list[dict[str, Any]]:
+        path = state.get("human_scripts_edits_latest_path") or state["iterations"][str(iteration)].get("human_scripts_edits_latest_path")
         if not path or not Path(path).exists():
             return []
         payload = load_json(Path(path))
         if not isinstance(payload, dict):
             return []
-        scripts = payload.get("scripts", [])
-        return scripts if isinstance(scripts, list) else []
+        edits = payload.get("edits", [])
+        if not isinstance(edits, list):
+            return []
+
+        script_edits: list[dict[str, Any]] = []
+        for edit in edits:
+            if not isinstance(edit, dict) or edit.get("scenario_id"):
+                continue
+            step_type = str(edit.get("step_type") or "")
+            if edit.get("is_gap"):
+                key = _script_key(step_type, gap_index=edit.get("gap_index"))
+            else:
+                key = _script_key(step_type, index=edit.get("step_index"))
+            script_edits.append(
+                {
+                    "step_id": key,
+                    "step_text": edit.get("step_text", ""),
+                    "code": edit.get("code", ""),
+                    "endpoint_name": edit.get("endpoint_name", ""),
+                }
+            )
+        return script_edits
 
     def create_scripts_by_ai(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
         state = self._load_state()
@@ -698,37 +846,62 @@ class ReviewSessionManager:
                 flush=True,
             )
             self._set_phase(job_id, "calling_llm")
-            response = provider.generate(
-                system_prompt=SCRIPTS_SYSTEM_PROMPT,
-                user_prompt=build_scripts_user_prompt(steps_for_model, api_catalog),
-            )
-            write_json(
-                raw_path,
-                {
-                    "run_id": job_id,
-                    "provider": provider_cfg.name,
-                    "model": provider_cfg.model,
-                    "prompt_version": SCRIPTS_PROMPT_VERSION,
-                    "response": response.raw_response,
-                },
-            )
-            self._set_phase(job_id, "validating")
-            fallback_reason = ""
+            generation_warning = ""
+            response = None
             try:
-                generated = _validate_script_ai_payload(
-                    parse_json_object(response.content),
-                    {item["step_id"] for item in steps_for_model},
-                    endpoint_names,
+                response = provider.generate(
+                    system_prompt=SCRIPTS_SYSTEM_PROMPT,
+                    user_prompt=build_scripts_user_prompt(steps_for_model, api_catalog),
                 )
-            except (SchemaError, ValueError, TypeError) as exc:
-                fallback_reason = str(exc)
-                logger.warning(
-                    "Scripts AI output failed validation; using deterministic draft scripts. session_id=%s job_id=%s reason=%s",
-                    self.session_id,
-                    job_id,
-                    fallback_reason,
+                write_json(
+                    raw_path,
+                    {
+                        "run_id": job_id,
+                        "provider": provider_cfg.name,
+                        "model": provider_cfg.model,
+                        "prompt_version": SCRIPTS_PROMPT_VERSION,
+                        "response": response.raw_response,
+                    },
                 )
-                generated = _draft_script_ai_payload(steps_for_model, api_catalog, fallback_reason)
+            except Exception as exc:
+                generation_warning = f"Scripts AI provider call failed; generated skip scripts instead: {exc}"
+                logger.exception("Scripts AI provider call failed; continuing with skipped scripts.")
+                write_json(
+                    raw_path,
+                    {
+                        "run_id": job_id,
+                        "provider": provider_cfg.name,
+                        "model": provider_cfg.model,
+                        "prompt_version": SCRIPTS_PROMPT_VERSION,
+                        "error": str(exc),
+                    },
+                )
+            self._set_phase(job_id, "validating")
+            steps_by_id = {str(item["step_id"]): item for item in steps_for_model}
+            skipped_scripts: list[dict[str, Any]]
+            if response is None:
+                generated = []
+                skipped_scripts = []
+                for step in steps_for_model:
+                    skipped_item = _skipped_script_for_step(step, generation_warning)
+                    generated.append(skipped_item)
+                    skipped_scripts.append(skipped_item)
+            else:
+                try:
+                    generated, skipped_scripts = _validate_script_ai_payload_partial(
+                        parse_json_object(response.content),
+                        steps_by_id,
+                        endpoint_names,
+                    )
+                except Exception as exc:
+                    generation_warning = f"Scripts AI response validation failed; generated skip scripts instead: {exc}"
+                    logger.exception("Scripts AI response validation failed; continuing with skipped scripts.")
+                    generated = []
+                    skipped_scripts = []
+                    for step in steps_for_model:
+                        skipped_item = _skipped_script_for_step(step, generation_warning)
+                        generated.append(skipped_item)
+                        skipped_scripts.append(skipped_item)
             output = {
                 "timestamp": timestamp,
                 "provider": provider_cfg.name,
@@ -737,7 +910,8 @@ class ReviewSessionManager:
                 "prompt_version": SCRIPTS_PROMPT_VERSION,
                 "api_catalog_path": str(self.repo_root / "api-endpoint" / "mock-hkex-api"),
                 "raw_response_path": str(raw_path),
-                "fallback_reason": fallback_reason or None,
+                "generation_warning": generation_warning,
+                "skipped_scripts": skipped_scripts,
                 "scripts": generated,
             }
             self._set_phase(job_id, "writing_scripts")
@@ -749,13 +923,15 @@ class ReviewSessionManager:
             self._save_manifest(state)
             result = {
                 "generated_count": len(generated),
+                "valid_generated_count": len(generated) - len(skipped_scripts),
+                "skipped_count": len(skipped_scripts),
                 "generated_scripts_path": str(latest_path),
                 "raw_response_path": str(raw_path),
                 "provider": provider_cfg.name,
                 "model": provider_cfg.model,
-                "fallback_reason": fallback_reason or None,
+                "generation_warning": generation_warning,
             }
-            print(f"[scripts] Generated {len(generated)} scripts.", flush=True)
+            print(f"[scripts] Generated {len(generated)} scripts ({len(skipped_scripts)} skipped).", flush=True)
             with self._lock:
                 self._jobs[job_id].status = "succeeded"
                 self._jobs[job_id].phase = "done"

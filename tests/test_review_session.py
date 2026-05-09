@@ -8,7 +8,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 from lme_testing.config import ProjectConfig, ProviderConfig, RoleDefaults
-from lme_testing.review_session import ReviewSessionManager, _render_review_session_shell
+from lme_testing.review_session import ReviewSessionManager, _render_review_session_shell, _validate_script_ai_payload
+from lme_testing.schemas import SchemaError
 from lme_testing.step_registry import (
     compute_step_matches,
     extract_steps_from_normalized_bdd,
@@ -316,6 +317,25 @@ class ReviewSessionTests(unittest.TestCase):
         self.assertIn('context.api.get', first_step['code'])
         self.assertTrue(scripts_payload['scripts_ready_to_save'])
         self.assertTrue(scripts_payload['generated_scripts_path'])
+        self.assertIn('api-endpoint', scripts_payload['api_catalog_path'])
+        edited_code = '@given("custom unmatched setup")\ndef step_custom_unmatched_setup(context):\n    context.edited_by_human = True'
+        manager.save_scripts_edits(
+            {
+                'edits': [
+                    {
+                        'step_type': 'given',
+                        'step_index': 0,
+                        'step_text': 'custom unmatched setup',
+                        'code': edited_code,
+                    }
+                ]
+            }
+        )
+        refreshed_payload = manager.scripts_payload()
+        refreshed_step = refreshed_payload['steps_by_type']['given'][0]
+        self.assertEqual(refreshed_step['script_source'], 'human')
+        self.assertEqual(refreshed_step['code'], edited_code)
+        self.assertNotIn('context.api.get', refreshed_step['code'])
         with self.assertRaisesRegex(ValueError, 'already been generated'):
             manager.create_scripts_by_ai({})
 
@@ -351,21 +371,52 @@ class ReviewSessionTests(unittest.TestCase):
         self.assertIn('@given("custom unmatched setup")', first_step['code'])
         self.assertTrue(scripts_payload['scripts_ready_to_save'])
 
-    def test_create_scripts_by_ai_falls_back_when_model_payload_is_invalid(self) -> None:
+    def test_create_scripts_by_ai_skips_invalid_scripts_without_failing_job(self) -> None:
         manager = self._build_manager(include_bdd=True)
-        manager.repo_root = Path.cwd()
+        manager.repo_root = WORK_TMP
+        api_dir = WORK_TMP / 'api-endpoint'
+        api_dir.mkdir(exist_ok=True)
+        (api_dir / 'mock-hkex-api').write_text(
+            json.dumps(
+                {
+                    'title': 'Mock HKEX API',
+                    'endpoints': [
+                        {
+                            'name': 'getMarginCreditBalance',
+                            'method': 'GET',
+                            'path': '/api/margin/credits/{clearingParticipantId}',
+                            'description': 'Returns available margin credit balance.',
+                        }
+                    ],
+                },
+                ensure_ascii=False,
+            ),
+            encoding='utf-8',
+        )
+        response_payload = {
+            'scripts': [
+                {
+                    'step_id': 'given:0',
+                    'step_type': 'given',
+                    'step_text': 'custom unmatched setup',
+                    'endpoint_name': 'getMarginCreditBalance',
+                    'code': '@given("custom unmatched setup")\ndef step_custom_unmatched_setup(context):\n    context.expected_margin_credit = 5000000',
+                    'notes': 'context-only setup',
+                }
+            ]
+        }
         config = make_config()
         config.providers['scripts_provider'] = ProviderConfig(
             name='scripts_provider',
             provider_type='openai_compatible',
-            model='demo-scripts-model',
+            model='kimi-k2.5',
             base_url='https://example.com/v1',
             api_key='secret',
         )
         config.roles['scripts'] = 'scripts_provider'
         manager.config = config
 
-        with patch('lme_testing.review_session.build_provider', return_value=FakeProvider([json.dumps({'results': []})])):
+        with patch('lme_testing.review_session.build_provider', return_value=FakeProvider([json.dumps(response_payload)])):
             job = manager.create_scripts_by_ai({})
             for _ in range(50):
                 status = manager.job_status(job['job_id'])
@@ -373,16 +424,66 @@ class ReviewSessionTests(unittest.TestCase):
                     break
                 time.sleep(0.05)
 
+        status = manager.job_status(job['job_id'])
         self.assertEqual(status['status'], 'succeeded')
-        self.assertEqual(status['result']['generated_count'], 1)
-        self.assertIn('scripts list', status['result']['fallback_reason'])
-        generated_payload = json.loads(Path(status['result']['generated_scripts_path']).read_text(encoding='utf-8'))
-        self.assertIn('scripts list', generated_payload['fallback_reason'])
-        self.assertIn('Deterministic draft', generated_payload['scripts'][0]['notes'])
+        self.assertEqual(status['result']['skipped_count'], 1)
         scripts_payload = manager.scripts_payload()
         first_step = scripts_payload['steps_by_type']['given'][0]
-        self.assertEqual(first_step['script_source'], 'ai')
-        self.assertIn('@given("custom unmatched setup")', first_step['code'])
+        self.assertEqual(first_step['validation_status'], 'skipped')
+        self.assertIn('context.scenario.skip', first_step['code'])
+        self.assertTrue(scripts_payload['scripts_ready_to_save'])
+
+    def test_scripts_ai_validation_requires_selected_endpoint_call(self) -> None:
+        payload = {
+            'scripts': [
+                {
+                    'step_id': 'then:0',
+                    'step_type': 'then',
+                    'step_text': 'Aggregated margin before rounding equals 46,929,904',
+                    'endpoint_name': 'calculateAggregatedMarketRiskMargin',
+                    'code': '@then("Aggregated margin before rounding equals 46,929,904")\ndef step_verify_aggregated_before_rounding(context):\n    actual = getattr(context, "aggregated_margin_before_rounding", None)\n    assert actual == 46929904',
+                    'notes': 'context-only assertion',
+                }
+            ]
+        }
+
+        with self.assertRaisesRegex(SchemaError, 'does not call or assert against a mock HKEX API result'):
+            _validate_script_ai_payload(payload, {'then:0'}, {'calculateAggregatedMarketRiskMargin'})
+
+    def test_scripts_ai_validation_allows_then_assertion_against_saved_api_response(self) -> None:
+        payload = {
+            'scripts': [
+                {
+                    'step_id': 'then:0',
+                    'step_type': 'then',
+                    'step_text': 'Aggregated margin before rounding equals 46,929,904',
+                    'endpoint_name': 'calculateAggregatedMarketRiskMargin',
+                    'code': '@then("Aggregated margin before rounding equals 46,929,904")\ndef step_verify_aggregated_before_rounding(context):\n    actual = context.calculation_response.get("aggregated_margin_before_rounding")\n    assert actual == 46929904',
+                    'notes': 'asserts against saved API response',
+                }
+            ]
+        }
+
+        generated = _validate_script_ai_payload(payload, {'then:0'}, {'calculateAggregatedMarketRiskMargin'})
+
+        self.assertEqual(generated[0]['endpoint_name'], 'calculateAggregatedMarketRiskMargin')
+
+    def test_scripts_ai_validation_requires_pending_when_no_endpoint_selected(self) -> None:
+        payload = {
+            'scripts': [
+                {
+                    'step_id': 'then:0',
+                    'step_type': 'then',
+                    'step_text': 'Aggregated margin before rounding equals 46,929,904',
+                    'endpoint_name': '',
+                    'code': '@then("Aggregated margin before rounding equals 46,929,904")\ndef step_verify_aggregated_before_rounding(context):\n    assert True',
+                    'notes': 'context-only assertion',
+                }
+            ]
+        }
+
+        with self.assertRaisesRegex(SchemaError, 'must remain pending with NotImplementedError'):
+            _validate_script_ai_payload(payload, {'then:0'}, {'calculateAggregatedMarketRiskMargin'})
 
     def test_save_scripts_edits_preserves_user_script_code(self) -> None:
         manager = self._build_manager(include_bdd=True)
@@ -405,6 +506,10 @@ class ReviewSessionTests(unittest.TestCase):
             if line.strip()
         ]
         self.assertEqual(reviewed[0]['step_definitions']['given'][0]['code'], code)
+        refreshed_payload = manager.scripts_payload()
+        refreshed_step = refreshed_payload['steps_by_type']['given'][0]
+        self.assertEqual(refreshed_step['script_source'], 'human')
+        self.assertEqual(refreshed_step['code'], code)
         step_files = result.get('step_definitions_files', [])
         self.assertTrue(step_files)
         self.assertIn('context.value = 1', Path(step_files[0]).read_text(encoding='utf-8'))

@@ -11,15 +11,15 @@ from pathlib import Path
 TEMPLATE_REGISTRY: dict[str, dict] = {
     # Session/Login patterns
     "session_login": {
-        "given_pattern": "a member with valid LME session",
-        "given_code": '''Given(/^a member with valid LME session$/) do
-  @session = LME::Client.login
+        "given_pattern": "a member with valid HKEX session",
+        "given_code": '''Given(/^a member with valid HKEX session$/) do
+  @session = HKEX::Client.login
 end''',
     },
     "session_login_with_credentials": {
         "given_pattern": "a member with valid credentials",
         "given_code": '''Given(/^a member with valid credentials$/) do
-  @session = LME::Client.login(username: @test_data[:username], password: @test_data[:password])
+  @session = HKEX::Client.login(username: @test_data[:username], password: @test_data[:password])
 end''',
     },
     # Order/Trade patterns
@@ -41,14 +41,14 @@ end''',
     "contact_exchange": {
         "then_pattern": "member contacts Exchange",
         "then_code": '''Then(/^member contacts Exchange$/) do
-  expect(LME::PostTrade).to receive(:contact_exchange).with(kind_of(String))
-  LME::PostTrade.contact_exchange(reason: @response.rejection_reason)
+  expect(HKEX::PostTrade).to receive(:contact_exchange).with(kind_of(String))
+  HKEX::PostTrade.contact_exchange(reason: @response.rejection_reason)
 end''',
     },
     "exchange_records_contact": {
         "then_pattern": "Exchange records the contact",
         "then_code": '''Then(/^Exchange records the contact$/) do
-  contact = LME::PostTrade.get_contact(reason: @response.rejection_reason)
+  contact = HKEX::PostTrade.get_contact(reason: @response.rejection_reason)
   expect(contact).not_to be_nil
   expect(contact[:member_id]).to eq(@session.member_id)
 end''',
@@ -64,13 +64,13 @@ end''',
     "api_get": {
         "when_pattern": "GET request to",
         "when_code": '''When(/^GET request to (.+)$/) do |endpoint|
-  @response = LME::API.get(endpoint, @session.token)
+  @response = HKEX::API.get(endpoint, @session.token)
 end''',
     },
     "api_post": {
         "when_pattern": "POST request to",
         "when_code": '''When(/^POST request to (.+) with (.+)$/) do |endpoint, payload|
-  @response = LME::API.post(endpoint, @session.token, JSON.parse(payload))
+  @response = HKEX::API.post(endpoint, @session.token, JSON.parse(payload))
 end''',
     },
     "api_response_success": {
@@ -106,21 +106,21 @@ end''',
     },
     # Terminology validation patterns (learned from samples/ruby_cucumber/)
     "terminology_assigned": {
-        "given_pattern": "terms are assigned the meaning ascribed in the LME Rulebook",
-        "given_code": '''Given(/^the terms are assigned the meaning ascribed in the LME Rulebook$/) do
-  @validation_result = LME::API.validate_terminology(@document)
+        "given_pattern": "terms are assigned the meaning ascribed in the HKEX Rulebook",
+        "given_code": '''Given(/^the terms are assigned the meaning ascribed in the HKEX Rulebook$/) do
+  @validation_result = HKEX::API.validate_terminology(@document)
 end''',
     },
     "terminology_compliant": {
-        "then_pattern": "terms are assigned the meaning ascribed in the LME Rulebook",
-        "then_code": '''Then(/^the terms are assigned the meaning ascribed in the LME Rulebook$/) do
+        "then_pattern": "terms are assigned the meaning ascribed in the HKEX Rulebook",
+        "then_code": '''Then(/^the terms are assigned the meaning ascribed in the HKEX Rulebook$/) do
   expect(@validation_result.compliant).to be(true)
-  expect(@validation_result.source).to eq('LME Rulebook')
+  expect(@validation_result.source).to eq('HKEX Rulebook')
 end''',
     },
     "terminology_deviation": {
-        "then_pattern": "system identifies the deviation from the LME Rulebook",
-        "then_code": '''Then(/^the system identifies the deviation from the LME Rulebook$/) do
+        "then_pattern": "system identifies the deviation from the HKEX Rulebook",
+        "then_code": '''Then(/^the system identifies the deviation from the HKEX Rulebook$/) do
   expect(@validation_result.compliant).to be(false)
   expect(@validation_result.errors).to include('TERM_DEVIATION')
 end''',
@@ -141,7 +141,7 @@ end''',
     "contact_exchange_reason": {
         "when_pattern": "member contacts Exchange to explain",
         "when_code": '''When(/^the Member contacts the Exchange to explain the rationale for the price$/) do
-  @contact_response = LME::PostTrade.contact_exchange(
+  @contact_response = HKEX::PostTrade.contact_exchange(
     reason: @validation_result.rejection_reason
   )
 end''',
@@ -151,7 +151,7 @@ end''',
         "then_code": '''Then(/^the processing result indicates compliance$/) do
   expect(@contact_response).not_to be_nil
   expect(@contact_response.status).to eq('RECORDED')
-  compliance = LME::PostTrade.get_compliance_status(@validation_result.rejection_reason)
+  compliance = HKEX::PostTrade.get_compliance_status(@validation_result.rejection_reason)
   expect(compliance).to eq('COMPLIANT')
 end''',
     },
@@ -159,7 +159,7 @@ end''',
         "then_pattern": "processing result indicates non-compliance",
         "then_code": '''Then(/^the processing result indicates non-compliance or failure$/) do
   expect(@contact_response).to be_nil
-  compliance = LME::PostTrade.get_compliance_status('trade_without_contact')
+  compliance = HKEX::PostTrade.get_compliance_status('trade_without_contact')
   expect(compliance).to eq('NON_COMPLIANT')
 end''',
     },
@@ -168,14 +168,14 @@ end''',
         "given_pattern": "trade submission resulted in Failed Checks",
         "given_code": '''Given(/^trade submission resulted in Failed Checks$/) do
   @trade_params = { price: '999999', metal: 'ALU', quantity: 25 }
-  @trade_submission = LME::API.submit_trade(@trade_params)
+  @trade_submission = HKEX::API.submit_trade(@trade_params)
   expect(@trade_submission.status).to eq('SUBMITTED')
 end''',
     },
     "resubmit_original_form": {
         "when_pattern": "Member requests to re-submit the trade in its original form",
         "when_code": '''When(/^Member requests to re-submit the trade in its original form$/) do
-  @resubmission_response = LME::API.resubmit_trade(
+  @resubmission_response = HKEX::API.resubmit_trade(
     @trade_submission.id, original_form: @trade_params
   )
 end''',
@@ -190,16 +190,16 @@ end''',
     "venue_business_transacted": {
         "given_pattern": "business is transacted on the Exchange",
         "given_code": '''Given(/^business is transacted on the Exchange$/) do
-  @session = LME::Client.login(
-    username: ENV['LME_USERNAME'] || 'test_trader',
-    password: ENV['LME_PASSWORD'] || 'test_pass'
+  @session = HKEX::Client.login(
+    username: ENV['HKEX_USERNAME'] || 'test_trader',
+    password: ENV['HKEX_PASSWORD'] || 'test_pass'
   )
 end''',
     },
     "venue_trade_agreement": {
         "when_pattern": "trade agreement occurs",
         "when_code": '''When(/^trade agreement occurs$/) do
-  @trade_agreement = LME::PostTrade.create_agreement
+  @trade_agreement = HKEX::PostTrade.create_agreement
 end''',
     },
     "venue_price_validation": {
@@ -212,13 +212,13 @@ end''',
     "exchange_defines_matching_rules": {
         "given_pattern": "Exchange defines matching rules",
         "given_code": '''Given(/^the Exchange defines matching rules$/) do
-  @rules = LME::PostTrade.define_matching_rules(version: '1.0')
+  @rules = HKEX::PostTrade.define_matching_rules(version: '1.0')
 end''',
     },
     "rules_submitted_adoption": {
         "when_pattern": "rules are submitted for adoption",
         "when_code": '''When(/^the rules are submitted for adoption$/) do
-  @adoption_status = LME::PostTrade.submit_adoption(@rules)
+  @adoption_status = HKEX::PostTrade.submit_adoption(@rules)
 end''',
     },
     "rules_adopted": {
@@ -228,18 +228,18 @@ end''',
   expect(@adoption_status.classification).to eq('Administrative_Procedures')
 end''',
     },
-    # LME trading environment
-    "lme_environment_active": {
-        "given_pattern": "LME trading environment is active",
-        "given_code": '''Given(/^LME trading environment is active$/) do
-  @env = LME::Client.environment
+    # HKEX trading environment
+    "hkex_environment_active": {
+        "given_pattern": "HKEX trading environment is active",
+        "given_code": '''Given(/^HKEX trading environment is active$/) do
+  @env = HKEX::Client.environment
   expect(@env.status).to eq('active')
 end''',
     },
     "trade_on_any_venue": {
         "when_pattern": "trade agreement occurs on any venue",
         "when_code": '''When(/^trade agreement occurs on any venue$/) do
-  @agreement = LME::PostTrade.create_agreement
+  @agreement = HKEX::PostTrade.create_agreement
 end''',
     },
     "trade_subject_to_validation": {
@@ -398,7 +398,7 @@ def map_step_to_template(step: str, step_type: str, require_exact: bool = False)
 
         # 2. Parameterized prefix: "GET request to" matches "GET request to /api/users"
         if "(" not in pattern:
-            # Non-parameterized pattern — check prefix overlap
+            # Non-parameterized pattern -check prefix overlap
             words = pattern_lower.split()
             if len(words) >= 2 and step_lower.startswith(" ".join(words[:2])):
                 return template.get(f"{step_type}_code")
@@ -444,11 +444,11 @@ def generate_step_definition(
     if step in STEP_LIBRARY:
         return STEP_LIBRARY[step].render()
 
-    # 2. Try map_step_to_template (legacy Ruby templates — convert to Python stub)
+    # 2. Try map_step_to_template (legacy Ruby templates -convert to Python stub)
     template_code = map_step_to_template(step, step_type, require_exact=not human_edited)
     if template_code:
         # Convert Ruby template to Python equivalent (use library entry if available)
-        # Ruby: Given(/^...$/) do ... end  →  Python: @given("...")\ndef step():
+        # Ruby: Given(/^...$/) do ... end  鈫? Python: @given("...")\ndef step():
         #     ...
         # For now, generate a Python stub with the same logic
         pass  # falls through to implementation generator
@@ -477,7 +477,7 @@ def _generate_python_implementation(step: str, step_type: str, pattern: str, ste
     """Attempt to generate a Python step implementation based on step text analysis.
 
     Returns None if no meaningful implementation can be generated.
-    All generated code uses Python syntax with LME.Client, LME.API, LME.PostTrade.
+    All generated code uses Python syntax with HKEX.Client, HKEX.API, HKEX.PostTrade.
     """
     step_lower = step.lower()
     keyword = step_type.lower()
@@ -488,14 +488,14 @@ def _generate_python_implementation(step: str, step_type: str, pattern: str, ste
     if step_type == "given":
         if "session" in step_lower or "login" in step_lower or "member" in step_lower:
             return py(f'''step_member_session():
-    session = LME.Client.login(
-        username=ENV.get('LME_USERNAME', 'test_trader'),
-        password=ENV.get('LME_PASSWORD', 'test_pass'),
+    session = HKEX.Client.login(
+        username=ENV.get('HKEX_USERNAME', 'test_trader'),
+        password=ENV.get('HKEX_PASSWORD', 'test_pass'),
     )
     return session''')
         if "environment" in step_lower and "active" in step_lower:
             return py('''step_environment_active():
-    env = LME.Client.environment
+    env = HKEX.Client.environment
     assert env.status == 'active' ''')
         if "trade" in step_lower or "submission" in step_lower:
             return py('''step_trade_submission():
@@ -504,34 +504,34 @@ def _generate_python_implementation(step: str, step_type: str, pattern: str, ste
         'metal': 'ALU',
         'quantity': 25,
     }
-    trade_submission = LME.API.submit_trade(trade_params)''')
+    trade_submission = HKEX.API.submit_trade(trade_params)''')
         if "document" in step_lower or "terminology" in step_lower or "terms" in step_lower:
             return py('''step_document_terminology():
-    document = LME.API.create_document(broker=broker, terms='capitalised')''')
+    document = HKEX.API.create_document(broker=broker, terms='capitalised')''')
         if "exchange" in step_lower and "matching rules" in step_lower:
             return py('''step_exchange_defines_rules():
-    rules = LME.PostTrade.define_matching_rules(version='1.0')''')
+    rules = HKEX.PostTrade.define_matching_rules(version='1.0')''')
         if "deadline" in step_lower:
             return py('''step_deadline_exists():
-    deadline = LME.PostTrade.get_deadline(request_type='post_trade_correction')
+    deadline = HKEX.PostTrade.get_deadline(request_type='post_trade_correction')
     assert deadline is not None''')
 
     elif step_type == "when":
         if "contact" in step_lower and "exchange" in step_lower:
             return py('''step_contacts_exchange():
-    contact_response = LME.PostTrade.contact_exchange(
+    contact_response = HKEX.PostTrade.contact_exchange(
         reason=validation_result.rejection_reason,
         member=session.member_id,
     )
     return contact_response''')
         if "api" in step_lower and "get" in step_lower:
             return py('''step_api_get():
-    response = LME.API.get(endpoint, session.token)
+    response = HKEX.API.get(endpoint, session.token)
     return response''')
         if "api" in step_lower and "post" in step_lower:
             return py('''step_api_post():
     import json
-    response = LME.API.post(endpoint, session.token, json.loads(payload))
+    response = HKEX.API.post(endpoint, session.token, json.loads(payload))
     return response''')
         if "submit" in step_lower or "submits" in step_lower:
             return py('''step_submit_order():
@@ -539,15 +539,15 @@ def _generate_python_implementation(step: str, step_type: str, pattern: str, ste
     return response''')
         if "trade" in step_lower and ("agreement" in step_lower or "occur" in step_lower):
             return py('''step_trade_agreement():
-    trade_agreement = LME.PostTrade.create_agreement()
+    trade_agreement = HKEX.PostTrade.create_agreement()
     return trade_agreement''')
         if "rules" in step_lower and "adoption" in step_lower:
             return py('''step_rules_adoption():
-    adoption_status = LME.PostTrade.submit_adoption(rules)
+    adoption_status = HKEX.PostTrade.submit_adoption(rules)
     return adoption_status''')
         if "re-submit" in step_lower or "resubmit" in step_lower:
             return py('''step_resubmit_trade():
-    resubmission_response = LME.API.resubmit_trade(
+    resubmission_response = HKEX.API.resubmit_trade(
         trade_submission.id,
         original_form=trade_params,
     )
@@ -559,7 +559,7 @@ def _generate_python_implementation(step: str, step_type: str, pattern: str, ste
             return py(f'''step_request_before_deadline():
     deadline_ts = deadline.get('timestamp')
     submitted_at = deadline_ts - ({minutes} * 60)
-    response = LME.API.submit_request(
+    response = HKEX.API.submit_request(
         request_type='post_trade_correction',
         submitted_at=submitted_at,
         session=session,
@@ -573,12 +573,12 @@ def _generate_python_implementation(step: str, step_type: str, pattern: str, ste
             return py('''step_compliance_recorded():
     assert contact_response is not None
     assert contact_response.status == 'RECORDED'
-    compliance = LME.PostTrade.get_compliance_status(validation_result.rejection_reason)
+    compliance = HKEX.PostTrade.get_compliance_status(validation_result.rejection_reason)
     assert compliance == 'COMPLIANT' ''')
         if "non-compliance" in step_lower or ("not" in step_lower and "compliant" in step_lower):
             return py('''step_non_compliance():
     assert contact_response is None
-    compliance = LME.PostTrade.get_compliance_status('trade_without_contact')
+    compliance = HKEX.PostTrade.get_compliance_status('trade_without_contact')
     assert compliance == 'NON_COMPLIANT' ''')
         if "obligation" in step_lower and "fulfilled" in step_lower:
             return py('''step_obligation_fulfilled():
@@ -589,7 +589,7 @@ def _generate_python_implementation(step: str, step_type: str, pattern: str, ste
         if "terminology" in step_lower or ("terms" in step_lower and "rulebook" in step_lower):
             return py('''step_terminology_rulebook():
     assert validation_result.compliant is True
-    assert validation_result.source == 'LME Rulebook' ''')
+    assert validation_result.source == 'HKEX Rulebook' ''')
         if "deviation" in step_lower:
             return py('''step_deviation_detected():
     assert validation_result.compliant is False
@@ -606,11 +606,11 @@ def _generate_python_implementation(step: str, step_type: str, pattern: str, ste
     assert response.rejection_reason == 'late_submission' ''')
         if "deadline" in step_lower and ("pass" in step_lower or "success" in step_lower):
             return py('''step_deadline_pass():
-    result = LME.API.get_deadline_validation(response.request_id)
+    result = HKEX.API.get_deadline_validation(response.request_id)
     assert result in ('pass', 'PASS', True) ''')
         if "deadline" in step_lower and ("fail" in step_lower or "failure" in step_lower):
             return py('''step_deadline_fail():
-    result = LME.API.get_deadline_validation(response.request_id)
+    result = HKEX.API.get_deadline_validation(response.request_id)
     assert result in ('fail', 'FAIL', False) ''')
         if "recorded" in step_lower and "timestamp" in step_lower:
             return py('''step_timestamp_recorded():
@@ -619,7 +619,7 @@ def _generate_python_implementation(step: str, step_type: str, pattern: str, ste
     assert submitted_at <= deadline_ts - (15 * 60) ''')
         if "recorded" in step_lower and ("late" in step_lower or "submission" in step_lower):
             return py('''step_late_submission_recorded():
-    outcome = LME.PostTrade.get_submission_outcome('late_submission')
+    outcome = HKEX.PostTrade.get_submission_outcome('late_submission')
     assert outcome is not None ''')
         if "api" in step_lower and "successful" in step_lower:
             return py('''step_api_success():
@@ -637,7 +637,7 @@ def render_step_definitions(feature_name: str, scenarios: list[dict]) -> str:
 
     lines.append(f"# frozen_string_literal: true")
     lines.append(f"# Step definitions for: {feature_name}")
-    lines.append(f"# Generated from LME Matching Rules BDD pipeline")
+    lines.append(f"# Generated from HKEX Matching Rules BDD pipeline")
     lines.append("")
 
     seen_patterns: set[str] = set()
@@ -749,7 +749,7 @@ def _extract_scenario_titles_from_feature_file(feature_file: str) -> dict[str, s
 
     Format expected:
       @medium @positive @SR-MR-001-01
-      Scenario: Capitalised terms resolve to LME Rulebook definitions
+      Scenario: Capitalised terms resolve to HKEX Rulebook definitions
         TC-SR-MR-001-01-positive-01
     """
     titles = {}
@@ -1074,33 +1074,80 @@ def {safe_name}(context):
 def render_environment_file(output_dir: Path) -> Path:
     """Write behave environment.py with before/after scenario hooks.
 
-    Provides shared context setup/teardown and LME client initialization.
+    Provides shared context setup/teardown and HKEX client initialization.
     """
     env_dir = output_dir / "features"
     env_dir.mkdir(parents=True, exist_ok=True)
 
-    content = '''"""Behave environment hooks for LME Matching Rules BDD suite."""
+    content = '''"""Behave environment hooks for HKEX Matching Rules BDD suite."""
 from __future__ import annotations
 
 
 def before_all(context):
-    """Initialize LME test environment before any scenarios run."""
-    # Import LME client stubs — replace with real LME client when VM access is available
+    """Initialize HKEX test environment before any scenarios run."""
+    # Import HKEX client stubs -replace with real HKEX client when VM access is available
     try:
-        from lme_testing.step_library import LME_CLIENT
-        context.lme = LME_CLIENT
+        from lme_testing.step_library import HKEX_API_CLIENT, HKEX_CLIENT
+        context.hkex = HKEX_CLIENT
+        context.api = HKEX_API_CLIENT
     except ImportError:
         # Fallback: use mock client for demo
-        class MockLME:
-            Client = MockLMEClient()
-            API = MockLMEAPI()
-            PostTrade = MockLMEPostTrade()
+        class MockHKEXCatalogApiClient:
+            def get(self, path, params=None, **kwargs):
+                if path == "/api/margin/risk-parameters":
+                    return {"rounding_parameter": 10000, "margin_credit": 5000000, "currency": "HKD"}
+                if path.startswith("/api/margin/credits/"):
+                    return {"clearingParticipantId": path.rsplit("/", 1)[-1], "available_credit": 5000000, "currency": "HKD"}
+                raise NotImplementedError(f"Mock HKEX API GET endpoint is not implemented: {path}")
 
-        class MockLMEClient:
+            def post(self, path, payload=None, **kwargs):
+                payload = payload if payload is not None else kwargs.get("json", kwargs.get("data", {}))
+                payload = payload or {}
+                if path == "/api/margin/market-risk/aggregate":
+                    components = payload.get("components") if isinstance(payload.get("components"), dict) else payload
+                    fields = (
+                        "portfolio_margin",
+                        "flat_rate_margin",
+                        "liquidation_risk_add_on",
+                        "structured_product_add_on",
+                        "corporate_action_position_margin",
+                        "holiday_add_on",
+                    )
+                    before = payload.get("aggregated_margin_before_rounding")
+                    if before is None:
+                        before = sum(int(str(components.get(field, 0)).replace(",", "")) for field in fields)
+                    else:
+                        before = int(str(before).replace(",", ""))
+                    rounding = int(str(payload.get("rounding_parameter", 10000)).replace(",", ""))
+                    rounded = ((before + rounding - 1) // rounding) * rounding if rounding > 0 else before
+                    return {
+                        "components": {
+                            **{field: int(str(components.get(field, 0)).replace(",", "")) for field in fields},
+                            "liquidation_risk_addon": int(str(components.get("liquidation_risk_add_on", components.get("liquidation_risk_addon", 0))).replace(",", "")),
+                            "structured_product_addon": int(str(components.get("structured_product_add_on", components.get("structured_product_addon", 0))).replace(",", "")),
+                            "holiday_addon": int(str(components.get("holiday_add_on", components.get("holiday_addon", 0))).replace(",", "")),
+                        },
+                        "aggregated_margin_before_rounding": before,
+                        "rounded_aggregated_market_risk_component_margin": rounded,
+                        "rounding_parameter": rounding,
+                        "currency": "HKD",
+                    }
+                if path == "/api/margin/credits/apply":
+                    net_margin = int(str(payload.get("net_margin", payload.get("net_margin_before_credit", 0))).replace(",", ""))
+                    credit = int(str(payload.get("margin_credit", 5000000)).replace(",", ""))
+                    return {
+                        "net_margin_before_credit": net_margin,
+                        "margin_credit": credit,
+                        "net_margin_after_credit": max(0, net_margin - credit),
+                        "currency": "HKD",
+                    }
+                raise NotImplementedError(f"Mock HKEX API POST endpoint is not implemented: {path}")
+
+        class MockHKEXClient:
             def login(self, username=None, password=None):
                 return MockSession()
 
-        class MockLMEAPI:
+        class MockHKEXAPI:
             def submit_order(self, member, price=None):
                 return MockResponse(status="submitted")
             def validate_price(self, trade):
@@ -1116,7 +1163,7 @@ def before_all(context):
             def get_request_status(self, request):
                 return "accepted"
 
-        class MockLMEPostTrade:
+        class MockHKEXPostTrade:
             def create_trade(self, order):
                 return MockTrade()
             def create_deadline(self):
@@ -1158,7 +1205,13 @@ def before_all(context):
                 self.status = status
                 self.result = result
 
-        context.lme = MockLME()
+        class MockHKEX:
+            Client = MockHKEXClient()
+            API = MockHKEXAPI()
+            PostTrade = MockHKEXPostTrade()
+
+        context.hkex = MockHKEX()
+        context.api = MockHKEXCatalogApiClient()
 
     context.session = None
     context.member = None
@@ -1201,8 +1254,8 @@ def render_steps_from_normalized_bdd(
     """Render Python step definitions from normalized BDD output.
 
     Produces behave-style grouped step files:
-    - ``features/step_definitions/{semantic_rule_id}_steps.py`` — one file per feature
-    - ``features/environment.py`` — behave hooks for context setup
+    - ``features/step_definitions/{semantic_rule_id}_steps.py`` -one file per feature
+    - ``features/environment.py`` -behave hooks for context setup
 
     Each step file uses ``context`` to share state (context.member, context.trade, etc.)
     instead of module-level global variables.
@@ -1232,8 +1285,8 @@ def render_steps_from_normalized_bdd(
 
         header = f'''"""Step definitions for: {feature_title} ({semantic_rule_id})
 
-Generated from LME BDD Pipeline (Normalized BDD).
-WARNING: Auto-generated — DO NOT EDIT MANUALLY.
+Generated from HKEX BDD Pipeline (Normalized BDD).
+WARNING: Auto-generated -DO NOT EDIT MANUALLY.
 
 Behave framework: steps use ``context`` for state sharing.
 Shared objects: context.session, context.member, context.trade,
@@ -1308,8 +1361,8 @@ def _convert_to_context_style(code: str, step_text: str, step_type: str) -> str:
     else:
         return code.replace("def ", "def ", 1)
 
-    # Known LME object names
-    lme_objects = [
+    # Known HKEX object names
+    hkex_objects = [
         "member", "session", "trade", "order", "request", "deadline",
         "contact_response", "validation_result", "trade_params",
         "trade_submission", "resubmission_response", "response",
@@ -1318,27 +1371,27 @@ def _convert_to_context_style(code: str, step_text: str, step_type: str) -> str:
     ]
 
     # Step 1: Bare assignment targets at line start.
-    # Matches "    member = ..." → "    context.member = ..."
+    # Matches "    member = ..." 鈫?"    context.member = ..."
     # Captures the "= ..." part so it's preserved after replacement.
-    for obj in lme_objects:
+    for obj in hkex_objects:
         body = _re.sub(rf"^(\s*)\b{obj}\b(\s*=\s*)", rf"\1context.{obj}\2", body, flags=_re.MULTILINE)
 
     # Step 2: Bare attribute accesses (.obj. or .obj at EOL), not already context.
     # Matches ".validation_result." or ".validation_result" at end of line
-    for obj in lme_objects:
+    for obj in hkex_objects:
         body = _re.sub(rf"(?<!\bcontext\.)\b{obj}\b(?=\s*\.)", rf"context.{obj}", body)
         body = _re.sub(rf"(?<!\bcontext\.)\b{obj}\b(\s*$)", rf"context.{obj}\1", body)
 
     # Step 3: Bare return statements (return obj at line start), not already context.
     # Must have word boundary before and nothing after but whitespace.
-    for obj in lme_objects:
+    for obj in hkex_objects:
         body = _re.sub(rf"^(\s*)\breturn\s+{obj}\b\s*$", rf"\1return context.{obj}", body, flags=_re.MULTILINE)
 
     # Step 4: Bare variables used as function arguments.
-    # Matches "func(arg1, member, arg3)" — member is not at line start and
+    # Matches "func(arg1, member, arg3)" -member is not at line start and
     # is followed by comma or close-paren, not an equals sign.
     # Negative lookbehind ensures not already context.member.
-    for obj in lme_objects:
+    for obj in hkex_objects:
         body = _re.sub(rf"(?<!\bcontext\.)\b{obj}\b(?=\s*[,)])", rf"context.{obj}", body)
 
     func_name_match = _re.search(r"def (\w+)\(", code)
@@ -1377,4 +1430,3 @@ def run_bdd_export(maker_cases_path: Path, output_dir: Path) -> dict:
         "feature_files": [str(f) for f in feature_files],
         "step_definitions_file": str(step_file),
     }
-
