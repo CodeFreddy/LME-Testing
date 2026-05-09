@@ -25,7 +25,7 @@ def _nav_links_html(active: str, audit_trail_url: str | None = None) -> str:
 
 
 def _status_options(values: list[str]) -> str:
-    options = ['<option value="">全部</option>']
+    options = ['<option value="">All</option>']
     for value in sorted({value for value in values if value}):
         options.append(f'<option value="{html.escape(value)}">{html.escape(value)}</option>')
     return ''.join(options)
@@ -407,7 +407,7 @@ def generate_html_report(
             f"<td>{html.escape(feature)}</td>"
             f"<td>{scenario_count}</td>"
             f"<td>{html.escape(', '.join(maker_record.get('requirement_ids', [])))}</td>"
-            f"<td><details><summary>展开场景</summary>{''.join(_render_maker_scenario_block(s, paragraph_ids=maker_record.get('paragraph_ids', [])) for s in maker_record.get('scenarios', []))}</details></td>"
+            f"<td><details><summary>Expand scenarios</summary>{''.join(_render_maker_scenario_block(s, paragraph_ids=maker_record.get('paragraph_ids', [])) for s in maker_record.get('scenarios', []))}</details></td>"
             f"</tr>"
         )
 
@@ -433,7 +433,7 @@ def generate_html_report(
                 f"<td>{html.escape(case_id)}</td>"
                 f"<td>{html.escape(feature)}</td>"
                 f"<td>{html.escape(coverage)}</td>"
-                f"<td><details><summary>展开详情</summary>{_render_combined_detail(scenario, review, paragraph_ids=maker_record.get('paragraph_ids', []))}</details></td>"
+                f"<td><details><summary>Expand details</summary>{_render_combined_detail(scenario, review, paragraph_ids=maker_record.get('paragraph_ids', []))}</details></td>"
                 f"</tr>"
             )
 
@@ -443,7 +443,7 @@ def generate_html_report(
             f"<td>{html.escape(review.get('case_id', ''))}</td>"
             f"<td>{html.escape(review.get('semantic_rule_id', ''))}</td>"
             f"<td>{html.escape(str(review.get('coverage_assessment', {}).get('status', '')))}</td>"
-            f"<td><details><summary>展开详情</summary>{_render_checker_detail(review)}</details></td>"
+            f"<td><details><summary>Expand details</summary>{_render_checker_detail(review)}</details></td>"
             f"</tr>"
         )
 
@@ -495,7 +495,7 @@ function applyCoverageTableFilters() {
     const anyVisible = Array.from(dataRows).some(r => r.style.display !== 'none');
     header.style.display = anyVisible ? '' : 'none';
   });
-  ruleVisibleCount.innerText = `${visible} / ${coverageRows.length} 条规则`;
+  ruleVisibleCount.innerText = `${visible} / ${coverageRows.length} rules`;
   // Show clear button only when a filter is active
   clearRuleFilters.style.display = (status || ruleType) ? '' : 'none';
 }
@@ -539,27 +539,27 @@ applyCoverageTableFilters();
 """
 
     combined_body = f"""
-  <h1>Maker / Checker HTML 报告</h1>
+  <h1>Maker / Checker HTML Report</h1>
   {compare_links_html}
   <div class="card">
-    <h2>运行摘要</h2>
+    <h2>Run Summary</h2>
     <div class="grid">
-      <div class="metric"><strong>Maker Rule 数</strong><br/>{maker_summary.get('merged_rule_count', maker_summary.get('processed_rule_count', 0))}</div>
-      <div class="metric"><strong>Maker Scenario 数</strong><br/>{maker_summary.get('scenario_count', 0)}</div>
-      <div class="metric"><strong>Checker Review 数</strong><br/>{checker_summary.get('merged_review_count', checker_summary.get('review_count', 0))}</div>
+      <div class="metric"><strong>Maker Rules</strong><br/>{maker_summary.get('merged_rule_count', maker_summary.get('processed_rule_count', 0))}</div>
+      <div class="metric"><strong>Maker Scenarios</strong><br/>{maker_summary.get('scenario_count', 0)}</div>
+      <div class="metric"><strong>Checker Reviews</strong><br/>{checker_summary.get('merged_review_count', checker_summary.get('review_count', 0))}</div>
       <div class="metric clickable" data-coverage-filter="fully_covered"><strong>Fully Covered</strong><br/><span class="coverage-fully-covered">{coverage_report.get('fully_covered', 0)}</span></div>
       <div class="metric clickable" data-coverage-filter="partially_covered"><strong>Partially Covered</strong><br/><span class="coverage-partially-covered">{coverage_report.get('partially_covered', 0)}</span></div>
       <div class="metric clickable" data-coverage-filter="uncovered"><strong>Uncovered</strong><br/><span class="coverage-uncovered">{coverage_report.get('uncovered', 0)}</span></div>
       <div class="metric clickable" data-coverage-filter="not_applicable"><strong>Not Applicable</strong><br/><span class="coverage-not-applicable">{coverage_report.get('not_applicable', 0)}</span></div>
-      <div class="metric"><strong>覆盖率</strong><br/>{coverage_report.get('coverage_percent', 0)}%</div>
+      <div class="metric"><strong>Coverage Rate</strong><br/>{coverage_report.get('coverage_percent', 0)}%</div>
     </div>
   </div>
   <div class="card">
-    <h2>Rule 级覆盖判定</h2>
+    <h2>Rule-Level Coverage Assessment</h2>
     <div class="toolbar">
       <label>Coverage Status
         <select id="coverageStatusFilter">
-          <option value="">全部</option>
+          <option value="">All</option>
           <option value="fully_covered">Fully Covered</option>
           <option value="partially_covered">Partially Covered</option>
           <option value="uncovered">Uncovered</option>
@@ -568,7 +568,7 @@ applyCoverageTableFilters();
       </label>
       <label>Rule Type
         <select id="ruleTypeFilter">
-          <option value="">全部</option>
+          <option value="">All</option>
           <option value="obligation">obligation</option>
           <option value="prohibition">prohibition</option>
           <option value="permission">permission</option>
@@ -579,7 +579,7 @@ applyCoverageTableFilters();
         </select>
       </label>
       <span id="ruleVisibleCount" class="muted"></span>
-      <button id="clearRuleFilters" style="display:none">清除筛选</button>
+      <button id="clearRuleFilters" style="display:none">Clear Filters</button>
     </div>
     <table>
       <thead>
@@ -601,7 +601,7 @@ applyCoverageTableFilters();
     </table>
   </div>
   <div class="card">
-    <h2>导出</h2>
+    <h2>Export</h2>
     <p><a href="/coverage.csv" download>Download Coverage CSV</a></p>
     <p class="muted">Coverage report: {html.escape(str(coverage_report_path))}</p>
   </div>
@@ -614,19 +614,19 @@ applyCoverageTableFilters();
     {_render_drift_view(drift_report)}
   </div>
   <div class="card">
-    <h2>筛选</h2>
+    <h2>Filters</h2>
     <div class="toolbar">
       <label>Coverage
         <select id="coverageFilter">{_status_options(coverage_values)}</select>
       </label>
-      <label>关键词
+      <label>Keyword
         <input id="keywordFilter" type="text" placeholder="rule id / case id / finding" />
       </label>
     </div>
-    <div class="muted">可按 Coverage、关键词组合筛选。</div>
+    <div class="muted">Filter by coverage and keyword.</div>
   </div>
   <div class="card">
-    <h2>场景审核明细</h2>
+    <h2>Scenario Review Details</h2>
     <table>
       <thead>
         <tr>
@@ -634,7 +634,7 @@ applyCoverageTableFilters();
           <th>Case ID</th>
           <th>Feature</th>
           <th>Coverage</th>
-          <th>详细信息</th>
+          <th>Details</th>
         </tr>
       </thead>
       <tbody>
@@ -645,7 +645,7 @@ applyCoverageTableFilters();
 """
 
     maker_body = f"""
-  <h1>Maker 可读结果</h1>
+  <h1>Maker Readable Results</h1>
   <div class="card">
     <p><code>{html.escape(str(maker_cases_path))}</code></p>
     <table>
@@ -655,7 +655,7 @@ applyCoverageTableFilters();
           <th>Feature</th>
           <th>Scenario Count</th>
           <th>Requirement IDs</th>
-          <th>详细场景</th>
+          <th>Scenario Details</th>
         </tr>
       </thead>
       <tbody>
@@ -666,7 +666,7 @@ applyCoverageTableFilters();
 """
 
     checker_body = f"""
-  <h1>Checker 可读结果</h1>
+  <h1>Checker Readable Results</h1>
   <div class="card">
     <p><code>{html.escape(str(checker_reviews_path))}</code></p>
     <table>
@@ -675,7 +675,7 @@ applyCoverageTableFilters();
           <th>Case ID</th>
           <th>Semantic Rule</th>
           <th>Coverage</th>
-          <th>详细信息</th>
+          <th>Details</th>
         </tr>
       </thead>
       <tbody>

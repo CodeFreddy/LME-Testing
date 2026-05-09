@@ -275,7 +275,7 @@ class ReviewJobStatus:
 
 
 class ReviewSessionManager:
-    # 管理 review session 的状态：当前工作集、每轮人工审核、后台回流任务和最终完成状态。
+    # Manage review session state: current workset, human review rounds, background rewrite jobs, and finalization.
     def __init__(
         self,
         config: ProjectConfig,
@@ -1513,7 +1513,7 @@ def serve_review_session(
     host: str,
     port: int,
 ) -> tuple[ThreadingHTTPServer, str]:
-    # 本地 HTTP 服务，负责把人工审核页面与后台回流任务串起来。
+    # Local HTTP service connecting the human review page to background rewrite jobs.
     handler = _build_handler(manager)
     server = ThreadingHTTPServer((host, port), handler)
     actual_port = server.server_address[1]
@@ -1803,28 +1803,28 @@ def _render_review_session_shell() -> str:
     <button class="tab-btn" data-tab="scripts">Scripts</button>
   </div>
   <div id="tab-review" class="tab-panel active">
-  <div class="card" id="summaryCard">加载中...</div>
+  <div class="card" id="summaryCard">Loading...</div>
   <div class="card">
-    <h2>字段说明</h2>
+    <h2>Field Guide</h2>
     <ul>
-      <li><strong>Decision</strong>: 人工最终动作。<code>approve</code> 表示放行，<code>rewrite</code> 表示回流给 maker 重写。人工与 checker 判断的分歧会自动记录到 Audit Trail，不需要再手动打二次标签。</li>
-      <li><strong>Issue Types</strong>: 人工问题标签，可多选。用于后续统计与 maker 定向重写。</li>
+      <li><strong>Decision</strong>: Final human action. <code>approve</code> accepts the case, and <code>rewrite</code> sends it back to the maker for revision. Divergence between human and checker decisions is recorded automatically in the Audit Trail.</li>
+      <li><strong>Issue Types</strong>: Optional human issue tags for later analysis and targeted maker rewrites.</li>
     </ul>
-    <div class="warning">当前版本中，只有 <code>Decision = rewrite</code> 才会触发 maker 回流。每次提交成功后，会话会自动切换到最新一轮结果继续审核。</div>
+    <div class="warning">In this version, only <code>Decision = rewrite</code> triggers the maker rewrite loop. After each successful submission, the session automatically switches to the newest iteration for continued review.</div>
   </div>
   <div class="card">
     <div class="toolbar">
-      <label>Coverage <select id="coverageFilter"><option value="">全部</option><option value="covered">covered</option><option value="partial">partial</option><option value="uncovered">uncovered</option><option value="missing">missing</option></select></label>
-      <label>Checker Blocking <select id="blockingFilter"><option value="">全部</option><option value="true">true</option><option value="false">false</option></select></label>
-      <button id="saveBtn">保存草稿</button>
-      <button id="submitBtn">提交并执行回流</button>
-      <button id="auditBtn">查看 Audit Trail</button>
+      <label>Coverage <select id="coverageFilter"><option value="">All</option><option value="covered">covered</option><option value="partial">partial</option><option value="uncovered">uncovered</option><option value="missing">missing</option></select></label>
+      <label>Checker Blocking <select id="blockingFilter"><option value="">All</option><option value="true">true</option><option value="false">false</option></select></label>
+      <button id="saveBtn">Save Draft</button>
+      <button id="submitBtn">Submit and Run Rewrite</button>
+      <button id="auditBtn">View Audit Trail</button>
       <button id="finalizeBtn">Finalize</button>
     </div>
-    <div class="muted">页面会自动把 human reviews 落到 session 目录，并在提交后串行执行 rewrite、checker、report。</div>
+    <div class="muted">This page saves human reviews into the session directory and runs rewrite, checker, and report generation after submission.</div>
   </div>
   <div class="card" id="resultCard" style="display:none"></div>
-  <div class="card"><h2>History</h2><div id="historyCard" class="muted">暂无历史</div></div>
+  <div class="card"><h2>History</h2><div id="historyCard" class="muted">No history yet</div></div>
   <div class="card">
     <table>
       <thead>
@@ -1852,7 +1852,7 @@ def _render_review_session_shell() -> str:
         <span id="bddStatus" class="muted"></span>
       </div>
     </div>
-    <div id="bddContent"><em>加载中...</em></div>
+    <div id="bddContent"><em>Loading...</em></div>
   </div>
   <div id="tab-scripts" class="tab-panel">
     <div class="card">
@@ -1861,14 +1861,14 @@ def _render_review_session_shell() -> str:
         <span id="scriptsStatus" class="muted"></span>
       </div>
     </div>
-    <div id="scriptsContent"><em>加载中...</em></div>
+    <div id="scriptsContent"><em>Loading...</em></div>
   </div>
 <script>
 let sessionPayload = null;
 let reviewMap = new Map();
 let pollTimer = null;
 const PHASE_PROGRESS = { queued: 5, rewrite: 20, checker: 55, report: 90, done: 100, failed: 100 };
-const PHASE_LABEL = { queued: '已排队', rewrite: '正在重写 cases', checker: '正在 checker 复检', report: '正在生成报告', done: '完成', failed: '失败' };
+const PHASE_LABEL = { queued: 'Queued', rewrite: 'Rewriting cases', checker: 'Checker re-review running', report: 'Generating report', done: 'Done', failed: 'Failed' };
 let bddPayload = null;
 let scriptsPayload = null;
 let bddDirty = false;
@@ -1981,12 +1981,12 @@ async function saveBddEdits() {
     });
     const edits = Object.values(byScenario);
     const result = await postJson('/api/bdd/save', { edits });
-    document.getElementById('bddStatus').textContent = `已保存 ${result.edit_count} 条编辑到 ${escapeHtml(result.latest_path)}；reviewed BDD: ${escapeHtml(result.reviewed_bdd_path || '')}`;
+    document.getElementById('bddStatus').textContent = `Saved ${result.edit_count} edits to ${escapeHtml(result.latest_path)}; reviewed BDD: ${escapeHtml(result.reviewed_bdd_path || '')}`;
     scriptsPayload = null;
     bddDirty = false;
     await loadStageData();
   } catch (err) {
-    document.getElementById('bddStatus').textContent = `保存失败: ${err.message}`;
+    document.getElementById('bddStatus').textContent = `Save failed: ${err.message}`;
     console.error('saveBddEdits error:', err);
   }
 }
@@ -2026,7 +2026,7 @@ function renderScriptsTab(data) {
             <div class="step-item ${step.match_type || ''}">
               <div class="step-item-header">
                 <span class="step-item-badge ${matchBadgeClass(step.match_type)}">${escapeHtml(step.match_type || 'unmatched')}</span>
-                ${step.source_scenario_ids && step.source_scenario_ids.length ? `<span class="muted" style="font-size:11px;">来源: ${escapeHtml(step.source_scenario_ids.join(', '))}</span>` : ''}
+                ${step.source_scenario_ids && step.source_scenario_ids.length ? `<span class="muted" style="font-size:11px;">Source: ${escapeHtml(step.source_scenario_ids.join(', '))}</span>` : ''}
               </div>
               <textarea class="step-textarea" data-step-type="${type}" data-step-index="${idx}" rows="2" placeholder="step text">${escapeHtml(step.step_text || '')}</textarea>
               ${step.step_pattern ? `<div class="step-item-pattern">pattern: ${escapeHtml(step.step_pattern || '')}</div>` : ''}
@@ -2039,12 +2039,12 @@ function renderScriptsTab(data) {
       }).join('')}
     </div>
     ${(data.gaps && data.gaps.length) ? `<div class="step-type-section">
-      <h3 style="color:#991b1b;">GAPS (${data.gaps.length}) — 需要人工实现</h3>
+      <h3 style="color:#991b1b;">GAPS (${data.gaps.length}) - needs human implementation</h3>
       ${data.gaps.map((g, idx) => `
         <div class="step-item unmatched">
           <div class="step-item-header">
             <span class="step-item-badge badge-unmatched">GAP</span>
-            ${g.source_scenario_ids && g.source_scenario_ids.length ? `<span class="muted" style="font-size:11px;">来源: ${escapeHtml(g.source_scenario_ids.join(', '))}</span>` : ''}
+            ${g.source_scenario_ids && g.source_scenario_ids.length ? `<span class="muted" style="font-size:11px;">Source: ${escapeHtml(g.source_scenario_ids.join(', '))}</span>` : ''}
           </div>
           <textarea class="step-textarea" data-gap-index="${idx}" data-step-type="${escapeHtml(g.step_type || '')}" rows="2" placeholder="step text (editable)">${escapeHtml(g.step_text || '')}</textarea>
           ${g.step_pattern ? `<div class="step-item-pattern">pattern: ${escapeHtml(g.step_pattern || '')}</div>` : ''}
@@ -2070,7 +2070,7 @@ async function saveScriptsEdits() {
     });
   });
   const result = await postJson('/api/scripts/save', { edits });
-  document.getElementById('scriptsStatus').textContent = `已保存到 ${escapeHtml(result.latest_path)}；匹配报告: ${escapeHtml(result.refreshed_step_registry_path || '')}`;
+  document.getElementById('scriptsStatus').textContent = `Saved to ${escapeHtml(result.latest_path)}; match report: ${escapeHtml(result.refreshed_step_registry_path || '')}`;
   scriptsPayload = null;
   await loadScriptsData();
   await loadStageData();
@@ -2090,7 +2090,7 @@ function reviewControls(review) {
   return `<div><label>Decision<br/><select data-field="review_decision" data-case-id="${caseId}"><option value="pending" ${review.review_decision === 'pending' ? 'selected' : ''}>pending</option><option value="approve" ${review.review_decision === 'approve' ? 'selected' : ''}>approve</option><option value="rewrite" ${review.review_decision === 'rewrite' ? 'selected' : ''}>rewrite</option></select></label></div><div><label>Issue Types</label><details class="issue-picker"><summary class="issue-summary" data-issue-summary="${caseId}">${escapeHtml(issueSummaryText(review))}</summary><table class="issue-table"><thead><tr><th>Select</th><th>Label</th><th>Code</th><th>Description</th></tr></thead><tbody>${issueTableHtml(review)}</tbody></table></details></div><div><label>Comment<br/><textarea data-field="human_comment" data-case-id="${caseId}" rows="4"></textarea></label></div>`;
 }
 function renderRows() {
-  document.getElementById('reviewRows').innerHTML = sessionPayload.table_rows.map(row => { const review = reviewMap.get(row.case_id); return `<tr data-coverage="${escapeHtml(row.coverage)}" data-blocking="${String(row.checker_blocking)}"><td>${escapeHtml(row.semantic_rule_id)}</td><td>${escapeHtml(row.case_id)}</td><td>${escapeHtml(row.feature)}</td><td>${escapeHtml(row.case_type)}</td><td>${escapeHtml(row.coverage)}</td><td>${escapeHtml(String(row.checker_blocking))}</td><td>${escapeHtml(row.blocking_category)}</td><td>${escapeHtml(row.blocking_reason)}</td><td><details><summary>展开</summary>${row.detail_html}</details></td><td>${reviewControls(review)}</td></tr>`; }).join('');
+  document.getElementById('reviewRows').innerHTML = sessionPayload.table_rows.map(row => { const review = reviewMap.get(row.case_id); return `<tr data-coverage="${escapeHtml(row.coverage)}" data-blocking="${String(row.checker_blocking)}"><td>${escapeHtml(row.semantic_rule_id)}</td><td>${escapeHtml(row.case_id)}</td><td>${escapeHtml(row.feature)}</td><td>${escapeHtml(row.case_type)}</td><td>${escapeHtml(row.coverage)}</td><td>${escapeHtml(String(row.checker_blocking))}</td><td>${escapeHtml(row.blocking_category)}</td><td>${escapeHtml(row.blocking_reason)}</td><td><details><summary>Expand</summary>${row.detail_html}</details></td><td>${reviewControls(review)}</td></tr>`; }).join('');
   hydrateControls();
 }
 function hydrateControls() {
@@ -2112,15 +2112,15 @@ async function postJson(url, payload) { const response = await fetch(url, { meth
 function currentPayload() { return { metadata: sessionPayload.metadata, reviews: Array.from(reviewMap.values()) }; }
 function renderResult(title, bodyHtml, cssClass='') { const card = document.getElementById('resultCard'); card.style.display = ''; card.innerHTML = `<h2 class="${cssClass}">${escapeHtml(title)}</h2>${bodyHtml}`; }
 function hideResult() { const card = document.getElementById('resultCard'); card.style.display = 'none'; card.innerHTML = ''; }
-function renderProgress(percent, label) { const safe = Math.max(0, Math.min(100, percent)); const body = `<div class="progress-wrap"><div class="progress-bar" style="width:${safe}%"></div></div><div class="progress-label">${escapeHtml(label)} · ${safe}%</div>`; renderResult('后台执行中', body, 'status-running'); }
+function renderProgress(percent, label) { const safe = Math.max(0, Math.min(100, percent)); const body = `<div class="progress-wrap"><div class="progress-bar" style="width:${safe}%"></div></div><div class="progress-label">${escapeHtml(label)} - ${safe}%</div>`; renderResult('Background Job Running', body, 'status-running'); }
 function compareLinkHtml(item) { if (!item.compare_path) return ''; const url = `/files?path=${encodeURIComponent(item.compare_path)}`; return `<a href="${url}" target="_blank">View Changes</a>`; }
-function renderHistory(currentIteration = null) { const items = sessionPayload.history || []; const container = document.getElementById('historyCard'); if (!items.length) { container.textContent = '暂无历史'; return; } container.innerHTML = items.map(item => { const isCurrent = currentIteration !== null && Number(item.iteration) === Number(currentIteration); const nextIteration = item.next_iteration ?? (Number.isFinite(Number(item.iteration)) ? Number(item.iteration) + 1 : ''); const title = nextIteration === '' ? `Iteration ${escapeHtml(String(item.iteration))} changes` : `Iteration ${escapeHtml(String(item.iteration))} -> ${escapeHtml(String(nextIteration))} changes`; const compare = compareLinkHtml(item); const compareHint = compare ? compare : '<span class="muted">本次没有 case 修改</span>'; return `<div class="history-row ${isCurrent ? 'current' : ''}"><strong>${title}</strong>${isCurrent ? ' <span class="status-succeeded">本次迭代</span>' : ''}<div>${compareHint}</div></div>`; }).join(''); }
+function renderHistory(currentIteration = null) { const items = sessionPayload.history || []; const container = document.getElementById('historyCard'); if (!items.length) { container.textContent = 'No history yet'; return; } container.innerHTML = items.map(item => { const isCurrent = currentIteration !== null && Number(item.iteration) === Number(currentIteration); const nextIteration = item.next_iteration ?? (Number.isFinite(Number(item.iteration)) ? Number(item.iteration) + 1 : ''); const title = nextIteration === '' ? `Iteration ${escapeHtml(String(item.iteration))} changes` : `Iteration ${escapeHtml(String(item.iteration))} -> ${escapeHtml(String(nextIteration))} changes`; const compare = compareLinkHtml(item); const compareHint = compare ? compare : '<span class="muted">No case changes were generated in this run.</span>'; return `<div class="history-row ${isCurrent ? 'current' : ''}"><strong>${title}</strong>${isCurrent ? ' <span class="status-succeeded">Current iteration</span>' : ''}<div>${compareHint}</div></div>`; }).join(''); }
 function resultLinksHtml(links) { return Object.entries(links || {}).map(([key, href]) => `<div><a href="${href}" target="_blank">${escapeHtml(key)}</a></div>`).join(''); }
-async function saveDraft() { const result = await postJson('/api/reviews/save', currentPayload()); renderResult('保存成功', `<div>Iteration ${escapeHtml(String(result.iteration))} 草稿已保存</div>`); }
+async function saveDraft() { const result = await postJson('/api/reviews/save', currentPayload()); renderResult('Saved', `<div>Iteration ${escapeHtml(String(result.iteration))} draft saved</div>`); }
 async function refreshSession(currentIteration = null) { const response = await fetch('/api/session'); sessionPayload = await response.json(); reviewMap = new Map(sessionPayload.reviews.map(item => [item.case_id, item])); document.getElementById('summaryCard').innerHTML = `<div class="grid"><div class="metric"><strong>Session ID</strong><br/>${escapeHtml(sessionPayload.session_id)}</div><div class="metric"><strong>Status</strong><br/>${escapeHtml(sessionPayload.session_status)}</div><div class="metric"><strong>Current Iteration</strong><br/>${escapeHtml(String(sessionPayload.current_iteration))}</div></div>`; renderRows(); renderHistory(currentIteration); applyFilters(); await loadStageData(); }
 function iterationCompareLink(iteration) { const item = (sessionPayload.history || []).find(entry => Number(entry.iteration) === Number(iteration)); return item ? compareLinkHtml(item) : ''; }
-async function pollJob(jobId) { const response = await fetch(`/api/status/${jobId}`); const payload = await response.json(); const phase = payload.phase || payload.status || 'queued'; if (payload.status === 'queued' || payload.status === 'running') { renderProgress(PHASE_PROGRESS[phase] ?? 10, PHASE_LABEL[phase] || phase); pollTimer = setTimeout(() => pollJob(jobId), 2000); return; } if (payload.status === 'failed') { renderResult('执行失败', `<pre>${escapeHtml(payload.error || '')}</pre>`, 'status-failed'); return; } const result = payload.result || {}; const iteration = result.next_iteration || ''; const historyIteration = result.history_iteration ?? iteration; renderProgress(100, PHASE_LABEL.done); await refreshSession(historyIteration); const compare = result.links?.case_compare_html ? `<a href="${result.links.case_compare_html}" target="_blank">View Changes</a>` : iterationCompareLink(historyIteration); renderResult('执行成功', `<div class="status-succeeded">Iteration ${escapeHtml(String(iteration))} 已生成</div>${compare ? `<div>${compare}</div>` : '<div class="muted">本次没有生成可对比的 case 修改。</div>'}`, 'status-succeeded'); }
-async function submitAndRun() { if (pollTimer) clearTimeout(pollTimer); renderProgress(0, '提交中'); const result = await postJson('/api/submit', currentPayload()); pollJob(result.job_id); }
+async function pollJob(jobId) { const response = await fetch(`/api/status/${jobId}`); const payload = await response.json(); const phase = payload.phase || payload.status || 'queued'; if (payload.status === 'queued' || payload.status === 'running') { renderProgress(PHASE_PROGRESS[phase] ?? 10, PHASE_LABEL[phase] || phase); pollTimer = setTimeout(() => pollJob(jobId), 2000); return; } if (payload.status === 'failed') { renderResult('Execution Failed', `<pre>${escapeHtml(payload.error || '')}</pre>`, 'status-failed'); return; } const result = payload.result || {}; const iteration = result.next_iteration || ''; const historyIteration = result.history_iteration ?? iteration; renderProgress(100, PHASE_LABEL.done); await refreshSession(historyIteration); const compare = result.links?.case_compare_html ? `<a href="${result.links.case_compare_html}" target="_blank">View Changes</a>` : iterationCompareLink(historyIteration); renderResult('Execution Succeeded', `<div class="status-succeeded">Iteration ${escapeHtml(String(iteration))} generated</div>${compare ? `<div>${compare}</div>` : '<div class="muted">No comparable case changes were generated in this run.</div>'}`, 'status-succeeded'); }
+async function submitAndRun() { if (pollTimer) clearTimeout(pollTimer); renderProgress(0, 'Submitting'); const result = await postJson('/api/submit', currentPayload()); pollJob(result.job_id); }
 async function openAuditTrail() { const resp = await fetch('/api/audit_trail'); const data = await resp.json(); if (data.audit_trail_url) window.open(data.audit_trail_url, '_blank'); }
 async function finalizeSession() { try { const result = await postJson('/api/finalize', {}); if (result.error) { renderResult('Finalize Failed', `<div class="status-failed">${escapeHtml(result.error)}</div>`, 'status-failed'); return; } if (result.final_report_url) { window.location.href = result.final_report_url; return; } await refreshSession(); renderResult('Session Finalized', `<div class="status-finalized">Status: ${escapeHtml(result.status || '')}</div><div><strong>Final Report</strong>: ${escapeHtml(result.final_report_path || "")}</div><div>${resultLinksHtml({ report_html: result.final_report_url, maker_html: result.final_maker_url, checker_html: result.final_checker_url })}</div>`, 'status-finalized'); } catch (err) { renderResult('Finalize Failed', `<div class="status-failed">${escapeHtml(err.message)}</div>`, 'status-failed'); } }
 async function bootstrap() { await refreshSession(); attachHandlers(); }

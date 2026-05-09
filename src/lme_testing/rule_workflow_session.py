@@ -1107,6 +1107,10 @@ RULE_WORKFLOW_HTML = r"""<!DOCTYPE html>
     .step-item.unmatched { border-left: 3px solid #991b1b; background: #fff5f5; }
     .step-item-badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 700; background: #e2e8f0; }
     .script-code-textarea { width: 100%; box-sizing: border-box; min-height: 180px; font-family: Consolas, monospace; font-size: 12px; }
+    .file-picker { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .file-picker input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+    .file-picker-button { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; padding: 0 12px; border: 1px solid #94a3b8; border-radius: 6px; background: #fff; color: #0f172a; cursor: pointer; font-size: 13px; }
+    .file-picker-name { color: #475569; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -1127,7 +1131,11 @@ RULE_WORKFLOW_HTML = r"""<!DOCTYPE html>
     <div class="workflow-panel active" data-workflow-panel="rule_extraction">
     <section class="band">
       <div class="row">
-        <label>Requirement document <input id="sourceFile" type="file" accept=".pdf,.md,.markdown,.docx"></label>
+        <label class="file-picker">Requirement document
+          <input id="sourceFile" type="file" accept=".pdf,.md,.markdown,.docx">
+          <span class="file-picker-button">Choose File</span>
+          <span id="sourceFileName" class="file-picker-name">No file selected</span>
+        </label>
         <label>doc_id <input id="docId" value="im_hk_v14"></label>
         <label>doc_title <input id="docTitle" value="Initial Margin Calculation Guide HKv14"></label>
         <label>doc_version <input id="docVersion" value="HKv14"></label>
@@ -2213,6 +2221,10 @@ window.addEventListener('hashchange', () => {
   if (stage !== activeWorkflowStep) setWorkflowStep(stage, { push: false });
 });
 
+$('sourceFile').addEventListener('change', () => {
+  const file = $('sourceFile').files && $('sourceFile').files[0];
+  $('sourceFileName').textContent = file ? file.name : 'No file selected';
+});
 $('uploadBtn').addEventListener('click', () => uploadSource().catch(err => setStatus(err.message)));
 $('extractBtn').addEventListener('click', () => extractSource().catch(err => setStatus(err.message)));
 $('saveRulesBtn').addEventListener('click', () => saveRules().catch(err => setStatus(err.message)));

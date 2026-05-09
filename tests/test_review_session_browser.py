@@ -319,7 +319,7 @@ class ReviewSessionBrowserE2ETests(unittest.TestCase):
                     })()"""
                 )
                 browser.eval("document.getElementById('saveScriptsBtn').click()")
-                browser.wait_for("document.getElementById('scriptsStatus').textContent.includes('匹配报告')")
+                browser.wait_for("document.getElementById('scriptsStatus').textContent.includes('match report')")
                 browser.wait_for("_e2eMetric('Unmatched (Gaps)') === 1")
                 self.assertEqual(browser.eval("_e2eMetric('Exact Matches')"), 0)
             finally:

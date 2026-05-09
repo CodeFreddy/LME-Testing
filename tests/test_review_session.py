@@ -98,7 +98,7 @@ class ReviewSessionTests(unittest.TestCase):
         self.assertIn('PHASE_PROGRESS', html)
         self.assertNotIn('id="overallFilter"', html)
         self.assertNotIn('<th>Overall</th>', html)
-        self.assertIn('正在 checker 复检', html)
+        self.assertIn('Checker re-review running', html)
         self.assertNotIn('rewrite_summary', html)
         self.assertNotIn('checker_summary', html)
         self.assertNotIn('Latest review path', html)
